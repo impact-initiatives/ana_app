@@ -99,10 +99,10 @@
 		<!-- Cell errors table -->
 		{#if result?.cellErrors?.length}
 			<div>
-				<p class="text-error mb-1 font-semibold">Cell errors ({result.cellErrors.length})</p>
+				<p class="text-error mt-2 mb-2 font-semibold">Cell errors ({result.cellErrors.length})</p>
 				<DataTable
 					rows={result.cellErrors}
-					headerRowClass="bg-error/10 text-error"
+					headerRowClass="bg-error/20 text-error"
 					overflow="paginate"
 					pageSize={10}
 				/>
@@ -112,10 +112,10 @@
 		<!-- Missingness table -->
 		{#if missingnessRows.length > 0}
 			<div>
-				<p class="text-warning mb-1 font-semibold">Missingness by indicator</p>
+				<p class="text-warning mt-2 mb-2 font-semibold">Missingness by indicator</p>
 				<DataTable
 					rows={missingnessRows}
-					headerRowClass="bg-warning text-warning-content"
+					headerRowClass="bg-warning/20 text-warning"
 					overflow="paginate"
 					pageSize={10}
 				/>
@@ -125,7 +125,7 @@
 		<!-- Warnings -->
 		{#if result?.warnings?.length}
 			<div>
-				<p class="text-warning mb-1 font-semibold">Warnings ({result.warnings.length})</p>
+				<p class="text-warning mt-2 mb-2 font-semibold">Warnings ({result.warnings.length})</p>
 				<ul class="list-inside list-disc space-y-0.5 text-sm">
 					{#each result.warnings as w, i (i)}
 						<li>{w}</li>
@@ -137,10 +137,10 @@
 		<!-- CSV preview -->
 		<div>
 			{#if header?.length}
-				<p class="mb-1 text-sm font-semibold">
+				<p class="text-primary mt-2 mb-2 font-semibold">
 					CSV preview: first {Math.min(10, numDataRows())} row(s)
 				</p>
-				<DataTable rows={previewRows} />
+				<DataTable rows={previewRows} headerRowClass="bg-primary/20 text-primary" />
 			{/if}
 		</div>
 	{/if}
