@@ -6,6 +6,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { validatorStore } from '$lib/stores/validatorStore.svelte';
 	import type { ValidationResult, MissingnessEntry } from '$lib/engine/validator';
+	import NoDataState from '$lib/components/ui/NoDataState.svelte';
 
 	const result = $derived(validatorStore.validationResult as unknown as ValidationResult | null);
 	const header = $derived(validatorStore.lastHeader ?? []);
@@ -38,17 +39,16 @@
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">
-	<div class="mb-6 flex justify-between gap-4">
-		<div class="flex items-baseline gap-2">
-			<h1 class="text-2xl font-semibold">Validation details</h1>
-			{#if validatorStore.filename}
-				<span class="text-base-content/75">{validatorStore.filename}</span>
-			{/if}
-		</div>
-		<NavButton href={resolve('/')} label="Go home" direction="back" size="md" />
-	</div>
-
 	{#if result}
+		<div class="mb-6 flex justify-between gap-4">
+			<div class="flex items-baseline gap-2">
+				<h1 class="text-2xl font-semibold">Validation details</h1>
+				{#if validatorStore.filename}
+					<span class="text-base-content/75">{validatorStore.filename}</span>
+				{/if}
+			</div>
+			<NavButton href={resolve('/')} label="Go home" direction="back" size="md" />
+		</div>
 		<div class="card w-full">
 			<div class="card-body flex flex-col gap-4">
 				<!-- Summary -->
@@ -110,34 +110,30 @@
 
 				<!-- Cell errors -->
 				{#if result.cellErrors?.length}
-					<div>
-						<p class="text-error mb-2 text-lg font-semibold">
-							Cell errors ({result.cellErrors.length})
-						</p>
-						<DataTable
-							rows={result.cellErrors as unknown as Record<string, unknown>[]}
-							headerRowClass="bg-error/20 text-error"
-							overflow="paginate"
-							pageSize={10}
-							downloadable
-							downloadFilename="cell-errors"
-						/>
-					</div>
+					<DataTable
+						rows={result.cellErrors as unknown as Record<string, unknown>[]}
+						headerRowClass="bg-error/20 text-error text-xs"
+						overflow="paginate"
+						pageSize={10}
+						downloadable
+						downloadFilename="cell-errors"
+						title="Cell errors ({result.cellErrors.length})"
+						titleClass="text-error font-semibold"
+					/>
 				{/if}
 
 				<!-- Missingness -->
 				{#if missingnessRows.length > 0}
-					<div>
-						<p class="text-warning mb-2 text-lg font-semibold">Missingness by metric</p>
-						<DataTable
-							rows={missingnessRows}
-							headerRowClass="bg-warning/20 text-warning"
-							overflow="paginate"
-							pageSize={10}
-							downloadable
-							downloadFilename="missingness"
-						/>
-					</div>
+					<DataTable
+						rows={missingnessRows}
+						headerRowClass="bg-warning/20 text-warning text-xs"
+						overflow="paginate"
+						pageSize={10}
+						downloadable
+						downloadFilename="missingness"
+						title="Missingness by metric"
+						titleClass="text-warning font-semibold"
+					/>
 				{/if}
 
 				<!-- Warnings -->
@@ -156,22 +152,18 @@
 
 				<!-- CSV preview -->
 				{#if header.length}
-					<div>
-						<p class="text-primary mb-2 text-lg font-semibold">CSV preview</p>
-						<DataTable
-							rows={previewRows}
-							headerRowClass="bg-primary/20 text-primary"
-							overflow="paginate"
-							pageSize={10}
-						/>
-					</div>
+					<DataTable
+						rows={previewRows}
+						headerRowClass="text-primary bg-primary/2  text-xs"
+						overflow="paginate"
+						pageSize={10}
+						title="CSV preview"
+						titleClass="text-primary font-semibold"
+					/>
 				{/if}
 			</div>
 		</div>
 	{:else}
-		<Card bodyClass="items-center py-16 text-center">
-			<p class="text-base-content/50 text-sm">No validation result yet.</p>
-			<a href={resolve('/')} class="btn btn-primary btn-sm mt-4 cursor-pointer">Upload a file</a>
-		</Card>
+		<NoDataState></NoDataState>
 	{/if}
 </div>
