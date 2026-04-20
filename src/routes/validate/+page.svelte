@@ -38,14 +38,14 @@
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">
-	<div class="mb-6 flex items-center gap-4">
-		<NavButton href={resolve('/')} label="Home" direction="back" />
+	<div class="mb-6 flex justify-between gap-4">
 		<div class="flex items-baseline gap-2">
 			<h1 class="text-2xl font-semibold">Validation details</h1>
 			{#if validatorStore.filename}
 				<span class="text-base-content/75">{validatorStore.filename}</span>
 			{/if}
 		</div>
+		<NavButton href={resolve('/')} label="Go home" direction="back" size="md" />
 	</div>
 
 	{#if result}
