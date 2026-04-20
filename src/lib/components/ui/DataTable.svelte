@@ -52,11 +52,15 @@
 		downloadable?: boolean;
 		/** Filename for the downloaded CSV (without extension). Default 'table'. */
 		downloadFilename?: string;
+		/** Optional title rendered in the toolbar row, left of search and download. */
+		title?: string;
+		/** Tailwind classes for the title. Default 'font-semibold'. */
+		titleClass?: string;
 	}
 	let {
 		rows = [],
 		tableClass = 'table-sm',
-		headerRowClass = 'bg-base-200 text-base-content',
+		headerRowClass = 'bg-primary/20 text-primary text-sm',
 		rowClass = 'hover:bg-base-200',
 		stripe = false,
 		renderCell,
@@ -70,7 +74,9 @@
 		scrollHeight = '48rem',
 		onrowclick,
 		downloadable = false,
-		downloadFilename = 'table'
+		downloadFilename = 'table',
+		title,
+		titleClass = 'font-semibold text-md'
 	}: Props = $props();
 
 	const columns = $derived(rows.length > 0 ? Object.keys(rows[0]) : []);
@@ -185,8 +191,11 @@
 </script>
 
 <div class="flex flex-col gap-2">
-	{#if searchable || downloadable}
+	{#if title || searchable || downloadable}
 		<div class="flex items-center gap-2">
+			{#if title}
+				<span class={titleClass}>{title}</span>
+			{/if}
 			{#if searchable}
 				<div class="flex-1">
 					<Search bind:value={searchQuery} placeholder={searchPlaceholder} />
