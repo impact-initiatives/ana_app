@@ -37,7 +37,10 @@
 		for (const row of rows) {
 			for (const sys of systems) {
 				const codes = systemCodes.get(sys.id) ?? [];
-				let avail = 0, missing = 0, flag_n = 0, within10 = 0;
+				let avail = 0,
+					missing = 0,
+					flag_n = 0,
+					within10 = 0;
 				for (const c of codes) {
 					const v = row[c];
 					if (v === null || v === undefined) missing++;
@@ -103,7 +106,7 @@
 		ROEM: 1,
 		ACUTE: 2,
 		INSUFFICIENT_EVIDENCE: 3,
-		NO_ACUTE_NEEDS: 4
+		ACUTE_NEEDS: 4
 	};
 
 	const sortedRows = $derived.by(() => {
@@ -244,7 +247,7 @@
 	<!-- Legend -->
 	<LegendBadge
 		keys={['no_flag', 'flag', 'no_data']}
-		prelimKeys={['EM', 'ROEM', 'ACUTE', 'NO_ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
+		prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
 		size="text-sm"
 	></LegendBadge>
 </Card>

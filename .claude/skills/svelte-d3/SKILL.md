@@ -17,6 +17,7 @@ Reference: https://github.com/OwnKng/svelte-d3 / https://svelted3.vercel.app/
 ## Core Rule: D3 for math, Svelte for DOM
 
 **Never** use `d3.select()`, `d3.append()`, `d3.transition()`, or any D3 DOM manipulation. D3 is used **only** for:
+
 - Scales — `scaleLinear`, `scaleBand`, `scaleOrdinal`, `scaleTime`, …
 - Shape generators — `arc`, `pie`, `line`, `area`, `stack`, …
 - Layout algorithms — `pie`, `histogram`, `pack`, `force`, …
@@ -27,12 +28,11 @@ Svelte `{#each}` renders all SVG elements. D3 outputs geometry (path strings, x/
 
 ```svelte
 <!-- D3 computes arc path strings -->
-const arcGen = $derived(arc().innerRadius(r * 0.5).outerRadius(r));
-const arcData = $derived(pie()(slices));
+const arcGen = $derived(arc().innerRadius(r * 0.5).outerRadius(r)); const arcData = $derived(pie()(slices));
 
 <!-- Svelte renders the DOM -->
 {#each arcData as d (d.data.key)}
-  <path d={arcGen(d)} fill={d.data.color} />
+	<path d={arcGen(d)} fill={d.data.color} />
 {/each}
 ```
 
@@ -43,15 +43,14 @@ const arcData = $derived(pie()(slices));
 Use Svelte 5's built-in **dimension bindings** — `bind:offsetWidth`, `bind:clientWidth`, etc. These are backed by `ResizeObserver` internally and are the idiomatic approach. Do **not** manually set up a `ResizeObserver` via `{@attach}` or `$effect`.
 
 ```svelte
-let containerWidth = $state(0);
-
-// In template:
+let containerWidth = $state(0); // In template:
 <div class="w-full" bind:offsetWidth={containerWidth}>
-  <svg width={containerWidth} height={svgHeight}>…</svg>
+	<svg width={containerWidth} height={svgHeight}>…</svg>
 </div>
 ```
 
 Available dimension bindings (all readonly, all use ResizeObserver under the hood):
+
 - `bind:clientWidth` / `bind:clientHeight` — excludes border and scrollbar
 - `bind:offsetWidth` / `bind:offsetHeight` — includes border
 - `bind:contentRect` — full ResizeObserverEntry.contentRect
@@ -74,9 +73,9 @@ SVG structure — always wrap content in a `<g>` translated by margins:
 
 ```svelte
 <svg width={containerWidth} height={svgHeight}>
-  <g transform="translate({margin.left},{margin.top})">
-    <!-- all chart content here, coords relative to inner area -->
-  </g>
+	<g transform="translate({margin.left},{margin.top})">
+		<!-- all chart content here, coords relative to inner area -->
+	</g>
 </svg>
 ```
 
@@ -88,12 +87,12 @@ Primitives live in `src/lib/components/viz/primitives/`. Always check here befor
 
 ### Project primitives (already ported to Svelte 5)
 
-| File | Props | Purpose |
-|------|-------|---------|
-| `primitives/XAxis.svelte` | `scale`, `innerWidth`, `innerHeight`, `numberOfTicks?`, `tickValues?` | Horizontal axis with baseline, ticks, labels |
-| `primitives/ThresholdLine.svelte` | `x`, `height`, `label?`, `color?` | Vertical dashed threshold line |
-| `primitives/Dot.svelte` | (see file) | Single data point circle for beeswarm |
-| `primitives/FlagTooltip.svelte` | (see file) | Hover tooltip for flagged indicators |
+| File                              | Props                                                                 | Purpose                                      |
+| --------------------------------- | --------------------------------------------------------------------- | -------------------------------------------- |
+| `primitives/XAxis.svelte`         | `scale`, `innerWidth`, `innerHeight`, `numberOfTicks?`, `tickValues?` | Horizontal axis with baseline, ticks, labels |
+| `primitives/ThresholdLine.svelte` | `x`, `height`, `label?`, `color?`                                     | Vertical dashed threshold line               |
+| `primitives/Dot.svelte`           | (see file)                                                            | Single data point circle for beeswarm        |
+| `primitives/FlagTooltip.svelte`   | (see file)                                                            | Hover tooltip for flagged indicators         |
 
 ### Fetching from svelte-d3 upstream (download only when needed)
 
@@ -101,18 +100,20 @@ Primitives live in `src/lib/components/viz/primitives/`. Always check here befor
 
 **Upstream catalogue** — https://svelted3.vercel.app/
 
-| Category | Available upstream | Local path when added |
-|----------|-------------------|-----------------------|
-| Full charts | Scatter, Beeswarm/Beeswarms, Bar chart, Stacked bars, Histogram, Line chart, Multi-line, Difference area, Diverging area, Diverging bar, Dumbell, Polar bar/dumbell/stack, Radar, Voronoi, Arcs/Donut | `src/lib/components/viz/` |
-| Primitives | Arc, Bar, Area, Line, Circle, Group, Triangle, Arrow, Spike | `src/lib/components/viz/primitives/` |
-| Helpers | Chart, Axis, AxisBottom, AxisLeft, AxisTop, Group, Grid, GridRows, Panel, ClipPath, Gradient, Legend (LegendOrdinal), Tooltip, TooltipWithBounds | `src/lib/components/viz/primitives/` |
+| Category    | Available upstream                                                                                                                                                                                    | Local path when added                |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Full charts | Scatter, Beeswarm/Beeswarms, Bar chart, Stacked bars, Histogram, Line chart, Multi-line, Difference area, Diverging area, Diverging bar, Dumbell, Polar bar/dumbell/stack, Radar, Voronoi, Arcs/Donut | `src/lib/components/viz/`            |
+| Primitives  | Arc, Bar, Area, Line, Circle, Group, Triangle, Arrow, Spike                                                                                                                                           | `src/lib/components/viz/primitives/` |
+| Helpers     | Chart, Axis, AxisBottom, AxisLeft, AxisTop, Group, Grid, GridRows, Panel, ClipPath, Gradient, Legend (LegendOrdinal), Tooltip, TooltipWithBounds                                                      | `src/lib/components/viz/primitives/` |
 
 Browse demos: https://svelted3.vercel.app/scatter, /beeswarms, /stacks, /histogram, etc.
 
 **Workflow when a component is needed:**
+
 1. Load `/svelte-core-bestpractices` and `/svelte-code-writer` — required when porting any upstream Svelte 4 code
 2. Check locally: `Glob("src/lib/components/viz/**/*Name*.svelte")`
 3. If not found, fetch from upstream:
+
 ```bash
 # Primitive or helper
 gh api "repos/OwnKng/svelte-d3/contents/src/visualisations/primatives/Bar.svelte" --jq '.content' | base64 -d
@@ -121,11 +122,13 @@ gh api "repos/OwnKng/svelte-d3/contents/src/visualisations/charts/Scatter.svelte
 # Helper
 gh api "repos/OwnKng/svelte-d3/contents/src/visualisations/helpers/AxisBottom.svelte" --jq '.content' | base64 -d
 ```
+
 4. Port to Svelte 5 (see Key Differences table — the upstream is Svelte 4 throughout)
 5. Run `bunx @sveltejs/mcp svelte-autofixer` on the result
 6. Save to the appropriate local path
 
 **Tooltip and Legend — choose based on need:**
+
 - For a generic tooltip or ordinal legend (any data, no project-specific colors), use upstream `Tooltip`/`TooltipWithBounds` or `LegendOrdinal` — port and add to `primitives/`
 - For flag/classification-specific display (prelim flags, system status colors), use the project's `TooltipCard` and `LegendBadge` which already know the color tokens
 
@@ -155,24 +158,27 @@ const arcData = $derived(slices.length > 0 ? pieGen(slices) : []);
 
 ```svelte
 <g transform="translate({cx},{cy})">
-  {#each arcData as d (d.data.key)}
-    {@const pathD = (hoveredKey === d.data.key ? arcHoverGen(d) : arcGen(d)) ?? ''}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <path
-      d={pathD}
-      fill={d.data.color}
-      opacity={isActive(d.data.key) ? 1 : 0.25}
-      style="transition: opacity 0.15s, d 0.1s; cursor: pointer"
-      onmousemove={(e) => { showTooltip(e, d); }}
-      onmouseleave={hideTooltip}
-      onclick={() => handleSliceClick(d.data.key)}
-    />
-  {/each}
+	{#each arcData as d (d.data.key)}
+		{@const pathD = (hoveredKey === d.data.key ? arcHoverGen(d) : arcGen(d)) ?? ''}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<path
+			d={pathD}
+			fill={d.data.color}
+			opacity={isActive(d.data.key) ? 1 : 0.25}
+			style="transition: opacity 0.15s, d 0.1s; cursor: pointer"
+			onmousemove={(e) => {
+				showTooltip(e, d);
+			}}
+			onmouseleave={hideTooltip}
+			onclick={() => handleSliceClick(d.data.key)}
+		/>
+	{/each}
 </g>
 ```
 
 For responsive radius — derive from container, not hardcoded:
+
 ```ts
 const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 ```
@@ -236,12 +242,13 @@ function hideTooltip() { tooltipVisible = false; }
 
 ```svelte
 {#if tooltipVisible}
-  <TooltipCard
-    x={tooltipX} y={tooltipY}
-    title="…"
-    rows={[{ key: 'Count', value: '42' }]}
-    swatches={[{ color: '#ff0000', label: 'EM' }]}
-  />
+	<TooltipCard
+		x={tooltipX}
+		y={tooltipY}
+		title="…"
+		rows={[{ key: 'Count', value: '42' }]}
+		swatches={[{ color: '#ff0000', label: 'EM' }]}
+	/>
 {/if}
 ```
 
@@ -255,7 +262,9 @@ Use `LegendBadge.svelte` — **not** OwnKng's `LegendOrdinal` (which uses D3 sca
 import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 
 <!-- Prelim flag legend -->
-<LegendBadge prelimKeys={['EM', 'ROEM', 'ACUTE', 'NO_ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']} />
+<LegendBadge
+	prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
+/>
 
 <!-- System status legend -->
 <LegendBadge statusKeys={['flag', 'no_flag', 'insufficient_evidence', 'no_data']} />
@@ -278,6 +287,7 @@ systemBaseColor(systemId)        // hex color per system
 ```
 
 For inline SVG style with dynamic colors, use the Svelte style directive:
+
 ```svelte
 <span style:background-color={s.color}></span>
 <!-- or CSS custom property for Tailwind bg-[--var] -->
@@ -308,6 +318,7 @@ With `role="img"` on the `<svg>`, Svelte will still warn on the inner elements. 
 ```
 
 For hover-only (no click), only the first ignore is needed:
+
 ```svelte
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <rect onmousemove={…} onmouseleave={…} />
@@ -319,23 +330,27 @@ For hover-only (no click), only the first ignore is needed:
 
 Three options in order of preference:
 
-**1. `svelte/transition` and `svelte/animate`** *(preferred — CSS-generated under the hood)*  
+**1. `svelte/transition` and `svelte/animate`** _(preferred — CSS-generated under the hood)_  
 Use for enter/leave transitions on elements and keyed list reordering. Works in SVG too:
+
 ```svelte
-import { fade, scale } from 'svelte/transition';
+import {(fade, scale)} from 'svelte/transition';
 
 {#each items as item (item.id)}
-  <g transition:fade={{ duration: 200 }}>…</g>
+	<g transition:fade={{ duration: 200 }}>…</g>
 {/each}
 ```
+
 `animate:flip` for reordering, `in:`/`out:` for asymmetric enter/leave.
 
 **2. CSS `transition` / `style` attribute** — good for simple continuous property changes (opacity, color, stroke) on SVG elements that are always in the DOM:
+
 ```svelte
 <path style="transition: opacity 0.15s, d 0.1s" d={…} opacity={…} />
 ```
 
-**3. `Tween` from `svelte/motion`** *(Svelte 5.8+)* — for value-driven animations where you need programmatic control (e.g. animating an arc angle reactively):
+**3. `Tween` from `svelte/motion`** _(Svelte 5.8+)_ — for value-driven animations where you need programmatic control (e.g. animating an arc angle reactively):
+
 ```svelte
 import { Tween } from 'svelte/motion';
 import { cubicOut } from 'svelte/easing';
@@ -343,6 +358,7 @@ import { cubicOut } from 'svelte/easing';
 const angle = new Tween(0, { duration: 600, easing: cubicOut });
 // angle.target = newValue  →  angle.current animates toward it
 ```
+
 Use `Tween.of(() => reactiveExpression)` to bind to a derived value automatically.
 
 **Avoid** the old `tweened()` store API — use the class-based `Tween` instead.
@@ -351,17 +367,17 @@ Use `Tween.of(() => reactiveExpression)` to bind to a derived value automaticall
 
 ## Key Differences from OwnKng's Svelte 4 Code
 
-| OwnKng (Svelte 4) | This project (Svelte 5) |
-|---|---|
-| `export let prop = value` | `let { prop = value } = $props()` |
-| `$: derived = expr` | `const derived = $derived(expr)` |
-| `$: { multi-step }` | `const x = $derived.by(() => { … })` |
-| `bind:clientWidth={w}` | `{@attach observeWidth}` with ResizeObserver |
-| `on:click={fn}` | `onclick={fn}` |
-| `on:mousemove={fn}` | `onmousemove={fn}` |
-| `<slot />` | `{@render children?.()}` |
-| `setContext` / `getContext` | same, but prefer typed `createContext` |
-| `tweened` animation | CSS `transition` preferred |
+| OwnKng (Svelte 4)           | This project (Svelte 5)                      |
+| --------------------------- | -------------------------------------------- |
+| `export let prop = value`   | `let { prop = value } = $props()`            |
+| `$: derived = expr`         | `const derived = $derived(expr)`             |
+| `$: { multi-step }`         | `const x = $derived.by(() => { … })`         |
+| `bind:clientWidth={w}`      | `{@attach observeWidth}` with ResizeObserver |
+| `on:click={fn}`             | `onclick={fn}`                               |
+| `on:mousemove={fn}`         | `onmousemove={fn}`                           |
+| `<slot />`                  | `{@render children?.()}`                     |
+| `setContext` / `getContext` | same, but prefer typed `createContext`       |
+| `tweened` animation         | CSS `transition` preferred                   |
 
 ---
 

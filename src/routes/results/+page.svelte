@@ -113,7 +113,10 @@
 			for (const { path, codes } of subList) {
 				const [systemId] = String(path).split('.');
 				let set = sets.get(systemId);
-				if (!set) { set = new Set(); sets.set(systemId, set); }
+				if (!set) {
+					set = new Set();
+					sets.set(systemId, set);
+				}
 				for (const c of codes) set.add(c);
 			}
 			return new Map([...sets].map(([k, v]) => [k, [...v]]));
@@ -166,13 +169,15 @@
 	const groupByOptions = $derived<{ value: string; label: string }[]>(
 		groupByCol === null
 			? []
-			: [...new Set(
-					flagged
-						.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
-						.map((r) => String(r[groupByCol!]))
-				)]
-				.sort()
-				.map((v) => ({ value: v, label: v }))
+			: [
+					...new Set(
+						flagged
+							.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
+							.map((r) => String(r[groupByCol!]))
+					)
+				]
+					.sort()
+					.map((v) => ({ value: v, label: v }))
 	);
 
 	let deselectedGroupValues = $state<{ col: string; values: Set<string> }>({
@@ -214,12 +219,12 @@
 	}
 
 	let selectedPrelimKeys = $state<string[] | null>(null);
-	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'NO_ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
+	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
 	const prelimOptions = $derived(
 		PRELIM_KEYS.map((k) => ({
 			value: k,
 			label:
-				k === 'NO_ACUTE_NEEDS'
+				k === 'ACUTE_NEEDS'
 					? 'No Acute Needs'
 					: k === 'INSUFFICIENT_EVIDENCE'
 						? 'Insufficient Evidence'
@@ -433,9 +438,7 @@
 	let showCoverageTable = $state(false);
 
 	// Shared sorted UoA list — used by coverage selector and export.
-	const uoaList = $derived(
-		[...new Set(flagged.map((r) => String(r['uoa'] ?? '')))].sort()
-	);
+	const uoaList = $derived([...new Set(flagged.map((r) => String(r['uoa'] ?? '')))].sort());
 
 	const coverageUoaOptions = $derived(uoaList);
 
@@ -523,7 +526,8 @@
 			(entries) => {
 				for (const entry of entries) {
 					if (entry.isIntersecting)
-						exploreNav.activeSection = (entry.target as HTMLElement).id as typeof exploreNav.activeSection;
+						exploreNav.activeSection = (entry.target as HTMLElement)
+							.id as typeof exploreNav.activeSection;
 				}
 			},
 			{ rootMargin: '-20% 0px -60% 0px' }
@@ -538,7 +542,10 @@
 			if (el) spyObs.observe(el);
 		}
 
-		return () => { filterObs.disconnect(); spyObs.disconnect(); };
+		return () => {
+			filterObs.disconnect();
+			spyObs.disconnect();
+		};
 	});
 
 	onMount(() => {
@@ -570,140 +577,140 @@
 	</div>
 
 	{#if mounted}
-	<FiltersSidebar
-		visible={filtersVisible && hasData}
-		flaggedTotal={flagged.length}
-		filteredTotal={filteredFlagged.length}
-		{isFiltered}
-		{overviewUoaOptions}
-		{overviewSelectedUoas}
-		{selectedPrelimKeys}
-		{PRELIM_KEYS}
-		{prelimOptions}
-		{metadataCols}
-		{groupByCol}
-		{groupByOptions}
-		{selectedGroupValues}
-		onoverviewuoaschange={onOverviewUoasChange}
-		onprelimkeyschange={onPrelimKeysChange}
-		ongroupbycol={(v) => (groupByCol = v)}
-		ongroupvalueschange={onGroupValuesChange}
-		onclearfilters={() => {
-			overviewSelectedUoas = null;
-			selectedPrelimKeys = null;
-			groupByCol = null;
-		}}
-	/>
+		<FiltersSidebar
+			visible={filtersVisible && hasData}
+			flaggedTotal={flagged.length}
+			filteredTotal={filteredFlagged.length}
+			{isFiltered}
+			{overviewUoaOptions}
+			{overviewSelectedUoas}
+			{selectedPrelimKeys}
+			{PRELIM_KEYS}
+			{prelimOptions}
+			{metadataCols}
+			{groupByCol}
+			{groupByOptions}
+			{selectedGroupValues}
+			onoverviewuoaschange={onOverviewUoasChange}
+			onprelimkeyschange={onPrelimKeysChange}
+			ongroupbycol={(v) => (groupByCol = v)}
+			ongroupvalueschange={onGroupValuesChange}
+			onclearfilters={() => {
+				overviewSelectedUoas = null;
+				selectedPrelimKeys = null;
+				groupByCol = null;
+			}}
+		/>
 
-	<!-- Overview -->
-	<div class="bg-base-200/30 border-base-300 border-y py-16">
-		<div
-			class="mx-auto max-w-5xl px-4"
-			{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-		>
-			<ResultsOverview
-				{filteredFlagged}
-				{systems}
-				{systemCodes}
-				{hasPcodes}
-				{pcodeLevel}
-				{selectedPrelimKeys}
-				{selectedMapUoa}
-				{selectedMapAdminName}
-				{selectedMapRow}
-				onselectinheatmap={selectInHeatmap}
-				onmapselect={(uoa, adminName) => {
-					if (selectedMapUoa === uoa) {
+		<!-- Overview -->
+		<div class="bg-base-200/30 border-base-300 border-y py-16">
+			<div
+				class="mx-auto max-w-5xl px-4"
+				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+			>
+				<ResultsOverview
+					{filteredFlagged}
+					{systems}
+					{systemCodes}
+					{hasPcodes}
+					{pcodeLevel}
+					{selectedPrelimKeys}
+					{selectedMapUoa}
+					{selectedMapAdminName}
+					{selectedMapRow}
+					onselectinheatmap={selectInHeatmap}
+					onmapselect={(uoa, adminName) => {
+						if (selectedMapUoa === uoa) {
+							selectedMapUoa = null;
+							selectedMapAdminName = null;
+						} else {
+							selectedMapUoa = uoa;
+							selectedMapAdminName = adminName;
+						}
+					}}
+					onmapclear={() => {
 						selectedMapUoa = null;
 						selectedMapAdminName = null;
-					} else {
-						selectedMapUoa = uoa;
-						selectedMapAdminName = adminName;
-					}
-				}}
-				onmapclear={() => {
-					selectedMapUoa = null;
-					selectedMapAdminName = null;
-				}}
-				ondonutsliceclick={handleDonutSliceClick}
-			/>
+					}}
+					ondonutsliceclick={handleDonutSliceClick}
+				/>
+			</div>
 		</div>
-	</div>
 
-	<!-- Systems -->
-	<div class="py-16">
-		<div
-			class="mx-auto max-w-5xl px-4"
-			{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-		>
-			<ResultsSystems
-				{filteredFlagged}
-				{systems}
-				{systemCodes}
-				{subList}
-				{referenceJson}
-				bind:selectedUoa={heatmapSelectedUoa}
-				bind:selectedSystem={heatmapSelectedSystem}
-			/>
+		<!-- Systems -->
+		<div class="py-16">
+			<div
+				class="mx-auto max-w-5xl px-4"
+				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+			>
+				<ResultsSystems
+					{filteredFlagged}
+					{systems}
+					{systemCodes}
+					{subList}
+					{referenceJson}
+					bind:selectedUoa={heatmapSelectedUoa}
+					bind:selectedSystem={heatmapSelectedSystem}
+				/>
+			</div>
 		</div>
-	</div>
 
-	<!-- Metrics -->
-	<div class="bg-base-200/30 border-base-300 border-y py-16">
-		<div
-			class="mx-auto max-w-5xl px-4"
-			{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-		>
-			<ResultsMetrics
-				{filteredBlocks}
-				{indSystemOptions}
-				{indFactorOptions}
-				{indSelectedSystems}
-				{indSelectedFactors}
-				{totalMetrics}
-				onindsystemschange={onIndSystemsChange}
-				onindfactorschange={onIndFactorsChange}
-			/>
+		<!-- Metrics -->
+		<div class="bg-base-200/30 border-base-300 border-y py-16">
+			<div
+				class="mx-auto max-w-5xl px-4"
+				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+			>
+				<ResultsMetrics
+					{filteredBlocks}
+					{indSystemOptions}
+					{indFactorOptions}
+					{indSelectedSystems}
+					{indSelectedFactors}
+					{totalMetrics}
+					onindsystemschange={onIndSystemsChange}
+					onindfactorschange={onIndFactorsChange}
+				/>
+			</div>
 		</div>
-	</div>
 
-	<!-- Coverage -->
-	<div class="py-16">
-		<div
-			class="mx-auto max-w-5xl px-4"
-			{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-		>
-			<ResultsCoverage
-				{coverageUoaOptions}
-				coverageUoa={effectiveCoverageUoa}
-				bind:showAvailableOnly
-				bind:showCoverageTable
-				{circlePackingDisplayData}
-				{coverageSelectedRow}
-				{systems}
-				{referenceJson}
-				oncoverageUoaChange={(v) => (coverageUoa = v)}
-			/>
+		<!-- Coverage -->
+		<div class="py-16">
+			<div
+				class="mx-auto max-w-5xl px-4"
+				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+			>
+				<ResultsCoverage
+					{coverageUoaOptions}
+					coverageUoa={effectiveCoverageUoa}
+					bind:showAvailableOnly
+					bind:showCoverageTable
+					{circlePackingDisplayData}
+					{coverageSelectedRow}
+					{systems}
+					{referenceJson}
+					oncoverageUoaChange={(v) => (coverageUoa = v)}
+				/>
+			</div>
 		</div>
-	</div>
 
-	<!-- Export -->
-	<div class="bg-base-200/30 border-base-300 border-y py-16">
-		<div
-			class="mx-auto max-w-5xl px-4"
-			{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-		>
-			<ResultsExport
-				{flagged}
-				{allUoas}
-				{exportSelectedUoas}
-				{handleJSON}
-				{handleCSV}
-				{handleXLSX}
-				{handleDeepDive}
-				onexportUoasChange={(v) => (exportUoaOverride = Array.isArray(v) ? v : [v])}
-			/>
+		<!-- Export -->
+		<div class="bg-base-200/30 border-base-300 border-y py-16">
+			<div
+				class="mx-auto max-w-5xl px-4"
+				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+			>
+				<ResultsExport
+					{flagged}
+					{allUoas}
+					{exportSelectedUoas}
+					{handleJSON}
+					{handleCSV}
+					{handleXLSX}
+					{handleDeepDive}
+					onexportUoasChange={(v) => (exportUoaOverride = Array.isArray(v) ? v : [v])}
+				/>
+			</div>
 		</div>
-	</div>
 	{/if}
 {/if}
