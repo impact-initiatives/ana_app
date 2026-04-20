@@ -35,7 +35,7 @@
 </script>
 
 <svelte:head>
-	<title>ANA — Validation details</title>
+	<title>ANA | Validation details</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">

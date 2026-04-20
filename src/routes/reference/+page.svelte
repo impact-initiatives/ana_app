@@ -80,66 +80,65 @@
 </script>
 
 <svelte:head>
-	<title>Reference List | ANA App</title>
+	<title>ANA | Reference list</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">
+	<PageHeader title="Metric Reference List" subtitle="Browse and filter the full metric framework.">
+		{#snippet action()}
+			<NavButton href={resolve('/')} label="Back to Home" direction="back" />
+		{/snippet}
+	</PageHeader>
 
-<PageHeader title="Metric Reference List" subtitle="Browse and filter the full metric framework.">
-	{#snippet action()}
-		<NavButton href={resolve('/')} label="Back to Home" direction="back" />
-	{/snippet}
-</PageHeader>
-
-{#if error}
-	<p class="text-error">Error loading circle-packing data: {error}</p>
-{:else if loading}
-	<p>Loading circle-packing data…</p>
-{:else}
-	<div class="flex flex-col gap-4 p-4">
-		<!-- Available-only toggle -->
-		<RadioToggle
-			bind:value={showTableReferenceList}
-			label="Show reference list as"
-			labelFalse="Circle Packing"
-			labelTrue="Table"
-			name="reference-list-view"
-		/>
-		<div class="flex flex-wrap gap-4">
-			<div class="min-w-60">
-				<Select
-					options={levelOptions}
-					selected={selectedLevels}
-					placeholder="All levels"
-					label="Filter by level"
-					onchange={(v) => (selectedLevels = v as string[])}
-				/>
-			</div>
-			<div class="min-w-60">
-				<Select
-					options={conceptOptions}
-					selected={selectedConcepts}
-					placeholder="All concepts"
-					label="Filter by risk concept"
-					onchange={(v) => (selectedConcepts = v as string[])}
-				/>
-			</div>
-		</div>
-	</div>
-
-	{#if !showTableReferenceList}
-		<CirclePacking
-			data={filteredData}
-			nodePadding={4}
-			paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
-		/>
+	{#if error}
+		<p class="text-error">Error loading circle-packing data: {error}</p>
+	{:else if loading}
+		<p>Loading circle-packing data…</p>
 	{:else}
-		<div class="relative left-1/2 w-dvw max-w-none -translate-x-1/2 px-4">
-			<div class="mx-auto max-w-7xl">
-				<DataTable rows={filteredTableRows} columnSearchable overflow="scroll" />
+		<div class="flex flex-col gap-4 p-4">
+			<!-- Available-only toggle -->
+			<RadioToggle
+				bind:value={showTableReferenceList}
+				label="Show reference list as"
+				labelFalse="Circle Packing"
+				labelTrue="Table"
+				name="reference-list-view"
+			/>
+			<div class="flex flex-wrap gap-4">
+				<div class="min-w-60">
+					<Select
+						options={levelOptions}
+						selected={selectedLevels}
+						placeholder="All levels"
+						label="Filter by level"
+						onchange={(v) => (selectedLevels = v as string[])}
+					/>
+				</div>
+				<div class="min-w-60">
+					<Select
+						options={conceptOptions}
+						selected={selectedConcepts}
+						placeholder="All concepts"
+						label="Filter by risk concept"
+						onchange={(v) => (selectedConcepts = v as string[])}
+					/>
+				</div>
 			</div>
 		</div>
-	{/if}
-{/if}
 
-</div><!-- /max-w-5xl -->
+		{#if !showTableReferenceList}
+			<CirclePacking
+				data={filteredData}
+				nodePadding={4}
+				paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
+			/>
+		{:else}
+			<div class="relative left-1/2 w-dvw max-w-none -translate-x-1/2 px-4">
+				<div class="mx-auto max-w-7xl">
+					<DataTable rows={filteredTableRows} columnSearchable overflow="scroll" />
+				</div>
+			</div>
+		{/if}
+	{/if}
+</div>
+<!-- /max-w-5xl -->
