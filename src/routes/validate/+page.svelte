@@ -13,7 +13,7 @@
 
 <div class="mx-auto max-w-5xl px-4">
 	<div class="mb-6 flex items-center gap-4">
-		<NavButton href={resolve('/')} label="Upload" direction="back" size="sm" />
+		<NavButton href={resolve('/')} label="Home" direction="back" size="sm" />
 		<div class="flex items-baseline gap-2">
 			<h1 class="text-lg font-bold">Validation details</h1>
 			{#if validatorStore.filename}
