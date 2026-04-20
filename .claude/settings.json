@@ -18,5 +18,6 @@
     "additionalDirectories": [
       "/home/gnoblet/Documents/GitHub/ANA_app_svelte/.claude/skills"
     ]
-  }
+  },
+  "enabledPlugins": {}
 }
