@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { asset } from '$app/paths';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
@@ -552,8 +552,11 @@
 		loadCirclePackingData(asset('/data/reference-circlepacking.json'));
 		// Defer heavy $derived computations to the next task so the browser
 		// gets one full paint (showing ExploreNav) before blocking the thread.
-		setTimeout(() => {
+		setTimeout(async () => {
 			mounted = true;
+			await tick();
+			const hash = window.location.hash;
+			if (hash) document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}, 0);
 	});
 </script>
@@ -603,7 +606,7 @@
 		/>
 
 		<!-- Overview -->
-		<div class="bg-base-200/30 border-base-300 border-y py-16">
+		<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-y py-16">
 			<div
 				class="mx-auto max-w-5xl px-4"
 				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -638,7 +641,7 @@
 		</div>
 
 		<!-- Systems -->
-		<div class="py-16">
+		<div id="systems" class="scroll-mt-28 py-16">
 			<div
 				class="mx-auto max-w-5xl px-4"
 				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -656,7 +659,7 @@
 		</div>
 
 		<!-- Metrics -->
-		<div class="bg-base-200/30 border-base-300 border-y py-16">
+		<div id="metrics" class="bg-base-200/30 border-base-300 scroll-mt-28 border-y py-16">
 			<div
 				class="mx-auto max-w-5xl px-4"
 				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -675,7 +678,7 @@
 		</div>
 
 		<!-- Coverage -->
-		<div class="py-16">
+		<div id="coverage" class="scroll-mt-28 py-16">
 			<div
 				class="mx-auto max-w-5xl px-4"
 				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -695,7 +698,7 @@
 		</div>
 
 		<!-- Export -->
-		<div class="bg-base-200/30 border-base-300 border-y py-16">
+		<div id="export" class="bg-base-200/30 border-base-300 scroll-mt-28 border-y py-16">
 			<div
 				class="mx-auto max-w-5xl px-4"
 				{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}

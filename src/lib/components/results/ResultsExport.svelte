@@ -28,7 +28,7 @@
 	}: Props = $props();
 </script>
 
-<section id="export" class="min-h-screen scroll-mt-28">
+<section class="min-h-screen">
 	<h2 class="mb-6 border-l-4 border-primary pl-3 text-lg font-semibold tracking-widest uppercase">Export</h2>
 
 	<div class="space-y-6">
