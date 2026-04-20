@@ -119,6 +119,8 @@
 							headerRowClass="bg-error/20 text-error"
 							overflow="paginate"
 							pageSize={10}
+							downloadable
+							downloadFilename="cell-errors"
 						/>
 					</div>
 				{/if}
@@ -132,6 +134,8 @@
 							headerRowClass="bg-warning/20 text-warning"
 							overflow="paginate"
 							pageSize={10}
+							downloadable
+							downloadFilename="missingness"
 						/>
 					</div>
 				{/if}

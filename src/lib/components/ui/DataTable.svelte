@@ -48,6 +48,10 @@
 		 * for the clicked row, plus the 0-based index within `sortedData`.
 		 */
 		onrowclick?: (cells: Record<string, string>, rowIndex: number) => void;
+		/** Show a download CSV button next to the search bar (requires searchable=true). Default false. */
+		downloadable?: boolean;
+		/** Filename for the downloaded CSV (without extension). Default 'table'. */
+		downloadFilename?: string;
 	}
 	let {
 		rows = [],
@@ -64,7 +68,9 @@
 		overflow = 'none',
 		pageSize = 25,
 		scrollHeight = '48rem',
-		onrowclick
+		onrowclick,
+		downloadable = false,
+		downloadFilename = 'table'
 	}: Props = $props();
 
 	const columns = $derived(rows.length > 0 ? Object.keys(rows[0]) : []);
@@ -139,6 +145,25 @@
 		});
 	});
 
+	// ── CSV download ─────────────────────────────────────────────────────────
+	function downloadCsv() {
+		const escape = (v: unknown) => {
+			const s = String(v ?? '');
+			return s.includes(',') || s.includes('"') || s.includes('\n')
+				? `"${s.replace(/"/g, '""')}"`
+				: s;
+		};
+		const lines = [columns.map(escape).join(',')];
+		for (const row of sortedData) lines.push(row.map(escape).join(','));
+		const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${downloadFilename}.csv`;
+		a.click();
+		URL.revokeObjectURL(url);
+	}
+
 	// ── Pagination ────────────────────────────────────────────────────────────
 	let page = $state(0);
 
@@ -160,8 +185,36 @@
 </script>
 
 <div class="flex flex-col gap-2">
-	{#if searchable}
-		<Search bind:value={searchQuery} placeholder={searchPlaceholder} />
+	{#if searchable || downloadable}
+		<div class="flex items-center gap-2">
+			{#if searchable}
+				<div class="flex-1">
+					<Search bind:value={searchQuery} placeholder={searchPlaceholder} />
+				</div>
+			{/if}
+			{#if downloadable}
+				<button
+					class="btn btn-sm btn-ghost border-base-300 ml-auto border"
+					onclick={downloadCsv}
+					aria-label="Download as CSV"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="size-4"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					Download as CSV
+				</button>
+			{/if}
+		</div>
 	{/if}
 
 	<div
