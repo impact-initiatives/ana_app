@@ -559,7 +559,7 @@
 </script>
 
 <svelte:head>
-	<title>Results | ANA</title>
+	<title>ANA | Results</title>
 </svelte:head>
 
 {#if !appReady.ready}
