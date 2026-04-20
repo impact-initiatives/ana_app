@@ -15,7 +15,7 @@
 	const year = new Date().getFullYear();
 </script>
 
-<footer class="border-base-300 bg-base-200 mt-16 border-t">
+<footer class="border-base-300 bg-base-200 border-t">
 	<div class="mx-auto max-w-7xl px-4 py-10">
 		<div class="text-base-content/85 grid grid-cols-1 gap-10 sm:grid-cols-3">
 			<!-- Brand -->
