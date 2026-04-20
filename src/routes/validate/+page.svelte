@@ -164,6 +164,9 @@
 			</div>
 		</div>
 	{:else}
-		<NoDataState></NoDataState>
+		<NoDataState
+			title="No validation results"
+			subtitle="Either data was validated or there was no data. Upload and validate a (new) CSV file on the Home page."
+		></NoDataState>
 	{/if}
 </div>
