@@ -81,14 +81,14 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
         }
         adm1 = { type: 'FeatureCollection', features: adm1Lines };
       }
-      if (adm2) adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
+      if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
     } else {
       try {
         adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
       } catch (e:any) {
         adm1 = { error: String(e) };
       }
-      if (adm1) adm1 = simplify(adm1, { tolerance: 0.01, highQuality: false, mutate: true });
+      if (adm1?.type === 'FeatureCollection') adm1 = simplify(adm1, { tolerance: 0.01, highQuality: false, mutate: true });
       adm2 = { type: 'FeatureCollection', features: [] };
     }
     return { adm1, adm2 };
