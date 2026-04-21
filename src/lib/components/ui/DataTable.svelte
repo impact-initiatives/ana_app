@@ -56,6 +56,8 @@
 		title?: string;
 		/** Tailwind classes for the title. Default 'font-semibold'. */
 		titleClass?: string;
+		/** Convert snake_case column keys to Sentence case for display (e.g. risk_concept → Risk concept). Default false. */
+		humanizeHeaders?: boolean;
 	}
 	let {
 		rows = [],
@@ -76,8 +78,13 @@
 		downloadable = false,
 		downloadFilename = 'table',
 		title,
-		titleClass = 'font-semibold text-md'
+		titleClass = 'font-semibold text-md',
+		humanizeHeaders = false
 	}: Props = $props();
+
+	function humanizeCol(col: string): string {
+		return col.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+	}
 
 	const columns = $derived(rows.length > 0 ? Object.keys(rows[0]) : []);
 
@@ -98,8 +105,10 @@
 	}
 
 	function headerBtnClass(colName: string): string {
-		const isCentered = (colOptions?.[colName]?.extraClass ?? '').includes('text-center');
-		return `hover:text-base-content/80 flex items-center gap-1 font-semibold${isCentered ? ' w-full justify-center' : ''}`;
+		const opt = colOptions?.[colName];
+		const isCentered = (opt?.extraClass ?? '').includes('text-center');
+		const wrapCls = opt?.wrap ? ' whitespace-normal break-words' : '';
+		return `hover:text-base-content/80 flex items-center gap-1 font-semibold${isCentered ? ' w-full justify-center' : ''}${wrapCls}`;
 	}
 
 	// ── Search ────────────────────────────────────────────────────────────────
@@ -241,7 +250,7 @@
 								onclick={() => toggleSort(j)}
 								aria-label="Sort by {col}"
 							>
-								{col}
+								{humanizeHeaders ? humanizeCol(col) : col}
 								<SortIcon active={sortCol === j} asc={sortAsc} />
 							</button>
 						</th>
