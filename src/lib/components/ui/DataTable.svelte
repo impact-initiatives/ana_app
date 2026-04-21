@@ -307,7 +307,7 @@
 					{@const rowObj = Object.fromEntries(columns.map((c, j) => [c, String(row[j] ?? '')]))}
 					{@const rc = resolveRowColor(rowObj)}
 					<tr
-						class="{rowClass}{stripe && i % 2 === 0 ? ' bg-base-200' : ' bg-base-100'}{onrowclick
+						class="group {rowClass}{stripe && i % 2 === 0 ? ' bg-base-200' : ' bg-base-100'}{onrowclick
 							? ' cursor-pointer'
 							: ''}"
 						onclick={onrowclick
@@ -319,7 +319,7 @@
 							{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
 							{@const txt = colOptions?.[colName]?.text ?? rc?.text}
 							<td
-								class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}"
+								class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg ? ' group-hover:brightness-90' : ''}"
 								style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
 									.filter(Boolean)
 									.join(';') || undefined}
