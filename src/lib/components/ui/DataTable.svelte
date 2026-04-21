@@ -203,7 +203,7 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// ── Pagination ────────────────────────────────────────────────────────────
+// ── Pagination ────────────────────────────────────────────────────────────
 	let page = $state(0);
 
 	$effect(() => {
@@ -336,22 +336,15 @@
 		{/each}
 	{/snippet}
 
-	<div class="rounded-box border-base-content/30 bg-base-100 overflow-x-auto border">
-		{#if overflow === 'scroll'}
-			<table class="table {tableClass}">
-				<thead>{@render theadMarkup()}</thead>
-			</table>
-			<div class="overflow-y-auto" style="max-height: {scrollHeight}">
-				<table class="table {tableClass}">
-					<tbody>{@render tbodyMarkup()}</tbody>
-				</table>
-			</div>
-		{:else}
-			<table class="table {tableClass}">
-				<thead>{@render theadMarkup()}</thead>
-				<tbody>{@render tbodyMarkup()}</tbody>
-			</table>
-		{/if}
+	<div
+		class="rounded-box border-base-content/30 bg-base-100 overflow-x-auto border"
+		class:overflow-y-auto={overflow === 'scroll'}
+		style={overflow === 'scroll' ? `max-height: ${scrollHeight}` : undefined}
+	>
+		<table class="table {tableClass}" class:table-pin-rows={overflow === 'scroll'}>
+			<thead>{@render theadMarkup()}</thead>
+			<tbody>{@render tbodyMarkup()}</tbody>
+		</table>
 	</div>
 
 	<!-- Pagination -->
