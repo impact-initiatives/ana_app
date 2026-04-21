@@ -22,8 +22,19 @@
 		 * - wrap: true  → text wraps (white-space: normal), column is fixed by maxWidth
 		 * - wrap: false → text does not wrap, column width fits content (default)
 		 * - extraClass: additional Tailwind classes, e.g. "max-w-48" or "min-w-24"
+		 * - bg: CSS color string for cell background (takes precedence over rowColor)
+		 * - text: CSS color string for cell text (takes precedence over rowColor)
 		 */
-		colOptions?: Record<string, { wrap?: boolean; extraClass?: string }>;
+		colOptions?: Record<
+			string,
+			{ wrap?: boolean; extraClass?: string; bg?: string; text?: string }
+		>;
+		/**
+		 * Declarative per-row colouring. Structure: { columnName: { cellValue: { bg?, text? } } }.
+		 * When a row's cell in `columnName` equals `cellValue`, the whole row gets that bg/text.
+		 * First matching column wins. Column-level bg/text in colOptions takes precedence.
+		 */
+		rowColor?: Record<string, Record<string, { bg?: string; text?: string }>>;
 		/** Show a global search input above the table. Default false. */
 		searchable?: boolean;
 		/** Show per-column filter inputs in a second header row. Default false. */
@@ -58,6 +69,8 @@
 		titleClass?: string;
 		/** Convert snake_case column keys to Sentence case for display (e.g. risk_concept → Risk concept). Default false. */
 		humanizeHeaders?: boolean;
+		/** Tailwind class(es) for row divider borders, e.g. 'border-base-100' or 'border-white'. */
+		rowDividerClass?: string;
 	}
 	let {
 		rows = [],
@@ -79,11 +92,22 @@
 		downloadFilename = 'table',
 		title,
 		titleClass = 'font-semibold text-md',
-		humanizeHeaders = false
+		humanizeHeaders = false,
+		rowColor,
+		rowDividerClass = 'border-base-300'
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
 		return col.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+	}
+
+	function resolveRowColor(rowObj: Record<string, string>) {
+		if (!rowColor) return undefined;
+		for (const [col, vals] of Object.entries(rowColor)) {
+			const match = vals[rowObj[col] ?? ''];
+			if (match) return match;
+		}
+		return undefined;
 	}
 
 	const columns = $derived(rows.length > 0 ? Object.keys(rows[0]) : []);
@@ -244,7 +268,7 @@
 			<thead>
 				<tr class={headerRowClass}>
 					{#each columns as col, j (col)}
-						<th class="{colClass(col)} select-none">
+						<th class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}">
 							<button
 								class={headerBtnClass(col)}
 								onclick={() => toggleSort(j)}
@@ -280,24 +304,29 @@
 			</thead>
 			<tbody>
 				{#each pageRows as row, i (i)}
+					{@const rowObj = Object.fromEntries(columns.map((c, j) => [c, String(row[j] ?? '')]))}
+					{@const rc = resolveRowColor(rowObj)}
 					<tr
 						class="{rowClass}{stripe && i % 2 === 0 ? ' bg-base-200' : ' bg-base-100'}{onrowclick
 							? ' cursor-pointer'
 							: ''}"
 						onclick={onrowclick
-							? () => {
-									const cells: Record<string, string> = {};
-									for (let j = 0; j < columns.length; j++)
-										cells[columns[j] ?? ''] = String(row[j] ?? '');
-									onrowclick(cells, page * effectivePageSize + i);
-								}
+							? () => onrowclick(rowObj, page * effectivePageSize + i)
 							: undefined}
 					>
 						{#each row as cell, j (j)}
-							<td class={colClass(columns[j] ?? '')}>
+							{@const colName = columns[j] ?? ''}
+							{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
+							{@const txt = colOptions?.[colName]?.text ?? rc?.text}
+							<td
+								class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}"
+								style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
+									.filter(Boolean)
+									.join(';') || undefined}
+							>
 								{#if renderCell}
 									{@render renderCell({
-										col: columns[j] ?? '',
+										col: colName,
 										value: String(cell),
 										colIndex: j,
 										rowIndex: i
