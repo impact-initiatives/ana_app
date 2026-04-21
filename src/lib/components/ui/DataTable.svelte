@@ -71,11 +71,13 @@
 		humanizeHeaders?: boolean;
 		/** Tailwind class(es) for row divider borders, e.g. 'border-base-100' or 'border-white'. */
 		rowDividerClass?: string;
+		/** Tailwind classes applied to every <th>, e.g. 'bg-base-200' for an opaque header background. */
+		headerThClass?: string;
 	}
 	let {
 		rows = [],
 		tableClass = 'table-sm',
-		headerRowClass = 'bg-primary/20 text-primary text-sm',
+		headerRowClass = 'text-primary text-sm',
 		rowClass = 'hover:bg-base-200',
 		stripe = false,
 		renderCell,
@@ -94,7 +96,8 @@
 		titleClass = 'font-semibold text-md',
 		humanizeHeaders = false,
 		rowColor,
-		rowDividerClass = 'border-base-300'
+		rowDividerClass = 'border-base-300',
+		headerThClass = 'bg-primary/20'
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
@@ -262,7 +265,9 @@
 	{#snippet theadMarkup()}
 		<tr class={headerRowClass}>
 			{#each columns as col, j (col)}
-				<th class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}">
+				<th
+					class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}{headerThClass ? ' ' + headerThClass : ''}"
+				>
 					<button
 						class={headerBtnClass(col)}
 						onclick={() => toggleSort(j)}
