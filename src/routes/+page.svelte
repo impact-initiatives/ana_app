@@ -129,7 +129,7 @@
 </script>
 
 <svelte:head>
-	<title>ANA — Acute Needs Analysis</title>
+	<title>ANA | Acute Needs Analysis</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">

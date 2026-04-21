@@ -63,7 +63,7 @@
 	const visibleMetricIds = new SvelteSet<string>();
 </script>
 
-<section id="metrics" class="scroll-mt-28">
+<section>
 	<h2 class="border-primary mb-6 border-l-4 pl-3 text-lg font-semibold tracking-widest uppercase">
 		Metrics
 	</h2>

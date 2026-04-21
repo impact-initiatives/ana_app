@@ -36,7 +36,7 @@
 	}: Props = $props();
 </script>
 
-<section id="coverage" class="scroll-mt-28">
+<section>
 	<h2 class="mb-6 border-l-4 border-primary pl-3 text-lg font-semibold tracking-widest uppercase">Coverage</h2>
 
 	{#if circlePackingStore.loading}

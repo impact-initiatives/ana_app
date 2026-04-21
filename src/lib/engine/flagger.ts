@@ -291,7 +291,7 @@ export function flagData(items: Row[], indicatorsJson: unknown): Row[] {
 		if (activeSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
 
 		// 6. No Acute Needs — all active systems are no_flag
-		return 'NO_ACUTE_NEEDS';
+		return 'ACUTE_NEEDS';
 	};
 
 	// ── Pipeline ──────────────────────────────────────────────────────────────

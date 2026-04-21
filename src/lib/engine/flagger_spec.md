@@ -200,7 +200,7 @@ isNoData(systemId)        =  row[`${systemId}.status`] === 'no_data'
      AND all active systems are 'no_data'
      (nothing was collected across all systems)
 
-6. NO_ACUTE_NEEDS
+6. ACUTE_NEEDS
    — all active systems are 'no_flag'
      (only reached when every system has enough evidence to conclude no flag)
 ```
@@ -375,7 +375,7 @@ const prelimFlagEntry = [
 		if (activeSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
 
 		// 6. No Acute Needs — all active systems are no_flag
-		return 'NO_ACUTE_NEEDS';
+		return 'ACUTE_NEEDS';
 	}
 ];
 ```
@@ -408,7 +408,7 @@ export const PRELIM_FLAG_BADGE: Record<string, FlagBadge> = {
   ACUTE:                { bg: 'var(--color-prelim-an)',      label: 'Acute Needs' },
   INSUFFICIENT_EVIDENCE:{ bg: 'var(--color-insuff)',         label: 'Insufficient Evidence' },
   NO_DATA:              { bg: 'var(--color-prelim-no-data)', label: 'No Data' },
-  NO_ACUTE_NEEDS:       { bg: 'var(--color-prelim-no-an)',   label: 'No Acute Needs' }
+  ACUTE_NEEDS:       { bg: 'var(--color-prelim-no-an)',   label: 'No Acute Needs' }
 };
 ```
 
@@ -429,16 +429,16 @@ export const STATUS_TO_BADGE_KEY: Record<string, string> = {
 
 ## New columns emitted per row (summary)
 
-| Column pattern                         | Values                                                                                | Change                                                       |
-| -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `{id}_flag`                            | `true` \| `false` \| `null`                                                           | unchanged                                                    |
-| `{id}_status`                          | `'flag'` \| `'no_flag'` \| `'no_data'`                                                | **renamed** from `{id}_flag_label`; `'noflag'` → `'no_flag'` |
-| `{id}_within_10perc`                   | boolean                                                                               | unchanged                                                    |
-| `{id}_within_10perc_change`            | boolean                                                                               | unchanged                                                    |
-| `{system}.{factor}.{subfactor}.status` | `flag` \| `no_flag` \| `insufficient_evidence` \| `no_data`                           | **new**                                                      |
-| `{system}.{factor}.status`             | same                                                                                  | **new**                                                      |
-| `{system}.status`                      | same                                                                                  | **new**                                                      |
-| `prelim_flag`                          | `EM` \| `ROEM` \| `ACUTE` \| `INSUFFICIENT_EVIDENCE` \| `NO_DATA` \| `NO_ACUTE_NEEDS` | updated logic                                                |
+| Column pattern                         | Values                                                                             | Change                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `{id}_flag`                            | `true` \| `false` \| `null`                                                        | unchanged                                                    |
+| `{id}_status`                          | `'flag'` \| `'no_flag'` \| `'no_data'`                                             | **renamed** from `{id}_flag_label`; `'noflag'` → `'no_flag'` |
+| `{id}_within_10perc`                   | boolean                                                                            | unchanged                                                    |
+| `{id}_within_10perc_change`            | boolean                                                                            | unchanged                                                    |
+| `{system}.{factor}.{subfactor}.status` | `flag` \| `no_flag` \| `insufficient_evidence` \| `no_data`                        | **new**                                                      |
+| `{system}.{factor}.status`             | same                                                                               | **new**                                                      |
+| `{system}.status`                      | same                                                                               | **new**                                                      |
+| `prelim_flag`                          | `EM` \| `ROEM` \| `ACUTE` \| `INSUFFICIENT_EVIDENCE` \| `NO_DATA` \| `ACUTE_NEEDS` | updated logic                                                |
 
 All existing `{path}.flag_n`, `{path}.noflag_n`, `{path}.missing_n` columns are **retained** for backward compatibility with the heatmap visualisation.
 

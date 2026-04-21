@@ -39,7 +39,7 @@ System
                     └── Metric   (leaf — one row in the input CSV, carries thresholds + type)
 ```
 
-**Key distinction:** an *Indicator* is a named concept (e.g. "Two-week prevalence of childhood illness") that groups one or more *Metrics*. Each *Metric* has its own ID (`MET001`), type constraint, threshold, and preference level. The input CSV has one column per metric (`MET001`, `MET002`, …).
+**Key distinction:** an _Indicator_ is a named concept (e.g. "Two-week prevalence of childhood illness") that groups one or more _Metrics_. Each _Metric_ has its own ID (`MET001`), type constraint, threshold, and preference level. The input CSV has one column per metric (`MET001`, `MET002`, …).
 
 ### Data Flow
 
@@ -58,13 +58,13 @@ CSV Upload (src/routes/+page.svelte)
 
 All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores). Components access fields directly without the `$` prefix. All stores persist to localStorage.
 
-| Store                | Storage key              | Purpose                                                                                     |
-| -------------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
-| `metricStore`        | `ana_metric_store_v1`    | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
-| `flagStore`          | `ana_flag_store_v2`      | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                 |
-| `adminFeaturesStore` | `ana_admin_features`     | Cached GeoJSON admin boundaries; fetch state: `'idle' \| 'loading' \| 'done' \| 'error'`   |
-| `validatorStore`     | —                        | Transient validation state; cleared after flagging completes                                |
-| `circlePackingStore` | —                        | Tree data for the circle-packing reference visualisation                                    |
+| Store                | Storage key           | Purpose                                                                                                                                          |
+| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `metricStore`        | `ana_metric_store_v1` | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
+| `flagStore`          | `ana_flag_store_v2`   | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                                                                      |
+| `adminFeaturesStore` | `ana_admin_features`  | Cached GeoJSON admin boundaries; fetch state: `'idle' \| 'loading' \| 'done' \| 'error'`                                                         |
+| `validatorStore`     | —                     | Transient validation state; cleared after flagging completes                                                                                     |
+| `circlePackingStore` | —                     | Tree data for the circle-packing reference visualisation                                                                                         |
 
 ### Core Processing Modules (`src/lib/engine/`)
 
@@ -97,50 +97,50 @@ uoa | MET001 | MET001_flag | MET001_status | MET001_within_10perc
 
 Status vocabulary (applies at every rollup level):
 
-| Value | Meaning |
-|-------|---------|
-| `flag` | Threshold crossed — acute needs signal |
-| `no_flag` | Sufficient evidence, no acute needs |
+| Value                   | Meaning                                |
+| ----------------------- | -------------------------------------- |
+| `flag`                  | Threshold crossed — acute needs signal |
+| `no_flag`               | Sufficient evidence, no acute needs    |
 | `insufficient_evidence` | Some data but below evidence threshold |
-| `no_data` | No data at all for this level |
+| `no_data`               | No data at all for this level          |
 
-`prelim_flag` values: `EM · ROEM · ACUTE · NO_ACUTE_NEEDS · INSUFFICIENT_EVIDENCE · NO_DATA`
+`prelim_flag` values: `EM · ROEM · ACUTE · ACUTE_NEEDS · INSUFFICIENT_EVIDENCE · NO_DATA`
 
 **TypeScript enums** in `src/lib/types/generated/` are auto-generated — do not edit them directly. Run `bun run generate:enums` to regenerate.
 
 ### Routes
 
-| Route       | Purpose                                                          |
-| ----------- | ---------------------------------------------------------------- |
-| `/`         | Home — CSV upload, step-by-step guidance, pipeline trigger       |
-| `/results`  | Main results — heatmap, system drilldown, coverage cards, export |
-| `/reference`| Reference list — full metric framework (table + circle-packing)  |
+| Route        | Purpose                                                          |
+| ------------ | ---------------------------------------------------------------- |
+| `/`          | Home — CSV upload, step-by-step guidance, pipeline trigger       |
+| `/results`   | Main results — heatmap, system drilldown, coverage cards, export |
+| `/reference` | Reference list — full metric framework (table + circle-packing)  |
 
 ### Components (`src/lib/components/`)
 
 #### `results/`
 
-| Component | Purpose |
-|-----------|---------|
-| `ResultsSystems.svelte` | System-level heatmap overview; clicks open the metric drilldown |
-| `ResultsMetrics.svelte` | Factor → Subfactor → Metric card grid per system |
-| `ResultsCoverage.svelte` | Coverage summary across all systems |
-| `ResultsExport.svelte` | Export controls (CSV / JSON / XLSX / deep-dive ZIP) |
-| `FiltersSidebar.svelte` | Filter panel (UoA, system, factor, status) |
+| Component                | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                             |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)             |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                      |
 
 #### `viz/`
 
-| Component | Purpose |
-|-----------|---------|
-| `HeatmapGrid.svelte` | Systems × subfactors colour grid; cell = flag count / availability |
-| `SystemMatrix.svelte` | Expanded per-system metric matrix |
-| `MetricDrilldown.svelte` | Metric-level detail panel (value, status, threshold) |
-| `CirclePacking.svelte` | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay |
-| `CoverageDetailCards.svelte` | Per-factor coverage bars |
-| `UoaRankingTable.svelte` | Ranked UoA table by prelim flag |
-| `UoaDetailPanel.svelte` | Single-UoA detail view |
-| `GeoCanvas.svelte` | Choropleth map (shown only when p-codes + admin boundaries available) |
-| `ChoroplethMap.svelte` | D3-geo projection layer |
+| Component                    | Purpose                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| `HeatmapGrid.svelte`         | Systems × subfactors colour grid; cell = flag count / availability                      |
+| `SystemMatrix.svelte`        | Expanded per-system metric matrix                                                       |
+| `MetricDrilldown.svelte`     | Metric-level detail panel (value, status, threshold)                                    |
+| `CirclePacking.svelte`       | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay |
+| `CoverageDetailCards.svelte` | Per-factor coverage bars                                                                |
+| `UoaRankingTable.svelte`     | Ranked UoA table by prelim flag                                                         |
+| `UoaDetailPanel.svelte`      | Single-UoA detail view                                                                  |
+| `GeoCanvas.svelte`           | Choropleth map (shown only when p-codes + admin boundaries available)                   |
+| `ChoroplethMap.svelte`       | D3-geo projection layer                                                                 |
 
 #### `ui/`
 
@@ -225,3 +225,36 @@ Key rules:
 - Function taxonomy: summary functions → `summarize()`; vector functions → `mutateWithSummary()`; item functions → `mutate()`; selectors → `select()`
 - `groupBy` without an export option returns a flat array; with `.object()`, `.entries()`, `.map()` the shape changes — export mode must be the last step
 - Read `gotchas.md` before finalizing any tidy pipeline
+
+## CodeGraph
+
+CodeGraph builds a semantic knowledge graph of codebases for faster, smarter code exploration.
+
+### If `.codegraph/` exists in the project
+
+**NEVER call `codegraph_explore` or `codegraph_context` directly in the main session.** These tools return large amounts of source code that fills up main session context. Instead, ALWAYS spawn an Explore agent for any exploration question (e.g., "how does X work?", "explain the Y system", "where is Z implemented?").
+
+**When spawning Explore agents**, include this instruction in the prompt:
+
+> This project has CodeGraph initialized (.codegraph/ exists). Use `codegraph_explore` as your PRIMARY tool — it returns full source code sections from all relevant files in one call.
+>
+> **Rules:**
+>
+> 1. Follow the explore call budget in the `codegraph_explore` tool description — it scales automatically based on project size.
+> 2. Do NOT re-read files that codegraph_explore already returned source code for. The source sections are complete and authoritative.
+> 3. Only fall back to grep/glob/read for files listed under "Additional relevant files" if you need more detail, or if codegraph returned no results.
+
+**The main session may only use these lightweight tools directly** (for targeted lookups before making edits, not for exploration):
+
+| Tool                                      | Use For                              |
+| ----------------------------------------- | ------------------------------------ |
+| `codegraph_search`                        | Find symbols by name                 |
+| `codegraph_callers` / `codegraph_callees` | Trace call flow                      |
+| `codegraph_impact`                        | Check what's affected before editing |
+| `codegraph_node`                          | Get a single symbol's details        |
+
+### If `.codegraph/` does NOT exist
+
+At the start of a session, ask the user if they'd like to initialize CodeGraph:
+
+"I notice this project doesn't have CodeGraph initialized. Would you like me to run `codegraph init -i` to build a code knowledge graph?"

@@ -120,7 +120,7 @@
 					<span class="h-3 w-3 shrink-0 rounded-full" style="background-color: {sys.color}"></span>
 					<span class="text-sm leading-tight font-semibold">{sys.label}</span>
 				</div>
-				<span class="badge badge-sm shrink-0" style={b.badgeStyle}>{b.label}</span>
+				<span class="badge badge-sm shrink-0" style={b.badgeTintStyle}>{b.label}</span>
 			</div>
 
 			<!-- Summary counts -->
@@ -139,7 +139,7 @@
 					<div class="py-1.5">
 						<div class="mb-1 flex items-center justify-between gap-2">
 							<span class="text-base-content/80 min-w-0 truncate text-xs">{f.label}</span>
-							<span class="badge badge-xs shrink-0" style={fb.badgeStyle}>{fb.label}</span>
+							<span class="badge badge-xs shrink-0" style={fb.badgeTintStyle}>{fb.label}</span>
 						</div>
 						<!-- Mini progress bar -->
 						<div class="bg-base-300 flex h-3 w-full overflow-hidden rounded-full">

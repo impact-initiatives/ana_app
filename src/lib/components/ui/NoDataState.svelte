@@ -1,6 +1,20 @@
 <script lang="ts">
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { resolve } from '$app/paths';
+
+	interface Props {
+		/** Title string */
+		title?: string;
+		/** Subtitle string */
+		subtitle?: string;
+		/** Navbutton string */
+		navButtonText?: string;
+	}
+	let {
+		title = 'No data loaded',
+		subtitle = 'Upload and validate a CSV file on the Home page to start exploring results here.',
+		navButtonText = 'Go to Home'
+	}: Props = $props();
 </script>
 
 <div class="flex flex-col items-center justify-center gap-5 py-14 text-center">
@@ -23,12 +37,16 @@
 		</svg>
 	</div>
 
-	<div class="max-w-xs">
-		<h2 class="mb-4 text-2xl font-semibold">No data loaded</h2>
-		<p class="text-base-content/85 mb-4">
-			Upload and validate a CSV file on the Home page to start exploring results here.
-		</p>
+	<div class="max-w-md">
+		<h2 class="mb-4 text-2xl font-semibold">{title}</h2>
+		<p class="text-base-content/85 mb-4">{subtitle}</p>
 	</div>
 
-	<NavButton href={resolve('/')} label="Go to Home" direction="back" variant="primary" size="md" />
+	<NavButton
+		href={resolve('/')}
+		label={navButtonText}
+		direction="back"
+		variant="primary"
+		size="md"
+	/>
 </div>

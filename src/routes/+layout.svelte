@@ -234,7 +234,7 @@
 	</div>
 </header>
 
-<main class="py-6">
+<main class="pt-6">
 	{@render children?.()}
 </main>
 
