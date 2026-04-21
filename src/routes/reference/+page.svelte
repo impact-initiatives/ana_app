@@ -67,6 +67,24 @@
 		).map((d) => ({ value: d.risk_concept, label: d.risk_concept }))
 	);
 
+	const refColOptions: Record<string, { wrap: boolean; extraClass?: string }> = {
+		system: { wrap: true, extraClass: 'max-w-20' },
+		factor: { wrap: true, extraClass: 'max-w-20' },
+		subfactor: { wrap: true, extraClass: 'max-w-24' },
+		indicator: { wrap: true, extraClass: 'max-w-40' },
+		label: { wrap: true, extraClass: 'max-w-48' },
+		level: { wrap: true, extraClass: 'max-w-24' },
+		preference: { wrap: true, extraClass: 'max-w-18' },
+		evidence_threshold: { wrap: true, extraClass: 'max-w-18' },
+		factor_threshold: { wrap: true, extraClass: 'max-w-18' },
+		above_or_below: { wrap: true, extraClass: 'max-w-18' },
+		threshold_an: { wrap: true, extraClass: 'max-w-5' },
+		threshold_van: { wrap: true, extraClass: 'max-w-5' },
+		msna_module: { wrap: true, extraClass: 'max-w-40' },
+		question_kobo_code: { wrap: true, extraClass: 'max-w-24' },
+		remarks_limitations: { wrap: true, extraClass: 'max-w-30' }
+	};
+
 	const filteredTableRows = $derived(
 		tidy(
 			referenceObjects,
@@ -75,7 +93,7 @@
 					(selectedLevels.length === 0 || selectedLevels.includes(d.level)) &&
 					(selectedConcepts.length === 0 || selectedConcepts.includes(d.risk_concept))
 			)
-		)
+		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
@@ -135,7 +153,15 @@
 		{:else}
 			<div class="relative left-1/2 w-dvw max-w-none -translate-x-1/2 px-4">
 				<div class="mx-auto max-w-7xl">
-					<DataTable rows={filteredTableRows} columnSearchable overflow="scroll" />
+					<DataTable
+						rows={filteredTableRows}
+						headerRowClass="text-xs text-primary bg-primary/20"
+						colOptions={refColOptions}
+						searchable
+						downloadable
+						humanizeHeaders
+						overflow="scroll"
+					/>
 				</div>
 			</div>
 		{/if}
