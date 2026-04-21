@@ -2,7 +2,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import Select from '$lib/components/ui/Select.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
-	import IndicatorStrip from '$lib/components/viz/IndicatorStrip.svelte';
+	import MetricsStrip from '$lib/components/viz/MetricsStrip.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { lazyMount } from '$lib/utils/lazyMount.svelte';
 
@@ -151,7 +151,7 @@
 																</span>
 															</div>
 															{#if visibleMetricIds.has(met.id)}
-																<IndicatorStrip
+																<MetricsStrip
 																	threshold={met.threshold}
 																	direction={met.direction}
 																	dots={met.dots}

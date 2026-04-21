@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fmt } from '$lib/utils/format';
 	import { FLAG_BADGE } from '$lib/utils/colors';
+	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import type { TooltipRow, TooltipBadge } from '$lib/components/ui/TooltipCard.svelte';
 
@@ -38,4 +39,4 @@
 	});
 </script>
 
-<TooltipCard title={uoa} {badge} {rows} {x} {y} />
+<TooltipCard title={uoaLabel(uoa)} {badge} {rows} {x} {y} />
