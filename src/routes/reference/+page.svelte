@@ -73,15 +73,15 @@
 		factor: { wrap: true, extraClass: 'max-w-20' },
 		subfactor: { wrap: true, extraClass: 'max-w-24' },
 		indicator: { wrap: true, extraClass: 'max-w-40' },
-		label: { wrap: true, extraClass: 'max-w-48' },
+		label: { wrap: true, extraClass: 'max-w-52' },
 		risk_concept: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
 		level: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
-		preference: { wrap: true, extraClass: 'max-w-18' },
-		evidence_threshold: { wrap: true, extraClass: 'max-w-18' },
-		factor_threshold: { wrap: true, extraClass: 'max-w-18' },
+		preference: { wrap: true, extraClass: 'max-w-20' },
+		evidence_threshold: { wrap: true, extraClass: 'max-w-20' },
+		factor_threshold: { wrap: true, extraClass: 'max-w-20' },
 		above_or_below: { wrap: true, extraClass: 'max-w-18' },
-		threshold_an: { wrap: true, extraClass: 'max-w-18' },
-		threshold_van: { wrap: true, extraClass: 'max-w-18' },
+		threshold_an: { wrap: true, extraClass: 'max-w-20' },
+		threshold_van: { wrap: true, extraClass: 'max-w-20' },
 		msna_module: { wrap: true, extraClass: 'max-w-40' },
 		question_kobo_code: { wrap: true, extraClass: 'max-w-24' },
 		remarks_limitations: { wrap: true, extraClass: 'max-w-30' }
@@ -117,7 +117,7 @@
 	<title>ANA | Reference list</title>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl px-4">
+<div class="mx-auto max-w-7xl px-4">
 	<PageHeader title="Metric Reference List" subtitle="Browse and filter the full metric framework.">
 		{#snippet action()}
 			<NavButton href={resolve('/')} label="Back to Home" direction="back" />
@@ -159,29 +159,27 @@
 				</div>
 			</div>
 		</div>
-
-		{#if !showTableReferenceList}
-			<CirclePacking
-				data={filteredData}
-				nodePadding={4}
-				paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
-			/>
-		{:else}
-			<div class="relative left-1/2 w-dvw max-w-none -translate-x-1/2 px-4">
-				<div class="mx-auto max-w-7xl">
-					<DataTable
-						rows={filteredTableRows}
-						colOptions={refColOptions}
-						rowColor={refRowColor}
-						rowDividerClass="border-base-content"
-						searchable
-						downloadable
-						humanizeHeaders
-						overflow="scroll"
-					/>
-				</div>
-			</div>
-		{/if}
+		<div class="mb-6">
+			{#if !showTableReferenceList}
+				<CirclePacking
+					data={filteredData}
+					nodePadding={4}
+					paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
+				/>
+			{:else}
+				<DataTable
+					rows={filteredTableRows}
+					colOptions={refColOptions}
+					rowColor={refRowColor}
+					headerRowClass="text-xs text-primary"
+					rowDividerClass="border-base-content"
+					searchable
+					downloadable
+					humanizeHeaders
+					overflow="scroll"
+				/>
+			{/if}
+		</div>
 	{/if}
 </div>
 <!-- /max-w-5xl -->
