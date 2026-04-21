@@ -229,8 +229,10 @@ export interface FlagStatusBadge {
 	colorVar: string;
 	/** CSS custom property name (without var()) for the tint background colour */
 	tintVar: string;
-	/** Inline style string for badge rendering — uses tintVar so colour tracks CSS vars */
+	/** Inline style string for badge rendering — solid colour background */
 	badgeStyle: string;
+	/** Inline style string for badge rendering — tinted background */
+	badgeTintStyle: string;
 	/** DaisyUI badge modifier class — kept for legacy fallbacks; prefer badgeStyle */
 	badgeCls: string;
 	/** DaisyUI checkbox modifier class, e.g. "checkbox-warning" */
@@ -253,7 +255,8 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
 		label: 'Flag',
 		colorVar: '--color-flag',
 		tintVar: '--color-flag-tint',
-		badgeStyle: 'background-color: var(--color-flag-tint); color: var(--color-base-content)',
+		badgeStyle: 'background-color: var(--color-flag); color: var(--color-base-100)',
+		badgeTintStyle: 'background-color: var(--color-flag-tint); color: var(--color-base-content)',
 		badgeCls: '',
 		checkboxCls: 'checkbox-warning',
 		buttonCls: 'btn-ghost'
@@ -262,7 +265,8 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
 		label: 'No Flag',
 		colorVar: '--color-no-flag',
 		tintVar: '--color-no-flag-tint',
-		badgeStyle: 'background-color: var(--color-no-flag-tint); color: var(--color-base-content)',
+		badgeStyle: 'background-color: var(--color-no-flag); color: var(--color-base-100)',
+		badgeTintStyle: 'background-color: var(--color-no-flag-tint); color: var(--color-base-content)',
 		badgeCls: '',
 		checkboxCls: 'checkbox-info',
 		buttonCls: 'btn-ghost'
@@ -271,7 +275,8 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
 		label: 'Insufficient Evidence',
 		colorVar: '--color-insufficient',
 		tintVar: '--color-insufficient-tint',
-		badgeStyle:
+		badgeStyle: 'background-color: var(--color-insufficient); color: var(--color-base-100)',
+		badgeTintStyle:
 			'background-color: var(--color-insufficient-tint); color: var(--color-base-content)',
 		badgeCls: 'badge-warning',
 		checkboxCls: 'checkbox-warning',
@@ -281,7 +286,8 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
 		label: 'No Data',
 		colorVar: '--color-no-data',
 		tintVar: '--color-no-data-tint',
-		badgeStyle: 'background-color: var(--color-no-data-tint); color: var(--color-base-content)',
+		badgeStyle: 'background-color: var(--color-no-data); color: var(--color-base-100)',
+		badgeTintStyle: 'background-color: var(--color-no-data-tint); color: var(--color-base-content)',
 		badgeCls: 'badge-ghost',
 		checkboxCls: 'checkbox-neutral',
 		buttonCls: 'btn-neutral'
