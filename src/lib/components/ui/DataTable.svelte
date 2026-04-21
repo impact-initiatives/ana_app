@@ -259,95 +259,99 @@
 		</div>
 	{/if}
 
-	<div
-		class="rounded-box border-base-content/30 bg-base-100 overflow-x-auto border"
-		class:overflow-y-auto={overflow === 'scroll'}
-		style={overflow === 'scroll' ? `max-height: ${scrollHeight}` : undefined}
-	>
-		<table class="table {tableClass}" class:table-pin-rows={overflow === 'scroll'}>
-			<thead>
-				<tr class={headerRowClass}>
-					{#each columns as col, j (col)}
-						<th class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}">
-							<button
-								class={headerBtnClass(col)}
-								onclick={() => toggleSort(j)}
-								aria-label="Sort by {col}"
-							>
-								{humanizeHeaders ? humanizeCol(col) : col}
-								<SortIcon active={sortCol === j} asc={sortAsc} />
-							</button>
-						</th>
-					{/each}
-				</tr>
-				{#if columnSearchable}
-					<tr class={headerRowClass}>
-						{#each columns as col, j (col)}
-							<th class="py-1">
-								<input
-									type="search"
-									class="input input-xs w-full"
-									placeholder="Filter..."
-									value={columnQueries[j] ?? ''}
-									oninput={(e) => {
-										const v = (e.currentTarget as HTMLInputElement).value;
-										if (v) columnQueries[j] = v;
-										else delete columnQueries[j];
-										columnQueries = { ...columnQueries };
-										page = 0;
-									}}
-								/>
-							</th>
-						{/each}
-					</tr>
-				{/if}
-			</thead>
-			<tbody>
-				{#each pageRows as row, i (i)}
-					{@const rowObj = Object.fromEntries(columns.map((c, j) => [c, String(row[j] ?? '')]))}
-					{@const rc = resolveRowColor(rowObj)}
-					<tr
-						class="group {rowClass}{stripe && i % 2 === 0 ? ' bg-base-200' : ' bg-base-100'}{onrowclick
-							? ' cursor-pointer'
-							: ''}"
-						onclick={onrowclick
-							? () => onrowclick(rowObj, page * effectivePageSize + i)
-							: undefined}
+	{#snippet theadMarkup()}
+		<tr class={headerRowClass}>
+			{#each columns as col, j (col)}
+				<th class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}">
+					<button
+						class={headerBtnClass(col)}
+						onclick={() => toggleSort(j)}
+						aria-label="Sort by {col}"
 					>
-						{#each row as cell, j (j)}
-							{@const colName = columns[j] ?? ''}
-							{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
-							{@const txt = colOptions?.[colName]?.text ?? rc?.text}
-							<td
-								class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg ? ' group-hover:brightness-90' : ''}"
-								style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
-									.filter(Boolean)
-									.join(';') || undefined}
-							>
-								{#if renderCell}
-									{@render renderCell({
-										col: colName,
-										value: String(cell),
-										colIndex: j,
-										rowIndex: i
-									})}
-								{:else}
-									{cell}
-								{/if}
-							</td>
-						{/each}
-					</tr>
-				{:else}
-					<tr>
-						<td colspan={columns.length} class="text-center py-4">
-							No data{searchQuery || Object.values(columnQueries).some(Boolean)
-								? ' matching your search'
-								: ''}.
-						</td>
-					</tr>
+						{humanizeHeaders ? humanizeCol(col) : col}
+						<SortIcon active={sortCol === j} asc={sortAsc} />
+					</button>
+				</th>
+			{/each}
+		</tr>
+		{#if columnSearchable}
+			<tr class={headerRowClass}>
+				{#each columns as col, j (col)}
+					<th class="py-1">
+						<input
+							type="search"
+							class="input input-xs w-full"
+							placeholder="Filter..."
+							value={columnQueries[j] ?? ''}
+							oninput={(e) => {
+								const v = (e.currentTarget as HTMLInputElement).value;
+								if (v) columnQueries[j] = v;
+								else delete columnQueries[j];
+								columnQueries = { ...columnQueries };
+								page = 0;
+							}}
+						/>
+					</th>
 				{/each}
-			</tbody>
-		</table>
+			</tr>
+		{/if}
+	{/snippet}
+
+	{#snippet tbodyMarkup()}
+		{#each pageRows as row, i (i)}
+			{@const rowObj = Object.fromEntries(columns.map((c, j) => [c, String(row[j] ?? '')]))}
+			{@const rc = resolveRowColor(rowObj)}
+			<tr
+				class="group {rowClass}{stripe && i % 2 === 0 ? ' bg-base-200' : ' bg-base-100'}{onrowclick
+					? ' cursor-pointer'
+					: ''}"
+				onclick={onrowclick ? () => onrowclick(rowObj, page * effectivePageSize + i) : undefined}
+			>
+				{#each row as cell, j (j)}
+					{@const colName = columns[j] ?? ''}
+					{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
+					{@const txt = colOptions?.[colName]?.text ?? rc?.text}
+					<td
+						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg ? ' group-hover:brightness-90' : ''}"
+						style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
+							.filter(Boolean)
+							.join(';') || undefined}
+					>
+						{#if renderCell}
+							{@render renderCell({ col: colName, value: String(cell), colIndex: j, rowIndex: i })}
+						{:else}
+							{cell}
+						{/if}
+					</td>
+				{/each}
+			</tr>
+		{:else}
+			<tr>
+				<td colspan={columns.length} class="text-center py-4">
+					No data{searchQuery || Object.values(columnQueries).some(Boolean)
+						? ' matching your search'
+						: ''}.
+				</td>
+			</tr>
+		{/each}
+	{/snippet}
+
+	<div class="rounded-box border-base-content/30 bg-base-100 overflow-x-auto border">
+		{#if overflow === 'scroll'}
+			<table class="table {tableClass}">
+				<thead>{@render theadMarkup()}</thead>
+			</table>
+			<div class="overflow-y-auto" style="max-height: {scrollHeight}">
+				<table class="table {tableClass}">
+					<tbody>{@render tbodyMarkup()}</tbody>
+				</table>
+			</div>
+		{:else}
+			<table class="table {tableClass}">
+				<thead>{@render theadMarkup()}</thead>
+				<tbody>{@render tbodyMarkup()}</tbody>
+			</table>
+		{/if}
 	</div>
 
 	<!-- Pagination -->
