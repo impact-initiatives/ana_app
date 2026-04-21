@@ -73,6 +73,13 @@
 		rowDividerClass?: string;
 		/** Tailwind classes applied to every <th>, e.g. 'bg-base-200' for an opaque header background. */
 		headerThClass?: string;
+		/**
+		 * Declarative badge rendering. Structure: { columnName: { cellValue: { label?, style?, class? } } }.
+		 * Exact value match wins; '*' is a catch-all for any unmatched value.
+		 * Matched cells render as <span class="badge badge-sm {class}" style={style}>{label ?? cell}</span>.
+		 * renderCell takes precedence when both are set.
+		 */
+		cellBadges?: Record<string, Record<string, { label?: string; style?: string; class?: string }>>;
 	}
 	let {
 		rows = [],
@@ -97,7 +104,8 @@
 		humanizeHeaders = false,
 		rowColor,
 		rowDividerClass = 'border-base-300',
-		headerThClass = 'bg-primary/20'
+		headerThClass = 'bg-primary/20',
+		cellBadges
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
@@ -324,6 +332,17 @@
 					>
 						{#if renderCell}
 							{@render renderCell({ col: colName, value: String(cell), colIndex: j, rowIndex: i })}
+						{:else if cellBadges?.[colName]}
+							{@const badgeMap = cellBadges[colName]}
+							{@const cfg = badgeMap[String(cell)] ?? badgeMap['*']}
+							{#if cfg}
+								<span
+									class="badge badge-sm{cfg.class ? ' ' + cfg.class : ''}"
+									style={cfg.style ?? undefined}
+								>{cfg.label ?? cell}</span>
+							{:else}
+								{cell}
+							{/if}
 						{:else}
 							{cell}
 						{/if}
