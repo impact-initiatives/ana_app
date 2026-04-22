@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Plot, Geo } from 'svelteplot';
-	import { geoIdentity } from 'd3-geo';
+	import { geoIdentity, geoBounds } from 'd3-geo';
 	import type { FeatureCollection, Geometry } from 'geojson';
 	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
@@ -20,9 +20,21 @@
 
 	let { adm1, adm2, rows, level, onuoaclick }: Props = $props();
 
-	let hoveredFeature: any = $state(null);
+	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null = $state(null);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
+	let containerWidth = $state(0);
+
+	const aspectRatio = $derived.by(() => {
+		const [[minX, minY], [maxX, maxY]] = geoBounds(adm1);
+		const w = maxX - minX;
+		const h = maxY - minY;
+		return w > 0 && h > 0 ? w / h : 1.5;
+	});
+
+	const plotHeight = $derived(
+		containerWidth > 0 ? Math.round(Math.max(150, Math.min(700, containerWidth / aspectRatio))) : 0
+	);
 
 	const NO_DATA_COLOR = PRELIM_FLAG_BADGE['NO_DATA']?.bg ?? '#d1d5db';
 
@@ -76,11 +88,14 @@
   bounding box to the resolved plot area.
   CSS var colors bypass SveltePlot's color scale automatically.
 -->
+<div bind:clientWidth={containerWidth}>
+{#if plotHeight > 0}
 <Plot
 	axes={false}
-	height={500}
+	height={plotHeight}
 	margin={0}
 	projection={{
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		type: ({ width, height }) => geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
 	}}
 >
@@ -136,6 +151,8 @@
 		style="pointer-events: none"
 	/>
 </Plot>
+{/if}
+</div>
 
 {#if hoveredFeature}
 	<TooltipCard
