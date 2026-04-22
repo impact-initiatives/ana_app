@@ -64,9 +64,9 @@
 </script>
 
 <section>
-	<h2 class="border-primary mb-6 border-l-4 pl-3 text-lg font-semibold tracking-widest uppercase">
+	<h1 class="border-primary mb-8 border-l-6 pl-3 text-2xl font-semibold tracking-widest uppercase">
 		Metrics
-	</h2>
+	</h1>
 
 	<div class="space-y-6">
 		<!-- Filters -->
@@ -140,7 +140,9 @@
 														<Card>
 															<div class="mb-1 flex flex-wrap items-baseline gap-2">
 																<span class="font-mono text-xs font-bold">{met.id}</span>
-																<span class="text-base-content/60 text-xs">{met.indicatorLabel}</span>
+																<span class="text-base-content/60 text-xs"
+																	>{met.indicatorLabel}</span
+																>
 																{#if met.label}
 																	<span class="text-base-content/80 text-xs italic"
 																		>— {met.label}</span
@@ -158,7 +160,7 @@
 																	height={120}
 																/>
 															{:else}
-																<div class="h-[120px] animate-pulse rounded bg-base-200"></div>
+																<div class="bg-base-200 h-[120px] animate-pulse rounded"></div>
 															{/if}
 														</Card>
 													</div>
