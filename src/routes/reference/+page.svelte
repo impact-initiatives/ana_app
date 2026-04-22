@@ -118,9 +118,18 @@
 </svelte:head>
 
 <div class="mx-auto max-w-7xl px-4">
-	<PageHeader title="Metric Reference List" subtitle="Browse and filter the full metric framework.">
+	<PageHeader
+		title="Metric Reference List"
+		subtitle="Browse and filter all metrics part of the framework."
+	>
 		{#snippet action()}
-			<NavButton href={resolve('/')} label="Back to Home" direction="back" />
+			<NavButton
+				href={resolve('/')}
+				label="Go to Home"
+				direction="back"
+				variant="primary"
+				size="sm"
+			/>
 		{/snippet}
 	</PageHeader>
 
