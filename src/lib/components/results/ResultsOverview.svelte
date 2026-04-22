@@ -42,10 +42,10 @@
 	}: Props = $props();
 </script>
 
-<section id="overview" class="scroll-mt-28">
-	<h2 class="border-primary mb-6 border-l-4 pl-3 text-lg font-semibold tracking-widest uppercase">
+<section>
+	<h1 class="border-primary mb-8 border-l-6 pl-3 text-2xl font-semibold tracking-widest uppercase">
 		Overview
-	</h2>
+	</h1>
 
 	<!-- Donut + ranking table -->
 	<div class="mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-5">

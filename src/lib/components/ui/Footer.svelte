@@ -11,18 +11,16 @@
 		{ href: resolve('/reference'), label: 'Reference' },
 		{ href: `${resolve('/results')}#export`, label: 'Export' }
 	];
-
-	const year = new Date().getFullYear();
 </script>
 
-<footer class="border-base-300 bg-base-200 mt-16 border-t">
+<footer class="border-base-300 bg-base-200 border-t">
 	<div class="mx-auto max-w-7xl px-4 py-10">
 		<div class="text-base-content/85 grid grid-cols-1 gap-10 sm:grid-cols-3">
 			<!-- Brand -->
 			<div class="flex flex-col gap-3">
 				<a href={resolve('/')} class="flex items-center gap-2.5" aria-label="ANA home">
-					<img src={logo} alt="ANA logo" class="logo-light h-8 w-auto" />
-					<img src={logoDark} alt="ANA logo" class="logo-dark h-8 w-auto" />
+					<img src={logo} alt="ANA logo" class="logo-light h-24 w-auto" />
+					<img src={logoDark} alt="ANA logo" class="logo-dark h-24 w-auto" />
 				</a>
 				<p class="max-w-xs text-sm leading-relaxed">
 					Acute Needs Analysis — screen humanitarian data for risk of excess mortality.
@@ -49,7 +47,9 @@
 			<!-- Partner logos -->
 			<div class="flex flex-col gap-3">
 				<p class="mb-1 text-xs font-semibold tracking-widest uppercase">Who we are</p>
-				<p class="text-sm">The world’s largest independent data provider in crisis contexts.</p>
+				<p class="mb-2 text-sm">
+					The world’s largest independent data provider in crisis contexts.
+				</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<a
 						href="https://www.impact-initiatives.org/"

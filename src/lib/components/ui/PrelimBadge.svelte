@@ -2,7 +2,7 @@
 	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
 
 	interface Props {
-		/** Prelim flag key: "EM", "ROEM", "ACUTE", "NO_ACUTE_NEEDS", "INSUFFICIENT_EVIDENCE", "NO_DATA" */
+		/** Prelim flag key: "EM", "ROEM", "ACUTE", "NO_ACUTE", "INSUFFICIENT_EVIDENCE", "NO_DATA" */
 		value: string;
 		/** Optional extra classes on the <span> */
 		class?: string;

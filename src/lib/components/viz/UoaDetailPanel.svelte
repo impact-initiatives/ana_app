@@ -154,7 +154,7 @@
 							</div>
 
 							<!-- Status badge -->
-							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
+							<span class="badge badge-sm shrink-0" style={fb.badgeTintStyle}>{fb.label}</span>
 						</button>
 					{/each}
 				</div>

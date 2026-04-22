@@ -94,15 +94,15 @@
     "hypotheses": [
       {
         "id": "H1",
-        "description": "Health/nutrition services are severely compromised, affecting most of the population (system failure)"
+        "description": "Health / Nutrition services are severely compromised, affecting most of the population (system failure)"
       },
       {
         "id": "H2",
-        "description": "Health/nutrition services are severely compromised, affecting pockets of the population"
+        "description": "Health / Nutrition services are severely compromised, affecting pockets of the population"
       },
       {
         "id": "H3",
-        "description": "Health/nutrition services are maintaining minimum service levels for most of the population, or severe gaps are mitigated"
+        "description": "Health / Nutrition services are maintaining minimum service levels for most of the population, or severe gaps are mitigated"
       }
     ]
   }

@@ -29,7 +29,7 @@
 	// Radius: explicit override or auto-fit to container (max 120px)
 	const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 
-	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'NO_ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
+	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
 
 	// ── Count rows per prelim_flag ────────────────────────────────────────────
 	interface Slice {

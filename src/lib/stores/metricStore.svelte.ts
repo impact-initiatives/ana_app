@@ -52,7 +52,7 @@ function flattenMetrics(json: unknown): MetricMap {
 	return map;
 }
 
-const STORAGE_KEY = 'ana_metric_store_v1';
+const STORAGE_KEY = 'ana_metric_store_v2';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
@@ -102,8 +102,6 @@ export function hydrateMetricStore(): void {
 }
 
 export async function loadMetrics(): Promise<void> {
-	if (metricStore.referenceJson !== null) return;
-
 	try {
 		const json = await loadReference();
 		const incoming = (json as Record<string, any>).generatedAt as string | undefined;

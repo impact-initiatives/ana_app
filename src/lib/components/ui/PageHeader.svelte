@@ -14,11 +14,11 @@
 		gap?: string;
 	}
 
-	let { title, subtitle, action, class: cls = '', gap = 'gap-50' }: Props = $props();
+	let { title, subtitle, action, class: cls = '', gap = 'gap-3 md:gap-50' }: Props = $props();
 </script>
 
 <div class="mb-6 {cls}">
-	<div class="flex items-start justify-between {gap}">
+	<div class="flex flex-col md:flex-row md:justify-between {gap}">
 		<div>
 			<h1 class="text-3xl font-semibold">{title}</h1>
 			{#if subtitle}

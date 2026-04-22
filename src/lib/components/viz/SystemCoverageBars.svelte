@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { scaleLinear, scaleBand } from 'd3-scale';
+	import { scaleLinear } from 'd3-scale';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import { FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
-	import Chart, { type Dimensions } from './primitives/Chart.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 
-	type Row = Record<string, any>;
+	type Row = Record<string, unknown>;
 
 	interface Props {
 		rows: Row[];
@@ -24,7 +23,6 @@
 		id: string;
 		label: string;
 		counts: Record<StatusKey, number>;
-		total: number;
 	}
 
 	const bars = $derived.by<SystemBar[]>(() =>
@@ -40,7 +38,7 @@
 				if (status in counts) counts[status]++;
 				else counts.no_data++;
 			}
-			return { id: sys.id, label: sys.label, counts, total: rows.length };
+			return { id: sys.id, label: sys.label, counts };
 		})
 	);
 
@@ -59,32 +57,18 @@
 	const tweenedTotal = Tween.of(() => rows.length, { duration: 600, easing: cubicOut });
 
 	// ── Layout ────────────────────────────────────────────────────────────────
-	const BAR_HEIGHT = 18;
-	const margin = { top: 12, right: 40, bottom: 8, left: 220 };
+	const BAR_HEIGHT = 30;
+	const GAP = 8;
 
 	let containerWidth = $state(600);
-	const innerWidth = $derived(Math.max(0, containerWidth - margin.left - margin.right));
-	const innerHeight = $derived(systems.length * (BAR_HEIGHT + 30));
+	const labelColWidth = $derived(containerWidth < 480 ? 112 : 168);
+	const barColWidth = $derived(Math.max(0, containerWidth - labelColWidth - GAP));
 
-	const dimensions = $derived<Dimensions>({
-		width: containerWidth,
-		height: innerHeight + margin.top + margin.bottom,
-		margins: margin,
-		innerWidth,
-		innerHeight
-	});
-
-	// ── Scales ────────────────────────────────────────────────────────────────
+	// ── Scale ─────────────────────────────────────────────────────────────────
 	const xScale = $derived(
 		scaleLinear()
 			.domain([0, tweenedTotal.current || 1])
-			.range([0, innerWidth])
-	);
-	const yScale = $derived(
-		scaleBand()
-			.domain(systems.map((s) => s.id))
-			.range([0, innerHeight])
-			.padding(0.2)
+			.range([0, barColWidth])
 	);
 
 	function stackedSegments(tweenedBarCounts: Record<string, number>) {
@@ -99,51 +83,57 @@
 	}
 </script>
 
+<style>
+	:global([data-theme='ana-dark']) .system-dot {
+		box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.35);
+	}
+</style>
+
 <Card title="System coverage overview" subtitle="UoA counts by flag status for each system.">
 	{#if rows.length === 0}
 		<p class="text-base-content/75 py-8 text-center text-sm">No data matches current filters.</p>
 	{:else}
-		<div class="w-full" bind:offsetWidth={containerWidth}>
-			<Chart {dimensions}>
-				{#each bars as bar (bar.id)}
-					{@const y = yScale(bar.id) ?? 0}
-					{@const bh = yScale.bandwidth()}
-					{@const sysColor = systemBaseColor(bar.id)}
+		<div class="w-full space-y-3" bind:offsetWidth={containerWidth}>
+			{#each bars as bar (bar.id)}
+				<div class="flex items-center" style="gap: {GAP}px">
+					<!-- Label -->
+					<div class="flex shrink-0 items-center gap-1.5" style="width: {labelColWidth}px">
+						<span
+							class="system-dot h-2.5 w-2.5 shrink-0 rounded-full"
+							style="background-color: {systemBaseColor(bar.id)}"
+						></span>
+						<span class="text-sm leading-tight">{bar.label}</span>
+					</div>
 
-					<!-- Label with colored dot -->
-					<circle cx={-margin.left + 10} cy={y + bh / 2} r={8} fill={sysColor} />
-					<text
-						x={-margin.left + 25}
-						y={y + bh / 2}
-						text-anchor="start"
-						dominant-baseline="middle"
-						fill="currentColor"
-						class="text-base-content">{bar.label}</text
-					>
-
-					{#each stackedSegments(tweenedCounts.current[bar.id] ?? bar.counts) as seg (seg.key)}
-						<rect
-							x={seg.x}
-							{y}
-							width={seg.width}
-							height={bh}
-							style="fill: var({FLAG_BADGE[seg.key].tintVar})"
-							rx="3"
-						/>
-						{#if seg.width > 22}
-							<text
-								x={seg.x + seg.width / 2}
-								y={y + bh / 2}
-								text-anchor="middle"
-								dominant-baseline="middle"
-								fill="currentColor"
-								class="text-base-content text-sm font-bold">{seg.count}</text
-							>
-						{/if}
-					{/each}
-				{/each}
-			</Chart>
-			<LegendBadge btnCircle size="text-sm"></LegendBadge>
+					<!-- Bar -->
+					<svg width={barColWidth} height={BAR_HEIGHT}>
+						{#each stackedSegments(tweenedCounts.current[bar.id] ?? bar.counts) as seg (seg.key)}
+							<rect
+								x={seg.x}
+								y={0}
+								width={seg.width}
+								height={BAR_HEIGHT}
+								style="fill: var({FLAG_BADGE[seg.key].tintVar})"
+								rx="3"
+							/>
+							{#if seg.width > 24}
+								<text
+									x={seg.x + seg.width / 2}
+									y={BAR_HEIGHT / 2}
+									text-anchor="middle"
+									dominant-baseline="middle"
+									fill="currentColor"
+									font-size="14"
+									font-weight="600">{seg.count}</text
+								>
+							{/if}
+						{/each}
+					</svg>
+				</div>
+			{/each}
+			<div class="mt-5">
+				<LegendBadge />
+			</div>
 		</div>
 	{/if}
 </Card>

@@ -129,7 +129,7 @@
 </script>
 
 <svelte:head>
-	<title>ANA — Acute Needs Analysis</title>
+	<title>ANA | Acute Needs Analysis</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-4">
@@ -503,7 +503,7 @@
 	<!-- ── Caveat note ────────────────────────────────────────────────────────── -->
 	<div
 		role="alert"
-		class="alert alert-info alert-soft mt-6"
+		class="alert alert-info alert-soft mt-6 mb-6"
 		style="opacity: 0"
 		{@attach revealOnScroll({ y: 16, duration: 400, delay: 100 })}
 	>
