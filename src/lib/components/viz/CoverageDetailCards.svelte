@@ -138,7 +138,7 @@
 					{@const fb = badge(f.status)}
 					<div class="py-1.5">
 						<div class="mb-1 flex items-center justify-between gap-2">
-							<span class="text-base-content/80 min-w-0 truncate text-sm">{f.label}</span>
+							<span class="min-w-0 truncate text-sm">{f.label}</span>
 							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
 						</div>
 						<!-- Mini progress bar -->
