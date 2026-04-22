@@ -126,7 +126,7 @@
 				</div>
 			{/each}
 
-			<LegendBadge btnCircle />
+			<LegendBadge />
 		</div>
 	{/if}
 </Card>
