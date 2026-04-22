@@ -246,8 +246,6 @@
 
 	<!-- Legend -->
 	<LegendBadge
-		keys={['no_flag', 'flag', 'no_data']}
 		prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
-		size="text-sm"
 	></LegendBadge>
 </Card>

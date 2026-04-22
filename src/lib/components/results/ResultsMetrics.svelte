@@ -93,7 +93,7 @@
 			</p>
 		</Card>
 
-		<LegendBadge keys={['no_flag', 'flag']} tinted={false} btnCircle size="text-sm">
+		<LegendBadge keys={['flag', 'no_flag']} tinted={false} btnCircle>
 			{#snippet extra()}
 				<span class="flex items-center gap-1.5">
 					<span

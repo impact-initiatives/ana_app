@@ -4,6 +4,7 @@
 	import type { FeatureCollection, Geometry } from 'geojson';
 	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
+	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 
 	type Row = Record<string, unknown>;
@@ -164,12 +165,7 @@
 	/>
 {/if}
 
-<!-- Legend -->
-<div class="mt-2 flex flex-wrap gap-3">
-	{#each Object.entries(PRELIM_FLAG_BADGE) as [key, badge] (key)}
-		<span class="flex items-center gap-1 text-xs text-gray-600">
-			<span class="inline-block h-3 w-3 rounded-sm" style="background-color:{badge.bg}"></span>
-			{badge.label}
-		</span>
-	{/each}
-</div>
+<LegendBadge
+	keys={[]}
+	prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
+/>
