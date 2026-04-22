@@ -36,6 +36,9 @@ jobs:
 
       - name: Generate and validate data
         run: bun run data:refresh
+        
+      - name: Test
+        run: bun run test
 
       - name: Setup Pages
         uses: actions/configure-pages@v3

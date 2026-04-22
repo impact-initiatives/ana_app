@@ -1,0 +1,160 @@
+{
+  "systems": [
+    {
+      "id": "mortality",
+      "label": "Mortality",
+      "factors": [
+        {
+          "id": "mortality_rate",
+          "label": "Mortality Rate",
+          "sub_factors": [
+            {
+              "id": "mortality_rate_cdr",
+              "label": "Crude Death Rate",
+              "indicators": [
+                {
+                  "id": "cdr",
+                  "label": "CDR",
+                  "metrics": [
+                    {
+                      "metric": "MET001",
+                      "label": "Crude Death Rate",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.5, "van": 1.0 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    },
+                    {
+                      "metric": "MET002",
+                      "label": "U5 Death Rate",
+                      "preference": 2,
+                      "type": "numeric",
+                      "thresholds": { "an": 2, "van": 4 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "food_security",
+      "label": "Food Security",
+      "factors": [
+        {
+          "id": "food_consumption",
+          "label": "Food Consumption",
+          "sub_factors": [
+            {
+              "id": "food_consumption_fcs",
+              "label": "FCS",
+              "indicators": [
+                {
+                  "id": "fcs",
+                  "label": "Food Consumption Score",
+                  "metrics": [
+                    {
+                      "metric": "MET003",
+                      "label": "FCS Poor",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.2, "van": 0.35 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 2,
+                      "factor_threshold": 1
+                    },
+                    {
+                      "metric": "MET004",
+                      "label": "FCS Borderline",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.3, "van": 0.5 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 2,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "health_outcomes",
+      "label": "Health Outcomes",
+      "factors": [
+        {
+          "id": "acute_malnutrition",
+          "label": "Acute Malnutrition",
+          "sub_factors": [
+            {
+              "id": "acute_malnutrition_gam",
+              "label": "GAM",
+              "indicators": [
+                {
+                  "id": "gam",
+                  "label": "GAM",
+                  "metrics": [
+                    {
+                      "metric": "MET005",
+                      "label": "GAM Prevalence",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.15, "van": 0.3 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "market_functionality",
+      "label": "Market Functionality",
+      "factors": [
+        {
+          "id": "market_access",
+          "label": "Market Access",
+          "sub_factors": [
+            {
+              "id": "market_access_index",
+              "label": "Market Access Index",
+              "indicators": [
+                {
+                  "id": "market_index",
+                  "label": "Market Index",
+                  "metrics": [
+                    {
+                      "metric": "MET006",
+                      "label": "Market Index Score",
+                      "preference": 3,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.5, "van": 0.7 },
+                      "above_or_below": "Below",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
