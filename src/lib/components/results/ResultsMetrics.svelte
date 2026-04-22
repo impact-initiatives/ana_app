@@ -2,7 +2,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import Select from '$lib/components/ui/Select.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
-	import IndicatorStrip from '$lib/components/viz/IndicatorStrip.svelte';
+	import MetricsStrip from '$lib/components/viz/MetricsStrip.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { lazyMount } from '$lib/utils/lazyMount.svelte';
 
@@ -64,9 +64,9 @@
 </script>
 
 <section>
-	<h2 class="border-primary mb-6 border-l-4 pl-3 text-lg font-semibold tracking-widest uppercase">
+	<h1 class="border-primary mb-8 border-l-6 pl-3 text-2xl font-semibold tracking-widest uppercase">
 		Metrics
-	</h2>
+	</h1>
 
 	<div class="space-y-6">
 		<!-- Filters -->
@@ -93,7 +93,7 @@
 			</p>
 		</Card>
 
-		<LegendBadge keys={['no_flag', 'flag']} tinted={false} btnCircle size="text-sm">
+		<LegendBadge keys={['flag', 'no_flag']} tinted={false} btnCircle>
 			{#snippet extra()}
 				<span class="flex items-center gap-1.5">
 					<span
@@ -140,7 +140,9 @@
 														<Card>
 															<div class="mb-1 flex flex-wrap items-baseline gap-2">
 																<span class="font-mono text-xs font-bold">{met.id}</span>
-																<span class="text-base-content/60 text-xs">{met.indicatorLabel}</span>
+																<span class="text-base-content/60 text-xs"
+																	>{met.indicatorLabel}</span
+																>
 																{#if met.label}
 																	<span class="text-base-content/80 text-xs italic"
 																		>— {met.label}</span
@@ -151,14 +153,14 @@
 																</span>
 															</div>
 															{#if visibleMetricIds.has(met.id)}
-																<IndicatorStrip
+																<MetricsStrip
 																	threshold={met.threshold}
 																	direction={met.direction}
 																	dots={met.dots}
 																	height={120}
 																/>
 															{:else}
-																<div class="h-[120px] animate-pulse rounded bg-base-200"></div>
+																<div class="bg-base-200 h-[120px] animate-pulse rounded"></div>
 															{/if}
 														</Card>
 													</div>

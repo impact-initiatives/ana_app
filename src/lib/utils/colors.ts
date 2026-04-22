@@ -216,6 +216,8 @@ export function formatMetricTooltip(met: Metric | undefined): string {
 export interface FlagBadge {
 	/** CSS var() string for the background colour */
 	bg: string;
+	/** CSS var() string for the tinted background colour (optional) */
+	tintBg?: string;
 	/** Human-readable label */
 	label: string;
 }
@@ -320,5 +322,5 @@ export const PRELIM_FLAG_BADGE: Record<string, FlagBadge> = {
 	ACUTE: { bg: 'var(--color-acute)', label: 'Acute Needs' },
 	ACUTE_NEEDS: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
 	INSUFFICIENT_EVIDENCE: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
-	NO_DATA: { bg: 'var(--color-no-data)', label: 'No Data' }
+	NO_DATA: { bg: 'var(--color-no-data)', tintBg: 'var(--color-no-data-tint)', label: 'No Data' }
 };

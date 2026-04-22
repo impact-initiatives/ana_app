@@ -110,25 +110,31 @@
 	}
 </script>
 
+<style>
+	:global([data-theme='ana-dark'] .system-card) {
+		box-shadow: inset 10px 0 16px -6px color-mix(in srgb, var(--sys-color) 40%, transparent);
+	}
+</style>
+
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 	{#each systemCards as sys (sys.id)}
 		{@const b = badge(sys.status)}
-		<Card class="border-l-[5px]" style="border-left-color: {sys.color}">
+		<Card class="system-card border-l-8" style="border-left-color: {sys.color}; --sys-color: {sys.color}">
 			<!-- System header -->
 			<div class="-mx-4 -mt-4 mb-3 flex items-center justify-between gap-2 px-4 pt-3 pb-2">
 				<div class="flex min-w-0 items-center gap-2">
 					<span class="h-3 w-3 shrink-0 rounded-full" style="background-color: {sys.color}"></span>
-					<span class="text-sm leading-tight font-semibold">{sys.label}</span>
+					<h1 class="text-lg font-semibold">{sys.label}</h1>
 				</div>
-				<span class="badge badge-sm shrink-0" style={b.badgeTintStyle}>{b.label}</span>
+				<span class="badge badge-md shrink-0" style={b.badgeStyle}>{b.label}</span>
 			</div>
 
 			<!-- Summary counts -->
-			<div class="text-base-content mb-2 flex gap-3 text-xs">
-				<span><strong class="text-base-content">{sys.flag_n}</strong> Flag</span>
-				<span><strong class="text-base-content">{sys.no_flag_n}</strong> No Flag</span>
+			<div class=" mb-2 flex gap-3 text-sm">
+				<span><strong>{sys.flag_n}</strong> Flag</span>
+				<span><strong>{sys.no_flag_n}</strong> No Flag</span>
 				{#if sys.missing_n > 0}
-					<span><strong class="text-base-content">{sys.missing_n}</strong> Missing</span>
+					<span><strong>{sys.missing_n}</strong> Missing</span>
 				{/if}
 			</div>
 
@@ -138,8 +144,8 @@
 					{@const fb = badge(f.status)}
 					<div class="py-1.5">
 						<div class="mb-1 flex items-center justify-between gap-2">
-							<span class="text-base-content/80 min-w-0 truncate text-xs">{f.label}</span>
-							<span class="badge badge-xs shrink-0" style={fb.badgeTintStyle}>{fb.label}</span>
+							<span class="min-w-0 truncate text-sm">{f.label}</span>
+							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
 						</div>
 						<!-- Mini progress bar -->
 						<div class="bg-base-300 flex h-3 w-full overflow-hidden rounded-full">
@@ -171,10 +177,12 @@
 						</div>
 						<!-- Counts below bar -->
 						<div class="mt-0.5 mb-1 flex gap-2 text-xs">
-							{#if f.flag_n > 0}<span style="color: {solidColor('flag')}">{f.flag_n} Flag</span
+							{#if f.flag_n > 0}<span class="font-semibold" style="color: {solidColor('flag')}"
+									>{f.flag_n} Flag</span
 								>{/if}
-							{#if f.no_flag_n > 0}<span style="color: {solidColor('no_flag')}"
-									>{f.no_flag_n} No Flag</span
+							{#if f.no_flag_n > 0}<span
+									class="font-semibold"
+									style="color: {solidColor('no_flag')}">{f.no_flag_n} No Flag</span
 								>{/if}
 							{#if f.missing_n > 0}<span style="color: {solidColor('no_data')}"
 									>{f.missing_n} Missing</span

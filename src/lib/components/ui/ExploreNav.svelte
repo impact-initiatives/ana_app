@@ -1,29 +1,24 @@
 <script lang="ts">
-	import { Tween } from 'svelte/motion';
-	import { cubicInOut } from 'svelte/easing';
-
 	interface Props {
 		activeSection: string;
-		visible?: boolean;
 	}
 
-	let { activeSection, visible = true }: Props = $props();
-
-	const opacity = new Tween(0, { duration: 600, easing: cubicInOut });
-	$effect(() => {
-		opacity.set(visible ? 1 : 0);
-	});
+	let { activeSection }: Props = $props();
 
 	const tabs = [
 		{ id: 'overview', label: 'Overview' },
 		{ id: 'systems', label: 'Systems' },
 		{ id: 'metrics', label: 'Metrics' },
-		{ id: 'coverage', label: 'Coverage' },
+		{ id: 'coverage', label: 'Data Coverage' },
 		{ id: 'export', label: 'Export' }
 	] as const;
 </script>
 
-<nav aria-label="Explore sections" class="flex items-center gap-1 overflow-x-auto">
+<nav
+	aria-label="Explore sections"
+	class="flex items-center gap-1 overflow-x-auto"
+	style="scrollbar-width: none"
+>
 	{#each tabs as tab (tab.id)}
 		<a
 			href="#{tab.id}"
@@ -31,7 +26,7 @@
 				'rounded-full px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150',
 				activeSection === tab.id
 					? 'bg-primary text-primary-content'
-					: 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+					: 'text-base-content hover:bg-base-200 hover:text-base-content'
 			].join(' ')}
 			aria-current={activeSection === tab.id ? 'location' : undefined}
 		>
@@ -39,3 +34,7 @@
 		</a>
 	{/each}
 </nav>
+
+<p class="text-base-content/75 mt-1 mb-1 text-center text-xs md:hidden">
+	Swipe to see all sections →
+</p>

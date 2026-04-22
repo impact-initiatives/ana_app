@@ -37,7 +37,9 @@
 </script>
 
 <section>
-	<h2 class="mb-6 border-l-4 border-primary pl-3 text-lg font-semibold tracking-widest uppercase">Coverage</h2>
+	<h1 class="border-primary mb-8 border-l-6 pl-3 text-2xl font-semibold tracking-widest uppercase">
+		Data Coverage
+	</h1>
 
 	{#if circlePackingStore.loading}
 		<div class="flex items-center justify-center gap-3 py-16">

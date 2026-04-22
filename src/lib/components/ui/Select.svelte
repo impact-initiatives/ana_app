@@ -177,7 +177,7 @@
 	<!-- Trigger -->
 	<button
 		type="button"
-		class="btn btn-outline border-base-content/30 btn-sm justify-between border"
+		class="btn btn-outline border-base-content/30 btn-sm h-auto min-h-8 justify-between border py-1.5"
 		onclick={() => (open = !open)}
 	>
 		<span class="flex flex-wrap gap-1">

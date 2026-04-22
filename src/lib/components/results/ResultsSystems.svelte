@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import SystemCoverageBars from '$lib/components/viz/SystemCoverageBars.svelte';
 	import SystemMatrix from '$lib/components/viz/SystemMatrix.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
 
 	type Row = Record<string, any>;
 	type System = { id: string; label: string };
@@ -30,9 +27,9 @@
 </script>
 
 <section>
-	<h2 class="border-primary mb-6 border-l-4 pl-3 text-lg font-semibold tracking-widest uppercase">
+	<h1 class="border-primary mb-8 border-l-6 pl-3 text-2xl font-semibold tracking-widest uppercase">
 		Systems
-	</h2>
+	</h1>
 
 	<!-- Guide + Coverage bars: side-by-side -->
 	<div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
