@@ -1,7 +1,7 @@
 /**
  * THIS FILE IS GENERATED — DO NOT EDIT BY HAND
  * Generated from: ../../../../static/data/system.csv
- * Generated at: 2026-04-15T09:06:38.727Z
+ * Generated at: 2026-04-22T12:30:51.488Z
  */
 
 export enum SystemIDEnum {
@@ -18,3 +18,14 @@ export enum SystemIDEnum {
 export const SystemIDs = Object.values(SystemIDEnum) as SystemIDEnum[];
 
 export type SystemID = SystemIDEnum;
+
+// Human-readable labels keyed by system id
+export const SystemLabels: Record<SystemIDEnum, string> = {
+	[SystemIDEnum.Mortality]: 'Mortality outcome',
+	[SystemIDEnum.HealthOutcomes]: 'Health Outcomes',
+	[SystemIDEnum.FoodSystems]: 'Food Systems',
+	[SystemIDEnum.WaterSystems]: 'Water Systems',
+	[SystemIDEnum.LivingConditions]: 'Living Conditions',
+	[SystemIDEnum.MarketFunctionality]: 'Market Functionality',
+	[SystemIDEnum.HealthNutritionServices]: 'Health / Nutrition Services',
+};

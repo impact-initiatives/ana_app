@@ -61,7 +61,7 @@ function readCsvSimple(filePath: string): string[][] {
   return rows;
 }
 
-function generateEnumContent(entries: Array<{ key: string; value: string }>, sourceFileRelative: string) {
+function generateEnumContent(entries: Array<{ key: string; value: string; label: string }>, sourceFileRelative: string) {
   const header = `/**
  * THIS FILE IS GENERATED — DO NOT EDIT BY HAND
  * Generated from: ${sourceFileRelative}
@@ -75,6 +75,12 @@ function generateEnumContent(entries: Array<{ key: string; value: string }>, sou
   enumLines.push('// Convenience array of ids');
   enumLines.push('export const SystemIDs = Object.values(SystemIDEnum) as SystemIDEnum[];\n');
   enumLines.push('export type SystemID = SystemIDEnum;\n');
+  enumLines.push('// Human-readable labels keyed by system id');
+  enumLines.push('export const SystemLabels: Record<SystemIDEnum, string> = {');
+  for (const e of entries) {
+    enumLines.push(`\t[SystemIDEnum.${e.key}]: '${e.label.replace(/'/g, "\\'")}',`);
+  }
+  enumLines.push('};\n');
   return header + enumLines.join('\n');
 }
 
@@ -93,24 +99,25 @@ function main() {
       return;
     }
 
-    // Determine index of "system" column from header (case-insensitive)
+    // Determine indices of "system" and "system_label" columns from header (case-insensitive)
     const header = rows[0].map((h) => h.toLowerCase());
     let systemIdx = header.indexOf('system');
-    if (systemIdx === -1) {
-      // Fallback: assume first column
-      systemIdx = 0;
-    }
+    if (systemIdx === -1) systemIdx = 0;
+    const labelIdx = header.indexOf('system_label');
 
-    const ids: string[] = [];
+    const idLabelPairs: Array<{ id: string; label: string }> = [];
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       if (systemIdx >= row.length) continue;
-      const raw = row[systemIdx].trim();
-      if (!raw) continue;
-      ids.push(raw);
+      const id = row[systemIdx].trim();
+      if (!id) continue;
+      const label = labelIdx !== -1 && labelIdx < row.length ? row[labelIdx].trim() : id;
+      idLabelPairs.push({ id, label });
     }
 
-    const unique = Array.from(new Set(ids));
+    // Deduplicate by id, keeping first occurrence
+    const seen = new Set<string>();
+    const unique = idLabelPairs.filter(({ id }) => seen.has(id) ? false : (seen.add(id), true));
     if (unique.length === 0) {
       console.error('No system ids found in CSV');
       process.exitCode = 2;
@@ -119,12 +126,11 @@ function main() {
 
     // Build enum entries ensuring unique keys
     const usedKeys = new Map<string, number>();
-    const entries: Array<{ key: string; value: string }> = [];
-    for (const id of unique) {
+    const entries: Array<{ key: string; value: string; label: string }> = [];
+    for (const { id, label } of unique) {
       let base = toPascalCaseId(id);
       if (!base) base = 'System';
       let key = base;
-      // Avoid duplicate key names
       if (usedKeys.has(key)) {
         const count = (usedKeys.get(key) || 1) + 1;
         usedKeys.set(key, count);
@@ -132,7 +138,7 @@ function main() {
       } else {
         usedKeys.set(key, 1);
       }
-      entries.push({ key, value: id });
+      entries.push({ key, value: id, label });
     }
 
     // Ensure output directory exists
