@@ -96,7 +96,7 @@
 							class="h-2.5 w-2.5 shrink-0 rounded-full"
 							style="background-color: {systemBaseColor(bar.id)}"
 						></span>
-						<span class="text-xs leading-tight">{bar.label}</span>
+						<span class="text-sm leading-tight">{bar.label}</span>
 					</div>
 
 					<!-- Bar -->
@@ -117,7 +117,7 @@
 									text-anchor="middle"
 									dominant-baseline="middle"
 									fill="currentColor"
-									font-size="11"
+									font-size="14"
 									font-weight="600">{seg.count}</text
 								>
 							{/if}
@@ -125,8 +125,9 @@
 					</svg>
 				</div>
 			{/each}
-
-			<LegendBadge />
+			<div class="mt-5">
+				<LegendBadge />
+			</div>
 		</div>
 	{/if}
 </Card>
