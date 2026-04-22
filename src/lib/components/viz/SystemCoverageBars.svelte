@@ -83,6 +83,12 @@
 	}
 </script>
 
+<style>
+	:global([data-theme='ana-dark']) .system-dot {
+		box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.35);
+	}
+</style>
+
 <Card title="System coverage overview" subtitle="UoA counts by flag status for each system.">
 	{#if rows.length === 0}
 		<p class="text-base-content/75 py-8 text-center text-sm">No data matches current filters.</p>
@@ -93,7 +99,7 @@
 					<!-- Label -->
 					<div class="flex shrink-0 items-center gap-1.5" style="width: {labelColWidth}px">
 						<span
-							class="h-2.5 w-2.5 shrink-0 rounded-full"
+							class="system-dot h-2.5 w-2.5 shrink-0 rounded-full"
 							style="background-color: {systemBaseColor(bar.id)}"
 						></span>
 						<span class="text-sm leading-tight">{bar.label}</span>

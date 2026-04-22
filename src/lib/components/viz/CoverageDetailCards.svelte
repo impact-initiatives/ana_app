@@ -110,10 +110,16 @@
 	}
 </script>
 
+<style>
+	:global([data-theme='ana-dark'] .system-card) {
+		box-shadow: inset 10px 0 16px -6px color-mix(in srgb, var(--sys-color) 40%, transparent);
+	}
+</style>
+
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 	{#each systemCards as sys (sys.id)}
 		{@const b = badge(sys.status)}
-		<Card class="border-l-8" style="border-left-color: {sys.color}">
+		<Card class="system-card border-l-8" style="border-left-color: {sys.color}; --sys-color: {sys.color}">
 			<!-- System header -->
 			<div class="-mx-4 -mt-4 mb-3 flex items-center justify-between gap-2 px-4 pt-3 pb-2">
 				<div class="flex min-w-0 items-center gap-2">
