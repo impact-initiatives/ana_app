@@ -11,8 +11,6 @@
 		{ href: resolve('/reference'), label: 'Reference' },
 		{ href: `${resolve('/results')}#export`, label: 'Export' }
 	];
-
-	const year = new Date().getFullYear();
 </script>
 
 <footer class="border-base-300 bg-base-200 border-t">
