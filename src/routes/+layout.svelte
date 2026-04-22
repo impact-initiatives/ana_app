@@ -6,12 +6,14 @@
 
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { page, navigating } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import Footer from '$lib/components/ui/Footer.svelte';
-	import { flagStore } from '$lib/stores/flagStore.svelte';
-	import { hydrateFlagStore } from '$lib/stores/flagStore.svelte';
+	import { flagStore, clearFlagResult, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
+	import { clearValidatorState } from '$lib/stores/validatorStore.svelte';
+	import { clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
@@ -57,6 +59,13 @@
 	const utilityLinks = [{ path: '/reference' as const, label: 'Reference' }];
 
 	let scrollY = $state(0);
+
+	function clearAll() {
+		clearFlagResult();
+		clearValidatorState();
+		clearAdminFeatures();
+		goto(resolve('/'));
+	}
 </script>
 
 <svelte:window bind:scrollY />
@@ -93,16 +102,24 @@
 				<span class="text-base-content/85 hidden font-semibold sm:inline">Acute Needs Analysis</span
 				>
 			</a>
-			<!-- Data-state dot: visible when analysis results are loaded -->
 			{#if flagStore.flaggedResult}
-				<div class="flex">
-					<div class="inline-grid gap-2 *:[grid-area:1/1]">
-						<div class="status status-success animate-ping"></div>
-						<div class="status status-success"></div>
-					</div>
-
-					<div class="text-success text-sm">Results loaded</div>
-				</div>{/if}
+				<div class="flex items-center gap-2">
+					<a
+						href={resolve('/results')}
+						class="border-success/30 bg-success/10 text-success hover:bg-success/20 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-150"
+					>
+						<span class="bg-success inline-block size-1.5 rounded-full"></span>
+						Results loaded
+					</a>
+					<button
+						class="border-error/30 bg-error/10 text-error hover:bg-error/20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-150"
+						onclick={clearAll}
+					>
+						<span class="bg-error inline-block size-1.5 rounded-full"></span>
+						Clear
+					</button>
+				</div>
+			{/if}
 		</div>
 
 		<!-- Desktop nav -->
@@ -228,6 +245,12 @@
 					<li>
 						<a href="{resolve('/results')}#export">Export</a>
 					</li>
+					{#if flagStore.flaggedResult}
+						<li><hr class="border-base-300 my-1" /></li>
+						<li>
+							<button class="text-error w-full text-left" onclick={clearAll}>Clear all data</button>
+						</li>
+					{/if}
 				</ul>
 			</div>
 		</div>
