@@ -50,6 +50,12 @@
 		if (open) searchInputEl?.focus();
 	});
 
+	$effect(() => {
+		if (!isMultiple && singleVal === '' && options.length > 0) {
+			onchange?.(options[0].value);
+		}
+	});
+
 	// ── Derived ───────────────────────────────────────────────────────────────
 
 	// The subset of options whose label contains the current search text.
