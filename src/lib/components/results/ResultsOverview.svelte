@@ -40,6 +40,8 @@
 		onmapclear,
 		ondonutsliceclick
 	}: Props = $props();
+
+	let mapDownloadFn: (() => Promise<void>) | undefined = $state();
 </script>
 
 <section>
@@ -69,6 +71,26 @@
 	<!-- Choropleth map -->
 	{#if hasPcodes && adminFeaturesStore.fetchState !== 'error'}
 		<Card class="mt-6" title="Preliminary flag map" subtitle="Click an area to view its report.">
+			{#snippet titleActions()}
+				{#if mapDownloadFn}
+					<button class="btn btn-sm btn-outline gap-1.5" onclick={mapDownloadFn}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="size-4"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+							aria-hidden="true"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+						Download SVG
+					</button>
+				{/if}
+			{/snippet}
 			{#if adminFeaturesStore.fetchState === 'loading'}
 				<div class="text-base-content/75 flex items-center gap-2 py-6 text-sm">
 					<span class="loading loading-spinner loading-sm"></span>
@@ -80,7 +102,9 @@
 					adm2={adminFeaturesStore.adm2}
 					rows={filteredFlagged}
 					level={pcodeLevel}
+					country={adminFeaturesStore.countryName}
 					onuoaclick={(uoa, adminName) => onmapselect(uoa, adminName)}
+					ondownloadready={(fn) => (mapDownloadFn = fn)}
 				/>
 				{#if selectedMapUoa}
 					<div class="mt-4">

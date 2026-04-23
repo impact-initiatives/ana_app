@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Plot, Geo } from 'svelteplot';
 	import { geoIdentity, geoBounds } from 'd3-geo';
+	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
 	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
+	import { buildExportSvg, downloadSvg, buildMapFilename } from '$lib/engine/exportMap';
+	import anaLogoRaw from '$lib/assets/LogoANA2026.svg?raw';
+	import impactLogoRaw from '$lib/assets/IMPACT.svg?raw';
 
 	type Row = Record<string, unknown>;
 	type GeoFC = FeatureCollection<Geometry, Record<string, unknown>>;
@@ -15,16 +19,41 @@
 		adm2: GeoFC | null;
 		rows: Row[];
 		level: 'ADM1' | 'ADM2';
+		/** ISO country code for the export filename, e.g. 'SOM'. */
+		country?: string | null;
 		/** Called with the UOA code and admin name when the user clicks an admin area. */
 		onuoaclick?: (uoa: string, adminName: string | null) => void;
+		/** Called once the map is ready, passing a function that triggers SVG download. */
+		ondownloadready?: (fn: () => Promise<void>) => void;
 	}
 
-	let { adm1, adm2, rows, level, onuoaclick }: Props = $props();
+	let { adm1, adm2, rows, level, country = null, onuoaclick, ondownloadready }: Props = $props();
 
 	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null = $state(null);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
 	let containerWidth = $state(0);
+	// Wraps only the <Plot> — no other SVGs inside, so querySelector('svg') is unambiguous.
+	let mapEl: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		if (mapEl) ondownloadready?.(handleSvgDownload);
+	});
+
+	async function handleSvgDownload() {
+		hoveredFeature = null;
+		await tick();
+		const svg = mapEl?.querySelector('svg') as SVGSVGElement | null;
+		if (!svg) return;
+		const svgStr = buildExportSvg(svg, {
+			level,
+			country,
+			rows,
+			anaLogoSvg: anaLogoRaw,
+			impactLogoSvg: impactLogoRaw
+		});
+		downloadSvg(svgStr, buildMapFilename(level, country));
+	}
 
 	const aspectRatio = $derived.by(() => {
 		const [[minX, minY], [maxX, maxY]] = geoBounds(adm1);
@@ -90,69 +119,72 @@
   CSS var colors bypass SveltePlot's color scale automatically.
 -->
 <div bind:clientWidth={containerWidth}>
-{#if plotHeight > 0}
-<Plot
-	axes={false}
-	height={plotHeight}
-	margin={0}
-	projection={{
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		type: ({ width, height }) => geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
-	}}
->
-	<!-- Colored fill layer -->
-	<Geo
-		data={fillFeatures}
-		fill={{ value: (d) => d.properties.flagColor, scale: null }}
-		stroke="var(--color-base-content)"
-		strokeWidth={0.5}
-		cursor={onuoaclick ? 'pointer' : undefined}
-		onmouseover={(_e, f) => {
-			if (hoveredFeature !== f) hoveredFeature = f;
-		}}
-		onmousemove={(e) => {
-			const me = e as unknown as MouseEvent;
-			tooltipX = me.clientX;
-			tooltipY = me.clientY;
-		}}
-		onmouseout={() => {
-			hoveredFeature = null;
-		}}
-		onclick={(_e, f) => {
-			const props = f.properties as Record<string, unknown>;
-			const code = props?.code as string | undefined;
-			if (code) {
-				const name = (adminFeaturesStore.pcodeLabelMap?.[code] ??
-					props?.gis_name ??
-					props?.name ??
-					null) as string | null;
-				onuoaclick?.(code, name);
-			}
-		}}
-	/>
+	{#if plotHeight > 0}
+		<!-- mapEl wraps only the Plot — keeps querySelector('svg') unambiguous -->
+		<div bind:this={mapEl}>
+			<Plot
+				axes={false}
+				height={plotHeight}
+				margin={0}
+				projection={{
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					type: ({ width, height }) => geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
+				}}
+			>
+				<!-- Colored fill layer -->
+				<Geo
+					data={fillFeatures}
+					fill={{ value: (d) => d.properties.flagColor, scale: null }}
+					stroke="var(--color-base-content)"
+					strokeWidth={0.5}
+					cursor={onuoaclick ? 'pointer' : undefined}
+					onmouseover={(_e, f) => {
+						if (hoveredFeature !== f) hoveredFeature = f;
+					}}
+					onmousemove={(e) => {
+						const me = e as unknown as MouseEvent;
+						tooltipX = me.clientX;
+						tooltipY = me.clientY;
+					}}
+					onmouseout={() => {
+						hoveredFeature = null;
+					}}
+					onclick={(_e, f) => {
+						const props = f.properties as Record<string, unknown>;
+						const code = props?.code as string | undefined;
+						if (code) {
+							const name = (adminFeaturesStore.pcodeLabelMap?.[code] ??
+								props?.gis_name ??
+								props?.name ??
+								null) as string | null;
+							onuoaclick?.(code, name);
+						}
+					}}
+				/>
 
-	<!-- Hover highlight layer — separate Geo so SveltePlot re-renders on state change -->
-	{#if hoveredFeature}
-		<Geo
-			data={[hoveredFeature]}
-			fill={false}
-			fillOpacity={0}
-			stroke="var(--color-base-content)"
-			strokeWidth={3.5}
-			style="pointer-events: none"
-		/>
+				<!-- Hover highlight layer — separate Geo so SveltePlot re-renders on state change -->
+				{#if hoveredFeature}
+					<Geo
+						data={[hoveredFeature]}
+						fill={false}
+						fillOpacity={0}
+						stroke="var(--color-base-content)"
+						strokeWidth={3.5}
+						style="pointer-events: none"
+					/>
+				{/if}
+
+				<!-- ADM1 outlines on top — decorative only, pointer events disabled -->
+				<Geo
+					data={adm1.features}
+					fillOpacity={0}
+					stroke="var(--color-base-content)"
+					strokeWidth={2}
+					style="pointer-events: none"
+				/>
+			</Plot>
+		</div>
 	{/if}
-
-	<!-- ADM1 outlines on top — decorative only, pointer events disabled -->
-	<Geo
-		data={adm1.features}
-		fillOpacity={0}
-		stroke="var(--color-base-content)"
-		strokeWidth={2}
-		style="pointer-events: none"
-	/>
-</Plot>
-{/if}
 </div>
 
 {#if hoveredFeature}
