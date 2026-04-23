@@ -8,28 +8,35 @@ import {
 /**
  * Lightweight, modular flagger
  *
- * - Entry: flagData(items, indicatorsJson)
- * - Assumes validator has ensured `uoa` exists on every row and indicator column
- *   names are the canonical IDs used in indicatorsJson.
+ * - Entry: flagData(items, referenceJson)
+ * 
+ * Assumes validator has ensured `uoa` exists on every row and metric column names are the canonical IDs used in indicatorsJson.
  *
  * Implementation notes:
- * - Missing canonical indicator columns are null-padded onto each input row before
- *   the mutate pass, so output rows always carry explicit nulls for every canonical id.
+ * - Missing canonical indicator columns are null-padded onto each input row before the mutate pass, so output rows always carry explicit nulls for every canonical id.
  * - Per-metric flags and within-10% computations are generated via makeMetricSpec.
  *   Preference-3 metrics are excluded from the flagging pipeline (reference/circle-packing only).
  * - Subfactor status is evaluated using threshold groups from buildSubfactorList:
- *   indicators sharing the same (factor_threshold, evidence_threshold) pair are
+ *   metrics sharing the same (factor_threshold, evidence_threshold) pair are
  *   pooled and evaluated together. A subfactor flags if any group reaches its
  *   factor_threshold; it concludes no_flag if any group reaches its evidence_threshold.
  * - Factor and system statuses are rolled up from their children's statuses via
  *   rollupStatuses.
  * - prelim_flag is derived from system statuses using the ANA decision tree.
  *
- * Status vocabulary (used at all levels from indicator to system):
+ * Status vocabulary (used at all levels from metric to system):
  *   'flag'                 — threshold crossed / acute needs detected
  *   'no_flag'              — enough evidence to conclude no acute needs
  *   'insufficient_evidence'— some data present but not enough to conclude
  *   'no_data'              — no data at all for this level
+ * 
+ * Status vocabulary at prelim_flag level:
+ *   'em' 				    	 — enough mortality data to conclude excess mortality
+ *   'roem'              — enough across systems + health outcomes information to conclude Risk of Excess Mortality
+ *   'acute_needs'       — enough evidence to conclude acute needs 
+ * 	 'no_acute_needs'    — enough evidence to conclude no acute needs 
+ *   'insufficient_evidence' — some data present but not enough to conclude
+ *   'no_data'               — no data at all for this level
  */
 
 /* --------------------- Types --------------------- */
@@ -43,67 +50,77 @@ type MutateSpec = Record<string, (d: Row) => unknown>;
 
 const isNumber = (v: unknown): v is number => typeof v === 'number' && !Number.isNaN(v);
 
-/** Evaluate a single threshold group against the current row.
- * A group is a set of indicators sharing the same (factor_threshold, evidence_threshold). */
-function evaluateGroup(group: ThresholdGroup, d: Row): Status {
-	let flag_n = 0;
-	let no_flag_n = 0;
-	for (const c of group.codes) {
-		const f = d[`${c}_flag`];
-		if (f === true) flag_n++;
-		else if (f === false) no_flag_n++;
-	}
-	const data_n = flag_n + no_flag_n;
-	if (flag_n >= group.factor_threshold) return 'flag';
-	if (data_n >= group.evidence_threshold) return 'no_flag';
-	if (data_n === 0) return 'no_data';
-	return 'insufficient_evidence';
-}
+
+/* ------------------- Metric level ------------------- */
+
 
 /**
- * Roll up an array of status strings into a single status.
- * Used for factor ← subfactor and system ← factor rollups.
- *
- * Priority: flag > no_flag > insufficient_evidence > no_data
- *
- * Special case: if all children are no_data, return no_data rather than
- * insufficient_evidence, to distinguish "nothing collected" from "some data
- * but not enough to conclude".
- */
-function rollupStatuses(statuses: Status[]): Status {
-	if (statuses.length === 0) return 'no_data';
-	if (statuses.some((s) => s === 'flag')) return 'flag';
-	if (statuses.every((s) => s === 'no_flag')) return 'no_flag';
-	if (statuses.every((s) => s === 'no_data')) return 'no_data';
-	return 'insufficient_evidence';
-}
-
-/**
- * Build a mutate spec object for a single metric id.
- * Produces four columns (mutate applies entries sequentially, so {id}_status
- * can safely read {id}_flag set by the preceding entry — mirrors dplyr behaviour):
- *   {id}_flag              — true | false | null
- *   {id}_status            — 'flag' | 'no_flag' | 'no_data'
- *   {id}_within_10perc     — boolean | null
- *   {id}_within_10perc_change — boolean | null
+ * Build a mutate spec object for a single metric ID.
+ * 
+ * PURPOSE:
+ * Generates a set of four transformation functions (a "spec") that will be applied to every row in the dataset for a specific metric. These functions run sequentially (piped as dplyr), allowing later functions to rely on values calculated by earlier ones (e.g., calculating `_status` based on the newly created `_flag`).
+ * 
+ * OUTPUT COLUMNS:
+ * 1. {id}_flag              — boolean (true/false) or null. Indicates if the metric crosses the critical threshold.
+ * 2. {id}_status            — string ('flag', 'no_flag', or 'no_data'). A simplified status derived directly from the flag.
+ * 3. {id}_within_10perc     — boolean or null. Checks if the value is within 10% of the threshold (regardless of direction).
+ * 4. {id}_within_10perc_change — boolean or null. Checks if the value is within 10%  of the threshold BUT has NOT crossed it.
+ * 
+ * @param id - The unique canonical ID of the metric (e.g., "MET001").
+ * @param md - The metadata object for this metric, containing configuration like  thresholds and direction (e.g., { raw: { thresholds: { an: 5 }, above_or_below: 'Above' } }).
+ * @returns An object mapping column names to transformation functions.
  */
 function makeMetricSpec(id: string, md: any): MutateSpec {
+
+	// Step 1: Access key needed items
+
+	// Construct the key for the boolean flag column (e.g., "MET001_flag")
 	const flagKey = `${id}_flag`;
+	// Extract the "Acute Needs" threshold from metadata. 
+	// If missing, we cannot calculate a flag, so we default to null.
 	const th: number | null = md?.raw?.thresholds?.an ?? null;
+	// Extract the direction: 'Above' or 'Below'
 	const dir: string | null = md?.raw?.above_or_below ?? null;
 
 	return {
+				/**
+		 * 1. Calculate the Boolean Flag ({id}_flag)
+		 * 
+		 * LOGIC:
+		 * - Returns null if the threshold or direction is missing (cannot evaluate).
+		 * - Returns null if the data value is missing or not a number.
+		 * - If 'Above': Returns true if value >= threshold.
+		 * - If 'Below': Returns true if value <= threshold.
+		 */
 		[`${id}_flag`]: (d) => {
 			if (th === null || dir === null) return null;
 			const v = d[id];
 			if (v == null || !isNumber(v)) return null;
 			return dir === 'Above' ? v >= th : v <= th;
 		},
+		/**
+		 * 2. Derive the Status String ({id}_status)
+		 * 
+		 * LOGIC:
+		 * - Reads the boolean flag calculated in the previous step.
+		 * - If the flag is null (missing data), returns 'no_data'.
+		 * - If the flag is true, returns 'flag'.
+		 * - If the flag is false, returns 'no_flag'.
+		 */
 		[`${id}_status`]: (d) => {
 			const f = d[flagKey];
 			if (f == null) return 'no_data';
 			return f ? 'flag' : 'no_flag';
 		},
+		/**
+		 * 3. Check Proximity to Threshold ({id}_within_10perc)
+		 * 
+		 * LOGIC:
+		 * - Calculates the percentage difference between the value (v) and the threshold (th).
+		 * - Formula: | (v - th) / th | <= 0.1
+		 * - Returns true if the value is within 10% of the threshold, regardless of whether it has crossed it or not.
+		 * - Special case: If threshold is 0, checks if value is exactly 0.
+		 */
 		[`${id}_within_10perc`]: (d) => {
 			if (th === null) return null;
 			const v = d[id];
@@ -111,6 +128,19 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 			if (th === 0) return v === 0;
 			return Math.abs((v - th) / th) <= 0.1;
 		},
+		
+		/**
+		 * 4. Check "Approaching" Status ({id}_within_10perc_change)
+		 * 
+		 * LOGIC:
+		 * - Identifies values that are close to the threshold (within 10%) but have NOT yet triggered the flag.
+		 * 
+		 * CONDITIONS:
+		 * 1. Threshold and direction must exist.
+		 * 2. Value must be a number.
+		 * 3. Percentage difference must be <= 10%.
+		 * 4. The value must NOT meet the flag condition (i.e., !met).
+		 */
 		[`${id}_within_10perc_change`]: (d) => {
 			if (th === null || dir === null || th === 0) return null;
 			const v = d[id];
@@ -120,6 +150,80 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 			return pct <= 0.1 && !met;
 		}
 	};
+}
+
+
+
+/* ------------------- Subfactor level ------------------- */
+
+/** 
+ * Evaluate a single threshold group against the current row.
+ * 
+ * CONTEXT:
+ * A "group" represents a set of metrics that share the same logical criteria 
+ * (factor_threshold and evidence_threshold) within a specific subfactor.
+ * Instead of evaluating metrics individually for the final status, we pool them
+ * to determine if the collective evidence is sufficient to trigger a flag or 
+ * confirm no_flag.
+ * 
+ * LOGIC FLOW:
+ * 1. Iterate through all metric codes in the group.
+ * 2. Count how many metrics have triggered a 'flag' (true) vs. confirmed 'no_flag' (false).
+ *    Note: We ignore metrics with null/undefined values here; they contribute to neither count.
+ * 3. Apply the decision hierarchy:
+ *    - FLAG: If the count of flagged metrics meets/exceeds the `factor_threshold`, the group returns 'flag'. This indicates acute needs are detected.
+ *    - NO FLAG: If the count of metrics with values (flags + no_flags) meets the `evidence_threshold`, the group returns 'no_flag'. This means we have enough data points to confidently conclude there are no acute needs.
+ *    - NO DATA: If no metrics in this group had any data (count is 0), return 'no_data'.
+ *    - INSUFFICIENT EVIDENCE: If we have some data but haven't hit the thresholds for either flag or no_flag, return 'insufficient_evidence'.
+ */
+function evaluateGroup(group: ThresholdGroup, d: Row): Status {
+
+	// Step 0: Initialize 
+	let flag_n = 0;
+	let no_flag_n = 0;
+
+	// Step 1: Aggregate counts for the current row across all metrics in this group
+	for (const c of group.codes) {
+		// Access the pre-computed boolean flag for this specific metric (e.g., "MET001_flag")
+		const f = d[`${c}_flag`];
+		
+		if (f === true) {
+			flag_n++; 
+		} else if (f === false) {
+			no_flag_n++; 
+		}
+		// If f is null/undefined, skip it (contributes to the "missing data" gap)
+	}
+
+	const data_n = flag_n + no_flag_n; // Total number of metrics with data in this group
+
+	// Step 2: Apply Decision Logic (Priority Order)
+	if (flag_n >= group.factor_threshold) return 'flag';
+	if (data_n >= group.evidence_threshold) return 'no_flag';
+	if (data_n === 0) return 'no_data';
+	return 'insufficient_evidence';
+}
+
+
+
+/* ---------------- Subfactor to System level ---------------- */
+
+/**
+ * Roll up an array of status strings into a single status.
+ * Used for subfactor -> factor and factor -> system rollups.
+ *
+ * Priority: flag > no_flag > insufficient_evidence > no_data
+ *
+ * Note: if all children are no_data, return no_data rather than
+ * insufficient_evidence, to distinguish "nothing collected" from "some data
+ * but not enough to conclude".
+ */
+function rollupStatuses(statuses: Status[]): Status {
+	if (statuses.length === 0) return 'no_data';
+	if (statuses.some((s) => s === 'flag')) return 'flag';
+	if (statuses.every((s) => s === 'no_flag')) return 'no_flag';
+	if (statuses.every((s) => s === 'no_data')) return 'no_data';
+	return 'insufficient_evidence';
 }
 
 /**
