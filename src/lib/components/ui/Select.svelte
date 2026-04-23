@@ -93,14 +93,6 @@
 	}
 
 	/**
-	 * Clears the current selection and closes the dropdown.
-	 */
-	function clearOne() {
-		closeDropdown();
-		onchange?.('');
-	}
-
-	/**
 	 * Toggles the selection of a value (multiple mode only).
 	 * It removes the value if it's already selected, or adds it if not.
 	 */
@@ -142,9 +134,7 @@
 		if (!isMultiple) {
 			selectOne(filtered[0].value);
 		} else {
-			const filteredValues = new Set(filtered.map((o) => o.value));
-			const next = [...new Set([...multiVal, ...filteredValues])];
-			onchange?.(next);
+			onchange?.(filtered.map((o) => o.value));
 			searchQuery = '';
 		}
 	}
@@ -255,16 +245,32 @@
 	{#if open}
 		<div class="menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 w-72 border p-0">
 			<!-- Search (shared) -->
-			<div class="border-base-200 border-b p-2">
+			<div class="border-base-200 flex items-center gap-1.5 border-b p-2">
 				<input
 					type="text"
-					class="input input-sm bg-base-100 w-full border text-xs"
+					class="input input-sm bg-base-100 min-w-0 flex-1 border text-xs"
 					placeholder="Search…"
 					bind:value={searchQuery}
 					bind:this={searchInputEl}
 					onclick={(e) => e.stopPropagation()}
-					onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onSearchEnter(); } }}
+					onkeydown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							onSearchEnter();
+						}
+					}}
 				/>
+				{#if !isMultiple}
+					<button
+						type="button"
+						class="btn btn-primary btn-xs shrink-0 text-xs disabled:opacity-40"
+						disabled={filtered.length === 0}
+						onclick={(e) => {
+							e.stopPropagation();
+							onSearchEnter();
+						}}>Select</button
+					>
+				{/if}
 			</div>
 
 			<!-- Single mode: no clear toolbar -->
@@ -275,8 +281,9 @@
 					<button
 						type="button"
 						class="btn btn-soft btn-xs text-primary disabled:text-base-content/75 text-xs"
-						disabled={allSelected}
-						onclick={selectAll}>Select all</button
+						disabled={searchQuery ? filtered.length === 0 : allSelected}
+						onclick={searchQuery ? onSearchEnter : selectAll}
+					>{searchQuery ? 'Select' : 'Select all'}</button
 					>
 					<span class="text-primary">|</span>
 					<button
