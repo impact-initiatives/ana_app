@@ -3,7 +3,7 @@
 	import { geoIdentity, geoBounds } from 'd3-geo';
 	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
-	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { PRELIM_FLAG_BADGE, FLAG_BADGE } from '$lib/utils/colors';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
@@ -14,22 +14,39 @@
 	type Row = Record<string, unknown>;
 	type GeoFC = FeatureCollection<Geometry, Record<string, unknown>>;
 
+	/** Discriminated union describing which data field to visualise on the map. */
+	export type MapLayer =
+		| { type: 'prelim' }
+		| { type: 'status'; field: string; hasInsufficient: boolean };
+
 	interface Props {
 		adm1: GeoFC;
 		adm2: GeoFC | null;
 		rows: Row[];
 		level: 'ADM1' | 'ADM2';
-		/** ISO country code for the export filename, e.g. 'SOM'. */
+		/** Human-readable country name for the export title. */
 		country?: string | null;
+		/** Which field to colour by. Defaults to prelim flag. */
+		layer?: MapLayer;
 		/** Called with the UOA code and admin name when the user clicks an admin area. */
 		onuoaclick?: (uoa: string, adminName: string | null) => void;
 		/** Called once the map is ready, passing a function that triggers SVG download. */
 		ondownloadready?: (fn: () => Promise<void>) => void;
 	}
 
-	let { adm1, adm2, rows, level, country = null, onuoaclick, ondownloadready }: Props = $props();
+	let {
+		adm1,
+		adm2,
+		rows,
+		level,
+		country = null,
+		layer = { type: 'prelim' },
+		onuoaclick,
+		ondownloadready
+	}: Props = $props();
 
-	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null = $state(null);
+	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null =
+		$state(null);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
 	let containerWidth = $state(0);
@@ -45,12 +62,29 @@
 		await tick();
 		const svg = mapEl?.querySelector('svg') as SVGSVGElement | null;
 		if (!svg) return;
+
+		let legendEntries: { varOrColor: string; label: string }[] | undefined;
+		let flaggedCount: number | undefined;
+
+		if (layer.type === 'status') {
+			const statusKeys = layer.hasInsufficient
+				? ['flag', 'no_flag', 'insufficient_evidence', 'no_data']
+				: ['flag', 'no_flag', 'no_data'];
+			legendEntries = statusKeys.map((k) => ({
+				varOrColor: `var(${FLAG_BADGE[k].colorVar})`,
+				label: FLAG_BADGE[k].label
+			}));
+			flaggedCount = rows.filter((r) => r[layer.field] === 'flag').length;
+		}
+
 		const svgStr = buildExportSvg(svg, {
 			level,
 			country,
 			rows,
 			anaLogoSvg: anaLogoRaw,
-			impactLogoSvg: impactLogoRaw
+			impactLogoSvg: impactLogoRaw,
+			legendEntries,
+			flaggedCount
 		});
 		downloadSvg(svgStr, buildMapFilename(level, country));
 	}
@@ -66,7 +100,7 @@
 		containerWidth > 0 ? Math.round(Math.max(150, Math.min(700, containerWidth / aspectRatio))) : 0
 	);
 
-	const NO_DATA_COLOR = PRELIM_FLAG_BADGE['NO_DATA']?.bg ?? '#d1d5db';
+	const NO_DATA_COLOR = PRELIM_FLAG_BADGE['NO_DATA']?.bg ?? 'var(--color-no-data)';
 
 	// Pre-extract p-codes per feature — only reruns when GeoJSON or level changes, not on rows filter.
 	const featureWithCodes = $derived.by(() => {
@@ -80,16 +114,30 @@
 		}));
 	});
 
-	// Enrich each fill feature with flagColor + flagLabel — reruns on rows change doing only Map lookups.
+	// Enrich each fill feature with flagColor + flagLabel — reruns on rows or layer change.
 	const fillFeatures = $derived.by(() => {
-		const lookup = new Map(rows.map((r) => [String(r.uoa), String(r.prelim_flag ?? '')]));
+		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
 		return featureWithCodes.map(({ feature: f, code }) => {
-			const flag = code ? lookup.get(code) : undefined;
-			const badge = flag ? PRELIM_FLAG_BADGE[flag] : undefined;
-			const flagColor = badge?.bg ?? NO_DATA_COLOR;
-			const flagLabel = badge?.label ?? PRELIM_FLAG_BADGE['NO_DATA']?.label ?? 'No Data';
-			const hasData = !!flag;
-			return { ...f, properties: { ...f.properties, flagColor, flagLabel, hasData, code } };
+			const row = code ? lookup.get(code) : undefined;
+			let flagColor: string;
+			let flagLabel: string;
+
+			if (!row) {
+				flagColor = NO_DATA_COLOR;
+				flagLabel = PRELIM_FLAG_BADGE['NO_DATA']?.label ?? 'No Data';
+			} else if (layer.type === 'prelim') {
+				const flag = String(row.prelim_flag ?? '');
+				const badge = flag ? PRELIM_FLAG_BADGE[flag] : undefined;
+				flagColor = badge?.bg ?? NO_DATA_COLOR;
+				flagLabel = badge?.label ?? (PRELIM_FLAG_BADGE['NO_DATA']?.label ?? 'No Data');
+			} else {
+				const status = String(row[layer.field] ?? 'no_data');
+				const badge = FLAG_BADGE[status];
+				flagColor = badge ? `var(${badge.colorVar})` : NO_DATA_COLOR;
+				flagLabel = badge?.label ?? (FLAG_BADGE['no_data']?.label ?? 'No Data');
+			}
+
+			return { ...f, properties: { ...f.properties, flagColor, flagLabel, hasData: !!row, code } };
 		});
 	});
 
@@ -108,6 +156,14 @@
 	const tooltipRows = $derived(
 		hoveredFeature?.properties?.code
 			? [{ key: 'Code', value: String(hoveredFeature.properties.code) }]
+			: []
+	);
+
+	const legendStatusKeys = $derived(
+		layer.type === 'status'
+			? layer.hasInsufficient
+				? ['flag', 'no_flag', 'insufficient_evidence', 'no_data']
+				: ['flag', 'no_flag', 'no_data']
 			: []
 	);
 </script>
@@ -197,7 +253,11 @@
 	/>
 {/if}
 
-<LegendBadge
-	keys={[]}
-	prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
-/>
+{#if layer.type === 'prelim'}
+	<LegendBadge
+		keys={[]}
+		prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
+	/>
+{:else}
+	<LegendBadge keys={legendStatusKeys} />
+{/if}
