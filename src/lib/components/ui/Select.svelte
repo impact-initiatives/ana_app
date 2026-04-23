@@ -177,7 +177,7 @@
 	<!-- Trigger -->
 	<button
 		type="button"
-		class="btn btn-outline border-base-content/30 btn-sm h-auto min-h-8 justify-between border py-1.5"
+		class="btn btn-outline border-base-content/50 btn-sm h-auto min-h-8 justify-between border py-1.5"
 		onclick={() => (open = !open)}
 	>
 		<span class="flex flex-wrap gap-1">
@@ -191,9 +191,9 @@
 			{:else}
 				<!-- Multiple mode: placeholder / "All (n)" / up-to-3 chips + overflow -->
 				{#if multiVal.length === 0}
-					<span class="text-base-content/70">{placeholder}</span>
+					<span class="text-base-content/85">{placeholder}</span>
 				{:else if multiVal.length === options.length}
-					<span class="text-base-content/70">All ({options.length})</span>
+					<span class="text-base-content/85">All ({options.length})</span>
 				{:else}
 					{#each multiVal.slice(0, 3) as v (v)}
 						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
@@ -201,7 +201,7 @@
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<span
-								class="cursor-pointer opacity-60 hover:opacity-100"
+								class="text-base-content/60 hover:text-base-content cursor-pointer"
 								onclick={(e) => {
 									e.stopPropagation();
 									removeChip(v);
@@ -218,7 +218,7 @@
 
 		<!-- Caret -->
 		<svg
-			class="text-base-content/70 h-4 w-4 shrink-0 transition-transform {open ? 'rotate-180' : ''}"
+			class="text-base-content/85 h-4 w-4 shrink-0 transition-transform {open ? 'rotate-180' : ''}"
 			fill="none"
 			viewBox="0 0 24 24"
 			stroke="currentColor"
@@ -248,18 +248,18 @@
 				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
 					<button
 						type="button"
-						class="btn btn-soft btn-xs text-primary text-xs disabled:opacity-40"
+						class="btn btn-soft btn-xs text-primary disabled:text-base-content/75 text-xs"
 						disabled={allSelected}
 						onclick={selectAll}>Select all</button
 					>
 					<span class="text-primary">|</span>
 					<button
 						type="button"
-						class="btn btn-ghost btn-xs text-base-content/70 text-xs disabled:opacity-40"
+						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/75 text-xs"
 						disabled={noneSelected}
 						onclick={clearAll}>Clear</button
 					>
-					<span class="ml-auto text-xs opacity-50">
+					<span class="text-base-content/75 ml-auto text-xs">
 						{multiVal.length}/{options.length}
 					</span>
 				</div>
