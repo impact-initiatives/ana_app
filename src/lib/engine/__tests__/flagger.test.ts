@@ -117,7 +117,7 @@ describe('flagData — prelim_flag classification', () => {
 			[row('A', { MET001: 0.3, MET002: 1, MET003: 0.1, MET004: 0.1, MET005: 0.1 })],
 			refJson
 		);
-		expect(out[0]!['prelim_flag']).toBe('NO_ACUTE_NEEDS');
+		expect(out[0]!['prelim_flag']).toBe('NO_ACUTE');
 	});
 
 	it('returns NO_DATA when all metrics are missing', () => {
@@ -135,6 +135,6 @@ describe('flagData — prelim_flag classification', () => {
 			refJson
 		);
 		expect(out[0]!['prelim_flag']).toBe('EM');
-		expect(out[1]!['prelim_flag']).toBe('NO_ACUTE_NEEDS');
+		expect(out[1]!['prelim_flag']).toBe('NO_ACUTE');
 	});
 });
