@@ -75,10 +75,17 @@ function escapeXml(s: string): string {
 export interface ExportMapOpts {
 	level: 'ADM1' | 'ADM2';
 	country: string | null;
-	/** Rows from flagStore — used to compute flagged count. */
+	/** Rows from flagStore — used to compute flagged count when flaggedCount is omitted. */
 	rows: { prelim_flag?: unknown }[];
 	anaLogoSvg: string;
 	impactLogoSvg: string;
+	/** Pre-computed flagged count. Overrides the default prelim-based calculation. */
+	flaggedCount?: number;
+	/** Legend entries to render. Each varOrColor may be a CSS var() string or a hex value.
+	 *  When omitted the default PRELIM_FLAG_BADGE legend is used. */
+	legendEntries?: { varOrColor: string; label: string }[];
+	/** Human-readable title for the exported SVG. Overrides the default prelim title. */
+	layerTitle?: string | null;
 }
 
 /**
@@ -89,7 +96,7 @@ export interface ExportMapOpts {
  *   ANA + IMPACT logos (bottom-right)
  */
 export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): string {
-	const { country, rows, anaLogoSvg, impactLogoSvg } = opts;
+	const { country, rows, anaLogoSvg, impactLogoSvg, legendEntries: legendEntriesOpt } = opts;
 
 	// Layout constants
 	const PAD = 24;
@@ -122,6 +129,10 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 		const badge = PRELIM_FLAG_BADGE[key];
 		if (badge) resolvedColors[key] = resolveVar(badge.bg, container);
 	}
+	const resolvedLegendEntries = legendEntriesOpt?.map((e) => ({
+		color: resolveVar(e.varOrColor, container),
+		label: e.label
+	}));
 
 	document.body.removeChild(container);
 
@@ -134,7 +145,8 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	// Title + subtitle strings
 	const countryPart = country ? ` for ${country}` : '';
 	const title = `Preliminary flag of Acute Needs Analysis${countryPart}`;
-	const flaggedCount = rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? ''))).length;
+	const flaggedCount =
+		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? ''))).length;
 	const now = new Date();
 	const datePart = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 	const timePart = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -158,11 +170,15 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	let lx = 0;
 	let lrow = 0;
 
-	for (const key of PRELIM_KEYS) {
-		const badge = PRELIM_FLAG_BADGE[key];
-		if (!badge) continue;
-		const color = resolvedColors[key] ?? '#999';
-		const textW = Math.ceil(measureText(badge.label, LEG_FS));
+	const activeLegendEntries: { color: string; label: string }[] =
+		resolvedLegendEntries ??
+		PRELIM_KEYS.map((key) => ({
+			color: resolvedColors[key] ?? '#999',
+			label: PRELIM_FLAG_BADGE[key]?.label ?? key
+		}));
+
+	for (const { color, label: entryLabel } of activeLegendEntries) {
+		const textW = Math.ceil(measureText(entryLabel, LEG_FS));
 		const itemW = SWATCH + 4 + textW + INTER_ITEM_GAP;
 		if (lx + itemW > contentW && lx > 0) {
 			lx = 0;
@@ -170,7 +186,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 		}
 		const iy = itemsStartY + lrow * ROW_H;
 		legendSvg += `<rect x="${lx}" y="${iy}" width="${SWATCH}" height="${SWATCH}" rx="2" fill="${color}"/>`;
-		legendSvg += `<text x="${lx + SWATCH + 4}" y="${iy + SWATCH - 1}" font-family="${FONT}" font-size="${LEG_FS}" fill="#374151">${escapeXml(badge.label)}</text>`;
+		legendSvg += `<text x="${lx + SWATCH + 4}" y="${iy + SWATCH - 1}" font-family="${FONT}" font-size="${LEG_FS}" fill="#374151">${escapeXml(entryLabel)}</text>`;
 		lx += itemW;
 	}
 

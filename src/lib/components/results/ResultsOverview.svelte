@@ -2,13 +2,25 @@
 	import PrelimFlagDonut from '$lib/components/viz/PrelimFlagDonut.svelte';
 	import UoaRankingTable from '$lib/components/viz/UoaRankingTable.svelte';
 	import ChoroplethMap from '$lib/components/viz/ChoroplethMap.svelte';
+	import type { MapLayer } from '$lib/components/viz/ChoroplethMap.svelte';
 	import UoaDetailPanel from '$lib/components/viz/UoaDetailPanel.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
+	import { metricStore } from '$lib/stores/metricStore.svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import Card from '$lib/components/ui/Card.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 
 	type Row = Record<string, unknown>;
 	type System = { id: string; label: string };
+	type SelectOption = { value: string; label: string };
+
+	// Reference JSON traversal types (full depth)
+	type RefMetric = { metric: string; label?: string };
+	type RefIndicator = { id: string; label: string; metrics?: RefMetric[] };
+	type RefSubfactor = { id: string; label: string; indicators?: RefIndicator[] };
+	type RefFactor = { id: string; label: string; sub_factors?: RefSubfactor[] };
+	type RefSystem = { id: string; label: string; factors?: RefFactor[] };
 
 	interface Props {
 		filteredFlagged: Row[];
@@ -42,7 +54,152 @@
 		ondonutsliceclick
 	}: Props = $props();
 
+	// ── Map download ──────────────────────────────────────────────────────────────
+
 	let mapDownloadFn: (() => Promise<void>) | undefined = $state();
+
+	// ── Cascade filter state ──────────────────────────────────────────────────────
+
+	let selectedSystem = $state('');
+	let selectedFactor = $state('');
+	let selectedSubfactor = $state('');
+	let selectedMetric = $state('');
+
+	// ── Ancestry map: metric ID → compound system/factor/subfactor keys ───────────
+
+	const metricAncestry = $derived.by(() => {
+		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
+		if (!ref) return new SvelteMap<string, { system: string; factor: string; subfactor: string }>();
+		const map = new SvelteMap<string, { system: string; factor: string; subfactor: string }>();
+		for (const s of ref) {
+			for (const f of s.factors ?? []) {
+				for (const sf of f.sub_factors ?? []) {
+					for (const ind of sf.indicators ?? []) {
+						for (const m of ind.metrics ?? []) {
+							map.set(m.metric, {
+								system: s.id,
+								factor: `${s.id}.${f.id}`,
+								subfactor: `${s.id}.${f.id}.${sf.id}`
+							});
+						}
+					}
+				}
+			}
+		}
+		return map;
+	});
+
+	// ── Cascading option lists ────────────────────────────────────────────────────
+
+	const systemOptions = $derived.by<SelectOption[]>(() => {
+		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
+		if (!ref) return [];
+		return ref.map((s) => ({ value: s.id, label: s.label }));
+	});
+
+	const factorOptions = $derived.by<SelectOption[]>(() => {
+		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
+		if (!ref) return [];
+		const src = selectedSystem ? ref.filter((s) => s.id === selectedSystem) : ref;
+		return src.flatMap((s) =>
+			(s.factors ?? []).map((f) => ({ value: `${s.id}.${f.id}`, label: `${f.label} — ${s.label}` }))
+		);
+	});
+
+	const subfactorOptions = $derived.by<SelectOption[]>(() => {
+		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
+		if (!ref) return [];
+		return ref.flatMap((s) =>
+			(s.factors ?? []).flatMap((f) => {
+				if (selectedFactor && `${s.id}.${f.id}` !== selectedFactor) return [];
+				return (f.sub_factors ?? []).map((sf) => ({
+					value: `${s.id}.${f.id}.${sf.id}`,
+					label: `${sf.label} — ${f.label}`
+				}));
+			})
+		);
+	});
+
+	const metricOptions = $derived.by<SelectOption[]>(() => {
+		const ancestry = metricAncestry;
+		return Object.entries(metricStore.metricMap)
+			.filter(([id]) => {
+				if (!selectedSubfactor && !selectedFactor && !selectedSystem) return true;
+				const a = ancestry.get(id);
+				if (!a) return false;
+				if (selectedSubfactor) return a.subfactor === selectedSubfactor;
+				if (selectedFactor) return a.factor === selectedFactor;
+				return a.system === selectedSystem;
+			})
+			.map(([id, m]) => ({ value: id, label: `${id} – ${m.label ?? id}` }))
+			.sort((a, b) => a.value.localeCompare(b.value));
+	});
+
+	// ── Cascade change handlers ───────────────────────────────────────────────────
+
+	function onSystemChange(val: string | string[]) {
+		const v = typeof val === 'string' ? val : '';
+		selectedSystem = v;
+		selectedFactor = '';
+		selectedSubfactor = '';
+		selectedMetric = '';
+	}
+
+	function onFactorChange(val: string | string[]) {
+		const v = typeof val === 'string' ? val : '';
+		selectedFactor = v;
+		selectedSubfactor = '';
+		selectedMetric = '';
+		if (v) selectedSystem = v.split('.')[0];
+	}
+
+	function onSubfactorChange(val: string | string[]) {
+		const v = typeof val === 'string' ? val : '';
+		selectedSubfactor = v;
+		selectedMetric = '';
+		if (v) {
+			const parts = v.split('.');
+			selectedSystem = parts[0];
+			selectedFactor = `${parts[0]}.${parts[1]}`;
+		}
+	}
+
+	function onMetricChange(val: string | string[]) {
+		const v = typeof val === 'string' ? val : '';
+		selectedMetric = v;
+		if (v) {
+			const a = metricAncestry.get(v);
+			if (a) {
+				selectedSystem = a.system;
+				selectedFactor = a.factor;
+				selectedSubfactor = a.subfactor;
+			}
+		}
+	}
+
+	// ── Map layer: deepest non-empty selection wins ───────────────────────────────
+
+	const mapLayer: MapLayer = $derived.by(() => {
+		if (selectedMetric) return { type: 'status', field: `${selectedMetric}_status`, hasInsufficient: false };
+		if (selectedSubfactor) return { type: 'status', field: `${selectedSubfactor}.status`, hasInsufficient: true };
+		if (selectedFactor) return { type: 'status', field: `${selectedFactor}.status`, hasInsufficient: true };
+		if (selectedSystem) return { type: 'status', field: `${selectedSystem}.status`, hasInsufficient: true };
+		return { type: 'prelim' };
+	});
+
+	// ── Card subtitle ─────────────────────────────────────────────────────────────
+
+	const activeLabel = $derived(
+		selectedMetric ? (metricOptions.find((o) => o.value === selectedMetric)?.label ?? selectedMetric)
+		: selectedSubfactor ? (subfactorOptions.find((o) => o.value === selectedSubfactor)?.label ?? selectedSubfactor)
+		: selectedFactor ? (factorOptions.find((o) => o.value === selectedFactor)?.label ?? selectedFactor)
+		: selectedSystem ? (systemOptions.find((o) => o.value === selectedSystem)?.label ?? selectedSystem)
+		: null
+	);
+
+	const cardSubtitle = $derived(
+		activeLabel ? `Showing: ${activeLabel}` : 'Click an area to view its report.'
+	);
 </script>
 
 <section>
@@ -71,24 +228,70 @@
 
 	<!-- Choropleth map -->
 	{#if hasPcodes && adminFeaturesStore.fetchState !== 'error'}
-		<Card class="mt-6" title="Preliminary flag map" subtitle="Click an area to view its report.">
+		<Card class="mt-6" title="Preliminary flag map" subtitle={cardSubtitle}>
 			{#snippet titleActions()}
 				{#if mapDownloadFn}
 					<DownloadButton onclick={mapDownloadFn} label="Download SVG" variant="outline" />
 				{/if}
 			{/snippet}
+
 			{#if adminFeaturesStore.fetchState === 'loading'}
 				<div class="text-base-content/75 flex items-center gap-2 py-6 text-sm">
 					<span class="loading loading-spinner loading-sm"></span>
 					Fetching admin boundaries…
 				</div>
 			{:else if adminFeaturesStore.adm1}
+				<!-- Cascade layer filters -->
+				<div class="mb-4 flex flex-wrap items-end gap-3">
+					<div class="min-w-44">
+						<Select
+							options={systemOptions}
+							selected={selectedSystem}
+							placeholder="System…"
+							label="System"
+	
+							onchange={onSystemChange}
+						/>
+					</div>
+					<div class="min-w-44">
+						<Select
+							options={factorOptions}
+							selected={selectedFactor}
+							placeholder="Factor…"
+							label="Factor"
+	
+							onchange={onFactorChange}
+						/>
+					</div>
+					<div class="min-w-44">
+						<Select
+							options={subfactorOptions}
+							selected={selectedSubfactor}
+							placeholder="Sub-factor…"
+							label="Sub-factor"
+	
+							onchange={onSubfactorChange}
+						/>
+					</div>
+					<div class="min-w-52">
+						<Select
+							options={metricOptions}
+							selected={selectedMetric}
+							placeholder="Metric…"
+							label="Metric"
+	
+							onchange={onMetricChange}
+						/>
+					</div>
+				</div>
+
 				<ChoroplethMap
 					adm1={adminFeaturesStore.adm1}
 					adm2={adminFeaturesStore.adm2}
 					rows={filteredFlagged}
 					level={pcodeLevel}
 					country={adminFeaturesStore.countryName}
+					layer={mapLayer}
 					onuoaclick={(uoa, adminName) => onmapselect(uoa, adminName)}
 					ondownloadready={(fn) => (mapDownloadFn = fn)}
 				/>
