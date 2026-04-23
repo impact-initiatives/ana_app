@@ -43,6 +43,12 @@
 	// Used by the window click handler to detect clicks *outside* the component
 	// so the dropdown can be closed when the user clicks elsewhere on the page.
 	let containerEl: HTMLDivElement | undefined = $state();
+	// Reference to the search input — used to auto-focus when dropdown opens.
+	let searchInputEl: HTMLInputElement | undefined = $state();
+
+	$effect(() => {
+		if (open) searchInputEl?.focus();
+	});
 
 	// ── Derived ───────────────────────────────────────────────────────────────
 
@@ -123,6 +129,24 @@
 	 */
 	function removeChip(v: string) {
 		onchange?.(multiVal.filter((s) => s !== v));
+	}
+
+	/**
+	 * Enter key handler for the search input.
+	 * Single mode: select the first filtered option and close.
+	 * Multiple mode: union-add all filtered options to the current selection,
+	 *   clear the search query, keep the dropdown open for further selection.
+	 */
+	function onSearchEnter() {
+		if (filtered.length === 0) return;
+		if (!isMultiple) {
+			selectOne(filtered[0].value);
+		} else {
+			const filteredValues = new Set(filtered.map((o) => o.value));
+			const next = [...new Set([...multiVal, ...filteredValues])];
+			onchange?.(next);
+			searchQuery = '';
+		}
 	}
 
 	// ── Outside click ─────────────────────────────────────────────────────────
@@ -237,7 +261,9 @@
 					class="input input-sm bg-base-100 w-full border text-xs"
 					placeholder="Search…"
 					bind:value={searchQuery}
+					bind:this={searchInputEl}
 					onclick={(e) => e.stopPropagation()}
+					onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onSearchEnter(); } }}
 				/>
 			</div>
 
