@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { fetchAdminsForCountry } from '$lib/engine/fetchAdmin';
+import i18nCountries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+i18nCountries.registerLocale(enLocale);
 
 // Minimal GeoJSON polygon fixture (a tiny square)
 const square = (id: string) => ({
@@ -59,7 +62,8 @@ describe('fetchAdminsForCountry — pcode not found', () => {
 	it('throws when matched feature has no iso3 property', async () => {
 		const noIso3 = featureCollection({
 			...square('S01'),
-			properties: { adm1_pcode: 'S01' } // iso3 missing
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			properties: { adm1_pcode: 'S01' } as any // iso3 intentionally absent
 		});
 		vi.stubGlobal('fetch', mockFetch(noIso3));
 		await expect(fetchAdminsForCountry('SO0101', 'ADM1')).rejects.toThrow(/iso3 not found/);
@@ -128,5 +132,23 @@ describe('fetchAdminsForCountry — ADM2 level', () => {
 		const result = await fetchAdminsForCountry('SO0101', 'ADM2');
 		const lineFeature = result!.adm1.features[0];
 		expect(lineFeature.properties?.adm1_pcode).toBe('S01');
+	});
+});
+
+describe('countryNameFromKey — iso2 lookup (mirrors adminFeaturesStore.countryNameFromKey)', () => {
+	it('resolves Sudan pcode prefix to "Sudan"', () => {
+		expect(i18nCountries.getName('SD', 'en')).toBe('Sudan');
+	});
+
+	it('resolves Somalia pcode prefix to "Somalia"', () => {
+		expect(i18nCountries.getName('SO', 'en')).toBe('Somalia');
+	});
+
+	it('resolves Bangladesh pcode prefix to "Bangladesh"', () => {
+		expect(i18nCountries.getName('BD', 'en')).toBe('Bangladesh');
+	});
+
+	it('returns undefined for an unknown iso2 code', () => {
+		expect(i18nCountries.getName('XX', 'en')).toBeUndefined();
 	});
 });
