@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 
 	type Row = Record<string, any>;
@@ -170,18 +171,14 @@
 							onchange={onexportUoasChange}
 						/>
 					</div>
-					<button
-						class="btn btn-secondary btn-sm"
-						disabled={exportSelectedUoas.length === 0}
+					<DownloadButton
 						onclick={handleDeepDive}
-					>
-						Download ZIP ({exportSelectedUoas.length} UoA{exportSelectedUoas.length !== 1
-							? 's'
-							: ''})
-					</button>
+						label="Download ZIP (of selected UoAs)"
+						variant="secondary"
+						disabled={exportSelectedUoas.length === 0}
+					></DownloadButton>
 				</div>
 			</Card>
 		</div>
-
 	</div>
 </section>

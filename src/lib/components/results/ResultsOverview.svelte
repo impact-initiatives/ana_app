@@ -5,6 +5,7 @@
 	import UoaDetailPanel from '$lib/components/viz/UoaDetailPanel.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 
 	type Row = Record<string, unknown>;
 	type System = { id: string; label: string };
@@ -73,22 +74,7 @@
 		<Card class="mt-6" title="Preliminary flag map" subtitle="Click an area to view its report.">
 			{#snippet titleActions()}
 				{#if mapDownloadFn}
-					<button class="btn btn-sm btn-outline gap-1.5" onclick={mapDownloadFn}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="size-4"
-							viewBox="0 0 20 20"
-							fill="currentColor"
-							aria-hidden="true"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-						Download SVG
-					</button>
+					<DownloadButton onclick={mapDownloadFn} label="Download SVG" variant="outline" />
 				{/if}
 			{/snippet}
 			{#if adminFeaturesStore.fetchState === 'loading'}
