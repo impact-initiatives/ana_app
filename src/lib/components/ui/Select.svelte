@@ -23,11 +23,13 @@
 		label?: string;
 		/** Called with the new string (simple) or string[] (multiple) when the selection changes. */
 		onchange?: (selected: string | string[]) => void;
+		/** Single mode only: auto-select the first option when nothing is selected. */
+		autoSelectFirst?: boolean;
 	}
 
 	// Those props are passed in from the parent component.
 	// These are the component's parameters that are used from the parent component.
-	let { options, selected, placeholder = 'Select…', label, onchange }: Props = $props();
+	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false }: Props = $props();
 
 	// Mode derived from the shape of selected — no separate prop needed.
 	const isMultiple = $derived(Array.isArray(selected));
@@ -51,7 +53,7 @@
 	});
 
 	$effect(() => {
-		if (!isMultiple && singleVal === '' && options.length > 0) {
+		if (autoSelectFirst && !isMultiple && singleVal === '' && options.length > 0) {
 			onchange?.(options[0].value);
 		}
 	});
@@ -202,9 +204,9 @@
 	>
 		<span class="flex flex-wrap gap-1">
 			{#if !isMultiple}
-				<!-- Simple mode: just text, no badge, no clear -->
+				<!-- Simple mode -->
 				{#if selectedLabel === null || singleVal === ''}
-					<span class="text-base-content">{placeholder}</span>
+					<span class="text-base-content/70">{placeholder}</span>
 				{:else}
 					<span class="text-base-content">{selectedLabel}</span>
 				{/if}
@@ -266,20 +268,26 @@
 						}
 					}}
 				/>
-				{#if !isMultiple}
-					<button
-						type="button"
-						class="btn btn-primary btn-xs shrink-0 text-xs disabled:opacity-40"
-						disabled={filtered.length === 0}
-						onclick={(e) => {
-							e.stopPropagation();
-							onSearchEnter();
-						}}>Select</button
-					>
-				{/if}
 			</div>
 
-			<!-- Single mode: no clear toolbar -->
+			<!-- Single mode toolbar: Select (active only while searching) + Clear -->
+			{#if !isMultiple}
+				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
+					<button
+						type="button"
+						class="btn btn-soft btn-xs text-primary disabled:text-base-content/75 text-xs"
+						disabled={!searchQuery || filtered.length === 0}
+						onclick={onSearchEnter}>Select</button
+					>
+					<span class="text-primary">|</span>
+					<button
+						type="button"
+						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/75 text-xs"
+						disabled={singleVal === ''}
+						onclick={() => onchange?.('')}>Clear</button
+					>
+				</div>
+			{/if}
 
 			<!-- Multiple mode only: select-all / clear toolbar -->
 			{#if isMultiple}
