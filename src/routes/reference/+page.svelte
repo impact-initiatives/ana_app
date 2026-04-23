@@ -101,6 +101,28 @@
 		}
 	);
 
+	// Pre-select all levels/concepts once options arrive from the async metricStore.
+	let levelsInitialized = $state(false);
+	let conceptsInitialized = $state(false);
+	$effect(() => {
+		if (!levelsInitialized && levelOptions.length > 0) {
+			levelsInitialized = true;
+			selectedLevels = levelOptions.map((o) => o.value);
+		}
+	});
+	$effect(() => {
+		if (!conceptsInitialized && conceptOptions.length > 0) {
+			conceptsInitialized = true;
+			selectedConcepts = conceptOptions.map((o) => o.value);
+		}
+	});
+
+	// True when the user has explicitly cleared a filter that has available options.
+	const noActiveFilters = $derived(
+		(levelOptions.length > 0 && selectedLevels.length === 0) ||
+		(conceptOptions.length > 0 && selectedConcepts.length === 0)
+	);
+
 	const filteredTableRows = $derived(
 		tidy(
 			referenceObjects,
@@ -154,6 +176,7 @@
 						selected={selectedLevels}
 						placeholder="All levels"
 						label="Filter by level"
+	
 						onchange={(v) => (selectedLevels = v as string[])}
 					/>
 				</div>
@@ -163,13 +186,18 @@
 						selected={selectedConcepts}
 						placeholder="All concepts"
 						label="Filter by risk concept"
+	
 						onchange={(v) => (selectedConcepts = v as string[])}
 					/>
 				</div>
 			</div>
 		</div>
 		<div class="mb-6">
-			{#if !showTableReferenceList}
+			{#if noActiveFilters}
+				<span class="text-base-content/70 flex py-8 text-center text-sm"
+					>No data matches current filters.</span
+				>
+			{:else if !showTableReferenceList}
 				<CirclePacking
 					data={filteredData}
 					nodePadding={4}
