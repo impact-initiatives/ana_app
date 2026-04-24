@@ -1,15 +1,20 @@
 <script lang="ts">
-	// Options
-	// Type definitions for the options passed to the select component.
 	interface Option {
 		value: string;
 		label: string;
 	}
 
-	// Props for the select component.
-	interface Props {
-		/** The list of options to display. */
+	interface OptionGroup {
+		group: string;
 		options: Option[];
+	}
+
+	// Exported so callers can type grouped option arrays without re-declaring.
+	export type SelectGroup = OptionGroup;
+
+	interface Props {
+		/** Flat options list OR an array of named groups. Groups render with a header divider. */
+		options: Option[] | OptionGroup[];
 		/**
 		 * Current selection.
 		 * - Pass a string for simple (single-choice) mode.
@@ -27,8 +32,6 @@
 		autoSelectFirst?: boolean;
 	}
 
-	// Those props are passed in from the parent component.
-	// These are the component's parameters that are used from the parent component.
 	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false }: Props = $props();
 
 	// Mode derived from the shape of selected — no separate prop needed.
@@ -37,106 +40,85 @@
 	const multiVal = $derived(isMultiple ? (selected as string[]) : []);
 
 	// ── Local UI state ────────────────────────────────────────────────────────
-	// Whether the dropdown panel is currently visible.
 	let open = $state(false);
-	// The current text typed into the search box; used to filter the options list.
 	let searchQuery = $state('');
-	// A reference to this component's root <div> in the DOM.
-	// Used by the window click handler to detect clicks *outside* the component
-	// so the dropdown can be closed when the user clicks elsewhere on the page.
 	let containerEl: HTMLDivElement | undefined = $state();
-	// Reference to the search input — used to auto-focus when dropdown opens.
 	let searchInputEl: HTMLInputElement | undefined = $state();
 
 	$effect(() => {
 		if (open) searchInputEl?.focus();
 	});
 
+	// ── Normalize flat/grouped options ────────────────────────────────────────
+
+	function isGrouped(opts: Option[] | OptionGroup[]): opts is OptionGroup[] {
+		return opts.length > 0 && 'group' in opts[0];
+	}
+
+	const groups = $derived(
+		isGrouped(options) ? options : [{ group: '', options: options as Option[] }]
+	);
+
+	const flatOptions = $derived(groups.flatMap((g) => g.options));
+
 	$effect(() => {
-		if (autoSelectFirst && !isMultiple && singleVal === '' && options.length > 0) {
-			onchange?.(options[0].value);
+		if (autoSelectFirst && !isMultiple && singleVal === '' && flatOptions.length > 0) {
+			onchange?.(flatOptions[0].value);
 		}
 	});
 
 	// ── Derived ───────────────────────────────────────────────────────────────
 
-	// The subset of options whose label contains the current search text.
-	// Recomputes on every keystroke so the list updates in real time.
-	const filtered = $derived(
-		options.filter((o) => o.label.toLowerCase().includes(searchQuery.toLowerCase()))
+	const filteredGroups = $derived(
+		groups
+			.map((g) => ({
+				...g,
+				options: g.options.filter((o) =>
+					o.label.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			}))
+			.filter((g) => g.options.length > 0)
 	);
 
-	// Simple mode: the display label for the currently selected value,
-	// or null when nothing is selected (so the placeholder is shown instead).
-	const selectedLabel = $derived(options.find((o) => o.value === singleVal)?.label ?? null);
+	const filtered = $derived(filteredGroups.flatMap((g) => g.options));
 
-	// Multiple mode: convenience flags used to enable/disable the
-	// "Select all" and "Clear" toolbar buttons respectively.
-	const allSelected = $derived(multiVal.length === options.length);
+	const selectedLabel = $derived(flatOptions.find((o) => o.value === singleVal)?.label ?? null);
+	const allSelected = $derived(multiVal.length === flatOptions.length);
 	const noneSelected = $derived(multiVal.length === 0);
 
-	/** Returns the label for a given value v
-	 *  falling back to the value itself if no label is found.
-	 */
 	function labelFor(v: string): string {
-		return options.find((o) => o.value === v)?.label ?? v;
+		return flatOptions.find((o) => o.value === v)?.label ?? v;
 	}
 
 	// ── Helpers ───────────────────────────────────────────────────────────────
 
-	/**
-	 * Closes the dropdown panel and clears the search query.
-	 */
 	function closeDropdown() {
 		open = false;
 		searchQuery = '';
 	}
 
-	/**
-	 * Selects a single value and closes the dropdown.
-	 */
 	function selectOne(v: string) {
 		closeDropdown();
 		onchange?.(v);
 	}
 
-	/**
-	 * Toggles the selection of a value (multiple mode only).
-	 * It removes the value if it's already selected, or adds it if not.
-	 */
 	function toggle(v: string) {
 		const next = multiVal.includes(v) ? multiVal.filter((s) => s !== v) : [...multiVal, v];
 		onchange?.(next);
 	}
 
-	/**
-	 * Selects all values and closes the dropdown.
-	 */
 	function selectAll() {
-		onchange?.(options.map((o) => o.value));
+		onchange?.(flatOptions.map((o) => o.value));
 	}
 
-	/**
-	 * Clears all selected values and closes the dropdown.
-	 */
 	function clearAll() {
 		onchange?.([]);
 	}
 
-	/**
-	 * Removes a chip (value) from the selection and closes the dropdown.
-	 * This is used when a user clicks on a chip to remove it from the selection.
-	 */
 	function removeChip(v: string) {
 		onchange?.(multiVal.filter((s) => s !== v));
 	}
 
-	/**
-	 * Enter key handler for the search input.
-	 * Single mode: select the first filtered option and close.
-	 * Multiple mode: union-add all filtered options to the current selection,
-	 *   clear the search query, keep the dropdown open for further selection.
-	 */
 	function onSearchEnter() {
 		if (filtered.length === 0) return;
 		if (!isMultiple) {
@@ -149,9 +131,6 @@
 
 	// ── Outside click ─────────────────────────────────────────────────────────
 
-	/**
-	 * Closes the dropdown when the user clicks outside the component.
-	 */
 	function onWindowClick(e: MouseEvent) {
 		if (containerEl && !containerEl.contains(e.target as Node)) {
 			closeDropdown();
@@ -159,40 +138,9 @@
 	}
 </script>
 
-<!-- Every click on the page bubbles up to window and fires onWindowClick.
-     That function checks if the click landed inside containerEl (this component's root div).
-     If outside → close the dropdown. If inside → do nothing, letting the trigger handle it. -->
 <svelte:window onclick={onWindowClick} />
 
-<!--
-  UI structure
-  ├── Label (optional, shown above trigger)
-  ├── Trigger (button, full width)
-  │   ├── Simple mode
-  │   │   ├── Placeholder (when nothing selected)
-  │   │   └── Badge chip with × (when a value is selected)
-  │   ├── Multiple mode
-  │   │   ├── Placeholder (when nothing selected)
-  │   │   ├── "All (n)" label (when everything selected)
-  │   │   └── Up to 3 badge chips with ×, then "+n more" overflow badge
-  │   └── Caret icon (rotates when open)
-  └── Dropdown (visible when open)
-      ├── Search input (filters the options list in real time)
-      ├── Toolbar — multiple mode
-      │   ├── "Select all" button (disabled when all selected)
-      │   ├── "Clear" button (disabled when none selected)
-      │   └── "n/total" counter
-      ├── Toolbar — single mode (only when a value is selected)
-      │   └── "Clear" button
-      └── Options list
-          ├── Each option row (button)
-          │   ├── Checkbox (multiple mode) or Radio (simple mode)
-          │   └── Option label
-          └── "No matches" message (when search has no results)
--->
-
 <div class="flex flex-col gap-1" bind:this={containerEl}>
-	<!-- If label is provided, render it above the trigger button. -->
 	{#if label}
 		<span class="mt-2 text-xs font-semibold tracking-wide uppercase">{label}</span>
 	{/if}
@@ -204,18 +152,16 @@
 	>
 		<span class="flex flex-wrap gap-1">
 			{#if !isMultiple}
-				<!-- Simple mode -->
 				{#if selectedLabel === null || singleVal === ''}
 					<span class="text-base-content/70">{placeholder}</span>
 				{:else}
 					<span class="text-base-content">{selectedLabel}</span>
 				{/if}
 			{:else}
-				<!-- Multiple mode: placeholder / "All (n)" / up-to-3 chips + overflow -->
 				{#if multiVal.length === 0}
 					<span class="text-base-content/85">{placeholder}</span>
-				{:else if multiVal.length === options.length}
-					<span class="text-base-content/85">All ({options.length})</span>
+				{:else if multiVal.length === flatOptions.length}
+					<span class="text-base-content/85">All ({flatOptions.length})</span>
 				{:else}
 					{#each multiVal.slice(0, 3) as v (v)}
 						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
@@ -270,7 +216,7 @@
 				/>
 			</div>
 
-			<!-- Single mode toolbar: Select (active only while searching) + Clear -->
+			<!-- Single mode toolbar -->
 			{#if !isMultiple}
 				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
 					<button
@@ -289,7 +235,7 @@
 				</div>
 			{/if}
 
-			<!-- Multiple mode only: select-all / clear toolbar -->
+			<!-- Multiple mode toolbar -->
 			{#if isMultiple}
 				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
 					<button
@@ -307,46 +253,57 @@
 						onclick={clearAll}>Clear</button
 					>
 					<span class="text-base-content/75 ml-auto text-xs">
-						{multiVal.length}/{options.length}
+						{multiVal.length}/{flatOptions.length}
 					</span>
 				</div>
 			{/if}
 
 			<!-- Options list -->
 			<ul class="max-h-56 overflow-y-auto py-1" role="listbox" aria-multiselectable={isMultiple}>
-				{#each filtered as option (option.value)}
-					{@const isSelected = isMultiple
-						? multiVal.includes(option.value)
-						: option.value === singleVal}
-					<li role="option" aria-selected={isSelected}>
-						<button
-							type="button"
-							class="flex w-full items-center gap-2 px-3 py-1.5 text-xs
-								{isSelected ? 'text-primary font-medium' : 'text-base-content'} hover:bg-base-200"
-							onclick={() => (isMultiple ? toggle(option.value) : selectOne(option.value))}
+				{#each filteredGroups as grp, i (grp.group || i)}
+					{#if grp.group}
+						<li
+							class="text-base-content/50 px-3 pb-0.5 pt-1 text-[10px] font-semibold tracking-wider uppercase {i >
+							0
+								? 'border-base-200 mt-1 border-t'
+								: ''}"
+							role="presentation"
 						>
-							{#if isMultiple}
-								<!-- Multiple mode: real checkbox, pointer-events-none so the parent button handles the click -->
-								<input
-									type="checkbox"
-									class="checkbox checkbox-primary checkbox-xs pointer-events-none shrink-0"
-									checked={isSelected}
-									tabindex="-1"
-									readonly
-								/>
-							{:else}
-								<!-- Simple mode: real radio, pointer-events-none so the parent button handles the click -->
-								<input
-									type="radio"
-									class="radio radio-primary radio-xs pointer-events-none shrink-0"
-									checked={isSelected}
-									tabindex="-1"
-									readonly
-								/>
-							{/if}
-							{option.label}
-						</button>
-					</li>
+							{grp.group}
+						</li>
+					{/if}
+					{#each grp.options as option (option.value)}
+						{@const isSelected = isMultiple
+							? multiVal.includes(option.value)
+							: option.value === singleVal}
+						<li role="option" aria-selected={isSelected}>
+							<button
+								type="button"
+								class="flex w-full items-center gap-2 px-3 py-1.5 text-xs
+									{isSelected ? 'text-primary font-medium' : 'text-base-content'} hover:bg-base-200"
+								onclick={() => (isMultiple ? toggle(option.value) : selectOne(option.value))}
+							>
+								{#if isMultiple}
+									<input
+										type="checkbox"
+										class="checkbox checkbox-primary checkbox-xs pointer-events-none shrink-0"
+										checked={isSelected}
+										tabindex="-1"
+										readonly
+									/>
+								{:else}
+									<input
+										type="radio"
+										class="radio radio-primary radio-xs pointer-events-none shrink-0"
+										checked={isSelected}
+										tabindex="-1"
+										readonly
+									/>
+								{/if}
+								{option.label}
+							</button>
+						</li>
+					{/each}
 				{:else}
 					<li class="text-base-content/70 px-3 py-2 text-xs">No matches</li>
 				{/each}

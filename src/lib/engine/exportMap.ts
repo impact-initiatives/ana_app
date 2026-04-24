@@ -70,6 +70,29 @@ function escapeXml(s: string): string {
 	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/** Wrap text to fit within max width, returning array of lines. */
+function wrapText(text: string, maxWidth: number, fontSize: number, bold = false): string[] {
+	const words = text.split(' ');
+	const lines: string[] = [];
+	let currentLine = '';
+
+	for (const word of words) {
+		const testLine = currentLine ? `${currentLine} ${word}` : word;
+		const testWidth = measureText(testLine, fontSize, bold);
+
+		if (testWidth <= maxWidth || !currentLine) {
+			currentLine = testLine;
+		} else {
+			lines.push(currentLine);
+			currentLine = word;
+		}
+	}
+
+	if (currentLine) lines.push(currentLine);
+	return lines;
+}
+
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export interface ExportMapOpts {
@@ -96,7 +119,7 @@ export interface ExportMapOpts {
  *   ANA + IMPACT logos (bottom-right)
  */
 export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): string {
-	const { country, rows, anaLogoSvg, impactLogoSvg, legendEntries: legendEntriesOpt } = opts;
+	const { country, rows, anaLogoSvg, impactLogoSvg, legendEntries: legendEntriesOpt, layerTitle } = opts;
 
 	// Layout constants
 	const PAD = 24;
@@ -105,8 +128,10 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	const SUB_FS = 20;
 	const SWATCH = 14;
 	const LEG_FS = 16;
-	const INTER_ITEM_GAP = 16; // consistent gap between legend items
+	const INTER_ITEM_GAP = 16;
 	const LOGO_H = 42;
+	const LINE_HEIGHT_TITLE = TITLE_FS + 4;
+	const LINE_HEIGHT_SUB = SUB_FS + 4;
 
 	// Map dimensions
 	const { width: rawW, height: rawH } = liveSvg.getBoundingClientRect();
@@ -142,30 +167,40 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	mapClone.setAttribute('width', String(mw));
 	mapClone.setAttribute('height', String(mh));
 
-	// Title + subtitle strings
+	// --- TEXT PREPARATION & WRAPPING ---
 	const countryPart = country ? ` for ${country}` : '';
-	const title = `Preliminary flag of Acute Needs Analysis${countryPart}`;
+	const defaultTitle = `Preliminary flag for ${countryPart}`;
+	const title = layerTitle ?? defaultTitle;
+	
 	const flaggedCount =
 		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? ''))).length;
+	
 	const now = new Date();
 	const datePart = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 	const timePart = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-	const subtitle = `${flaggedCount} of ${rows.length} unit${rows.length !== 1 ? 's' : ''} of analysis flagged · Downloaded at: ${datePart} ${timePart}`;
+	const subtitle = `${flaggedCount} of ${rows.length} unit${rows.length !== 1 ? 's' : ''} of analysis flagged · Downloaded on: ${datePart} ${timePart}`;
 
-	// Y layout
-	const titleY = PAD + TITLE_FS; // text baseline
-	const subY = titleY + 7 + SUB_FS;
-	const mapY = subY + 8 + GAP;
+	// Calculate max width (85% of total container)
+	const titleMaxWidth = totalW * 0.85;
 
-	// Legend
+	// Wrap text
+	const wrappedTitleLines = wrapText(title, titleMaxWidth, TITLE_FS, true);
+	const wrappedSubLines = wrapText(subtitle, titleMaxWidth, SUB_FS, false);
+
+	// Calculate Y positions
+	const titleY = PAD + TITLE_FS;
+	const titleBlockHeight = wrappedTitleLines.length * LINE_HEIGHT_TITLE;
+	const subY = titleY + titleBlockHeight + 7; // Gap after title block
+	
+	// Calculate map Y position (below subtitle)
+	const mapY = subY + (wrappedSubLines.length * LINE_HEIGHT_SUB) + GAP;
+
+	// --- LEGEND LOGIC ---
 	const contentW = mw;
 	const ROW_H = SWATCH + 10;
-
-	// "Flag:" heading on its own line
 	const flagLabelFs = LEG_FS;
 	let legendSvg = `<text x="0" y="${flagLabelFs}" font-family="${FONT}" font-size="${flagLabelFs}" font-weight="bold" fill="#374151">Flag:</text>`;
 
-	// Items start on the line below the heading
 	const itemsStartY = flagLabelFs + 8;
 	let lx = 0;
 	let lrow = 0;
@@ -204,16 +239,25 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 
 	const mapSvgStr = new XMLSerializer().serializeToString(mapClone);
 
+	// --- GENERATE WRAPPED TEXT SVG STRINGS ---
+	const titleSvgParts = wrappedTitleLines.map((line, i) => 
+		`  <text x="${PAD}" y="${titleY + i * LINE_HEIGHT_TITLE}" font-family="${FONT}" font-size="${TITLE_FS}" font-weight="bold" fill="#111827">${escapeXml(line)}</text>`
+	).join('\n');
+
+	const subSvgParts = wrappedSubLines.map((line, i) => 
+		`  <text x="${PAD}" y="${subY + i * LINE_HEIGHT_SUB}" font-family="${FONT}" font-size="${SUB_FS}" fill="#6b7280">${escapeXml(line)}</text>`
+	).join('\n');
+
 	return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${totalW}" height="${totalH}">
-  <rect width="${totalW}" height="${totalH}" fill="white"/>
-  <text x="${PAD}" y="${titleY}" font-family="${FONT}" font-size="${TITLE_FS}" font-weight="bold" fill="#111827">${escapeXml(title)}</text>
-  <text x="${PAD}" y="${subY}" font-family="${FONT}" font-size="${SUB_FS}" fill="#6b7280">${escapeXml(subtitle)}</text>
-  ${mapSvgStr.replace(/^<svg /, `<svg x="${PAD}" y="${mapY}" `)}
-  <g transform="translate(${PAD}, ${legendY})">${legendSvg}</g>
-  <image href="${svgToDataUri(anaLogoSvg)}" x="${anaX}" y="${logoY}" width="${ANA_W}" height="${LOGO_H}"/>
-  <image href="${svgToDataUri(impactLogoSvg)}" x="${impactX}" y="${logoY}" width="${IMPACT_W}" height="${LOGO_H}"/>
-</svg>`;
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${totalW}" height="${totalH}">
+		<rect width="${totalW}" height="${totalH}" fill="white"/>
+		${titleSvgParts}
+		${subSvgParts}
+		${mapSvgStr.replace(/^<svg /, `<svg x="${PAD}" y="${mapY}" `)}
+		<g transform="translate(${PAD}, ${legendY})">${legendSvg}</g>
+		<image href="${svgToDataUri(anaLogoSvg)}" x="${anaX}" y="${logoY}" width="${ANA_W}" height="${LOGO_H}"/>
+		<image href="${svgToDataUri(impactLogoSvg)}" x="${impactX}" y="${logoY}" width="${IMPACT_W}" height="${LOGO_H}"/>
+		</svg>`;
 }
 
 /** Trigger a browser download of an SVG string. */

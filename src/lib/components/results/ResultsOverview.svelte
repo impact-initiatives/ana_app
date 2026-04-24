@@ -9,6 +9,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
+	import type { SelectGroup } from '$lib/components/ui/Select.svelte';
 	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 
 	type Row = Record<string, unknown>;
@@ -97,27 +98,33 @@
 		return ref.map((s) => ({ value: s.id, label: s.label }));
 	});
 
-	const factorOptions = $derived.by<SelectOption[]>(() => {
+	const factorOptions = $derived.by<SelectGroup[]>(() => {
 		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
 		if (!ref) return [];
 		const src = selectedSystem ? ref.filter((s) => s.id === selectedSystem) : ref;
-		return src.flatMap((s) =>
-			(s.factors ?? []).map((f) => ({ value: `${s.id}.${f.id}`, label: `${f.label} — ${s.label}` }))
-		);
+		return src
+			.map((s) => ({
+				group: s.label,
+				options: (s.factors ?? []).map((f) => ({ value: `${s.id}.${f.id}`, label: f.label }))
+			}))
+			.filter((g) => g.options.length > 0);
 	});
 
-	const subfactorOptions = $derived.by<SelectOption[]>(() => {
+	const subfactorOptions = $derived.by<SelectGroup[]>(() => {
 		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
 		if (!ref) return [];
-		return ref.flatMap((s) =>
-			(s.factors ?? []).flatMap((f) => {
-				if (selectedFactor && `${s.id}.${f.id}` !== selectedFactor) return [];
-				return (f.sub_factors ?? []).map((sf) => ({
+		const groups: SelectGroup[] = [];
+		for (const s of ref) {
+			for (const f of s.factors ?? []) {
+				if (selectedFactor && `${s.id}.${f.id}` !== selectedFactor) continue;
+				const opts = (f.sub_factors ?? []).map((sf) => ({
 					value: `${s.id}.${f.id}.${sf.id}`,
-					label: `${sf.label} — ${f.label}`
+					label: sf.label
 				}));
-			})
-		);
+				if (opts.length > 0) groups.push({ group: f.label, options: opts });
+			}
+		}
+		return groups;
 	});
 
 	const metricOptions = $derived.by<SelectOption[]>(() => {
@@ -177,28 +184,115 @@
 		}
 	}
 
+	// ── Label lookup: system/factor/subfactor id → human label ───────────────────
+
+	const labelLookup = $derived.by(() => {
+		const ref = metricStore.referenceJson?.systems as RefSystem[] | undefined;
+		const systems: Record<string, string> = {};
+		const factors: Record<string, string> = {};
+		const subfactors: Record<string, string> = {};
+		for (const s of ref ?? []) {
+			systems[s.id] = s.label;
+			for (const f of s.factors ?? []) {
+				factors[`${s.id}.${f.id}`] = f.label;
+				for (const sf of f.sub_factors ?? []) {
+					subfactors[`${s.id}.${f.id}.${sf.id}`] = sf.label;
+				}
+			}
+		}
+		return { systems, factors, subfactors };
+	});
+
+	// ── Export title: reflects the deepest active filter ─────────────────────────
+
+	const exportLayerTitle = $derived.by<string | null>(() => {
+		if (selectedMetric) {
+			return metricOptions.find((o) => o.value === selectedMetric)?.label ?? selectedMetric;
+		}
+		if (selectedSubfactor) {
+			const sysId = selectedSubfactor.split('.')[0];
+			const facId = `${sysId}.${selectedSubfactor.split('.')[1]}`;
+			const parts: string[] = [];
+			const sysLabel = labelLookup.systems[sysId];
+			const facLabel = labelLookup.factors[facId];
+			const sfLabel = labelLookup.subfactors[selectedSubfactor];
+			if (sysLabel) parts.push(`System: ${sysLabel}`);
+			if (facLabel) parts.push(`Factor: ${facLabel}`);
+			if (sfLabel) parts.push(`Sub-factor: ${sfLabel}`);
+			return parts.join(' – ') || selectedSubfactor;
+		}
+		if (selectedFactor) {
+			const sysId = selectedFactor.split('.')[0];
+			const parts: string[] = [];
+			const sysLabel = labelLookup.systems[sysId];
+			const facLabel = labelLookup.factors[selectedFactor];
+			if (sysLabel) parts.push(`System: ${sysLabel}`);
+			if (facLabel) parts.push(`Factor: ${facLabel}`);
+			return parts.join(' – ') || selectedFactor;
+		}
+		if (selectedSystem) {
+			const label = labelLookup.systems[selectedSystem];
+			return label ? `System: ${label}` : selectedSystem;
+		}
+		return null;
+	});
+
 	// ── Map layer: deepest non-empty selection wins ───────────────────────────────
 
 	const mapLayer: MapLayer = $derived.by(() => {
-		if (selectedMetric) return { type: 'status', field: `${selectedMetric}_status`, hasInsufficient: false };
-		if (selectedSubfactor) return { type: 'status', field: `${selectedSubfactor}.status`, hasInsufficient: true };
-		if (selectedFactor) return { type: 'status', field: `${selectedFactor}.status`, hasInsufficient: true };
-		if (selectedSystem) return { type: 'status', field: `${selectedSystem}.status`, hasInsufficient: true };
+		if (selectedMetric)
+			return { type: 'status', field: `${selectedMetric}_status`, hasInsufficient: false };
+		if (selectedSubfactor)
+			return { type: 'status', field: `${selectedSubfactor}.status`, hasInsufficient: true };
+		if (selectedFactor)
+			return { type: 'status', field: `${selectedFactor}.status`, hasInsufficient: true };
+		if (selectedSystem)
+			return { type: 'status', field: `${selectedSystem}.status`, hasInsufficient: true };
 		return { type: 'prelim' };
 	});
 
 	// ── Card subtitle ─────────────────────────────────────────────────────────────
 
-	const activeLabel = $derived(
-		selectedMetric ? (metricOptions.find((o) => o.value === selectedMetric)?.label ?? selectedMetric)
-		: selectedSubfactor ? (subfactorOptions.find((o) => o.value === selectedSubfactor)?.label ?? selectedSubfactor)
-		: selectedFactor ? (factorOptions.find((o) => o.value === selectedFactor)?.label ?? selectedFactor)
-		: selectedSystem ? (systemOptions.find((o) => o.value === selectedSystem)?.label ?? selectedSystem)
-		: null
-	);
+	const activeLabel = $derived.by<string | null>(() => {
+		if (selectedMetric) {
+			const a = metricAncestry.get(selectedMetric);
+			const metricLabel =
+				metricOptions.find((o) => o.value === selectedMetric)?.label ?? selectedMetric;
+			if (!a) return metricLabel;
+			const parts: string[] = [];
+			if (labelLookup.systems[a.system]) parts.push(labelLookup.systems[a.system]);
+			if (labelLookup.factors[a.factor]) parts.push(labelLookup.factors[a.factor]);
+			if (labelLookup.subfactors[a.subfactor]) parts.push(labelLookup.subfactors[a.subfactor]);
+			parts.push(metricLabel);
+			return parts.join(' / ');
+		}
+		if (selectedSubfactor) {
+			const sysId = selectedSubfactor.split('.')[0];
+			const facId = `${sysId}.${selectedSubfactor.split('.')[1]}`;
+			const parts: string[] = [];
+			if (labelLookup.systems[sysId]) parts.push(labelLookup.systems[sysId]);
+			if (labelLookup.factors[facId]) parts.push(labelLookup.factors[facId]);
+			if (labelLookup.subfactors[selectedSubfactor])
+				parts.push(labelLookup.subfactors[selectedSubfactor]);
+			return parts.join(' / ') || selectedSubfactor;
+		}
+		if (selectedFactor) {
+			const sysId = selectedFactor.split('.')[0];
+			const parts: string[] = [];
+			if (labelLookup.systems[sysId]) parts.push(labelLookup.systems[sysId]);
+			if (labelLookup.factors[selectedFactor]) parts.push(labelLookup.factors[selectedFactor]);
+			return parts.join(' / ') || selectedFactor;
+		}
+		if (selectedSystem) {
+			return labelLookup.systems[selectedSystem] ?? selectedSystem;
+		}
+		return null;
+	});
 
 	const cardSubtitle = $derived(
-		activeLabel ? `Showing: ${activeLabel}` : 'Click an area to view its report.'
+		activeLabel
+			? `Showing: ${activeLabel}`
+			: 'Showing: Preliminary flag. Click an area to view its report. Filter to view flags for systems, factors, subfactors or metrics.'
 	);
 </script>
 
@@ -228,7 +322,7 @@
 
 	<!-- Choropleth map -->
 	{#if hasPcodes && adminFeaturesStore.fetchState !== 'error'}
-		<Card class="mt-6" title="Preliminary flag map" subtitle={cardSubtitle}>
+		<Card class="mt-6" title="Map" subtitle={cardSubtitle}>
 			{#snippet titleActions()}
 				{#if mapDownloadFn}
 					<DownloadButton onclick={mapDownloadFn} label="Download SVG" variant="outline" />
@@ -249,7 +343,6 @@
 							selected={selectedSystem}
 							placeholder="System…"
 							label="System"
-	
 							onchange={onSystemChange}
 						/>
 					</div>
@@ -259,7 +352,6 @@
 							selected={selectedFactor}
 							placeholder="Factor…"
 							label="Factor"
-	
 							onchange={onFactorChange}
 						/>
 					</div>
@@ -269,7 +361,6 @@
 							selected={selectedSubfactor}
 							placeholder="Sub-factor…"
 							label="Sub-factor"
-	
 							onchange={onSubfactorChange}
 						/>
 					</div>
@@ -279,7 +370,6 @@
 							selected={selectedMetric}
 							placeholder="Metric…"
 							label="Metric"
-	
 							onchange={onMetricChange}
 						/>
 					</div>
@@ -292,6 +382,7 @@
 					level={pcodeLevel}
 					country={adminFeaturesStore.countryName}
 					layer={mapLayer}
+					layerTitle={exportLayerTitle}
 					onuoaclick={(uoa, adminName) => onmapselect(uoa, adminName)}
 					ondownloadready={(fn) => (mapDownloadFn = fn)}
 				/>

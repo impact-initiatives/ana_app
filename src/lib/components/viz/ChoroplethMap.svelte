@@ -32,6 +32,8 @@
 		onuoaclick?: (uoa: string, adminName: string | null) => void;
 		/** Called once the map is ready, passing a function that triggers SVG download. */
 		ondownloadready?: (fn: () => Promise<void>) => void;
+		/** Title for the exported SVG. Overrides the default prelim title when set. */
+		layerTitle?: string | null;
 	}
 
 	let {
@@ -42,7 +44,8 @@
 		country = null,
 		layer = { type: 'prelim' },
 		onuoaclick,
-		ondownloadready
+		ondownloadready,
+		layerTitle = null
 	}: Props = $props();
 
 	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null =
@@ -84,7 +87,8 @@
 			anaLogoSvg: anaLogoRaw,
 			impactLogoSvg: impactLogoRaw,
 			legendEntries,
-			flaggedCount
+			flaggedCount,
+			layerTitle
 		});
 		downloadSvg(svgStr, buildMapFilename(level, country));
 	}
