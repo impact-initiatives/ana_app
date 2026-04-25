@@ -115,6 +115,12 @@ Checks performed:
   Pass 4 — Threshold value sanity
     · factor_threshold must be ≥ 1 (0 would always flag every group)
     · evidence_threshold must be ≥ 1 (0 would always conclude no_flag, even with no data)
+
+  Pass 5 — Duplicate IDs
+    · metric IDs must be globally unique across the full tree
+    · system IDs must be globally unique
+    · factor IDs must be unique within each system
+    · subfactor IDs must be unique within each factor
 `);
 }
 
@@ -344,6 +350,112 @@ function checkRequiredSystems(data: unknown): SystemIDEnum[] {
 	return REQUIRED_SYSTEM_IDS.filter((id) => !present.has(id));
 }
 
+// ── Duplicate ID check ────────────────────────────────────────────────────────
+
+interface DuplicateIDError {
+	location: string;
+	kind: 'metric' | 'system' | 'factor' | 'subfactor';
+	id: string;
+	/** Location where this ID was first seen. */
+	firstSeen: string;
+}
+
+/**
+ * Checks that IDs are unique at each scope:
+ *   - metric IDs globally across the full tree
+ *   - system IDs globally
+ *   - factor IDs within each system
+ *   - subfactor IDs within each factor
+ *
+ * Duplicates cause silent path collisions in flagger's mutate spec dictionaries
+ * (last writer wins) and corrupt metadata lookups in metricMetadata.ts.
+ */
+function checkDuplicateIDs(data: unknown): DuplicateIDError[] {
+	const root = data as {
+		systems?: Array<{
+			id?: string;
+			factors?: Array<{
+				id?: string;
+				sub_factors?: Array<{
+					id?: string;
+					indicators?: Array<{
+						metrics?: Array<{ metric?: string }>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: DuplicateIDError[] = [];
+	const seenMetrics = new Map<string, string>();
+	const seenSystems = new Map<string, string>();
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		const sys = root.systems![si];
+		const sysId = sys.id ?? '';
+		const sysLoc = `systems[${si}]`;
+
+		if (sysId) {
+			if (seenSystems.has(sysId)) {
+				errors.push({ location: sysLoc, kind: 'system', id: sysId, firstSeen: seenSystems.get(sysId)! });
+			} else {
+				seenSystems.set(sysId, sysLoc);
+			}
+		}
+
+		const seenFactors = new Map<string, string>();
+
+		for (let fi = 0; fi < (sys.factors?.length ?? 0); fi++) {
+			const fac = sys.factors![fi];
+			const facId = fac.id ?? '';
+			const facLoc = `${sysLoc}.factors[${fi}]`;
+
+			if (facId) {
+				if (seenFactors.has(facId)) {
+					errors.push({ location: facLoc, kind: 'factor', id: facId, firstSeen: seenFactors.get(facId)! });
+				} else {
+					seenFactors.set(facId, facLoc);
+				}
+			}
+
+			const seenSubfactors = new Map<string, string>();
+
+			for (let sfi = 0; sfi < (fac.sub_factors?.length ?? 0); sfi++) {
+				const sf = fac.sub_factors![sfi];
+				const sfId = sf.id ?? '';
+				const sfLoc = `${facLoc}.sub_factors[${sfi}]`;
+
+				if (sfId) {
+					if (seenSubfactors.has(sfId)) {
+						errors.push({ location: sfLoc, kind: 'subfactor', id: sfId, firstSeen: seenSubfactors.get(sfId)! });
+					} else {
+						seenSubfactors.set(sfId, sfLoc);
+					}
+				}
+
+				for (let ii = 0; ii < (sf.indicators?.length ?? 0); ii++) {
+					const ind = sf.indicators![ii];
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						const metId = m.metric ?? '';
+						const metLoc = `${sfLoc}.indicators[${ii}].metrics[${mi}]`;
+
+						if (metId) {
+							if (seenMetrics.has(metId)) {
+								errors.push({ location: metLoc, kind: 'metric', id: metId, firstSeen: seenMetrics.get(metId)! });
+							} else {
+								seenMetrics.set(metId, metLoc);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -395,6 +507,7 @@ async function main(): Promise<void> {
 	let pass2Ok = false;
 	let pass3Ok = false;
 	let pass4Ok = false;
+	let pass5Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -456,9 +569,25 @@ async function main(): Promise<void> {
 		}
 	}
 
+	// ── Pass 5: Duplicate IDs ─────────────────────────────────────────────────
+	console.log('\nPass 5 — Duplicate IDs...');
+	const duplicateErrors = checkDuplicateIDs(data);
+
+	if (duplicateErrors.length === 0) {
+		console.log('  ✅ Passed');
+		pass5Ok = true;
+	} else {
+		console.error(`  ❌ Failed — ${duplicateErrors.length} duplicate ID(s) found.\n`);
+		for (const e of duplicateErrors) {
+			console.error(
+				`  ${e.location}: duplicate ${e.kind} id "${e.id}" (first seen at ${e.firstSeen})`
+			);
+		}
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {
