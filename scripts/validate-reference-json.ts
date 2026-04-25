@@ -121,6 +121,13 @@ Checks performed:
     · system IDs must be globally unique
     · factor IDs must be unique within each system
     · subfactor IDs must be unique within each factor
+
+  Pass 6 — Threshold integers and plausibility
+    · factor_threshold and evidence_threshold must be integers (non-integer values
+      produce nonsensical comparisons in evaluateGroup since counts are always whole)
+    · within each (factor_threshold, evidence_threshold) group in a subfactor:
+        factor_threshold ≤ group size  (otherwise the group can never flag)
+        evidence_threshold ≤ group size (otherwise the group can never reach no_flag)
 `);
 }
 
@@ -350,6 +357,136 @@ function checkRequiredSystems(data: unknown): SystemIDEnum[] {
 	return REQUIRED_SYSTEM_IDS.filter((id) => !present.has(id));
 }
 
+// ── Threshold integer + plausibility checks ───────────────────────────────────
+
+interface ThresholdIntegerError {
+	location: string;
+	metric: string;
+	field: 'factor_threshold' | 'evidence_threshold';
+	value: number;
+}
+
+interface ThresholdPlausibilityError {
+	/** Path to the subfactor containing the offending group. */
+	location: string;
+	kind: 'factor_threshold' | 'evidence_threshold';
+	value: number;
+	groupSize: number;
+	/** Composite key identifying the group, e.g. "ft=2,et=3". */
+	groupKey: string;
+}
+
+/**
+ * Checks that factor_threshold and evidence_threshold are integers.
+ * Non-integer values (e.g. 1.5) produce nonsensical comparisons in evaluateGroup
+ * because flag_n and data_n are always whole numbers.
+ */
+function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
+	const root = data as {
+		systems?: Array<{
+			factors?: Array<{
+				sub_factors?: Array<{
+					indicators?: Array<{
+						metrics?: Array<{
+							metric?: string;
+							factor_threshold?: number;
+							evidence_threshold?: number;
+						}>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: ThresholdIntegerError[] = [];
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
+			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
+				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
+					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
+						if (typeof m.factor_threshold === 'number' && !Number.isInteger(m.factor_threshold)) {
+							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
+						}
+						if (typeof m.evidence_threshold === 'number' && !Number.isInteger(m.evidence_threshold)) {
+							errors.push({ location: loc, metric: m.metric ?? '?', field: 'evidence_threshold', value: m.evidence_threshold });
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
+/**
+ * Checks that factor_threshold and evidence_threshold do not exceed the number
+ * of metrics in their threshold group.
+ *
+ * Within a subfactor, metrics sharing the same (factor_threshold, evidence_threshold)
+ * pair form one group (mirroring buildSubfactorList in metricMetadata.ts).
+ * If factor_threshold > group size, the group can never flag.
+ * If evidence_threshold > group size, the group can never reach no_flag.
+ * Both conditions mean the subfactor is permanently stuck in a degraded state.
+ */
+function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[] {
+	const root = data as {
+		systems?: Array<{
+			factors?: Array<{
+				sub_factors?: Array<{
+					indicators?: Array<{
+						metrics?: Array<{
+							factor_threshold?: number;
+							evidence_threshold?: number;
+						}>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: ThresholdPlausibilityError[] = [];
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
+			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
+				const sf = root.systems![si].factors![fi].sub_factors![sfi];
+				const sfLoc = `systems[${si}].factors[${fi}].sub_factors[${sfi}]`;
+
+				// Group metrics by (factor_threshold, evidence_threshold)
+				const groups = new Map<string, { ft: number; et: number; count: number }>();
+				for (const ind of sf.indicators ?? []) {
+					for (const m of ind.metrics ?? []) {
+						const ft = m.factor_threshold;
+						const et = m.evidence_threshold;
+						if (typeof ft === 'number' && typeof et === 'number') {
+							const key = `ft=${ft},et=${et}`;
+							const g = groups.get(key);
+							if (g) g.count++;
+							else groups.set(key, { ft, et, count: 1 });
+						}
+					}
+				}
+
+				for (const [key, { ft, et, count }] of groups) {
+					if (ft > count) {
+						errors.push({ location: sfLoc, kind: 'factor_threshold', value: ft, groupSize: count, groupKey: key });
+					}
+					if (et > count) {
+						errors.push({ location: sfLoc, kind: 'evidence_threshold', value: et, groupSize: count, groupKey: key });
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
 // ── Duplicate ID check ────────────────────────────────────────────────────────
 
 interface DuplicateIDError {
@@ -508,6 +645,7 @@ async function main(): Promise<void> {
 	let pass3Ok = false;
 	let pass4Ok = false;
 	let pass5Ok = false;
+	let pass6Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -585,9 +723,34 @@ async function main(): Promise<void> {
 		}
 	}
 
+	// ── Pass 6: Threshold integers and plausibility ───────────────────────────
+	console.log('\nPass 6 — Threshold integers and plausibility...');
+	const integerErrors = checkThresholdIntegers(data);
+	const plausibilityErrors = checkThresholdPlausibility(data);
+
+	if (integerErrors.length === 0 && plausibilityErrors.length === 0) {
+		console.log('  ✅ Passed');
+		pass6Ok = true;
+	} else {
+		if (integerErrors.length > 0) {
+			console.error(`  ❌ Non-integer threshold values (${integerErrors.length}):`);
+			for (const e of integerErrors) {
+				console.error(`  ${e.location}: metric "${e.metric}" has ${e.field}=${e.value}`);
+			}
+		}
+		if (plausibilityErrors.length > 0) {
+			console.error(`  ❌ Threshold exceeds group size (${plausibilityErrors.length}):`);
+			for (const e of plausibilityErrors) {
+				console.error(
+					`  ${e.location}: ${e.kind}=${e.value} > group size ${e.groupSize} [${e.groupKey}]`
+				);
+			}
+		}
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok && pass6Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {
