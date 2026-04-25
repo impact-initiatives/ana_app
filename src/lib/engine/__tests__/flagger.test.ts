@@ -62,6 +62,18 @@ describe('flagData — metric-level flagging', () => {
 		expect(out[0]).not.toHaveProperty('MET006_flag');
 	});
 
+	it('includes preference-2 metrics (MET002) in flagging', () => {
+		const out = flagData([row('A', { MET002: 3 })], refJson);
+		expect(out[0]).toHaveProperty('MET002_flag');
+		expect(out[0]!['MET002_flag']).toBe(true); // 3 ≥ 2 (threshold), Above
+	});
+
+	it('flags an Above-direction metric at exactly the threshold', () => {
+		// MET001: threshold=0.5, Above → v >= 0.5; boundary must flag
+		const out = flagData([row('A', { MET001: 0.5 })], refJson);
+		expect(out[0]!['MET001_flag']).toBe(true);
+	});
+
 	it('computes within_10perc correctly', () => {
 		// threshold 0.5, value 0.52 → |0.52-0.5|/0.5 = 0.04 ≤ 0.1 → true
 		const out = flagData([row('A', { MET001: 0.52 })], refJson);
@@ -112,6 +124,30 @@ describe('flagData — metric-level flagging', () => {
 	it('flags a Below-direction metric at exactly the threshold', () => {
 		const out = flagData([row('A', { MET009: 0.3 })], refJson);
 		expect(out[0]!['MET009_flag']).toBe(true);
+	});
+
+	// MET009: threshold=0.3, Below — within_10perc and within_10perc_change
+	it('within_10perc is true for a Below metric within 10% of threshold', () => {
+		// |0.28 - 0.3| / 0.3 = 0.067 ≤ 0.1 → true
+		const out = flagData([row('A', { MET009: 0.28 })], refJson);
+		expect(out[0]!['MET009_within_10perc']).toBe(true);
+	});
+
+	it('within_10perc is false for a Below metric far from threshold', () => {
+		const out = flagData([row('A', { MET009: 0.1 })], refJson);
+		expect(out[0]!['MET009_within_10perc']).toBe(false);
+	});
+
+	it('within_10perc_change is true for a Below metric approaching but not yet crossed', () => {
+		// 0.32 > 0.3 (not flagged for Below), |0.32-0.3|/0.3 = 0.067 ≤ 0.1 → approaching
+		const out = flagData([row('A', { MET009: 0.32 })], refJson);
+		expect(out[0]!['MET009_within_10perc_change']).toBe(true);
+	});
+
+	it('within_10perc_change is false for a Below metric that has already flagged', () => {
+		// 0.28 ≤ 0.3 (flagged), within 10% → already crossed, not approaching
+		const out = flagData([row('A', { MET009: 0.28 })], refJson);
+		expect(out[0]!['MET009_within_10perc_change']).toBe(false);
 	});
 });
 
