@@ -10,7 +10,7 @@ import {
  *
  * - Entry: flagData(items, referenceJson)
  * 
- * Assumes validator has ensured `uoa` exists on every row and metric column names are the canonical IDs used in indicatorsJson.
+ * Assumes validator has ensured `uoa` exists on every row and metric column names are the canonical IDs used in referenceJson.
  *
  * Implementation notes:
  * - Missing canonical indicator columns are null-padded onto each input row before the mutate pass, so output rows always carry explicit nulls for every canonical id.
@@ -56,19 +56,20 @@ const isNumber = (v: unknown): v is number => typeof v === 'number' && !Number.i
 
 /**
  * Build a mutate spec object for a single metric ID.
- * 
- * PURPOSE:
- * Generates a set of four transformation functions (a "spec") that will be applied to every row in the dataset for a specific metric. These functions run sequentially (piped as dplyr), allowing later functions to rely on values calculated by earlier ones (e.g., calculating `_status` based on the newly created `_flag`).
- * 
+ *
+ * PURPOSE: Generates four transformation functions applied sequentially to every
+ * row, so later entries can rely on values computed by earlier ones
+ * (e.g. `_status` reads the `_flag` computed just before it).
+ *
  * OUTPUT COLUMNS:
- * 1. {id}_flag              — boolean (true/false) or null. Indicates if the metric crosses the critical threshold.
- * 2. {id}_status            — string ('flag', 'no_flag', or 'no_data'). A simplified status derived directly from the flag.
- * 3. {id}_within_10perc     — boolean or null. Checks if the value is within 10% of the threshold (regardless of direction).
- * 4. {id}_within_10perc_change — boolean or null. Checks if the value is within 10%  of the threshold BUT has NOT crossed it.
- * 
- * @param id - The unique canonical ID of the metric (e.g., "MET001").
- * @param md - The metadata object for this metric, containing configuration like  thresholds and direction (e.g., { raw: { thresholds: { an: 5 }, above_or_below: 'Above' } }).
- * @returns An object mapping column names to transformation functions.
+ * 1. {id}_flag               — boolean | null. Whether the metric crosses the AN threshold.
+ * 2. {id}_status             — 'flag' | 'no_flag' | 'no_data'. Derived from the flag.
+ * 3. {id}_within_10perc      — boolean | null. Value is within 10% of threshold (either side).
+ * 4. {id}_within_10perc_change — boolean | null. Within 10% but has NOT yet crossed the threshold.
+ *
+ * @param id - Canonical metric ID (e.g. `"MET001"`).
+ * @param md - Metric metadata from `getMetricMetadata` (needs `raw.thresholds.an` and `raw.above_or_below`).
+ * @returns Object mapping column names to row-transform functions.
  */
 function makeMetricSpec(id: string, md: any): MutateSpec {
 
@@ -83,44 +84,20 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 	const dir: string | null = md?.raw?.above_or_below ?? null;
 
 	return {
-				/**
-		 * 1. Calculate the Boolean Flag ({id}_flag)
-		 * 
-		 * LOGIC:
-		 * - Returns null if the threshold or direction is missing (cannot evaluate).
-		 * - Returns null if the data value is missing or not a number.
-		 * - If 'Above': Returns true if value >= threshold.
-		 * - If 'Below': Returns true if value <= threshold.
-		 */
+				/** 1. {id}_flag — true/false if value crosses the AN threshold; null if no threshold, direction, or value. */
 		[`${id}_flag`]: (d) => {
 			if (th === null || dir === null) return null;
 			const v = d[id];
 			if (v == null || !isNumber(v)) return null;
 			return dir === 'Above' ? v >= th : v <= th;
 		},
-		/**
-		 * 2. Derive the Status String ({id}_status)
-		 * 
-		 * LOGIC:
-		 * - Reads the boolean flag calculated in the previous step.
-		 * - If the flag is null (missing data), returns 'no_data'.
-		 * - If the flag is true, returns 'flag'.
-		 * - If the flag is false, returns 'no_flag'.
-		 */
+		/** 2. {id}_status — 'flag' | 'no_flag' | 'no_data', derived from the flag computed above. */
 		[`${id}_status`]: (d) => {
 			const f = d[flagKey];
 			if (f == null) return 'no_data';
 			return f ? 'flag' : 'no_flag';
 		},
-		/**
-		 * 3. Check Proximity to Threshold ({id}_within_10perc)
-		 * 
-		 * LOGIC:
-		 * - Calculates the percentage difference between the value (v) and the threshold (th).
-		 * - Formula: | (v - th) / th | <= 0.1
-		 * - Returns true if the value is within 10% of the threshold, regardless of whether it has crossed it or not.
-		 * - Special case: If threshold is 0, checks if value is exactly 0.
-		 */
+		/** 3. {id}_within_10perc — true if |(v − th) / th| ≤ 0.1, regardless of direction; special-cased when th = 0. */
 		[`${id}_within_10perc`]: (d) => {
 			if (th === null) return null;
 			const v = d[id];
@@ -129,18 +106,7 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 			return Math.abs((v - th) / th) <= 0.1;
 		},
 		
-		/**
-		 * 4. Check "Approaching" Status ({id}_within_10perc_change)
-		 * 
-		 * LOGIC:
-		 * - Identifies values that are close to the threshold (within 10%) but have NOT yet triggered the flag.
-		 * 
-		 * CONDITIONS:
-		 * 1. Threshold and direction must exist.
-		 * 2. Value must be a number.
-		 * 3. Percentage difference must be <= 10%.
-		 * 4. The value must NOT meet the flag condition (i.e., !met).
-		 */
+		/** 4. {id}_within_10perc_change — true if within 10% of threshold but NOT yet flagged ("approaching"). */
 		[`${id}_within_10perc_change`]: (d) => {
 			if (th === null || dir === null || th === 0) return null;
 			const v = d[id];
@@ -156,25 +122,16 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 
 /* ------------------- Subfactor level ------------------- */
 
-/** 
- * Evaluate a single threshold group against the current row.
- * 
- * CONTEXT:
- * A "group" represents a set of metrics that share the same logical criteria 
- * (factor_threshold and evidence_threshold) within a specific subfactor.
- * Instead of evaluating metrics individually for the final status, we pool them
- * to determine if the collective evidence is sufficient to trigger a flag or 
- * confirm no_flag.
- * 
- * LOGIC FLOW:
- * 1. Iterate through all metric codes in the group.
- * 2. Count how many metrics have triggered a 'flag' (true) vs. confirmed 'no_flag' (false).
- *    Note: We ignore metrics with null/undefined values here; they contribute to neither count.
- * 3. Apply the decision hierarchy:
- *    - FLAG: If the count of flagged metrics meets/exceeds the `factor_threshold`, the group returns 'flag'. This indicates acute needs are detected.
- *    - NO FLAG: If the count of metrics with values (flags + no_flags) meets the `evidence_threshold`, the group returns 'no_flag'. This means we have enough data points to confidently conclude there are no acute needs.
- *    - NO DATA: If no metrics in this group had any data (count is 0), return 'no_data'.
- *    - INSUFFICIENT EVIDENCE: If we have some data but haven't hit the thresholds for either flag or no_flag, return 'insufficient_evidence'.
+/**
+ * Evaluate a single threshold group against a row.
+ *
+ * Counts flagged vs. no-flag metrics in the group, then compares against
+ * `factor_threshold` and `evidence_threshold` to decide group status.
+ * Metrics with null flags (no data) are ignored in both counts.
+ *
+ * @param group - Threshold group: `codes` (metric IDs), `factor_threshold`, `evidence_threshold`.
+ * @param d - Row with pre-computed `{id}_flag` booleans for each code in the group.
+ * @returns `'flag' | 'no_flag' | 'insufficient_evidence' | 'no_data'`
  */
 function evaluateGroup(group: ThresholdGroup, d: Row): Status {
 
@@ -209,14 +166,15 @@ function evaluateGroup(group: ThresholdGroup, d: Row): Status {
 /* ---------------- Subfactor to System level ---------------- */
 
 /**
- * Roll up an array of status strings into a single status.
- * Used for subfactor -> factor and factor -> system rollups.
+ * Roll up child status strings into a single parent status.
+ * Used for subfactor→factor and factor→system rollups.
  *
- * Priority: flag > no_flag > insufficient_evidence > no_data
+ * Priority: flag > no_flag > insufficient_evidence > no_data.
+ * Exception: all-no_data stays no_data rather than insufficient_evidence,
+ * to distinguish "nothing collected" from "some data but not enough to conclude".
  *
- * Note: if all children are no_data, return no_data rather than
- * insufficient_evidence, to distinguish "nothing collected" from "some data
- * but not enough to conclude".
+ * @param statuses - Status values from child nodes (subfactors or factors).
+ * @returns Aggregated parent status.
  */
 function rollupStatuses(statuses: Status[]): Status {
 	if (statuses.length === 0) return 'no_data';
@@ -227,9 +185,12 @@ function rollupStatuses(statuses: Status[]): Status {
 }
 
 /**
- * Build a mutate spec object for group-level indicator counts.
- * Retained for the heatmap visualisation.
- * Returns columns: `${prefix}.missing_n`, `${prefix}.flag_n`, `${prefix}.no_flag_n`
+ * Build a mutate spec for group-level indicator counts (used by the heatmap).
+ * Produces `${prefix}.missing_n`, `${prefix}.flag_n`, `${prefix}.no_flag_n`.
+ *
+ * @param prefix - Column prefix — typically a subfactor or factor path.
+ * @param codes - Metric IDs to count across.
+ * @returns Mutate spec object mapping column names to row-transform functions.
  */
 function makeCountSpec(prefix: string, codes: string[]): MutateSpec {
 	return {
@@ -242,11 +203,18 @@ function makeCountSpec(prefix: string, codes: string[]): MutateSpec {
 	};
 }
 
-/** Build a metadata lookup: id → getMetricMetadata result. */
-function extractMetricMetadata(ids: string[], indicatorsJson: unknown): Record<string, any> {
+/**
+ * Build a `{ [id]: metadata }` lookup for a list of metric IDs.
+ * IDs whose metadata cannot be found are silently omitted.
+ *
+ * @param ids - Canonical metric IDs to look up.
+ * @param referenceJson - Parsed `reference.json` passed to `getMetricMetadata`.
+ * @returns Record mapping each metric ID to its metadata object.
+ */
+function extractMetricMetadata(ids: string[], referenceJson: unknown): Record<string, any> {
 	return Object.fromEntries(
 		ids.flatMap((id) => {
-			const md = getMetricMetadata(indicatorsJson, id);
+			const md = getMetricMetadata(referenceJson, id);
 			return md ? [[id, md]] : [];
 		})
 	);
@@ -255,22 +223,24 @@ function extractMetricMetadata(ids: string[], indicatorsJson: unknown): Record<s
 /* --------------------- Main entry --------------------- */
 
 /**
- * Flag data rows using indicators.json metadata.
+ * Flag data rows using the reference JSON metadata.
+ * Runs five sequential mutate layers: metric → subfactor → factor → system → prelim_flag.
  *
- * @param items - input rows (each must include `uoa`)
- * @param indicatorsJson - parsed indicators.json
+ * @param items - Input rows; each must include a `uoa` field.
+ * @param referenceJson - Parsed `reference.json`.
+ * @returns Rows enriched with per-metric flags/statuses, rollup statuses at every level, and `prelim_flag`.
  */
-export function flagData(items: Row[], indicatorsJson: unknown): Row[] {
+export function flagData(items: Row[], referenceJson: unknown): Row[] {
 	if (!Array.isArray(items) || items.length === 0) return [];
-	if (!indicatorsJson) throw new Error('indicatorsJson is required');
+	if (!referenceJson) throw new Error('referenceJson is required');
 
 	// ── Setup ─────────────────────────────────────────────────────────────────
 
 	// all metric ids (order preserved by getAllMetricIds)
-	const allMetricIds: string[] = getAllMetricIds(indicatorsJson);
+	const allMetricIds: string[] = getAllMetricIds(referenceJson);
 
 	// metadata lookup: id → { raw, systemId, factorId, subfactorId, ... }
-	const metadata = extractMetricMetadata(allMetricIds, indicatorsJson);
+	const metadata = extractMetricMetadata(allMetricIds, referenceJson);
 
 	// preference-3 metrics are for reference/circle-packing only — exclude from flagging
 	const canonicalIds = allMetricIds.filter((id) => (metadata[id]?.raw?.preference ?? 1) !== 3);
@@ -296,7 +266,7 @@ export function flagData(items: Row[], indicatorsJson: unknown): Row[] {
 	// ── Layer 2: subfactor-level spec ─────────────────────────────────────────
 
 	const dataKeySet = new Set(canonicalIds);
-	const subList = buildSubfactorList(indicatorsJson) || [];
+	const subList = buildSubfactorList(referenceJson) || [];
 
 	// Hierarchy lookup built while iterating subfactors, reused for layers 3 & 4.
 	// factorCodes[factorKey]     → indicator codes under that factor
@@ -364,7 +334,7 @@ export function flagData(items: Row[], indicatorsJson: unknown): Row[] {
 
 	// ── Layer 5: ANA preliminary flag classification ──────────────────────────
 	const allSystemIds = Object.keys(systemFactorKeys);
-	const json = indicatorsJson as any;
+	const json = referenceJson as any;
 	const knownSystems = new Set<string>(json.systems?.map((s: any) => s.id) ?? []);
 	const mortalitySystemId = knownSystems.has('mortality') ? 'mortality' : null;
 	const healthOutcomesId = knownSystems.has('health_outcomes') ? 'health_outcomes' : null;
@@ -394,7 +364,7 @@ export function flagData(items: Row[], indicatorsJson: unknown): Row[] {
 		// 5. No Data — no flag, no insufficient evidence, all systems are no_data
 		if (activeSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
 
-		// 6. No Acute Needs — all active systems are no_flag
+		// 6. No Acute Needs — all active systems are no_flag (or mix of no_flag + no_data)
 		return 'ACUTE_NEEDS';
 	};
 
