@@ -142,6 +142,50 @@ describe('flagData — subfactor/factor/system rollup', () => {
 	});
 });
 
+describe('flagData — count columns', () => {
+	it('missing_n counts null metric values in the group', () => {
+		// MET001 present, MET002 null → 1 missing in mortality_rate_cdr
+		const out = flagData([row('A', { MET001: 0.6, MET002: null })], refJson);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.missing_n']).toBe(1);
+	});
+
+	it('flag_n counts flagged metrics in the group', () => {
+		const out = flagData([row('A', { MET001: 0.6, MET002: null })], refJson);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.flag_n']).toBe(1);
+	});
+
+	it('no_flag_n counts non-flagged metrics with data in the group', () => {
+		const out = flagData([row('A', { MET001: 0.3, MET002: null })], refJson);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.no_flag_n']).toBe(1);
+	});
+
+	it('all three counts are zero when all metrics are null', () => {
+		const out = flagData([row('A', { MET001: null, MET002: null })], refJson);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.missing_n']).toBe(2);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.flag_n']).toBe(0);
+		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.no_flag_n']).toBe(0);
+	});
+});
+
+describe('flagData — factor and system rollup', () => {
+	it('factor status rolls up from subfactor statuses', () => {
+		const out = flagData([row('A', { MET001: 0.6 })], refJson);
+		expect(out[0]!['mortality.mortality_rate.status']).toBe('flag');
+	});
+
+	it('subfactor status is insufficient_evidence when data present but below evidence threshold', () => {
+		// food_security fcs: MET003=0.1 (no_flag), MET004=null
+		// → 1 data point < evidence_threshold=2 → insufficient_evidence
+		const out = flagData([row('A', { MET003: 0.1 })], refJson);
+		expect(out[0]!['food_security.food_consumption.food_consumption_fcs.status']).toBe('insufficient_evidence');
+	});
+
+	it('system status is insufficient_evidence when all its factors are insufficient_evidence', () => {
+		const out = flagData([row('A', { MET003: 0.1 })], refJson);
+		expect(out[0]!['food_security.status']).toBe('insufficient_evidence');
+	});
+});
+
 describe('flagData — prelim_flag classification', () => {
 	it('returns EM when mortality system is flagged', () => {
 		const out = flagData([row('A', { MET001: 0.6 })], refJson);
