@@ -198,6 +198,20 @@ describe('flagData — prelim_flag classification', () => {
 		expect(out[0]!['prelim_flag']).toBe('ACUTE');
 	});
 
+	it('returns ACUTE when health_outcomes flags but fewer than 3 other systems flag', () => {
+		// health_outcomes: MET005=0.2 → flag; food_security + livelihoods = 2 others < 3
+		const out = flagData(
+			[row('A', { MET001: 0.3, MET005: 0.2, MET003: 0.25, MET007: 0.5 })],
+			refJson
+		);
+		expect(out[0]!['prelim_flag']).toBe('ACUTE');
+	});
+
+	it('returns ACUTE when health_outcomes flags alone with no other systems', () => {
+		const out = flagData([row('A', { MET005: 0.2 })], refJson);
+		expect(out[0]!['prelim_flag']).toBe('ACUTE');
+	});
+
 	it('returns ROEM when health_outcomes flags and ≥3 other classification systems flag', () => {
 		// health_outcomes: MET005=0.2 ≥ 0.15 Above → flag
 		// food_security: MET003=0.25 ≥ 0.2 Above, factor_threshold=1 → flag (1 other)
