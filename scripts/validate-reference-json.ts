@@ -128,6 +128,13 @@ Checks performed:
     · within each (factor_threshold, evidence_threshold) group in a subfactor:
         factor_threshold ≤ group size  (otherwise the group can never flag)
         evidence_threshold ≤ group size (otherwise the group can never reach no_flag)
+
+  Pass 7 — VAN threshold ordering
+    · when both an and van are set: van must be strictly more extreme than an
+        Above metrics: van > an
+        Below metrics: van < an
+      Equal or inverted values mean VAN is easier to reach than AN, inverting
+      the intended severity scale.
 `);
 }
 
@@ -487,6 +494,73 @@ function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[]
 	return errors;
 }
 
+// ── VAN threshold ordering check ─────────────────────────────────────────────
+
+interface VanOrderError {
+	location: string;
+	metric: string;
+	above_or_below: string;
+	an: number;
+	van: number;
+}
+
+/**
+ * Checks that the VAN threshold is strictly more extreme than AN.
+ *
+ * "More extreme" means harder to reach the VAN level:
+ *   - Above: van > an  (a higher value is needed to cross VAN than AN)
+ *   - Below: van < an  (a lower value is needed to cross VAN than AN)
+ *
+ * If this ordering is violated, VAN is trivially easier to reach than AN,
+ * which inverts the intended severity scale. Equal values (van === an) are
+ * also flagged — a redundant threshold adds no information.
+ */
+function checkVanOrdering(data: unknown): VanOrderError[] {
+	const root = data as {
+		systems?: Array<{
+			factors?: Array<{
+				sub_factors?: Array<{
+					indicators?: Array<{
+						metrics?: Array<{
+							metric?: string;
+							above_or_below?: string;
+							thresholds?: { an?: number | null; van?: number | null };
+						}>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: VanOrderError[] = [];
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
+			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
+				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
+					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						const an = m.thresholds?.an;
+						const van = m.thresholds?.van;
+						const dir = m.above_or_below;
+
+						if (typeof an === 'number' && typeof van === 'number' && dir) {
+							const valid = dir === 'Above' ? van > an : van < an;
+							if (!valid) {
+								const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
+								errors.push({ location: loc, metric: m.metric ?? '?', above_or_below: dir, an, van });
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
 // ── Duplicate ID check ────────────────────────────────────────────────────────
 
 interface DuplicateIDError {
@@ -646,6 +720,7 @@ async function main(): Promise<void> {
 	let pass4Ok = false;
 	let pass5Ok = false;
 	let pass6Ok = false;
+	let pass7Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -748,9 +823,26 @@ async function main(): Promise<void> {
 		}
 	}
 
+	// ── Pass 7: VAN threshold ordering ────────────────────────────────────────
+	console.log('\nPass 7 — VAN threshold ordering...');
+	const vanErrors = checkVanOrdering(data);
+
+	if (vanErrors.length === 0) {
+		console.log('  ✅ Passed');
+		pass7Ok = true;
+	} else {
+		console.error(`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).\n`);
+		for (const e of vanErrors) {
+			console.error(
+				`  ${e.location}: metric "${e.metric}" [${e.above_or_below}] an=${e.an}, van=${e.van}` +
+				` — expected van ${e.above_or_below === 'Above' ? '>' : '<'} an`
+			);
+		}
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok && pass6Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok && pass6Ok && pass7Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {
