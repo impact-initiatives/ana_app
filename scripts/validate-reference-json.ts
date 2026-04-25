@@ -111,6 +111,10 @@ Checks performed:
   Pass 3 — Required system IDs
     · mortality and health_outcomes must be present in the systems array
     · their absence disables the EM and ROEM classification paths in flagger.ts
+
+  Pass 4 — Threshold value sanity
+    · factor_threshold must be ≥ 1 (0 would always flag every group)
+    · evidence_threshold must be ≥ 1 (0 would always conclude no_flag, even with no data)
 `);
 }
 
@@ -258,6 +262,65 @@ function printLookupErrors(errors: LookupError[]): void {
 	console.error(`Total: ${errors.length} unknown id(s).`);
 }
 
+// ── Threshold value sanity check ─────────────────────────────────────────────
+
+interface ThresholdValueError {
+	location: string;
+	metric: string;
+	field: 'factor_threshold' | 'evidence_threshold';
+	value: number;
+}
+
+/**
+ * Checks that no metric has factor_threshold ≤ 0 or evidence_threshold ≤ 0.
+ *
+ * In evaluateGroup:
+ *   - factor_threshold=0  → flag_n >= 0 is always true → every group always flags
+ *   - evidence_threshold=0 → data_n >= 0 is always true → every group always concludes no_flag
+ *     (even with no data, skipping the explicit no_data branch)
+ */
+function checkThresholdValues(data: unknown): ThresholdValueError[] {
+	const root = data as {
+		systems?: Array<{
+			factors?: Array<{
+				sub_factors?: Array<{
+					indicators?: Array<{
+						metrics?: Array<{
+							metric?: string;
+							factor_threshold?: number;
+							evidence_threshold?: number;
+						}>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: ThresholdValueError[] = [];
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
+			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
+				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
+					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
+						if (typeof m.factor_threshold === 'number' && m.factor_threshold <= 0) {
+							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
+						}
+						if (typeof m.evidence_threshold === 'number' && m.evidence_threshold <= 0) {
+							errors.push({ location: loc, metric: m.metric ?? '?', field: 'evidence_threshold', value: m.evidence_threshold });
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
 // ── Required system IDs check ─────────────────────────────────────────────────
 
 /**
@@ -331,6 +394,7 @@ async function main(): Promise<void> {
 	let pass1Ok = false;
 	let pass2Ok = false;
 	let pass3Ok = false;
+	let pass4Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -375,9 +439,26 @@ async function main(): Promise<void> {
 		);
 	}
 
+	// ── Pass 4: Threshold value sanity ───────────────────────────────────────────
+	console.log('\nPass 4 — Threshold value sanity...');
+	const thresholdErrors = checkThresholdValues(data);
+
+	if (thresholdErrors.length === 0) {
+		console.log('  ✅ Passed');
+		pass4Ok = true;
+	} else {
+		console.error(
+			`  ❌ Failed — ${thresholdErrors.length} metric(s) have zero or negative threshold values.\n` +
+			'  factor_threshold=0 always flags; evidence_threshold=0 always concludes no_flag.\n'
+		);
+		for (const e of thresholdErrors) {
+			console.error(`  ${e.location}: metric "${e.metric}" has ${e.field}=${e.value}`);
+		}
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok && pass3Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {
