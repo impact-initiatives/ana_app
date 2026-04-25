@@ -172,7 +172,7 @@ describe('FLAG_BADGE', () => {
 
 describe('PRELIM_FLAG_BADGE', () => {
 	it('has entries for all six prelim_flag values', () => {
-		const keys = ['EM', 'ROEM', 'ACUTE', 'NO_ACUTE', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
+		const keys = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
 		for (const key of keys) {
 			expect(PRELIM_FLAG_BADGE).toHaveProperty(key);
 		}

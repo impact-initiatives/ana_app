@@ -123,6 +123,74 @@
       ]
     },
     {
+      "id": "livelihoods",
+      "label": "Livelihoods",
+      "factors": [
+        {
+          "id": "income",
+          "label": "Income",
+          "sub_factors": [
+            {
+              "id": "income_sources",
+              "label": "Income Sources",
+              "indicators": [
+                {
+                  "id": "income_idx",
+                  "label": "Income Index",
+                  "metrics": [
+                    {
+                      "metric": "MET007",
+                      "label": "Income Index Score",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.4, "van": 0.7 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wash",
+      "label": "WASH",
+      "factors": [
+        {
+          "id": "water_access",
+          "label": "Water Access",
+          "sub_factors": [
+            {
+              "id": "water_access_idx",
+              "label": "Water Access Index",
+              "indicators": [
+                {
+                  "id": "water_idx",
+                  "label": "Water Index",
+                  "metrics": [
+                    {
+                      "metric": "MET008",
+                      "label": "Water Access Score",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.4, "van": 0.7 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "market_functionality",
       "label": "Market Functionality",
       "factors": [

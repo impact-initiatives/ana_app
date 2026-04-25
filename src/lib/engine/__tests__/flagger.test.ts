@@ -108,16 +108,41 @@ describe('flagData — prelim_flag classification', () => {
 	});
 
 	it('returns ACUTE when a non-mortality system flags but not mortality', () => {
+		// MET003=0.25 ≥ 0.2 Above, factor_threshold=1 → food_security flags with one metric
 		const out = flagData([row('A', { MET001: 0.3, MET003: 0.25 })], refJson);
 		expect(out[0]!['prelim_flag']).toBe('ACUTE');
 	});
 
-	it('returns NO_ACUTE_NEEDS when data present and nothing flags', () => {
+	it('returns ROEM when health_outcomes flags and ≥3 other classification systems flag', () => {
+		// health_outcomes: MET005=0.2 ≥ 0.15 Above → flag
+		// food_security: MET003=0.25 ≥ 0.2 Above, factor_threshold=1 → flag (1 other)
+		// livelihoods:   MET007=0.5 ≥ 0.4 Above → flag (2 other)
+		// wash:          MET008=0.5 ≥ 0.4 Above → flag (3 other)
+		// mortality: MET001=0.3 < 0.5 → no_flag (no EM)
+		const out = flagData(
+			[row('A', { MET001: 0.3, MET005: 0.2, MET003: 0.25, MET007: 0.5, MET008: 0.5 })],
+			refJson
+		);
+		expect(out[0]!['prelim_flag']).toBe('ROEM');
+	});
+
+	it('returns INSUFFICIENT_EVIDENCE when some data present but below evidence threshold', () => {
+		// food_security: MET003=0.1 below threshold (no_flag), MET004 null
+		// → 1 metric with data < evidence_threshold=2 → insufficient_evidence
+		// all other classification systems: no data
+		const out = flagData([row('A', { MET003: 0.1 })], refJson);
+		expect(out[0]!['prelim_flag']).toBe('INSUFFICIENT_EVIDENCE');
+	});
+
+	it('returns ACUTE_NEEDS when data is present and nothing flags', () => {
+		// food_security: both MET003 and MET004 below threshold, evidence_threshold=2 met → no_flag
+		// health_outcomes: MET005 below threshold → no_flag
+		// other systems: no data — not enough to block ACUTE_NEEDS
 		const out = flagData(
 			[row('A', { MET001: 0.3, MET002: 1, MET003: 0.1, MET004: 0.1, MET005: 0.1 })],
 			refJson
 		);
-		expect(out[0]!['prelim_flag']).toBe('NO_ACUTE');
+		expect(out[0]!['prelim_flag']).toBe('ACUTE_NEEDS');
 	});
 
 	it('returns NO_DATA when all metrics are missing', () => {
@@ -135,6 +160,32 @@ describe('flagData — prelim_flag classification', () => {
 			refJson
 		);
 		expect(out[0]!['prelim_flag']).toBe('EM');
-		expect(out[1]!['prelim_flag']).toBe('NO_ACUTE');
+		expect(out[1]!['prelim_flag']).toBe('ACUTE_NEEDS');
+	});
+});
+
+describe('flagData — hard guard', () => {
+	it('throws when mortality is missing from reference.json', () => {
+		const refNoMortality = {
+			systems: [
+				{ id: 'health_outcomes', label: 'Health Outcomes', factors: [] },
+				{ id: 'food_security', label: 'Food Security', factors: [] }
+			]
+		};
+		expect(() => flagData([row('A', {})], refNoMortality)).toThrow(
+			/required system IDs missing/
+		);
+	});
+
+	it('throws when health_outcomes is missing from reference.json', () => {
+		const refNoHealthOutcomes = {
+			systems: [
+				{ id: 'mortality', label: 'Mortality', factors: [] },
+				{ id: 'food_security', label: 'Food Security', factors: [] }
+			]
+		};
+		expect(() => flagData([row('A', {})], refNoHealthOutcomes)).toThrow(
+			/required system IDs missing/
+		);
 	});
 });
