@@ -4,6 +4,8 @@ import {
 	getMetricMetadata,
 	getAllMetricIds
 } from '$lib/engine/metricMetadata';
+import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import type { ReferenceRoot } from '$lib/types/structure';
 
 /**
  * Lightweight, modular flagger
@@ -333,38 +335,69 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 	}
 
 	// ── Layer 5: ANA preliminary flag classification ──────────────────────────
-	const allSystemIds = Object.keys(systemFactorKeys);
-	const json = referenceJson as any;
-	const knownSystems = new Set<string>(json.systems?.map((s: any) => s.id) ?? []);
-	const mortalitySystemId = knownSystems.has('mortality') ? 'mortality' : null;
-	const healthOutcomesId = knownSystems.has('health_outcomes') ? 'health_outcomes' : null;
-	const marketId = knownSystems.has('market_functionality') ? 'market_functionality' : null;
 
-	// market_functionality does not enter the classification
-	const activeSystems = allSystemIds.filter((s) => s !== marketId);
+	// Minimum other flagged classification systems required for ROEM.
+	const ROEM_MIN_OTHER_FLAGGED = 3;
+
+	// Use the full reference system list so systems absent from the CSV still
+	// contribute 'no_data' rather than being invisible to the decision tree.
+	const ref = referenceJson as ReferenceRoot;
+	const refSystemIds = ref.systems.map((s) => s.id);
+
+	// Required systems — absence already caught by validate-reference-json Pass 3,
+	// but guard here too so a misconfigured runtime fails loudly rather than silently
+	// downgrading EM/ROEM to ACUTE.
+	const mortalityId = refSystemIds.includes(SystemIDEnum.Mortality)
+		? SystemIDEnum.Mortality
+		: null;
+	const healthOutcomesId = refSystemIds.includes(SystemIDEnum.HealthOutcomes)
+		? SystemIDEnum.HealthOutcomes
+		: null;
+
+	if (!mortalityId || !healthOutcomesId) {
+		const missing = [
+			!mortalityId && SystemIDEnum.Mortality,
+			!healthOutcomesId && SystemIDEnum.HealthOutcomes
+		]
+			.filter(Boolean)
+			.join(', ');
+		throw new Error(
+			`flagData: required system IDs missing from reference.json: ${missing}. ` +
+				'Run validate:reference-json to diagnose.'
+		);
+	}
+
+	// Classification systems = all reference systems except market and mortality.
+	// • market_functionality: excluded by ANA design.
+	// • mortality: handled exclusively in step 1 (EM) — keeping it here would let a
+	//   flagged mortality system also trigger ACUTE (step 3), which is wrong.
+	const classificationSystems = refSystemIds.filter(
+		(s) => s !== SystemIDEnum.MarketFunctionality && s !== SystemIDEnum.Mortality
+	);
 
 	const prelimFlagFn = (d: Row) => {
-		const status = (key: string | null) => (key ? (d[`${key}.status`] ?? 'no_data') : 'no_data');
-		const isFlagged = (key: string | null) => status(key) === 'flag';
-		const isInsuff = (key: string | null) => status(key) === 'insufficient_evidence';
+		const status = (key: string): Status => ((d[`${key}.status`] as Status) ?? 'no_data');
+		const isFlagged = (key: string) => status(key) === 'flag';
+		const isInsuff  = (key: string) => status(key) === 'insufficient_evidence';
 
 		// 1. Emergency — mortality system flagged
-		if (isFlagged(mortalitySystemId)) return 'EM';
+		if (isFlagged(mortalityId)) return 'EM';
 
-		// 2. Risk of Emergency — health outcomes flagged AND ≥3 other active systems flagged
-		const otherFlagged = activeSystems.filter((s) => s !== healthOutcomesId && isFlagged(s)).length;
-		if (isFlagged(healthOutcomesId) && otherFlagged >= 3) return 'ROEM';
+		// 2. Risk of Emergency — health outcomes flagged AND ≥3 other classification systems flagged
+		const otherFlagged = classificationSystems
+			.filter((s) => s !== healthOutcomesId && isFlagged(s)).length;
+		if (isFlagged(healthOutcomesId) && otherFlagged >= ROEM_MIN_OTHER_FLAGGED) return 'ROEM';
 
-		// 3. Acute Needs — any active system flagged
-		if (activeSystems.some(isFlagged)) return 'ACUTE';
+		// 3. Acute Needs — any classification system flagged
+		if (classificationSystems.some(isFlagged)) return 'ACUTE';
 
-		// 4. Insufficient Evidence — no flag, but at least one system has insufficient evidence
-		if (activeSystems.some(isInsuff)) return 'INSUFFICIENT_EVIDENCE';
+		// 4. Insufficient Evidence — no flag, at least one classification system insufficient
+		if (classificationSystems.some(isInsuff)) return 'INSUFFICIENT_EVIDENCE';
 
-		// 5. No Data — no flag, no insufficient evidence, all systems are no_data
-		if (activeSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
+		// 5. No Data — no flag, no insufficient evidence, all classification systems have no data
+		if (classificationSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
 
-		// 6. No Acute Needs — all active systems are no_flag (or mix of no_flag + no_data)
+		// 6. No Acute Needs — mix of no_flag / no_data; enough evidence to rule out acute needs
 		return 'ACUTE_NEEDS';
 	};
 
