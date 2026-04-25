@@ -72,6 +72,29 @@ describe('flagData — metric-level flagging', () => {
 		const out = flagData([row('A', { MET001: 0.9 })], refJson);
 		expect(out[0]!['MET001_within_10perc']).toBe(false);
 	});
+
+	// MET001: threshold=0.5, Above
+	it('within_10perc_change is true when value is approaching but has not crossed threshold', () => {
+		// |0.48 - 0.5| / 0.5 = 0.04 ≤ 0.1, and 0.48 < 0.5 → not yet flagged
+		const out = flagData([row('A', { MET001: 0.48 })], refJson);
+		expect(out[0]!['MET001_within_10perc_change']).toBe(true);
+	});
+
+	it('within_10perc_change is false when value has already crossed threshold', () => {
+		// 0.52 is within 10% of 0.5 but flagged → no longer "approaching"
+		const out = flagData([row('A', { MET001: 0.52 })], refJson);
+		expect(out[0]!['MET001_within_10perc_change']).toBe(false);
+	});
+
+	it('within_10perc_change is false when value is far from threshold', () => {
+		const out = flagData([row('A', { MET001: 0.3 })], refJson);
+		expect(out[0]!['MET001_within_10perc_change']).toBe(false);
+	});
+
+	it('within_10perc_change is null for null metric value', () => {
+		const out = flagData([row('A', { MET001: null })], refJson);
+		expect(out[0]!['MET001_within_10perc_change']).toBeNull();
+	});
 });
 
 describe('flagData — subfactor/factor/system rollup', () => {
