@@ -95,6 +95,24 @@ describe('flagData — metric-level flagging', () => {
 		const out = flagData([row('A', { MET001: null })], refJson);
 		expect(out[0]!['MET001_within_10perc_change']).toBeNull();
 	});
+
+	// MET009: threshold=0.3, Below
+	it('flags a Below-direction metric when value is at or below threshold', () => {
+		const out = flagData([row('A', { MET009: 0.2 })], refJson);
+		expect(out[0]!['MET009_flag']).toBe(true);
+		expect(out[0]!['MET009_status']).toBe('flag');
+	});
+
+	it('does not flag a Below-direction metric when value is above threshold', () => {
+		const out = flagData([row('A', { MET009: 0.5 })], refJson);
+		expect(out[0]!['MET009_flag']).toBe(false);
+		expect(out[0]!['MET009_status']).toBe('no_flag');
+	});
+
+	it('flags a Below-direction metric at exactly the threshold', () => {
+		const out = flagData([row('A', { MET009: 0.3 })], refJson);
+		expect(out[0]!['MET009_flag']).toBe(true);
+	});
 });
 
 describe('flagData — subfactor/factor/system rollup', () => {

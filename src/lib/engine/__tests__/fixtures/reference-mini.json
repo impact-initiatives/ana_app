@@ -147,6 +147,16 @@
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
+                    },
+                    {
+                      "metric": "MET009",
+                      "label": "Income Diversity Score",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.3 },
+                      "above_or_below": "Below",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
                     }
                   ]
                 }
