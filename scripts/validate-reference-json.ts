@@ -36,6 +36,7 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { safeValidateReferenceRoot, formatZodErrors } from '$lib/types/reference-json';
+import { SystemIDEnum } from '$lib/types/generated/system-enum';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -106,6 +107,10 @@ Checks performed:
     · every (factor, system) pair exists in factor.csv
     · every (sub_factor, factor, system) triple exists in subfactor.csv
     Note: system ids are already enforced by Pass 1 via z.enum(SystemIDEnum).
+
+  Pass 3 — Required system IDs
+    · mortality and health_outcomes must be present in the systems array
+    · their absence disables the EM and ROEM classification paths in flagger.ts
 `);
 }
 
@@ -253,6 +258,29 @@ function printLookupErrors(errors: LookupError[]): void {
 	console.error(`Total: ${errors.length} unknown id(s).`);
 }
 
+// ── Required system IDs check ─────────────────────────────────────────────────
+
+/**
+ * System IDs that must be present in reference.json for the ANA preliminary
+ * classification to work correctly.
+ *
+ * - mortality      → triggers EM (Emergency) when flagged
+ * - health_outcomes → triggers ROEM when flagged alongside ≥3 other systems
+ *
+ * Their absence is not caught by the Zod schema (which only checks that IDs
+ * are valid members of SystemIDEnum, not that specific members are present).
+ */
+const REQUIRED_SYSTEM_IDS: SystemIDEnum[] = [
+	SystemIDEnum.Mortality,
+	SystemIDEnum.HealthOutcomes
+];
+
+function checkRequiredSystems(data: unknown): SystemIDEnum[] {
+	const root = data as { systems?: Array<{ id?: string }> };
+	const present = new Set((root.systems ?? []).map((s) => s.id).filter(Boolean));
+	return REQUIRED_SYSTEM_IDS.filter((id) => !present.has(id));
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -302,6 +330,7 @@ async function main(): Promise<void> {
 
 	let pass1Ok = false;
 	let pass2Ok = false;
+	let pass3Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -331,9 +360,24 @@ async function main(): Promise<void> {
 		printLookupErrors(lookupErrors);
 	}
 
+	// ── Pass 3: Required system IDs ───────────────────────────────────────────
+	console.log('\nPass 3 — Required system IDs...');
+	const missingSystems = checkRequiredSystems(data);
+
+	if (missingSystems.length === 0) {
+		console.log('  ✅ Passed');
+		pass3Ok = true;
+	} else {
+		console.error(
+			`  ❌ Failed — missing required system IDs: ${missingSystems.join(', ')}\n` +
+			'  These systems drive the EM and ROEM paths in the preliminary classification.\n' +
+			'  Add them to reference.json or update the classification logic in flagger.ts.'
+		);
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {
