@@ -201,6 +201,14 @@ describe('flagData — count columns', () => {
 		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.flag_n']).toBe(0);
 		expect(out[0]!['mortality.mortality_rate.mortality_rate_cdr.no_flag_n']).toBe(0);
 	});
+
+	it('factor-level counts aggregate all metrics under the factor', () => {
+		// mortality.mortality_rate has MET001 + MET002; MET001 flags, MET002 null
+		const out = flagData([row('A', { MET001: 0.6, MET002: null })], refJson);
+		expect(out[0]!['mortality.mortality_rate.flag_n']).toBe(1);
+		expect(out[0]!['mortality.mortality_rate.no_flag_n']).toBe(0);
+		expect(out[0]!['mortality.mortality_rate.missing_n']).toBe(1);
+	});
 });
 
 describe('flagData — factor and system rollup', () => {
@@ -300,6 +308,14 @@ describe('flagData — prelim_flag classification', () => {
 });
 
 describe('flagData — hard guard', () => {
+	it('throws when referenceJson is null', () => {
+		expect(() => flagData([row('A', {})], null)).toThrow('referenceJson is required');
+	});
+
+	it('throws when referenceJson is undefined', () => {
+		expect(() => flagData([row('A', {})], undefined)).toThrow('referenceJson is required');
+	});
+
 	it('throws when mortality is missing from reference.json', () => {
 		const refNoMortality = {
 			systems: [
