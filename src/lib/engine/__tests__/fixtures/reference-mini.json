@@ -161,6 +161,28 @@
                   ]
                 }
               ]
+            },
+            {
+              "id": "income_resilience",
+              "label": "Income Resilience",
+              "indicators": [
+                {
+                  "id": "income_res_idx",
+                  "label": "Income Resilience Index",
+                  "metrics": [
+                    {
+                      "metric": "MET010",
+                      "label": "Income Resilience Score",
+                      "preference": 1,
+                      "type": "numeric",
+                      "thresholds": { "an": 0.4 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }

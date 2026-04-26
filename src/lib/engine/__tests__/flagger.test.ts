@@ -228,6 +228,14 @@ describe('flagData — factor and system rollup', () => {
 		const out = flagData([row('A', { MET003: 0.1 })], refJson);
 		expect(out[0]!['food_security.status']).toBe('insufficient_evidence');
 	});
+
+	it('factor status is insufficient_evidence when one subfactor is no_flag and another is no_data', () => {
+		// income_sources: MET007=0.3 (no_flag Above 0.4), MET009=0.5 (no_flag Below 0.3) → no_flag
+		// income_resilience: MET010=null → no_data
+		// rollupStatuses([no_flag, no_data]) → insufficient_evidence
+		const out = flagData([row('A', { MET007: 0.3, MET009: 0.5 })], refJson);
+		expect(out[0]!['livelihoods.income.status']).toBe('insufficient_evidence');
+	});
 });
 
 describe('flagData — prelim_flag classification', () => {
