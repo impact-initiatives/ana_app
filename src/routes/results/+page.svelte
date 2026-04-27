@@ -17,7 +17,8 @@
 	import { quintOut } from 'svelte/easing';
 	import { appReady } from '$lib/stores/appReady.svelte';
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
-	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { PRELIM_BADGE_MAP } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
 
 	import ResultsOverview from '$lib/components/results/ResultsOverview.svelte';
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
@@ -220,15 +221,11 @@
 	}
 
 	let selectedPrelimKeys = $state<string[] | null>(null);
-	const PRELIM_KEYS = $derived(
-		Object.keys(PRELIM_FLAG_BADGE) as Array<keyof typeof PRELIM_FLAG_BADGE>
-	);
-	const prelimOptions = $derived(
-		Object.entries(PRELIM_FLAG_BADGE).map(([key, badge]) => ({
-			value: key,
-			label: badge.label
-		}))
-	);
+	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
+	const prelimOptions = PRELIM_FLAG_KEYS.map((key) => ({
+		value: key,
+		label: PRELIM_BADGE_MAP[key].label
+	}));
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];

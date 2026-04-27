@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SvelteSet } from 'svelte/reactivity';
-	import { FLAG_BADGE } from '$lib/utils/colors';
+	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 
@@ -63,9 +63,9 @@
 	}
 
 	const FLAG_FILTER_OPTIONS = [
-		{ key: 'flag', label: FLAG_BADGE['flag'].label, cls: FLAG_BADGE['flag'].checkboxCls },
-		{ key: 'no_flag', label: FLAG_BADGE['no_flag'].label, cls: FLAG_BADGE['no_flag'].checkboxCls },
-		{ key: 'no_data', label: FLAG_BADGE['no_data'].label, cls: FLAG_BADGE['no_data'].checkboxCls }
+		{ key: 'flag', label: FLAG_BADGE_MAP['flag'].label, cls: FLAG_BADGE_MAP['flag'].checkboxCls },
+		{ key: 'no_flag', label: FLAG_BADGE_MAP['no_flag'].label, cls: FLAG_BADGE_MAP['no_flag'].checkboxCls },
+		{ key: 'no_data', label: FLAG_BADGE_MAP['no_data'].label, cls: FLAG_BADGE_MAP['no_data'].checkboxCls }
 	];
 
 	const totalVisible = $derived(
@@ -90,7 +90,7 @@
 				direction: info?.above_or_below ?? '–',
 				within_10: boolSym(row[`${ind}_within_10perc`]),
 				near_no_flag: boolSym(row[`${ind}_within_10perc_change`]),
-				status: FLAG_BADGE[fk]?.label ?? '–'
+				status: getFlagBadge(fk)?.label ?? '–'
 			};
 		});
 	}
@@ -109,14 +109,14 @@
 
 	const dtCellBadges = {
 		status: {
-			[FLAG_BADGE.flag.label]: { style: FLAG_BADGE.flag.badgeStyle, class: 'border-0' },
-			[FLAG_BADGE.no_flag.label]: { style: FLAG_BADGE.no_flag.badgeStyle, class: 'border-0' },
-			[FLAG_BADGE.no_data.label]: { style: FLAG_BADGE.no_data.badgeStyle, class: 'border-0' }
+			[FLAG_BADGE_MAP.flag.label]: { style: FLAG_BADGE_MAP.flag.badgeStyle, class: 'border-0' },
+			[FLAG_BADGE_MAP.no_flag.label]: { style: FLAG_BADGE_MAP.no_flag.badgeStyle, class: 'border-0' },
+			[FLAG_BADGE_MAP.no_data.label]: { style: FLAG_BADGE_MAP.no_data.badgeStyle, class: 'border-0' }
 		}
 	};
 
 	const dtRowColor = {
-		status: { [FLAG_BADGE.flag.label]: { bg: 'var(--color-flag-tint)' } }
+		status: { [FLAG_BADGE_MAP.flag.label]: { bg: 'var(--color-flag-tint)' } }
 	};
 </script>
 

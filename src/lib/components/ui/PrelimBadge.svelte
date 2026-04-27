@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { getPrelimBadge } from '$lib/utils/colors';
 
 	interface Props {
-		/** Prelim flag key: "EM", "ROEM", "ACUTE", "NO_ACUTE", "INSUFFICIENT_EVIDENCE", "NO_DATA" */
+		/** Prelim flag key — lowercase snake_case: 'em', 'roem', 'acute', 'acute_needs', 'insufficient_evidence', 'no_data' */
 		value: string;
 		/** Optional extra classes on the <span> */
 		class?: string;
@@ -10,7 +10,7 @@
 
 	let { value, class: cls = '' }: Props = $props();
 
-	const badge = $derived(PRELIM_FLAG_BADGE[value]);
+	const badge = $derived(getPrelimBadge(value));
 </script>
 
 {#if badge}

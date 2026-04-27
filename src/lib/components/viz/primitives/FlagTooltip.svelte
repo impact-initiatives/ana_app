@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fmt } from '$lib/utils/format';
-	import { FLAG_BADGE } from '$lib/utils/colors';
+	import { getFlagBadge } from '$lib/utils/colors';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import type { TooltipRow, TooltipBadge } from '$lib/components/ui/TooltipCard.svelte';
@@ -28,7 +28,7 @@
 	});
 
 	const badge = $derived.by((): TooltipBadge | null => {
-		const fb = FLAG_BADGE[flagLabel];
+		const fb = getFlagBadge(flagLabel);
 		if (!fb) return null;
 		const b: TooltipBadge = { label: fb.label, cls: fb.badgeCls, style: fb.badgeStyle };
 		if (within10 && (flagLabel === 'flag' || flagLabel === 'no_flag')) {

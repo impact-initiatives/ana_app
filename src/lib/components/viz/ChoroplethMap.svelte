@@ -3,7 +3,8 @@
 	import { geoIdentity, geoBounds } from 'd3-geo';
 	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
-	import { PRELIM_FLAG_BADGE, FLAG_BADGE } from '$lib/utils/colors';
+	import { getPrelimBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
@@ -74,8 +75,8 @@
 				? ['flag', 'no_flag', 'insufficient_evidence', 'no_data']
 				: ['flag', 'no_flag', 'no_data'];
 			legendEntries = statusKeys.map((k) => ({
-				varOrColor: `var(${FLAG_BADGE[k].colorVar})`,
-				label: FLAG_BADGE[k].label
+				varOrColor: `var(${getFlagBadge(k)!.colorVar})`,
+				label: getFlagBadge(k)!.label
 			}));
 			flaggedCount = rows.filter((r) => r[layer.field] === 'flag').length;
 		}
@@ -104,7 +105,7 @@
 		containerWidth > 0 ? Math.round(Math.max(150, Math.min(700, containerWidth / aspectRatio))) : 0
 	);
 
-	const NO_DATA_COLOR = PRELIM_FLAG_BADGE['NO_DATA']?.bg ?? 'var(--color-no-data)';
+	const NO_DATA_COLOR = getPrelimBadge('no_data')?.bg ?? 'var(--color-no-data)';
 
 	// Pre-extract p-codes per feature — only reruns when GeoJSON or level changes, not on rows filter.
 	const featureWithCodes = $derived.by(() => {
@@ -128,17 +129,17 @@
 
 			if (!row) {
 				flagColor = NO_DATA_COLOR;
-				flagLabel = PRELIM_FLAG_BADGE['NO_DATA']?.label ?? 'No Data';
+				flagLabel = getPrelimBadge('no_data')?.label ?? 'No Data';
 			} else if (layer.type === 'prelim') {
 				const flag = String(row.prelim_flag ?? '');
-				const badge = flag ? PRELIM_FLAG_BADGE[flag] : undefined;
+				const badge = flag ? getPrelimBadge(flag) : undefined;
 				flagColor = badge?.bg ?? NO_DATA_COLOR;
-				flagLabel = badge?.label ?? (PRELIM_FLAG_BADGE['NO_DATA']?.label ?? 'No Data');
+				flagLabel = badge?.label ?? getPrelimBadge('no_data')?.label ?? 'No Data';
 			} else {
 				const status = String(row[layer.field] ?? 'no_data');
-				const badge = FLAG_BADGE[status];
+				const badge = getFlagBadge(status);
 				flagColor = badge ? `var(${badge.colorVar})` : NO_DATA_COLOR;
-				flagLabel = badge?.label ?? (FLAG_BADGE['no_data']?.label ?? 'No Data');
+				flagLabel = badge?.label ?? FLAG_BADGE_MAP.no_data.label;
 			}
 
 			return { ...f, properties: { ...f.properties, flagColor, flagLabel, hasData: !!row, code } };
@@ -188,7 +189,8 @@
 				margin={0}
 				projection={{
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					type: ({ width, height }) => geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
+					type: ({ width, height }) =>
+						geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
 				}}
 			>
 				<!-- Colored fill layer -->
@@ -258,10 +260,7 @@
 {/if}
 
 {#if layer.type === 'prelim'}
-	<LegendBadge
-		keys={[]}
-		prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
-	/>
+	<LegendBadge keys={[]} prelimKeys={PRELIM_FLAG_KEYS} />
 {:else}
 	<LegendBadge keys={legendStatusKeys} />
 {/if}

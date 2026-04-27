@@ -1,4 +1,4 @@
-import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+import { getPrelimBadge } from '$lib/utils/colors';
 import { PRELIM_FLAG_KEYS, ACUTE_PRELIM_FLAGS, type PrelimFlag } from '$lib/types/flags';
 
 const PAINT_PROPS = [
@@ -106,7 +106,7 @@ export interface ExportMapOpts {
 	/** Pre-computed flagged count. Overrides the default prelim-based calculation. */
 	flaggedCount?: number;
 	/** Legend entries to render. Each varOrColor may be a CSS var() string or a hex value.
-	 *  When omitted the default PRELIM_FLAG_BADGE legend is used. */
+	 *  When omitted the default prelimBadge legend is used. */
 	legendEntries?: { varOrColor: string; label: string }[];
 	/** Human-readable title for the exported SVG. Overrides the default prelim title. */
 	layerTitle?: string | null;
@@ -152,7 +152,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	// Resolve legend colours while container still alive
 	const resolvedColors: Record<string, string> = {};
 	for (const key of PRELIM_KEYS) {
-		const badge = PRELIM_FLAG_BADGE[key];
+		const badge = getPrelimBadge(key);
 		if (badge) resolvedColors[key] = resolveVar(badge.bg, container);
 	}
 	const resolvedLegendEntries = legendEntriesOpt?.map((e) => ({
@@ -210,7 +210,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 		resolvedLegendEntries ??
 		PRELIM_KEYS.map((key) => ({
 			color: resolvedColors[key] ?? '#999',
-			label: PRELIM_FLAG_BADGE[key]?.label ?? key
+			label: getPrelimBadge(key)?.label ?? key
 		}));
 
 	for (const { color, label: entryLabel } of activeLegendEntries) {
