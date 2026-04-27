@@ -270,7 +270,7 @@ function checkSemantics(data: unknown, indicatorsPath: string | null): SemanticR
 		}
 	}
 
-	// Optional cross-check against indicators.json
+	// Optional cross-check against reference.json
 	if (indicatorsPath !== null) {
 		if (!fs.existsSync(indicatorsPath)) {
 			errors.push(`--indicators file not found: ${indicatorsPath}`);
@@ -284,7 +284,7 @@ function checkSemantics(data: unknown, indicatorsPath: string | null): SemanticR
 			}
 
 			if (indicatorsData) {
-				// Collect all indicator ids from indicators.json
+				// Collect all indicator ids from reference.json
 				const knownIds = new Set<string>();
 				const root = indicatorsData as {
 					systems?: Array<{
@@ -308,7 +308,7 @@ function checkSemantics(data: unknown, indicatorsPath: string | null): SemanticR
 				for (const leaf of leaves) {
 					if (!knownIds.has(leaf.id)) {
 						errors.push(
-							`${leaf.path}: leaf id "${leaf.id}" not found in indicators.json`
+							`${leaf.path}: leaf id "${leaf.id}" not found in reference.json`
 						);
 					}
 				}

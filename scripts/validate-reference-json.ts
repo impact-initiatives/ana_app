@@ -2,7 +2,7 @@
 /**
  * scripts/validate-indicators-json.ts
  *
- * Validates the generated `static/data/indicators.json` in two passes:
+ * Validates the generated `static/data/reference.json` in two passes:
  *
  * Pass 1 — Zod schema
  *   Checks structural correctness of the JSON: indicator IDs, type syntax,
@@ -21,7 +21,7 @@
  *
  * Usage:
  *   bun ./scripts/validate-indicators.ts
- *   bun ./scripts/validate-indicators.ts --json static/data/indicators.json
+ *   bun ./scripts/validate-indicators.ts --json static/data/reference.json
  *   bun ./scripts/validate-indicators.ts --factor static/data/factor.csv
  *   bun ./scripts/validate-indicators.ts --subfactor static/data/subfactor.csv
  *   bun ./scripts/validate-indicators.ts --help

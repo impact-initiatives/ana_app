@@ -4,17 +4,17 @@
 
 | File                   | Role                                                                                                                                   |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `access_indicators.js` | Metadata traversal layer — reads `indicators.json`, exposes `buildSubfactorList`, `getIndicatorMetadata`, etc.                         |
+| `access_indicators.js` | Metadata traversal layer — reads `reference.json`, exposes `buildSubfactorList`, `getIndicatorMetadata`, etc.                          |
 | `flagger.ts`           | Flagging engine — calls access layer, builds `tidy` mutate pipeline, emits `prelim_flag`                                               |
 | `colors.ts`            | Display metadata — `prelimBadge` maps `prelim_flag` values to colors and labels                                                        |
-| `indicators.json`      | Source of truth — hierarchical system → factor → subfactor → indicator, with per-indicator `evidence_threshold` and `factor_threshold` |
+| `reference.json`       | Source of truth — hierarchical system → factor → subfactor → indicator, with per-indicator `evidence_threshold` and `factor_threshold` |
 | `input_good_50.csv`    | Example input — rows with `uoa`, optional metadata cols, then indicator columns by canonical ID                                        |
 
 ---
 
 ## What the thresholds mean
 
-`evidence_threshold` and `factor_threshold` are stored **per indicator** in `indicators.json` but they operate at the **subfactor level** — they define how many indicators from a given "strength group" are needed to draw a conclusion about the subfactor.
+`evidence_threshold` and `factor_threshold` are stored **per indicator** in `reference.json` but they operate at the **subfactor level** — they define how many indicators from a given "strength group" are needed to draw a conclusion about the subfactor.
 
 Within a subfactor, indicators with the **same `(factor_threshold, evidence_threshold)` pair** form a group. All indicators with `(1, 1)` are in one group, all with `(2, 2)` in another, etc.
 
