@@ -3,6 +3,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
+	import { resolve } from '$app/paths';
 
 	type Row = Record<string, any>;
 
