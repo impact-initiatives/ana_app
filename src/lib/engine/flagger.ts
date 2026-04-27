@@ -6,6 +6,7 @@ import {
 } from '$lib/engine/metricMetadata';
 import { SystemIDEnum } from '$lib/types/generated/system-enum';
 import type { ReferenceRoot } from '$lib/types/structure';
+import type { FlagStatus } from '$lib/types/flags';
 
 /**
  * Lightweight, modular flagger
@@ -44,7 +45,7 @@ import type { ReferenceRoot } from '$lib/types/structure';
 /* --------------------- Types --------------------- */
 
 type Row = Record<string, any>;
-type Status = 'flag' | 'no_flag' | 'insufficient_evidence' | 'no_data';
+type Status = FlagStatus;
 type ThresholdGroup = { factor_threshold: number; evidence_threshold: number; codes: string[] };
 type MutateSpec = Record<string, (d: Row) => unknown>;
 
@@ -381,24 +382,24 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		const isInsuff  = (key: string) => status(key) === 'insufficient_evidence';
 
 		// 1. Emergency — mortality system flagged
-		if (isFlagged(mortalityId)) return 'EM';
+		if (isFlagged(mortalityId)) return 'em';
 
 		// 2. Risk of Emergency — health outcomes flagged AND ≥3 other classification systems flagged
 		const otherFlagged = classificationSystems
 			.filter((s) => s !== healthOutcomesId && isFlagged(s)).length;
-		if (isFlagged(healthOutcomesId) && otherFlagged >= ROEM_MIN_OTHER_FLAGGED) return 'ROEM';
+		if (isFlagged(healthOutcomesId) && otherFlagged >= ROEM_MIN_OTHER_FLAGGED) return 'roem';
 
 		// 3. Acute Needs — any classification system flagged
-		if (classificationSystems.some(isFlagged)) return 'ACUTE';
+		if (classificationSystems.some(isFlagged)) return 'acute';
 
 		// 4. Insufficient Evidence — no flag, at least one classification system insufficient
-		if (classificationSystems.some(isInsuff)) return 'INSUFFICIENT_EVIDENCE';
+		if (classificationSystems.some(isInsuff)) return 'insufficient_evidence';
 
 		// 5. No Data — no flag, no insufficient evidence, all classification systems have no data
-		if (classificationSystems.every((s) => status(s) === 'no_data')) return 'NO_DATA';
+		if (classificationSystems.every((s) => status(s) === 'no_data')) return 'no_data';
 
 		// 6. No Acute Needs — mix of no_flag / no_data; enough evidence to rule out acute needs
-		return 'ACUTE_NEEDS';
+		return 'acute_needs';
 	};
 
 	// ── Pipeline ──────────────────────────────────────────────────────────────
