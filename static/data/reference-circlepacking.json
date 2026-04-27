@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T13:39:16.629Z",
+  "generatedAt": "2026-04-27T20:47:36.722Z",
   "name": "root",
   "id": "root",
   "children": [
@@ -290,8 +290,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -322,8 +322,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -354,8 +354,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Below",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -752,8 +752,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -784,8 +784,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -816,8 +816,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -848,8 +848,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability"
                       }
                     }
@@ -1666,8 +1666,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -1698,8 +1698,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -1730,8 +1730,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -1762,8 +1762,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2108,8 +2108,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2140,8 +2140,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2172,8 +2172,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2204,8 +2204,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2236,8 +2236,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2370,8 +2370,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2402,8 +2402,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2440,8 +2440,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2472,8 +2472,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -2504,8 +2504,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3042,8 +3042,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3202,8 +3202,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3234,8 +3234,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3266,8 +3266,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3478,8 +3478,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3510,8 +3510,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3548,8 +3548,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -3586,8 +3586,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -4078,8 +4078,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -4206,8 +4206,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -4238,8 +4238,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure"
                       }
                     }
@@ -5778,8 +5778,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping"
                       }
                     }
@@ -5810,8 +5810,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping"
                       }
                     }
@@ -5842,8 +5842,8 @@
                           "van_label": null
                         },
                         "above_or_below": "Below",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping"
                       }
                     }
