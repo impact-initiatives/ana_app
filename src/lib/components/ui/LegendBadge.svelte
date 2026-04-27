@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { FLAG_BADGE, PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { getFlagBadge, getPrelimBadge } from '$lib/utils/colors';
 
 	interface Props {
 		/** FLAG_BADGE keys to display. Default: the four main statuses. */
-		keys?: string[];
-		/** PRELIM_FLAG_BADGE keys to display after a | separator. Default: none. */
-		prelimKeys?: string[];
+		keys?: readonly string[];
+		/** prelimBadge keys to display after a | separator. Default: none. */
+		prelimKeys?: readonly string[];
 		/** Use solid colours for FLAG_BADGE swatches instead of tinted. Default true = tinted. */
 		tinted?: boolean;
 		/** Render FLAG_BADGE swatches as btn-circle buttons. Default false = small square. */
@@ -34,29 +34,31 @@
 <div class="text-base-content/85 mt-3 flex flex-col gap-1.5 {size}">
 	<!-- Status badges row (hidden when keys is empty) -->
 	{#if keys.length > 0}
-	<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-		<span class="font-semibold">{prelimKeys.length > 0 ? 'System:' : 'Legend:'}</span>
-		{#each keys as fk (fk)}
-			{@const fb = FLAG_BADGE[fk]}
-			{#if fb}
-				<span class="flex items-center gap-1">
-					{#if btnCircle}
-						<span
-							class="btn btn-circle badge-xs"
-							style="background-color: var({swatchVar(fb)}); color: var(--color-base-content)"
-						></span>
-					{:else}
-						<span class="inline-block h-3 w-3 rounded" style="background-color: var({swatchVar(fb)})"
-						></span>
-					{/if}
-					{fb.label}
-				</span>
+		<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+			<span class="font-semibold">{prelimKeys.length > 0 ? 'System:' : 'Legend:'}</span>
+			{#each keys as fk (fk)}
+				{@const fb = getFlagBadge(fk)}
+				{#if fb}
+					<span class="flex items-center gap-1">
+						{#if btnCircle}
+							<span
+								class="btn btn-circle badge-xs"
+								style="background-color: var({swatchVar(fb)}); color: var(--color-base-content)"
+							></span>
+						{:else}
+							<span
+								class="inline-block h-3 w-3 rounded"
+								style="background-color: var({swatchVar(fb)})"
+							></span>
+						{/if}
+						{fb.label}
+					</span>
+				{/if}
+			{/each}
+			{#if extra}
+				{@render extra()}
 			{/if}
-		{/each}
-		{#if extra}
-			{@render extra()}
-		{/if}
-	</div>
+		</div>
 	{/if}
 
 	<!-- Prelim badges row -->
@@ -64,13 +66,19 @@
 		<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
 			<span class="font-semibold">Preliminary flag:</span>
 			{#each prelimKeys as pk (pk)}
-				{@const pb = PRELIM_FLAG_BADGE[pk]}
+				{@const pb = getPrelimBadge(pk)}
 				{#if pb}
 					<span class="flex items-center gap-1">
 						{#if btnCircle}
-							<span class="btn btn-circle badge-sm" style="background-color: {tinted && pb.tintBg ? pb.tintBg : pb.bg}"></span>
+							<span
+								class="btn btn-circle badge-sm"
+								style="background-color: {tinted && pb.tintBg ? pb.tintBg : pb.bg}"
+							></span>
 						{:else}
-							<span class="inline-block h-3 w-3 rounded" style="background-color: {tinted && pb.tintBg ? pb.tintBg : pb.bg}"></span>
+							<span
+								class="inline-block h-3 w-3 rounded"
+								style="background-color: {tinted && pb.tintBg ? pb.tintBg : pb.bg}"
+							></span>
 						{/if}
 						{pb.label}
 					</span>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
+	import { FLAG_BADGE_MAP, getFlagBadge, systemBaseColor } from '$lib/utils/colors';
 	import Card from '$lib/components/ui/Card.svelte';
 
 	type Row = Record<string, unknown>;
@@ -36,17 +36,17 @@
 	let { row, systems, referenceJson, tinted = true }: Props = $props();
 
 	function barColor(status: string): string {
-		const fb = FLAG_BADGE[status] ?? FLAG_BADGE.no_data;
+		const fb = getFlagBadge(status) ?? FLAG_BADGE_MAP.no_data;
 		return `var(${tinted ? fb.tintVar : fb.colorVar})`;
 	}
 
 	function solidColor(status: string): string {
-		const fb = FLAG_BADGE[status] ?? FLAG_BADGE.no_data;
+		const fb = getFlagBadge(status) ?? FLAG_BADGE_MAP.no_data;
 		return `var(${fb.colorVar})`;
 	}
 
 	function badge(status: string) {
-		return FLAG_BADGE[status] ?? FLAG_BADGE.no_data;
+		return getFlagBadge(status) ?? FLAG_BADGE_MAP.no_data;
 	}
 
 	const systemCards = $derived.by<SystemCard[]>(() => {

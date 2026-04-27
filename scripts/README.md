@@ -3,7 +3,7 @@
 This folder contains small helper scripts used to:
 
 - generate TypeScript enums from CSV lookup tables (systems, factors, sub_factors), and
-- validate the generated nested `indicators.json` using the zod schema.
+- validate the generated nested `reference.json` using the zod schema.
 
 These scripts are invoked with Bun (recommended) and are wired into the repository `package.json` as convenience commands.
 
@@ -25,7 +25,7 @@ These scripts are invoked with Bun (recommended) and are wired into the reposito
   - Exported symbols: `SubFactorIDEnum`, `SubFactorIDs`, `SubFactorID`.
 
 - `scripts/validate-reference-json.ts`
-  - Reads `static/data/indicators.json` and validates it against the zod schema exported by:
+  - Reads `static/data/reference.json` and validates it against the zod schema exported by:
     `src/lib/types/indicators.ts`.
   - Prints a friendly list of validation errors (paths + messages) or `Validation passed ✅`.
 
@@ -144,7 +144,7 @@ Example (inspect file):
 bun run generate:enums
 ```
 
-3. If you change indicators or thresholds, re-generate the `indicators.json` file (if you have a script for that) or edit `static/data/indicators.json` directly.
+3. If you change indicators or thresholds, re-generate the `reference.json` file (if you have a script for that) or edit `static/data/reference.json` directly.
 4. Run the validator:
 
 ```ANA_app_svelte/scripts/README.md#L1-4
@@ -167,7 +167,7 @@ bun run validate:indicators
 If you want, I can:
 
 - Update `package.json` now to run all three generators for `generate:enums`.
-- Add a single script that regenerates all enums and then validates `indicators.json` in one command.
+- Add a single script that regenerates all enums and then validates `reference.json` in one command.
 - Replace the simple CSV reader with a robust CSV parser to handle quoted cells.
 
 Pick any of those and I will prepare the changes.

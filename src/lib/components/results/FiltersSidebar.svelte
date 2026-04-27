@@ -13,7 +13,7 @@
 		overviewUoaOptions: Option[];
 		overviewSelectedUoas: string[] | null;
 		selectedPrelimKeys: string[] | null;
-		PRELIM_KEYS: string[];
+		PRELIM_KEYS: readonly string[];
 		prelimOptions: Option[];
 		metadataCols: string[];
 		groupByCol: string | null;
@@ -74,7 +74,7 @@
 		<Select
 			label="Preliminary flag"
 			options={prelimOptions}
-			selected={selectedPrelimKeys ?? PRELIM_KEYS}
+			selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
 			placeholder="All flags"
 			onchange={onprelimkeyschange}
 		/>

@@ -1,8 +1,19 @@
 <script lang="ts">
-	export let value: string = '';
-	export let placeholder: string = 'Search…';
-	export let extraClass: string = '';
-	export let required: boolean = false;
+	interface Props {
+		value?: string;
+		placeholder?: string;
+		extraClass?: string;
+		required?: boolean;
+		oninput?: (value: string) => void;
+	}
+
+	let {
+		value = $bindable(''),
+		placeholder = 'Search…',
+		extraClass = '',
+		required = false,
+		oninput
+	}: Props = $props();
 </script>
 
 <label
@@ -25,5 +36,13 @@
 			<path d="m21 21-4.3-4.3"></path>
 		</g>
 	</svg>
-	<input type="search" class="grow" {placeholder} bind:value aria-label="Search" {required} />
+	<input
+		type="search"
+		class="grow"
+		{placeholder}
+		bind:value
+		oninput={() => oninput?.(value)}
+		aria-label={placeholder}
+		{required}
+	/>
 </label>

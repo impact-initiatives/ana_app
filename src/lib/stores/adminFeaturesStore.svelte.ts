@@ -1,5 +1,8 @@
 // src/lib/stores/adminFeaturesStore.svelte.ts
 import { browser } from '$app/environment';
+import i18nCountries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+i18nCountries.registerLocale(enLocale);
 
 const STORAGE_KEY = 'ana_admin_features_store';
 
@@ -10,6 +13,8 @@ export interface AdminFeaturesState {
   adm2: any | null;
   /** Identifies which country + level was last fetched, to avoid redundant requests. */
   cachedKey: string | null;
+  /** Human-readable country name resolved from the ISO-2 prefix of cachedKey via country-list-js. */
+  countryName: string | null;
   fetchState: FetchState;
   fetchError: string | null;
   /** pcode → human-readable admin name (gis_name ?? name). Built from adm2 features; falls back to adm1. */
@@ -20,10 +25,17 @@ const initialState: AdminFeaturesState = {
   adm1: null,
   adm2: null,
   cachedKey: null,
+  countryName: null,
   fetchState: 'idle',
   fetchError: null,
   pcodeLabelMap: null
 };
+
+/** Derive a human-readable country name from a pcode-based cache key (e.g. "SD01001_ADM1" → "Sudan"). */
+export function countryNameFromKey(key: string): string | null {
+  const iso2 = key.slice(0, 2).toUpperCase();
+  return i18nCountries.getName(iso2, 'en') ?? null;
+}
 
 function loadFromStorage(): AdminFeaturesState {
   if (!browser) return initialState;
@@ -38,7 +50,9 @@ function loadFromStorage(): AdminFeaturesState {
       : parsed.fetchState === 'error'
         ? 'error'
         : 'idle';
-    return { ...parsed, fetchState, fetchError: fetchState === 'error' ? parsed.fetchError : null };
+    // Re-derive countryName on hydration so old persisted data without the field still works.
+    const countryName = parsed.countryName ?? (parsed.cachedKey ? countryNameFromKey(parsed.cachedKey) : null);
+    return { ...parsed, fetchState, fetchError: fetchState === 'error' ? parsed.fetchError : null, countryName };
   } catch {
     return initialState;
   }
@@ -71,6 +85,7 @@ export function setAdminFeatures(adm1: any, adm2: any, key: string) {
   adminFeaturesStore.adm1 = adm1;
   adminFeaturesStore.adm2 = adm2;
   adminFeaturesStore.cachedKey = key;
+  adminFeaturesStore.countryName = countryNameFromKey(key);
   adminFeaturesStore.fetchState = 'done';
   adminFeaturesStore.fetchError = null;
   adminFeaturesStore.pcodeLabelMap = buildPcodeLabelMap(adm2, adm1);
@@ -100,6 +115,7 @@ export function clearAdminFeatures() {
   adminFeaturesStore.adm1 = null;
   adminFeaturesStore.adm2 = null;
   adminFeaturesStore.cachedKey = null;
+  adminFeaturesStore.countryName = null;
   adminFeaturesStore.fetchState = 'idle';
   adminFeaturesStore.fetchError = null;
   adminFeaturesStore.pcodeLabelMap = null;

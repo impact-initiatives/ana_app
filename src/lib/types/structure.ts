@@ -1,7 +1,7 @@
 /**
  * src/lib/types/structure.ts
  *
- * Canonical data-shape types for indicators.json.
+ * Canonical data-shape types for reference.json.
  * No Zod, no validation logic — pure types, enums, and type-parsing utilities.
  *
  * Imported by:

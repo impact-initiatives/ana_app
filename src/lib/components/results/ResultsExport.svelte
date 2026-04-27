@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import { resolve } from '$app/paths';
 
@@ -171,28 +172,14 @@
 							onchange={onexportUoasChange}
 						/>
 					</div>
-					<button
-						class="btn btn-secondary btn-sm"
-						disabled={exportSelectedUoas.length === 0}
+					<DownloadButton
 						onclick={handleDeepDive}
-					>
-						Download ZIP ({exportSelectedUoas.length} UoA{exportSelectedUoas.length !== 1
-							? 's'
-							: ''})
-					</button>
-					<a
-						href={resolve('/merge')}
-						class="btn btn-outline btn-sm gap-2"
-						title="Merge filled-in deep-dives"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4" aria-hidden="true">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
-						</svg>
-						Merge
-					</a>
+						label="Download ZIP (of selected UoAs)"
+						variant="secondary"
+						disabled={exportSelectedUoas.length === 0}
+					></DownloadButton>
 				</div>
 			</Card>
 		</div>
-
 	</div>
 </section>

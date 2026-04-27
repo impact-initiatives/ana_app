@@ -14,7 +14,7 @@ export interface HypothesisEntry {
 }
 
 export interface SystemHypotheses {
-	/** Matches system.id in indicators.json (e.g. "food_systems") */
+	/** Matches system.id in reference.json (e.g. "food_systems") */
 	systemId: string;
 	/** Human-readable system label for the hypothesis table header */
 	systemLabel: string;

@@ -215,7 +215,7 @@ For non-browser contexts that need actual hex (e.g. ExcelJS in `deepdive.ts`), `
 
 ### Flag / status colours
 
-Defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Accessed via `FLAG_BADGE` and `PRELIM_FLAG_BADGE` records in `colors.ts`.
+Defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Accessed via `FLAG_BADGE` and `prelimBadge` records in `colors.ts`.
 
 ---
 

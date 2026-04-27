@@ -2,7 +2,8 @@
 	import { pie } from 'd3-shape';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { getPrelimBadge } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 	import Arc from './primitives/Arc.svelte';
@@ -29,7 +30,7 @@
 	// Radius: explicit override or auto-fit to container (max 120px)
 	const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 
-	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
+	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
 
 	// ── Count rows per prelim_flag ────────────────────────────────────────────
 	interface Slice {
@@ -49,8 +50,8 @@
 		return PRELIM_KEYS.map((k) => ({
 			key: k,
 			count: counts[k],
-			label: PRELIM_FLAG_BADGE[k]?.label ?? k,
-			color: PRELIM_FLAG_BADGE[k]?.bg ?? '#9ca3af'
+			label: getPrelimBadge(k)?.label ?? k,
+			color: getPrelimBadge(k)?.bg ?? '#9ca3af'
 		}));
 	});
 
