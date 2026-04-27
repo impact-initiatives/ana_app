@@ -35,8 +35,7 @@
 	const variantCls = $derived(`btn-${variant}`);
 	const sizeCls = $derived(size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : 'btn-md');
 
-	// Auto-calculate aria-label if not explicitly provided
-	const ariaLabel = `Download button: ${label}`;
+	const ariaLabel = $derived(`Download button: ${label}`);
 </script>
 
 <button
