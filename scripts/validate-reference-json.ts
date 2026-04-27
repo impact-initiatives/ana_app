@@ -307,6 +307,7 @@ function checkThresholdValues(data: unknown): ThresholdValueError[] {
 					indicators?: Array<{
 						metrics?: Array<{
 							metric?: string;
+							preference?: number;
 							factor_threshold?: number;
 							evidence_threshold?: number;
 						}>;
@@ -325,6 +326,7 @@ function checkThresholdValues(data: unknown): ThresholdValueError[] {
 					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
 					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
 						const m = ind.metrics![mi];
+						if (m.preference === 3) continue; // excluded from the flagging pipeline
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 						if (typeof m.factor_threshold === 'number' && m.factor_threshold <= 0) {
 							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
@@ -396,6 +398,7 @@ function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 					indicators?: Array<{
 						metrics?: Array<{
 							metric?: string;
+							preference?: number;
 							factor_threshold?: number;
 							evidence_threshold?: number;
 						}>;
@@ -414,6 +417,7 @@ function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
 					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
 						const m = ind.metrics![mi];
+						if (m.preference === 3) continue; // excluded from the flagging pipeline
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 						if (typeof m.factor_threshold === 'number' && !Number.isInteger(m.factor_threshold)) {
 							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
@@ -447,6 +451,7 @@ function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[]
 				sub_factors?: Array<{
 					indicators?: Array<{
 						metrics?: Array<{
+							preference?: number;
 							factor_threshold?: number;
 							evidence_threshold?: number;
 						}>;
@@ -468,6 +473,7 @@ function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[]
 				const groups = new Map<string, { ft: number; et: number; count: number }>();
 				for (const ind of sf.indicators ?? []) {
 					for (const m of ind.metrics ?? []) {
+						if (m.preference === 3) continue; // excluded from the flagging pipeline
 						const ft = m.factor_threshold;
 						const et = m.evidence_threshold;
 						if (typeof ft === 'number' && typeof et === 'number') {
