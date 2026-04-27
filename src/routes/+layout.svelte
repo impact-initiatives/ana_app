@@ -56,7 +56,10 @@
 		{ path: '/results' as const, label: 'Results' }
 	];
 
-	const utilityLinks = [{ path: '/reference' as const, label: 'Reference' }];
+	const utilityLinks = [
+		{ path: '/reference' as const, label: 'Reference' },
+		{ path: '/merge' as const, label: 'Merge' }
+	];
 
 	let scrollY = $state(0);
 
@@ -151,13 +154,18 @@
 					<a
 						href={resolve(link.path)}
 						class={[
-							'relative flex items-center px-3.5 py-1 text-sm transition-colors duration-150',
+							'relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150',
 							isActive(link.path)
 								? 'text-primary after:bg-primary after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:rounded-full'
 								: 'text-base-content/85 hover:text-base-content'
 						].join(' ')}
 						aria-current={isActive(link.path) ? 'page' : undefined}
 					>
+						{#if link.path === '/merge'}
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4" aria-hidden="true">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+							</svg>
+						{/if}
 						{link.label}
 					</a>
 				{/each}
@@ -238,6 +246,11 @@
 								class={isActive(link.path) ? 'active' : ''}
 								aria-current={isActive(link.path) ? 'page' : undefined}
 							>
+								{#if link.path === '/merge'}
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4" aria-hidden="true">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+									</svg>
+								{/if}
 								{link.label}
 							</a>
 						</li>
