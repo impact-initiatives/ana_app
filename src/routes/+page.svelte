@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { resolve } from '$app/paths';
+	import { resolve, asset } from '$app/paths';
 	import { revealOnScroll } from '$lib/utils/revealOnScroll.svelte';
 	import { steps } from '$lib/types/steps';
 	import CsvUploader from '$lib/components/data/CsvUploader.svelte';
@@ -540,6 +540,31 @@
 			<h3 class="text-lg font-bold">CSV format guide</h3>
 			<p class="text-base-content/85 text-md mt-1">How to structure your file before uploading.</p>
 
+			<div
+				class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="text-primary size-4 shrink-0"
+					viewBox="0 0 20 20"
+					fill="currentColor"
+					aria-hidden="true"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+				<p class="text-sm">
+					Download the CSV
+					<a
+						href={asset('/data/input_template.csv')}
+						class="text-primary font-semibold underline underline-offset-2">template</a
+					>. And read the below for information on how to fill in.
+				</p>
+			</div>
+
 			<div class="text-base-content/85 mt-5 space-y-3 text-sm">
 				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
 					<div class="flex items-center justify-between gap-2">
@@ -562,8 +587,7 @@
 					</div>
 					<p class="mt-1">
 						Named with the metric ID (e.g. <code>MET001</code>, <code>MET002</code>). Unrecognised
-						column names are silently ignored during flagging. See the Reference tab for type
-						constraints — for example, proportions must be between 0 and 1.
+						column names are silently ignored during flagging.
 					</p>
 				</div>
 				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
@@ -583,7 +607,8 @@
 					</div>
 					<p class="mt-1">
 						Must be generally numeric or empty. No formatted strings, units, or special characters.
-						For missing values, leave the cell empty instead of writing "N/A" or "missing".
+						For missing values, leave the cell empty instead of writing "N/A" or "missing". See the
+						Reference tab for type constraints — for example, proportions must be between 0 and 1.
 					</p>
 				</div>
 			</div>
