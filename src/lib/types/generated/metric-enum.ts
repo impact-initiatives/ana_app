@@ -1,7 +1,7 @@
 /**
  * THIS FILE IS GENERATED — DO NOT EDIT BY HAND
  * Generated from: ../../../../static/data/ANA_2025_reference.csv
- * Generated at: 2026-04-22T12:30:51.567Z
+ * Generated at: 2026-04-27T13:39:16.549Z
  */
 
 export enum MetricIDEnum {
