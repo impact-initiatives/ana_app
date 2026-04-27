@@ -9,6 +9,7 @@ This skill captures the patterns from OwnKng's svelte-d3 reference repo and how 
 ## Core Pattern: D3 for math, Svelte for DOM
 
 **Never** use `d3.select()`, `d3.append()`, or any D3 DOM manipulation. D3 is used **only** for:
+
 - Scales (`scaleLinear`, `scaleBand`, `scaleOrdinal`, `scaleTime`, …)
 - Shape generators (`arc`, `pie`, `line`, `area`, `stack`, …)
 - Layout algorithms (`pie`, `histogram`, `pack`, `force`, …)
@@ -19,12 +20,11 @@ Svelte `{#each}` renders all SVG elements. D3 outputs geometry (path strings, x/
 
 ```svelte
 <!-- D3 computes arc path strings -->
-const arcGen = $derived(arc().innerRadius(r * 0.5).outerRadius(r));
-const arcData = $derived(pie()(slices));
+const arcGen = $derived(arc().innerRadius(r * 0.5).outerRadius(r)); const arcData = $derived(pie()(slices));
 
 <!-- Svelte renders the DOM -->
 {#each arcData as d (d.data.key)}
-  <path d={arcGen(d)} fill={d.data.color} />
+	<path d={arcGen(d)} fill={d.data.color} />
 {/each}
 ```
 
@@ -65,11 +65,12 @@ const innerHeight = $derived(Math.max(height - margin.top - margin.bottom, 0));
 ```
 
 SVG structure:
+
 ```svelte
 <svg width={containerWidth} height={svgHeight}>
-  <g transform="translate({margin.left},{margin.top})">
-    <!-- all chart content here, coords relative to inner area -->
-  </g>
+	<g transform="translate({margin.left},{margin.top})">
+		<!-- all chart content here, coords relative to inner area -->
+	</g>
 </svg>
 ```
 
@@ -79,12 +80,12 @@ SVG structure:
 
 These already exist and should be reused:
 
-| File | What it does |
-|------|-------------|
-| `src/lib/components/viz/XAxis.svelte` | Horizontal axis: baseline + tick marks + labels. Props: `scale`, `innerWidth`, `innerHeight`, `numberOfTicks?`, `tickValues?` |
-| `src/lib/components/viz/ThresholdLine.svelte` | Vertical dashed threshold line. Props: `x`, `height`, `label?`, `color?` |
-| `src/lib/components/viz/Dot.svelte` | Single data point circle. Used in beeswarm. |
-| `src/lib/components/viz/FlagTooltip.svelte` | Hover tooltip for flagged indicators. |
+| File                                          | What it does                                                                                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/components/viz/XAxis.svelte`         | Horizontal axis: baseline + tick marks + labels. Props: `scale`, `innerWidth`, `innerHeight`, `numberOfTicks?`, `tickValues?` |
+| `src/lib/components/viz/ThresholdLine.svelte` | Vertical dashed threshold line. Props: `x`, `height`, `label?`, `color?`                                                      |
+| `src/lib/components/viz/Dot.svelte`           | Single data point circle. Used in beeswarm.                                                                                   |
+| `src/lib/components/viz/FlagTooltip.svelte`   | Hover tooltip for flagged indicators.                                                                                         |
 
 **Do not duplicate these.** Use them when building new charts.
 
@@ -122,6 +123,7 @@ const arcData = $derived(pieGen(slices));
 ```
 
 Key differences from OwnKng (which uses Svelte 4):
+
 - Use `$state`/`$derived` not `$:` reactive statements
 - Use `{@attach observeWidth}` not `bind:clientWidth`
 - Use `onclick`/`onmousemove` not `on:click`/`on:mousemove`
@@ -189,10 +191,11 @@ function showTooltip(e: MouseEvent, data: …) {
 ## Legend Pattern
 
 This project uses `LegendBadge.svelte` for legends. Props:
+
 - `prelimKeys?: string[]` — renders prelim flag swatches
 - `statusKeys?: string[]` — renders system status swatches
 
-OwnKng's `LegendOrdinal` uses a D3 `scaleOrdinal` — this project's `LegendBadge` uses the color token maps (`PRELIM_FLAG_BADGE`, `FLAG_BADGE`) directly.
+OwnKng's `LegendOrdinal` uses a D3 `scaleOrdinal` — this project's `LegendBadge` uses the color token maps (`prelimBadge`, `FLAG_BADGE`) directly.
 
 ---
 
@@ -201,10 +204,10 @@ OwnKng's `LegendOrdinal` uses a D3 `scaleOrdinal` — this project's `LegendBadg
 Always use project color tokens, not D3 color palettes:
 
 ```ts
-import { PRELIM_FLAG_BADGE, FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
+import { prelimBadge, FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
 
-// PRELIM_FLAG_BADGE[key].bg      — hex fill color
-// PRELIM_FLAG_BADGE[key].label   — display label
+// prelimBadge[key].bg      — hex fill color
+// prelimBadge[key].label   — display label
 // FLAG_BADGE[key].tintVar        — CSS custom property name for tint (e.g. '--color-flag-tint')
 // FLAG_BADGE[key].label          — display label
 // systemBaseColor(systemId)      — returns a hex color for a system
@@ -215,12 +218,14 @@ import { PRELIM_FLAG_BADGE, FLAG_BADGE, systemBaseColor } from '$lib/utils/color
 ## SVG a11y Suppression
 
 For interactive SVG elements (paths, rects with mouse handlers), always add:
+
 ```svelte
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 ```
 
 For mouse-only hover (no click):
+
 ```svelte
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 ```
@@ -230,6 +235,7 @@ For mouse-only hover (no click):
 ## Animation
 
 Prefer CSS transitions on SVG attributes over JS animation:
+
 ```svelte
 <path style="transition: opacity 0.15s, d 0.1s" d={…} opacity={…} />
 ```
@@ -245,6 +251,6 @@ For enter animations, OwnKng uses `tweened` from `svelte/motion`. In Svelte 5 th
 3. Reuse `XAxis`, `ThresholdLine`, `Dot`, `FlagTooltip` where applicable
 4. Use `TooltipCard` for hover tooltips
 5. Use `LegendBadge` for legends
-6. Use project color tokens (`PRELIM_FLAG_BADGE`, `FLAG_BADGE`, `systemBaseColor`)
+6. Use project color tokens (`prelimBadge`, `FLAG_BADGE`, `systemBaseColor`)
 7. Add `svelte-ignore` comments for SVG a11y
 8. Run `npx @sveltejs/mcp svelte-autofixer ./path/to/Component.svelte` before finalizing

@@ -6,7 +6,7 @@
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `access_indicators.js` | Metadata traversal layer — reads `indicators.json`, exposes `buildSubfactorList`, `getIndicatorMetadata`, etc.                         |
 | `flagger.ts`           | Flagging engine — calls access layer, builds `tidy` mutate pipeline, emits `prelim_flag`                                               |
-| `colors.ts`            | Display metadata — `PRELIM_FLAG_BADGE` maps `prelim_flag` values to colors and labels                                                  |
+| `colors.ts`            | Display metadata — `prelimBadge` maps `prelim_flag` values to colors and labels                                                        |
 | `indicators.json`      | Source of truth — hierarchical system → factor → subfactor → indicator, with per-indicator `evidence_threshold` and `factor_threshold` |
 | `input_good_50.csv`    | Example input — rows with `uoa`, optional metadata cols, then indicator columns by canonical ID                                        |
 
@@ -399,10 +399,10 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
 
 Any UI code using `FLAG_BADGE['noflag']` must be updated to `FLAG_BADGE['no_flag']`.
 
-**2. Add `NO_DATA` to `PRELIM_FLAG_BADGE`** — the new decision tree can emit `'NO_DATA'`:
+**2. Add `NO_DATA` to `prelimBadge`** — the new decision tree can emit `'NO_DATA'`:
 
 ```ts
-export const PRELIM_FLAG_BADGE: Record<string, FlagBadge> = {
+export const prelimBadge: Record<string, FlagBadge> = {
   EM:                   { bg: 'var(--color-prelim-em)',      label: 'EM' },
   ROEM:                 { bg: 'var(--color-prelim-roem)',    label: 'RoEM' },
   ACUTE:                { bg: 'var(--color-prelim-an)',      label: 'Acute Needs' },
