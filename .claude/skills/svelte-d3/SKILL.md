@@ -277,10 +277,10 @@ import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 Always use project color tokens, **not** D3 color palettes (`colorPalette`, `schemeCategory10`, etc.):
 
 ```ts
-import { PRELIM_FLAG_BADGE, FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
+import { prelimBadge, FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
 
-PRELIM_FLAG_BADGE[key].bg        // hex fill — e.g. '#ef4444'
-PRELIM_FLAG_BADGE[key].label     // display label — e.g. 'Emergency'
+prelimBadge[key].bg        // hex fill — e.g. '#ef4444'
+prelimBadge[key].label     // display label — e.g. 'Emergency'
 FLAG_BADGE[key].tintVar          // CSS var name — e.g. '--color-flag-tint'
 FLAG_BADGE[key].label            // display label
 systemBaseColor(systemId)        // hex color per system
@@ -389,6 +389,6 @@ Use `Tween.of(() => reactiveExpression)` to bind to a derived value automaticall
 4. Reuse `XAxis`, `ThresholdLine`, `Dot`, `FlagTooltip` where applicable
 5. `TooltipCard` for hover tooltips
 6. `LegendBadge` for legends
-7. Project color tokens — `PRELIM_FLAG_BADGE`, `FLAG_BADGE`, `systemBaseColor`
+7. Project color tokens — `prelimBadge`, `FLAG_BADGE`, `systemBaseColor`
 8. `svelte-ignore` comments on interactive SVG elements
 9. Run `npx @sveltejs/mcp svelte-autofixer ./path/to/Component.svelte` before finalizing

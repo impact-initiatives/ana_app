@@ -3,7 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
-	import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS, ACUTE_PRELIM_FLAGS, type PrelimFlag } from '$lib/types/flags';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 
@@ -19,8 +19,7 @@
 
 	let { rows, systems, systemCodes, onprelimclick }: Props = $props();
 
-	// Prelim flags that count as an acute preliminary flag
-	const ACUTE_FLAGS = new Set(['EM', 'ROEM', 'ACUTE']);
+	const ACUTE_FLAGS = ACUTE_PRELIM_FLAGS;
 
 	interface RankedRow {
 		uoa: string;
@@ -30,7 +29,7 @@
 		within10: number;
 	}
 
-	const PRELIM_ORDER = Object.fromEntries(Object.keys(PRELIM_FLAG_BADGE).map((k, i) => [k, i]));
+	const PRELIM_ORDER = Object.fromEntries(PRELIM_FLAG_KEYS.map((k, i) => [k, i]));
 
 	// Single pass: compute ranked rows + summary + sorted table in one $derived.
 	const processed = $derived.by(() => {
@@ -49,7 +48,7 @@
 				if (sysFlagged) flaggedSystems++;
 			}
 			total++;
-			if (ACUTE_FLAGS.has(prelim_flag)) flagged++;
+			if (ACUTE_FLAGS.has(prelim_flag as PrelimFlag)) flagged++;
 			totalFlags += flaggedIndicators;
 			totalWithin10 += within10;
 			return { uoa, prelim_flag, flaggedSystems, flaggedIndicators, within10 };

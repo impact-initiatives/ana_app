@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FLAG_BADGE, PRELIM_FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
+	import { FLAG_BADGE_MAP, getFlagBadge, getPrelimBadge, systemBaseColor } from '$lib/utils/colors';
 	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
@@ -81,7 +81,7 @@
 		<!-- Preliminary flag -->
 		<div class="mt-1 mb-2 flex items-center gap-2">
 			<span>This UoA received the following preliminary flag:</span>
-			{#if row && PRELIM_FLAG_BADGE[row.prelim_flag]}
+			{#if row && getPrelimBadge(row.prelim_flag)}
 				<PrelimBadge value={row.prelim_flag} />
 			{:else}
 				<PrelimBadge value="NO_DATA" />
@@ -120,7 +120,7 @@
 				<!-- Per-system breakdown -->
 				<div class="divide-base-content/20 divide-y">
 					{#each sortedSystemStats as ss (ss.id)}
-						{@const fb = FLAG_BADGE[ss.status] ?? FLAG_BADGE.no_data}
+						{@const fb = getFlagBadge(ss.status) ?? FLAG_BADGE_MAP.no_data}
 						{@const sysColor = systemBaseColor(ss.id)}
 						<button
 							type="button"

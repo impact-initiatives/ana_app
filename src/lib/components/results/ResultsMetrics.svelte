@@ -89,7 +89,8 @@
 			</div>
 			<p class="text-primary mt-2 text-xs">
 				Showing {totalMetrics} metric{totalMetrics !== 1 ? 's' : ''}
-				across {filteredBlocks.length} system{filteredBlocks.length !== 1 ? 's' : ''}
+				across {filteredBlocks.length} system{filteredBlocks.length !== 1 ? 's' : ''}. Dropdowns
+				display only systems and factors that have metrics with data.
 			</p>
 		</Card>
 

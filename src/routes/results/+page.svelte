@@ -17,6 +17,8 @@
 	import { quintOut } from 'svelte/easing';
 	import { appReady } from '$lib/stores/appReady.svelte';
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
+	import { PRELIM_BADGE_MAP } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
 
 	import ResultsOverview from '$lib/components/results/ResultsOverview.svelte';
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
@@ -219,20 +221,11 @@
 	}
 
 	let selectedPrelimKeys = $state<string[] | null>(null);
-	const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'];
-	const prelimOptions = $derived(
-		PRELIM_KEYS.map((k) => ({
-			value: k,
-			label:
-				k === 'ACUTE_NEEDS'
-					? 'No Acute Needs'
-					: k === 'INSUFFICIENT_EVIDENCE'
-						? 'Insufficient Evidence'
-						: k === 'NO_DATA'
-							? 'No Data'
-							: k
-		}))
-	);
+	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
+	const prelimOptions = PRELIM_FLAG_KEYS.map((key) => ({
+		value: key,
+		label: PRELIM_BADGE_MAP[key].label
+	}));
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
@@ -556,7 +549,8 @@
 			mounted = true;
 			await tick();
 			const hash = window.location.hash;
-			if (hash) document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			if (hash)
+				document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}, 0);
 	});
 </script>

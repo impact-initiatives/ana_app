@@ -3,6 +3,7 @@
 	import Chevron from '$lib/components/ui/Chevron.svelte';
 	import Search from '$lib/components/ui/Search.svelte';
 	import SortIcon from '$lib/components/ui/SortIcon.svelte';
+	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 
 	interface Props {
 		/** Row data as plain objects. Column order follows key insertion order of the first row. */
@@ -214,7 +215,7 @@
 		URL.revokeObjectURL(url);
 	}
 
-// ── Pagination ────────────────────────────────────────────────────────────
+	// ── Pagination ────────────────────────────────────────────────────────────
 	let page = $state(0);
 
 	$effect(() => {
@@ -246,26 +247,7 @@
 				</div>
 			{/if}
 			{#if downloadable}
-				<button
-					class="btn btn-sm btn-ghost border-base-300 ml-auto border"
-					onclick={downloadCsv}
-					aria-label="Download as CSV"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="size-4"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-						aria-hidden="true"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					Download as CSV
-				</button>
+				<DownloadButton onclick={downloadCsv} label="Download as CSV" variant="outline" />
 			{/if}
 		</div>
 	{/if}
@@ -274,7 +256,9 @@
 		<tr class={headerRowClass}>
 			{#each columns as col, j (col)}
 				<th
-					class="{colClass(col)} select-none{rowDividerClass ? ' ' + rowDividerClass : ''}{headerThClass ? ' ' + headerThClass : ''}"
+					class="{colClass(col)} select-none{rowDividerClass
+						? ' ' + rowDividerClass
+						: ''}{headerThClass ? ' ' + headerThClass : ''}"
 				>
 					<button
 						class={headerBtnClass(col)}
@@ -325,7 +309,9 @@
 					{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
 					{@const txt = colOptions?.[colName]?.text ?? rc?.text}
 					<td
-						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg ? ' group-hover:brightness-90' : ''}"
+						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg
+							? ' group-hover:brightness-90'
+							: ''}"
 						style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
 							.filter(Boolean)
 							.join(';') || undefined}
@@ -338,8 +324,8 @@
 							{#if cfg}
 								<span
 									class="badge badge-sm{cfg.class ? ' ' + cfg.class : ''}"
-									style={cfg.style ?? undefined}
-								>{cfg.label ?? cell}</span>
+									style={cfg.style ?? undefined}>{cfg.label ?? cell}</span
+								>
 							{:else}
 								{cell}
 							{/if}

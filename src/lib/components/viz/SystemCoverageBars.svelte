@@ -2,7 +2,8 @@
 	import { scaleLinear } from 'd3-scale';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { FLAG_BADGE, systemBaseColor } from '$lib/utils/colors';
+	import { FLAG_BADGE_MAP, systemBaseColor } from '$lib/utils/colors';
+	import { FLAG_STATUS_KEYS, type FlagStatus } from '$lib/types/flags';
 	import Card from '$lib/components/ui/Card.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 
@@ -16,8 +17,8 @@
 	let { rows, systems }: Props = $props();
 
 	// ── Data ──────────────────────────────────────────────────────────────────
-	const STATUS_KEYS = ['flag', 'no_flag', 'insufficient_evidence', 'no_data'] as const;
-	type StatusKey = (typeof STATUS_KEYS)[number];
+	const STATUS_KEYS = FLAG_STATUS_KEYS;
+	type StatusKey = FlagStatus;
 
 	interface SystemBar {
 		id: string;
@@ -113,7 +114,7 @@
 								y={0}
 								width={seg.width}
 								height={BAR_HEIGHT}
-								style="fill: var({FLAG_BADGE[seg.key].tintVar})"
+								style="fill: var({FLAG_BADGE_MAP[seg.key as FlagStatus].tintVar})"
 								rx="3"
 							/>
 							{#if seg.width > 24}

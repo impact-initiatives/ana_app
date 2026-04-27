@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * generate-indicators-json.ts
- * Converts static/data/ANA_2025_reference.csv → static/data/indicators.json
+ * Converts static/data/ANA_2025_reference.csv → static/data/reference.json
  * Run validate-indicators.ts afterwards to check schema + id consistency.
  *
  * Usage:

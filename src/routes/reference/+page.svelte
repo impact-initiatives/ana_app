@@ -101,6 +101,28 @@
 		}
 	);
 
+	// Pre-select all levels/concepts once options arrive from the async metricStore.
+	let levelsInitialized = $state(false);
+	let conceptsInitialized = $state(false);
+	$effect(() => {
+		if (!levelsInitialized && levelOptions.length > 0) {
+			levelsInitialized = true;
+			selectedLevels = levelOptions.map((o) => o.value);
+		}
+	});
+	$effect(() => {
+		if (!conceptsInitialized && conceptOptions.length > 0) {
+			conceptsInitialized = true;
+			selectedConcepts = conceptOptions.map((o) => o.value);
+		}
+	});
+
+	// True when the user has explicitly cleared a filter that has available options.
+	const noActiveFilters = $derived(
+		(levelOptions.length > 0 && selectedLevels.length === 0) ||
+			(conceptOptions.length > 0 && selectedConcepts.length === 0)
+	);
+
 	const filteredTableRows = $derived(
 		tidy(
 			referenceObjects,
@@ -133,6 +155,29 @@
 		{/snippet}
 	</PageHeader>
 
+	<div role="alert" class="alert alert-info alert-soft mt-6 mb-6">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			class="h-6 w-6 shrink-0 stroke-current"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<p>
+			The full guidance is available <a
+				href="https://repository.impact-initiatives.org/document/impact/96b71396/ANA_2025_Methodology-Summary-1.pdf"
+			>
+				<span class="btn btn-outline btn-secondary btn-sm ml-1">here.</span>
+			</a>
+		</p>
+	</div>
+
 	{#if error}
 		<p class="text-error">Error loading circle-packing data: {error}</p>
 	{:else if loading}
@@ -143,8 +188,8 @@
 			<RadioToggle
 				bind:value={showTableReferenceList}
 				label="Show reference list as"
-				labelFalse="Circle Packing"
-				labelTrue="Table"
+				labelFalse="Table"
+				labelTrue="Circle Paking"
 				name="reference-list-view"
 			/>
 			<div class="flex flex-wrap gap-4">
@@ -169,7 +214,11 @@
 			</div>
 		</div>
 		<div class="mb-6">
-			{#if !showTableReferenceList}
+			{#if noActiveFilters}
+				<span class="text-base-content/70 flex py-8 text-center text-sm"
+					>No data matches current filters.</span
+				>
+			{:else if showTableReferenceList}
 				<CirclePacking
 					data={filteredData}
 					nodePadding={4}

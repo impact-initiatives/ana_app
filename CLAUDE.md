@@ -75,6 +75,7 @@ All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores
 - **fetch_admin.ts** — Detects p-codes in UOA column, fetches ADM1/ADM2 GeoJSON from external API
 - **download.ts** — Exports results as CSV / JSON / XLSX
 - **deepdive.ts** — Generates ZIP packages (one XLSX per UoA). Reads system colours from CSS custom properties via `getComputedStyle`.
+- **exportMap.ts** — Builds self-contained composite SVG for map export (title, map with inlined light-theme styles, legend, logos). `layerTitle` overrides the default prelim title for metric/system/factor/subfactor layers.
 - **parser.ts** — Thin PapaParse wrapper; returns `{ headers, rows }`
 
 ### Key Data Structures
@@ -120,13 +121,14 @@ Status vocabulary (applies at every rollup level):
 
 #### `results/`
 
-| Component                | Purpose                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                             |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)             |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                      |
+| Component                | Purpose                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking, choropleth map with cascade layer filters       |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                          |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                         |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                                                      |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                      |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                               |
 
 #### `viz/`
 
@@ -135,12 +137,14 @@ Status vocabulary (applies at every rollup level):
 | `HeatmapGrid.svelte`         | Systems × subfactors colour grid; cell = flag count / availability                      |
 | `SystemMatrix.svelte`        | Expanded per-system metric matrix                                                       |
 | `MetricDrilldown.svelte`     | Metric-level detail panel (value, status, threshold)                                    |
+| `MetricsStrip.svelte`        | Compact horizontal strip of metric status badges for a single UoA                       |
 | `CirclePacking.svelte`       | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay |
 | `CoverageDetailCards.svelte` | Per-factor coverage bars                                                                |
+| `SystemCoverageBars.svelte`  | System-level coverage bar chart                                                         |
+| `PrelimFlagDonut.svelte`     | Donut chart of prelim-flag distribution; slices are clickable filters                   |
 | `UoaRankingTable.svelte`     | Ranked UoA table by prelim flag                                                         |
 | `UoaDetailPanel.svelte`      | Single-UoA detail view                                                                  |
-| `GeoCanvas.svelte`           | Choropleth map (shown only when p-codes + admin boundaries available)                   |
-| `ChoroplethMap.svelte`       | D3-geo projection layer                                                                 |
+| `ChoroplethMap.svelte`       | Choropleth map (p-codes + admin boundaries); exports composite SVG via `exportMap.ts`   |
 
 #### `ui/`
 
@@ -255,6 +259,4 @@ CodeGraph builds a semantic knowledge graph of codebases for faster, smarter cod
 
 ### If `.codegraph/` does NOT exist
 
-At the start of a session, ask the user if they'd like to initialize CodeGraph:
-
-"I notice this project doesn't have CodeGraph initialized. Would you like me to run `codegraph init -i` to build a code knowledge graph?"
+Run `codegraph init -i` to build the knowledge graph, or ask the user if they'd like to do so.

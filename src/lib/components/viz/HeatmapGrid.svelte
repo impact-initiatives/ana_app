@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { tileCssClass, tileStyle, PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+	import { tileCssClass, tileStyle, getPrelimBadge } from '$lib/utils/colors';
+	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import SortIcon from '$lib/components/ui/SortIcon.svelte';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
@@ -101,13 +102,7 @@
 		}
 	}
 
-	const PRELIM_ORDER: Record<string, number> = {
-		EM: 0,
-		ROEM: 1,
-		ACUTE: 2,
-		INSUFFICIENT_EVIDENCE: 3,
-		ACUTE_NEEDS: 4
-	};
+	const PRELIM_ORDER = Object.fromEntries(PRELIM_FLAG_KEYS.map((k, i) => [k, i]));
 
 	const sortedRows = $derived.by(() => {
 		if (sortKey === null) return rows;
@@ -232,7 +227,7 @@
 							</td>
 						{/each}
 						<td class="p-0.5 text-center whitespace-nowrap">
-							{#if PRELIM_FLAG_BADGE[row.prelim_flag]}
+							{#if getPrelimBadge(row.prelim_flag)}
 								<PrelimBadge value={row.prelim_flag} />
 							{:else}
 								<span class="text-base-content/40 text-xs">–</span>
@@ -246,6 +241,6 @@
 
 	<!-- Legend -->
 	<LegendBadge
-		prelimKeys={['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA']}
+		prelimKeys={PRELIM_FLAG_KEYS}
 	></LegendBadge>
 </Card>
