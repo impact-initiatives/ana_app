@@ -1,4 +1,5 @@
 import { PRELIM_FLAG_BADGE } from '$lib/utils/colors';
+import { PRELIM_FLAG_KEYS, ACUTE_PRELIM_FLAGS, type PrelimFlag } from '$lib/types/flags';
 
 const PAINT_PROPS = [
 	'fill',
@@ -13,8 +14,8 @@ const PAINT_PROPS = [
 ] as const;
 
 const FONT = 'system-ui, -apple-system, Arial, sans-serif';
-const PRELIM_KEYS = ['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS', 'INSUFFICIENT_EVIDENCE', 'NO_DATA'] as const;
-const FLAGGED_STATUSES = new Set(['EM', 'ROEM', 'ACUTE', 'ACUTE_NEEDS']);
+const PRELIM_KEYS = PRELIM_FLAG_KEYS;
+const FLAGGED_STATUSES = ACUTE_PRELIM_FLAGS;
 
 let _measureCanvas: HTMLCanvasElement | null = null;
 /** Measure rendered text width using canvas — exact, avoids character-width estimates. */
@@ -173,7 +174,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	const title = layerTitle ?? defaultTitle;
 	
 	const flaggedCount =
-		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? ''))).length;
+		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? '') as PrelimFlag)).length;
 	
 	const now = new Date();
 	const datePart = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
