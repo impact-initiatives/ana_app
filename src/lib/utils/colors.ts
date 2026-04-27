@@ -34,6 +34,7 @@
  */
 
 import type { Metric } from '$lib/types/structure';
+import type { FlagStatus, PrelimFlag } from '$lib/types/flags';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
 
@@ -252,7 +253,7 @@ export interface FlagStatusBadge {
  *   'insufficient_evidence' — some data but not enough to conclude
  *   'no_data'               — no data at all
  */
-export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
+export const FLAG_BADGE: Record<FlagStatus, FlagStatusBadge> = {
 	flag: {
 		label: 'Flag',
 		colorVar: '--color-flag',
@@ -304,7 +305,7 @@ export const FLAG_BADGE: Record<string, FlagStatusBadge> = {
  * All keys are identical so this is a direct pass-through — but the
  * explicit map makes the contract clear and survives future key changes.
  */
-export const STATUS_TO_BADGE_KEY: Record<string, string> = {
+export const STATUS_TO_BADGE_KEY: Record<FlagStatus, FlagStatus> = {
 	flag: 'flag',
 	no_flag: 'no_flag',
 	insufficient_evidence: 'insufficient_evidence',
@@ -316,11 +317,11 @@ export const STATUS_TO_BADGE_KEY: Record<string, string> = {
  * Keys match the string values produced by the decision tree in flagger.tss.
  * Background colours reference CSS custom properties defined in app.css.
  */
-export const PRELIM_FLAG_BADGE: Record<string, FlagBadge> = {
-	EM: { bg: 'var(--color-em)', label: 'EM' },
-	ROEM: { bg: 'var(--color-roem)', label: 'RoEM' },
-	ACUTE: { bg: 'var(--color-acute)', label: 'Acute Needs' },
-	ACUTE_NEEDS: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
-	INSUFFICIENT_EVIDENCE: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
-	NO_DATA: { bg: 'var(--color-no-data)', tintBg: 'var(--color-no-data-tint)', label: 'No Data' }
+export const PRELIM_FLAG_BADGE: Record<PrelimFlag, FlagBadge> = {
+	em: { bg: 'var(--color-em)', label: 'Emergency' },
+	roem: { bg: 'var(--color-roem)', label: 'Risk of Emergency' },
+	acute: { bg: 'var(--color-acute)', label: 'Acute Needs' },
+	acute_needs: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
+	insufficient_evidence: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
+	no_data: { bg: 'var(--color-no-data)', tintBg: 'var(--color-no-data-tint)', label: 'No Data' }
 };
