@@ -462,6 +462,45 @@ function addLandingPage(ws: Worksheet, uoaRow: Record<string, any>, sheetMeta: S
 			cell.border = allBorders();
 		}
 	}
+
+	// Outcome block — per-UoA final classification
+	ws.addRow([]);
+
+	const outcomeHeaderRow = ws.addRow(new Array(8).fill(''));
+	ws.mergeCells(outcomeHeaderRow.number, 1, outcomeHeaderRow.number, 8);
+	const outcomeHeaderCell = outcomeHeaderRow.getCell(1);
+	outcomeHeaderCell.value = 'ANALYSIS OUTCOME';
+	outcomeHeaderCell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+	outcomeHeaderCell.fill = solidFill('FF1F4E79');
+	outcomeHeaderCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+	outcomeHeaderRow.height = 20;
+
+	const addOutcomeRow = (label: string, value: string, editable: boolean) => {
+		const r = ws.addRow([label, editable ? '' : value]);
+		const labelCell = r.getCell(1);
+		labelCell.font = { bold: true, size: 10 };
+		labelCell.fill = solidFill('FFF2F2F2');
+		labelCell.alignment = { vertical: 'middle', indent: 1 };
+		labelCell.border = allBorders();
+		const valueCell = r.getCell(2);
+		if (editable) {
+			valueCell.dataValidation = {
+				type: 'list',
+				allowBlank: true,
+				formulae: ['"EM,ROEM,ACUTE,ACUTE_NEEDS,INSUFFICIENT_EVIDENCE,NO_DATA"'],
+				showErrorMessage: false
+			};
+		} else {
+			valueCell.font = { size: 10, color: { argb: 'FF555555' } };
+		}
+		valueCell.fill = solidFill(editable ? 'FFFFFFFF' : 'FFF8F8F8');
+		valueCell.alignment = { vertical: 'middle', indent: 1 };
+		valueCell.border = allBorders();
+		r.height = 20;
+	};
+
+	addOutcomeRow('Prelim flag', String(uoaRow['prelim_flag'] ?? ''), false);
+	addOutcomeRow('Final flag', '', true);
 }
 
 /* --------------------- Main exports --------------------- */
