@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import CirclePacking from '$lib/components/viz/CirclePacking.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
-	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
 	import RadioToggle from '$lib/components/ui/RadioToggle.svelte';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
@@ -15,8 +13,6 @@
 	let data = $state<any>(null);
 	let error = $state<string | null>(null);
 	let loading = $state(true);
-	let selectedLevels = $state<string[]>([]);
-	let selectedConcepts = $state<string[]>([]);
 	let showTableReferenceList = $state(false);
 
 	onMount(async () => {
@@ -32,41 +28,7 @@
 		}
 	});
 
-	// Recursively prune tree to only keep indicators matching all active filters
-	function filterTree(node: any, levels: string[], concepts: string[]): any | null {
-		if (!node) return null;
-		if (node.metric) {
-			const levelOk = levels.length === 0 || levels.includes(node.metric.level);
-			const conceptOk =
-				concepts.length === 0 ||
-				(node.metric.risk_concept != null && concepts.includes(String(node.metric.risk_concept)));
-			return levelOk && conceptOk ? node : null;
-		}
-		if (!node.children) return node;
-		const kept = node.children.map((c: any) => filterTree(c, levels, concepts)).filter(Boolean);
-		return kept.length > 0 ? { ...node, children: kept } : null;
-	}
-
-	const filteredData = $derived(data ? filterTree(data, selectedLevels, selectedConcepts) : null);
 	const referenceObjects = $derived(buildReferenceRows(metricStore.referenceJson));
-
-	const levelOptions = $derived(
-		tidy(
-			referenceObjects,
-			filter((d) => d.level !== ''),
-			distinct(['level']),
-			arrange(asc('level'))
-		).map((d) => ({ value: d.level, label: d.level }))
-	);
-
-	const conceptOptions = $derived(
-		tidy(
-			referenceObjects,
-			filter((d) => d.risk_concept !== ''),
-			distinct(['risk_concept']),
-			arrange(asc('risk_concept'))
-		).map((d) => ({ value: d.risk_concept, label: d.risk_concept }))
-	);
 
 	const refColOptions: Record<string, { wrap: boolean; extraClass?: string; bg?: string }> = {
 		system: { wrap: true, extraClass: 'max-w-20' },
@@ -101,38 +63,6 @@
 		}
 	);
 
-	// Pre-select all levels/concepts once options arrive from the async metricStore.
-	let levelsInitialized = $state(false);
-	let conceptsInitialized = $state(false);
-	$effect(() => {
-		if (!levelsInitialized && levelOptions.length > 0) {
-			levelsInitialized = true;
-			selectedLevels = levelOptions.map((o) => o.value);
-		}
-	});
-	$effect(() => {
-		if (!conceptsInitialized && conceptOptions.length > 0) {
-			conceptsInitialized = true;
-			selectedConcepts = conceptOptions.map((o) => o.value);
-		}
-	});
-
-	// True when the user has explicitly cleared a filter that has available options.
-	const noActiveFilters = $derived(
-		(levelOptions.length > 0 && selectedLevels.length === 0) ||
-			(conceptOptions.length > 0 && selectedConcepts.length === 0)
-	);
-
-	const filteredTableRows = $derived(
-		tidy(
-			referenceObjects,
-			filter(
-				(d) =>
-					(selectedLevels.length === 0 || selectedLevels.includes(d.level)) &&
-					(selectedConcepts.length === 0 || selectedConcepts.includes(d.risk_concept))
-			)
-		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
-	);
 </script>
 
 <svelte:head>
@@ -183,8 +113,7 @@
 	{:else if loading}
 		<p>Loading circle-packing data…</p>
 	{:else}
-		<div class="flex flex-col gap-4 p-4">
-			<!-- Available-only toggle -->
+		<div class="p-4">
 			<RadioToggle
 				bind:value={showTableReferenceList}
 				label="Show reference list as"
@@ -192,46 +121,23 @@
 				labelTrue="Circle Paking"
 				name="reference-list-view"
 			/>
-			<div class="flex flex-wrap gap-4">
-				<div class="min-w-60">
-					<Select
-						options={levelOptions}
-						selected={selectedLevels}
-						placeholder="All levels"
-						label="Filter by level"
-						onchange={(v) => (selectedLevels = v as string[])}
-					/>
-				</div>
-				<div class="min-w-60">
-					<Select
-						options={conceptOptions}
-						selected={selectedConcepts}
-						placeholder="All concepts"
-						label="Filter by risk concept"
-						onchange={(v) => (selectedConcepts = v as string[])}
-					/>
-				</div>
-			</div>
 		</div>
 		<div class="mb-6">
-			{#if noActiveFilters}
-				<span class="text-base-content/70 flex py-8 text-center text-sm"
-					>No data matches current filters.</span
-				>
-			{:else if showTableReferenceList}
+			{#if showTableReferenceList}
 				<CirclePacking
-					data={filteredData}
+					data={data}
 					nodePadding={4}
 					paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
 				/>
 			{:else}
 				<DataTable
-					rows={filteredTableRows}
+					rows={referenceObjects}
 					colOptions={refColOptions}
 					rowColor={refRowColor}
 					headerRowClass="text-xs text-primary"
 					rowDividerClass="border-base-content"
 					searchable
+					columnSearchable
 					downloadable
 					humanizeHeaders
 					overflow="scroll"
