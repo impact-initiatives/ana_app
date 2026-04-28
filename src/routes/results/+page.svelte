@@ -558,47 +558,40 @@
 		<NoDataState />
 	</div>
 {:else}
-	<!-- Explore sub-nav: sticky, full viewport width — renders immediately, no heavy derivations -->
-	<div class="bg-base-100/90 border-base-300 sticky top-14 z-20 w-full border-b backdrop-blur-sm">
-		<div class="mx-auto max-w-5xl px-6">
-			<ExploreNav activeSection={exploreNav.activeSection} />
-		</div>
-	</div>
-
 	{#if mounted}
-		<!-- Two-panel: sidebar + Overview / Systems / Metrics -->
-		<div class="flex w-full flex-col lg:flex-row">
-			<!-- Sidebar -->
-			<aside class="bg-base-100 border-base-300 w-full shrink-0 border-r lg:w-64">
-				<div class="lg:sticky lg:top-28">
-					<FiltersSidebar
-						flaggedTotal={flagged.length}
-						filteredTotal={filteredFlagged.length}
-						{isFiltered}
-						{overviewUoaOptions}
-						{overviewSelectedUoas}
-						{selectedPrelimKeys}
-						{PRELIM_KEYS}
-						{prelimOptions}
-						{metadataCols}
-						{groupByCol}
-						{groupByOptions}
-						{selectedGroupValues}
-						onoverviewuoaschange={onOverviewUoasChange}
-						onprelimkeyschange={onPrelimKeysChange}
-						ongroupbycol={(v) => (groupByCol = v)}
-						ongroupvalueschange={onGroupValuesChange}
-						onclearfilters={() => {
-							overviewSelectedUoas = null;
-							selectedPrelimKeys = null;
-							groupByCol = null;
-						}}
-					/>
-				</div>
-			</aside>
+		<!-- Fixed sidebar -->
+		<aside class="bg-base-100 border-base-300 hidden lg:block lg:fixed lg:top-14 lg:bottom-0 lg:w-64 lg:z-10 border-r">
+			<FiltersSidebar
+				flaggedTotal={flagged.length}
+				filteredTotal={filteredFlagged.length}
+				{isFiltered}
+				{overviewUoaOptions}
+				{overviewSelectedUoas}
+				{selectedPrelimKeys}
+				{PRELIM_KEYS}
+				{prelimOptions}
+				{metadataCols}
+				{groupByCol}
+				{groupByOptions}
+				{selectedGroupValues}
+				onoverviewuoaschange={onOverviewUoasChange}
+				onprelimkeyschange={onPrelimKeysChange}
+				ongroupbycol={(v) => (groupByCol = v)}
+				ongroupvalueschange={onGroupValuesChange}
+				onclearfilters={() => {
+					overviewSelectedUoas = null;
+					selectedPrelimKeys = null;
+					groupByCol = null;
+				}}
+			/>
+		</aside>
 
-			<!-- Right panel: Overview → Systems → Metrics, each filling full panel width -->
-			<div class="min-w-0 flex-1">
+		<!-- Right panel: offset by fixed sidebar width -->
+		<div class="min-w-0 w-full lg:pl-64">
+				<!-- ExploreNav: sticky within the right panel, flush with the main nav -->
+				<div class="bg-base-100/90 border-base-300 sticky top-14 z-20 border-b px-6 backdrop-blur-sm">
+					<ExploreNav activeSection={exploreNav.activeSection} />
+				</div>
 				<!-- Overview -->
 				<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
@@ -709,7 +702,6 @@
 						/>
 					</div>
 				</div>
-			</div>
 		</div>
 	{/if}
 {/if}
