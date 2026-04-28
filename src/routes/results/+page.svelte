@@ -596,6 +596,35 @@
 
 		<!-- Right panel: offset by ExploreNav height only; sidebar is in-flow via flex -->
 		<div class="min-w-0 w-full pt-12">
+
+			<!-- Mobile-only filters card (visible instead of sidebar on small screens) -->
+			<div class="border-base-300 bg-base-100 border-b lg:hidden">
+				<FiltersSidebar
+					flaggedTotal={flagged.length}
+					filteredTotal={filteredFlagged.length}
+					{isFiltered}
+					{overviewUoaOptions}
+					{overviewSelectedUoas}
+					{selectedPrelimKeys}
+					{PRELIM_KEYS}
+					{prelimOptions}
+					{metadataCols}
+					{groupByCol}
+					{groupByOptions}
+					{selectedGroupValues}
+					selectClass="w-60"
+					onoverviewuoaschange={onOverviewUoasChange}
+					onprelimkeyschange={onPrelimKeysChange}
+					ongroupbycol={(v) => (groupByCol = v)}
+					ongroupvalueschange={onGroupValuesChange}
+					onclearfilters={() => {
+						overviewSelectedUoas = null;
+						selectedPrelimKeys = null;
+						groupByCol = null;
+					}}
+				/>
+			</div>
+
 				<!-- Overview -->
 				<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div

@@ -17,6 +17,8 @@
 		groupByCol: string | null;
 		groupByOptions: Option[];
 		selectedGroupValues: string[];
+		dropdownClass?: string;
+		selectClass?: string;
 		onoverviewuoaschange: (v: string | string[]) => void;
 		onprelimkeyschange: (v: string | string[]) => void;
 		ongroupbycol: (v: string | null) => void;
@@ -37,6 +39,8 @@
 		groupByCol,
 		groupByOptions,
 		selectedGroupValues,
+		dropdownClass = 'w-full',
+		selectClass = '',
 		onoverviewuoaschange,
 		onprelimkeyschange,
 		ongroupbycol,
@@ -59,7 +63,8 @@
 	</div>
 
 	<Select
-		dropdownClass="w-full"
+		{dropdownClass}
+		class={selectClass}
 		label="Units of analysis"
 		options={overviewUoaOptions}
 		selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
@@ -68,7 +73,8 @@
 	/>
 
 	<Select
-		dropdownClass="w-full"
+		{dropdownClass}
+		class={selectClass}
 		label="Preliminary flag"
 		options={prelimOptions}
 		selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
@@ -78,7 +84,8 @@
 
 	{#if metadataCols.length > 0}
 		<Select
-			dropdownClass="w-full"
+			{dropdownClass}
+			class={selectClass}
 			label="Filter by column"
 			selected={groupByCol ?? ''}
 			placeholder="(no extra filter)"
@@ -88,7 +95,8 @@
 
 		{#if groupByCol !== null && groupByOptions.length > 0}
 			<Select
-				dropdownClass="w-full"
+				{dropdownClass}
+				class={selectClass}
 				label="Filter values"
 				options={groupByOptions}
 				selected={selectedGroupValues}
