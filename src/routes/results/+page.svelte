@@ -558,9 +558,12 @@
 		<NoDataState />
 	</div>
 {:else}
+	<!-- Cancel the pt-6 from <main> so the two-panel row starts flush below the header -->
+	<div class="-mt-6">
 	{#if mounted}
-		<!-- Fixed sidebar -->
-		<aside class="bg-base-100 border-base-300 hidden lg:block lg:fixed lg:top-14 lg:bottom-0 lg:w-64 lg:z-10 border-r">
+		<!-- Two-panel row: sidebar (sticky, bounded by this container) + content -->
+		<div class="flex min-h-[calc(100vh-3.5rem)]">
+		<aside class="bg-base-100 border-base-300 hidden lg:block lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:w-64 lg:shrink-0 border-r">
 			<FiltersSidebar
 				flaggedTotal={flagged.length}
 				filteredTotal={filteredFlagged.length}
@@ -591,8 +594,8 @@
 			<ExploreNav activeSection={exploreNav.activeSection} />
 		</div>
 
-		<!-- Right panel: offset by sidebar + ExploreNav heights -->
-		<div class="min-w-0 w-full lg:pl-64 pt-12">
+		<!-- Right panel: offset by ExploreNav height only; sidebar is in-flow via flex -->
+		<div class="min-w-0 w-full pt-12">
 				<!-- Overview -->
 				<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
@@ -704,5 +707,7 @@
 					</div>
 				</div>
 		</div>
+		</div><!-- flex wrapper -->
 	{/if}
+	</div><!-- -mt-6 wrapper -->
 {/if}
