@@ -13,7 +13,14 @@
       "Bash(mv SystemHeatmap.svelte HeatmapGrid.svelte)",
       "Bash(mv DrilldownTable.svelte IndicatorDrilldown.svelte)",
       "Bash(mv PcodeMap.svelte ChoroplethMap.svelte)",
-      "Bash(mv AdminChoropleth.svelte GeoCanvas.svelte)"
+      "Bash(mv AdminChoropleth.svelte GeoCanvas.svelte)",
+      "mcp__codegraph__codegraph_search",
+      "mcp__codegraph__codegraph_context",
+      "mcp__codegraph__codegraph_callers",
+      "mcp__codegraph__codegraph_callees",
+      "mcp__codegraph__codegraph_impact",
+      "mcp__codegraph__codegraph_node",
+      "mcp__codegraph__codegraph_status"
     ],
     "additionalDirectories": [
       "/home/gnoblet/Documents/GitHub/ANA_app_svelte/.claude/skills"
