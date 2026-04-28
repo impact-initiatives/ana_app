@@ -270,11 +270,12 @@
 	</div>
 </header>
 
-<main class="pt-6">
-	{@render children?.()}
+<main class="flex min-h-[calc(100vh-3.5rem)] flex-col pt-6">
+	<div class="flex-1">
+		{@render children?.()}
+	</div>
+	<Footer />
 </main>
-
-<Footer />
 
 <!-- Back to top -->
 {#if scrollY > 400}

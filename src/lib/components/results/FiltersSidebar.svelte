@@ -1,12 +1,10 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
 
 	type Option = { value: string; label: string };
 
 	interface Props {
-		visible: boolean;
 		flaggedTotal: number;
 		filteredTotal: number;
 		isFiltered: boolean;
@@ -27,7 +25,6 @@
 	}
 
 	let {
-		visible,
 		flaggedTotal,
 		filteredTotal,
 		isFiltered,
@@ -46,63 +43,66 @@
 		ongroupvalueschange,
 		onclearfilters
 	}: Props = $props();
-
 </script>
 
-<!-- On mobile: in-flow full-width bar. On md+: fixed overlay card on the left -->
-<div
-	class="relative mb-6 w-full 2xl:fixed 2xl:top-36 2xl:left-4 2xl:z-40 2xl:w-65"
-	style="opacity: {visible ? 1 : 0}; pointer-events: {visible ? 'auto' : 'none'}; transition: opacity 400ms ease-in-out"
->
-	<Card
-		title="Focus on specific UoAs or preliminary flags"
-		titleUppercase
-		titleSemibold
-		titleSize="text-sm"
-	>
-		<p>Use these filters to subset UoAs or preliminary flags (or additional filter columns).</p>
-		<p>Filters apply across these sections: Overview, Systems, and Metrics.</p>
-
-		<Select
-			label="Units of analysis"
-			options={overviewUoaOptions}
-			selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
-			placeholder="All UOAs"
-			onchange={onoverviewuoaschange}
-		/>
-
-		<Select
-			label="Preliminary flag"
-			options={prelimOptions}
-			selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
-			placeholder="All flags"
-			onchange={onprelimkeyschange}
-		/>
-
-		{#if metadataCols.length > 0}
-			<Select
-				label="Filter by column"
-				selected={groupByCol ?? ''}
-				placeholder="(no extra filter)"
-				options={metadataCols.map((c) => ({ value: c, label: c }))}
-				onchange={(v) => ongroupbycol((Array.isArray(v) ? v[0] : v) || null)}
-			/>
-
-			{#if groupByCol !== null && groupByOptions.length > 0}
-				<Select
-					label="Filter values"
-					options={groupByOptions}
-					selected={selectedGroupValues}
-					placeholder="Select values…"
-					onchange={ongroupvalueschange}
-				/>
-			{/if}
-		{/if}
-		<p class="text-base-content/75 text-xs">
-			<strong class="text-base-content">{filteredTotal}</strong> / {flaggedTotal} UOAs
+<div class="card-body gap-4">
+	<div class="mb-2">
+		<h2 class="card-title text-sm font-semibold uppercase">
+			Focus on specific UoAs or preliminary flags
+		</h2>
+		<p class="text-base-content/75 mt-1 text-sm">
+			Use these filters to subset UoAs or preliminary flags (or additional filter columns).
 		</p>
-		{#if isFiltered}
-			<ButtonClear label="Clear filters" onclick={onclearfilters} widthClass="w-1/2" />
+		<p class="text-base-content/75 text-sm">
+			Filters apply to charts and other dropdowns across all sections.
+		</p>
+	</div>
+
+	<Select
+		dropdownClass="w-full"
+		label="Units of analysis"
+		options={overviewUoaOptions}
+		selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
+		placeholder="All UOAs"
+		onchange={onoverviewuoaschange}
+	/>
+
+	<Select
+		dropdownClass="w-full"
+		label="Preliminary flag"
+		options={prelimOptions}
+		selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
+		placeholder="All flags"
+		onchange={onprelimkeyschange}
+	/>
+
+	{#if metadataCols.length > 0}
+		<Select
+			dropdownClass="w-full"
+			label="Filter by column"
+			selected={groupByCol ?? ''}
+			placeholder="(no extra filter)"
+			options={metadataCols.map((c) => ({ value: c, label: c }))}
+			onchange={(v) => ongroupbycol((Array.isArray(v) ? v[0] : v) || null)}
+		/>
+
+		{#if groupByCol !== null && groupByOptions.length > 0}
+			<Select
+				dropdownClass="w-full"
+				label="Filter values"
+				options={groupByOptions}
+				selected={selectedGroupValues}
+				placeholder="Select values…"
+				onchange={ongroupvalueschange}
+			/>
 		{/if}
-	</Card>
+	{/if}
+
+	<p class="text-base-content/75 text-xs">
+		<strong class="text-base-content">{filteredTotal}</strong> / {flaggedTotal} UOAs shown
+	</p>
+
+	{#if isFiltered}
+		<ButtonClear label="Clear filters" onclick={onclearfilters} widthClass="w-full" />
+	{/if}
 </div>
