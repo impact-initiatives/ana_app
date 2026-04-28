@@ -30,9 +30,11 @@
 		onchange?: (selected: string | string[]) => void;
 		/** Single mode only: auto-select the first option when nothing is selected. */
 		autoSelectFirst?: boolean;
+		/** Extra classes for the dropdown panel — use to override the default width (e.g. `"w-full"` in a narrow sidebar). */
+		dropdownClass?: string;
 	}
 
-	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false }: Props = $props();
+	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72' }: Props = $props();
 
 	// Mode derived from the shape of selected — no separate prop needed.
 	const isMultiple = $derived(Array.isArray(selected));
@@ -140,7 +142,7 @@
 
 <svelte:window onclick={onWindowClick} />
 
-<div class="flex flex-col gap-1" bind:this={containerEl}>
+<div class="relative flex flex-col gap-1" bind:this={containerEl}>
 	{#if label}
 		<span class="mt-2 text-xs font-semibold tracking-wide uppercase">{label}</span>
 	{/if}
@@ -197,7 +199,7 @@
 
 	<!-- Dropdown -->
 	{#if open}
-		<div class="menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 w-72 border p-0">
+		<div class={['menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 border p-0', dropdownClass]}>
 			<!-- Search (shared) -->
 			<div class="border-base-200 flex items-center gap-1.5 border-b p-2">
 				<input

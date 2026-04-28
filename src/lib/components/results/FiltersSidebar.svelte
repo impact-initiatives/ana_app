@@ -58,7 +58,7 @@
 		</p>
 	</div>
 
-	<Select
+	<Select dropdownClass="w-full"
 		label="Units of analysis"
 		options={overviewUoaOptions}
 		selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
@@ -66,7 +66,7 @@
 		onchange={onoverviewuoaschange}
 	/>
 
-	<Select
+	<Select dropdownClass="w-full"
 		label="Preliminary flag"
 		options={prelimOptions}
 		selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
@@ -75,7 +75,7 @@
 	/>
 
 	{#if metadataCols.length > 0}
-		<Select
+		<Select dropdownClass="w-full"
 			label="Filter by column"
 			selected={groupByCol ?? ''}
 			placeholder="(no extra filter)"
@@ -84,7 +84,7 @@
 		/>
 
 		{#if groupByCol !== null && groupByOptions.length > 0}
-			<Select
+			<Select dropdownClass="w-full"
 				label="Filter values"
 				options={groupByOptions}
 				selected={selectedGroupValues}

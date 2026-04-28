@@ -570,7 +570,7 @@
 		<div class="flex w-full flex-col lg:flex-row">
 			<!-- Sidebar -->
 			<aside class="bg-base-100 border-base-300 w-full shrink-0 border-r lg:w-64">
-				<div class="lg:sticky lg:top-28 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+				<div class="lg:sticky lg:top-28">
 					<FiltersSidebar
 						flaggedTotal={flagged.length}
 						filteredTotal={filteredFlagged.length}
