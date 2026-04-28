@@ -520,7 +520,7 @@
 							.id as typeof exploreNav.activeSection;
 				}
 			},
-			{ rootMargin: '-20% 0px -60% 0px' }
+			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
 		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'export']) {
@@ -586,12 +586,13 @@
 			/>
 		</aside>
 
-		<!-- Right panel: offset by fixed sidebar width -->
-		<div class="min-w-0 w-full lg:pl-64">
-				<!-- ExploreNav: sticky within the right panel, flush with the main nav -->
-				<div class="bg-base-100/90 border-base-300 sticky top-14 z-20 border-b px-6 backdrop-blur-sm">
-					<ExploreNav activeSection={exploreNav.activeSection} />
-				</div>
+		<!-- ExploreNav: fixed, spanning right panel only (left-64 = sidebar width) -->
+		<div class="bg-base-100/90 border-base-300 fixed top-14 left-0 right-0 z-20 border-b px-6 backdrop-blur-sm lg:left-64">
+			<ExploreNav activeSection={exploreNav.activeSection} />
+		</div>
+
+		<!-- Right panel: offset by sidebar + ExploreNav heights -->
+		<div class="min-w-0 w-full lg:pl-64 pt-12">
 				<!-- Overview -->
 				<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
