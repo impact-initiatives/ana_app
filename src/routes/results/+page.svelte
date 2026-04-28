@@ -433,10 +433,17 @@
 	// Shared sorted UoA list — used by coverage selector and export.
 	const uoaList = $derived([...new Set(flagged.map((r) => String(r['uoa'] ?? '')))].sort());
 
-	const coverageUoaOptions = $derived(uoaList);
+	// Filtered UoA list respects sidebar filters (UoA, prelim flag, group column).
+	const filteredUoaList = $derived(
+		[...new Set(filteredFlagged.map((r) => String(r['uoa'] ?? '')))].sort()
+	);
 
-	// $derived fallback avoids updating state inside an $effect.
-	const effectiveCoverageUoa = $derived(coverageUoa || coverageUoaOptions[0] || '');
+	const coverageUoaOptions = $derived(filteredUoaList);
+
+	// Fall back to first filtered UoA when the current selection is no longer in the filtered list.
+	const effectiveCoverageUoa = $derived(
+		filteredUoaList.includes(coverageUoa) ? coverageUoa : (filteredUoaList[0] ?? '')
+	);
 
 	const coverageSelectedRow = $derived(
 		flagged.find((r) => String(r['uoa']) === effectiveCoverageUoa) ?? null
@@ -463,9 +470,14 @@
 
 	// ── Section 5: Export ─────────────────────────────────────────────────────
 
-	const allUoas = $derived(uoaList);
+	const allUoas = $derived(filteredUoaList);
 	let exportUoaOverride = $state<string[] | null>(null);
-	const exportSelectedUoas = $derived(exportUoaOverride ?? allUoas);
+	// Intersect manual override with current filtered list so stale selections are dropped.
+	const exportSelectedUoas = $derived(
+		exportUoaOverride
+			? exportUoaOverride.filter((u) => filteredUoaList.includes(u))
+			: filteredUoaList
+	);
 	const timestamp = $derived(new Date().toISOString().split('T')[0]);
 
 	function handleJSON() {
