@@ -20,7 +20,9 @@
 
 The ANA app lets field teams upload a CSV of humanitarian data per units of analysis (often geographic areas such as admin2 administrative areas, but not always) and immediately see which units have acute humanitarian needs, and in which sectors. A colour-coded map, heatmaps, and drill-down tables show both the overall preliminary flag and the evidence behind it at every level of the framework.
 
-Everything the app knows about the framework — which metrics exist, what thresholds signal acute needs, how indicators roll up into systems — comes from a **single reference spreadsheet** maintained by the methodology team: `static/data/ANA_2025_reference.csv`. Changing that file (and running the data refresh described below) is all that is needed to update the framework across the entire app.
+Most framework changes — adding or editing metrics, adjusting thresholds, updating labels — only require editing `static/data/ANA_2025_reference.csv` and running `bun run data:refresh`. Adding or renaming a system, factor, or sub-factor also requires updating the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`). The flagging rollup logic and the preliminary-flag decision tree are hardcoded in `src/lib/engine/flagger.ts` and are not controlled by the CSV.
+
+See the [Maintenance guide](#maintenance-guide--data-pipeline-and-export-logic) for step-by-step instructions on all of the above.
 
 > **Note:** The preliminary flag is a data-driven pre-screening result, not a conclusion. Each unit of analysis requires a full deep-dive before drawing final conclusions.
 
