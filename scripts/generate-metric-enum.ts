@@ -2,7 +2,7 @@
 /**
  * Script: generate-metric-enum.ts
  *
- * Reads `static/data/ANA_2025_reference.csv` and generates a TypeScript file exporting
+ * Reads `static/data/reference.csv` and generates a TypeScript file exporting
  * a string enum `MetricIDEnum` into `src/lib/types/generated/metric-enum.ts`.
  *
  * Usage:
@@ -25,7 +25,7 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 
-const INPUT_CSV = path.join(process.cwd(), 'static', 'data', 'ANA_2025_reference.csv');
+const INPUT_CSV = path.join(process.cwd(), 'static', 'data', 'reference.csv');
 const OUTPUT_TS = path.join(process.cwd(), 'src', 'lib', 'types', 'generated', 'metric-enum.ts');
 
 interface RefRow {
