@@ -1,4 +1,4 @@
-# ANA Dashboard — Application Structure
+# ANA app — Application Structure
 
 ---
 
@@ -18,9 +18,11 @@
 
 ### What the app does
 
-The ANA Dashboard lets field teams upload a CSV of survey results and immediately see which geographic areas have acute humanitarian needs, and in which sectors. A colour-coded map, heatmaps, and drill-down tables show both the overall preliminary flag and the evidence behind it at every level of the framework.
+The ANA app lets field teams upload a CSV of humanitarian data per units of analysis (often geographic areas such as admin2 administrative areas, but not always) and immediately see which units have acute humanitarian needs, and in which sectors. A colour-coded map, heatmaps, and drill-down tables show both the overall preliminary flag and the evidence behind it at every level of the framework.
 
 Everything the app knows about the framework — which metrics exist, what thresholds signal acute needs, how indicators roll up into systems — comes from a **single reference spreadsheet** maintained by the methodology team: `static/data/ANA_2025_reference.csv`. Changing that file (and running the data refresh described below) is all that is needed to update the framework across the entire app.
+
+> **Note:** The preliminary flag is a data-driven pre-screening result, not a conclusion. Each unit of analysis requires a full deep-dive before drawing final conclusions.
 
 ### The reference framework
 
