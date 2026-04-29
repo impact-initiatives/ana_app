@@ -80,7 +80,7 @@ All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores
 
 ### Key Data Structures
 
-**`reference.json`** (static asset at `static/data/reference.json`, generated from `ANA_2025_reference.csv`):
+**`reference.json`** (static asset at `static/data/reference.json`, generated from `reference.csv`):
 
 ```
 systems[] → factors[] → sub_factors[] → indicators[] → metrics[]
@@ -121,14 +121,14 @@ Status vocabulary (applies at every rollup level):
 
 #### `results/`
 
-| Component                | Purpose                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking, choropleth map with cascade layer filters       |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                          |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                         |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                                                      |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                      |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                               |
+| Component                | Purpose                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking, choropleth map with cascade layer filters |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                    |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                   |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                                                |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                         |
 
 #### `viz/`
 
