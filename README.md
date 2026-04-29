@@ -2,7 +2,19 @@
 
 ---
 
-## How the app works — guide for the methodology team
+## Table of contents
+
+1. [How the app works](#how-the-app-works) — guide for the methodology team
+2. [Getting started](#getting-started)
+3. [Data model](#data-model) — hierarchy, data flow, static assets
+4. [Architecture](#architecture) — engine, stores, routes, components, colours, types
+5. [Tech stack](#tech-stack)
+6. [Development](#development) — commands and scripts
+7. [Maintenance guide](#maintenance-guide--data-pipeline-and-export-logic) — data pipeline, export logic, CI/CD
+
+---
+
+## How the app works
 
 ### What the app does
 
@@ -75,11 +87,28 @@ This regenerates all the JSON files the app reads from the CSV and validates the
 
 ---
 
-The **Acute Needs Analysis (ANA) Dashboard** is a SvelteKit static-site application for humanitarian data analysis. Users upload a CSV of metric values; the app validates, flags entries against configurable thresholds, and visualises results through heatmaps, choropleth maps, metric strips, and drill-down tables.
+## Getting started
+
+**Prerequisite:** [Bun](https://bun.sh) ≥ 1.x — install with `curl -fsSL https://bun.sh/install | bash`.
+
+```bash
+bun install          # install dependencies
+bun run dev          # start local dev server at http://localhost:5173
+bun run build        # production build (outputs to build/)
+bun run preview      # preview the production build locally
+bun run check        # Svelte type-checking
+bun run test         # run the test suite (Vitest)
+```
+
+Set `BASE_PATH=/repo-name` when building for GitHub Pages sub-path deploys.
+
+For data pipeline setup, adding metrics, or modifying export logic, see the [Maintenance guide](#maintenance-guide--data-pipeline-and-export-logic).
 
 ---
 
-## Reference hierarchy
+## Data model
+
+### Reference hierarchy
 
 The core data model has five levels. Each level is identified by a snake_case ID and carries a human-readable label.
 
@@ -93,24 +122,20 @@ System
 
 **Key distinction:** an _Indicator_ is a named concept (e.g. "Two-week prevalence of childhood illness") that groups one or more _Metrics_. Each _Metric_ has its own ID (`MET001`), type constraint, threshold, and preference level. The input CSV has one column per metric (`MET001`, `MET002`, …).
 
----
-
-## Data flow
+### Data flow
 
 ```
 CSV Upload  (src/routes/+page.svelte)
   → parser.ts          PapaParse wrapper — returns headers + raw rows
   → validator.ts       Checks headers against reference.json, UOA uniqueness, type constraints
   → flagger.ts         Applies thresholds; rolls up metric → subfactor → factor → system → prelim_flag
-  → fetch_admin.ts     If p-codes detected, fetches ADM1/ADM2 GeoJSON from external API (fire-and-forget)
+  → fetchAdmin.ts      If p-codes detected, fetches ADM1/ADM2 GeoJSON from external API (fire-and-forget)
   → Stores             flagStore, adminFeaturesStore
   → Results routes     /results  (heatmap, drilldown, coverage)
   → Export             download.ts (CSV/JSON/XLSX)  |  deepdive.ts (ZIP packages, one XLSX per UoA)
 ```
 
----
-
-## Static assets
+### Static assets
 
 | File                                       | Description                                                                                                                                                                          |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -118,7 +143,7 @@ CSV Upload  (src/routes/+page.svelte)
 | `static/data/reference-circlepacking.json` | D3-compatible tree for the circle-packing visualisation. Same hierarchy, leaf nodes carry `metric` object + `value` (derived from preference).                                       |
 | `static/data/ANA_2025_reference.csv`       | Source of truth. One row = one metric. Edited here; run `bun run data:refresh` to regenerate all derived assets.                                                                     |
 
-### `reference.json` shape
+#### `reference.json` shape
 
 ```ts
 ReferenceRoot {
@@ -148,7 +173,7 @@ ReferenceRoot {
 }
 ```
 
-### Flagged row shape (output of `flagger.ts`, stored in `flagStore`)
+#### Flagged row shape (output of `flagger.ts`, stored in `flagStore`)
 
 ```
 uoa | MET001 | MET001_flag | MET001_status | MET001_within_10perc
@@ -169,55 +194,36 @@ Status vocabulary (applies at every rollup level):
 
 ---
 
-## Scripts
+## Architecture
 
-Run via `bun run <script>`:
-
-| Command                   | Script                                   | Description                                                                      |
-| ------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------- |
-| `generate:enums`          | `scripts/generate-*-enum.ts`             | Regenerate TypeScript enums in `src/lib/types/generated/` from the reference CSV |
-| `generate:reference-json` | `scripts/generate-reference-json.ts`     | Regenerate `reference.json` + `reference-circlepacking.json`                     |
-| `validate:reference-json` | `scripts/validate-reference-json.ts`     | Validate `reference.json` against Zod schemas                                    |
-| `validate:hypotheses`     | `scripts/validate-hypotheses-json.ts`    | Validate hypotheses JSON                                                         |
-| `validate:circle-packing` | `scripts/validate-circlepacking-json.ts` | Validate `reference-circlepacking.json` leaf structure                           |
-| `data:refresh`            | —                                        | Run all generation + validation scripts in sequence                              |
-
-**TypeScript enums** in `src/lib/types/generated/` are auto-generated — do not edit them directly.
-
----
-
-## Engine (`src/lib/engine/`)
+### Engine (`src/lib/engine/`)
 
 | File                | Role                                                                                                                                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pipeline.ts`        | Orchestrates validate → flag → admin fetch. Entry point for the full processing run.                                                                                                                 |
-| `validator.ts`       | Validates CSV structure: headers present in `MetricMap`, UOA uniqueness, type constraints per metric. Produces `ValidationResult` with per-column missingness entries.                               |
-| `flagger.ts`         | Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics are excluded from the flagging pipeline (reference display only). Rolls up metric → subfactor → factor → system → `prelim_flag`. |
-| `metricMetadata.ts`  | Traverses `reference.json`: `getAllMetricIds()`, `getMetricMetadata()`, `getIndicatorMetadata()`, `buildSubfactorList()`, `buildReferenceRows()` (for the reference table).                          |
-| `fetchAdmin.ts`      | Detects p-codes in the UOA column; fetches ADM1/ADM2 GeoJSON boundaries from an external API.                                                                                                        |
-| `download.ts`        | Exports results as CSV / JSON / XLSX.                                                                                                                                                                |
-| `deepdive.ts`        | Generates ZIP packages (one XLSX per UoA) with full metric-level detail. Reads system colours from CSS custom properties via `getComputedStyle`.                                                     |
-| `mergeDeepDives.ts`  | Merges multiple deep-dive ZIP packages into a single consolidated XLSX (used by the `/merge` route).                                                                                                  |
-| `exportMap.ts`       | Builds a self-contained composite SVG for map export (title, choropleth, legend, logos) with inlined light-theme styles.                                                                             |
-| `parser.ts`          | Thin PapaParse wrapper; returns `{ headers, rows }`.                                                                                                                                                 |
+| `pipeline.ts`       | Orchestrates validate → flag → admin fetch. Entry point for the full processing run.                                                                                                                 |
+| `validator.ts`      | Validates CSV structure: headers present in `MetricMap`, UOA uniqueness, type constraints per metric. Produces `ValidationResult` with per-column missingness entries.                               |
+| `flagger.ts`        | Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics are excluded from the flagging pipeline (reference display only). Rolls up metric → subfactor → factor → system → `prelim_flag`. |
+| `metricMetadata.ts` | Traverses `reference.json`: `getAllMetricIds()`, `getMetricMetadata()`, `getIndicatorMetadata()`, `buildSubfactorList()`, `buildReferenceRows()` (for the reference table).                          |
+| `fetchAdmin.ts`     | Detects p-codes in the UOA column; fetches ADM1/ADM2 GeoJSON boundaries from an external API.                                                                                                        |
+| `download.ts`       | Exports results as CSV / JSON / XLSX.                                                                                                                                                                |
+| `deepdive.ts`       | Generates ZIP packages (one XLSX per UoA) with full metric-level detail. Reads system colours from CSS custom properties via `getComputedStyle`.                                                     |
+| `mergeDeepDives.ts` | Merges multiple deep-dive ZIP packages into a single consolidated XLSX (used by the `/merge` route).                                                                                                 |
+| `exportMap.ts`      | Builds a self-contained composite SVG for map export (title, choropleth, legend, logos) with inlined light-theme styles.                                                                             |
+| `parser.ts`         | Thin PapaParse wrapper; returns `{ headers, rows }`.                                                                                                                                                 |
 
----
-
-## Stores (`src/lib/stores/`)
+### Stores (`src/lib/stores/`)
 
 All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fields directly (no `$` prefix needed outside `.svelte` files).
 
-| Store                | Storage key           | Purpose                                                                                                                                          |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `metricStore`        | `ana_metric_store_v2`       | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
-| `flagStore`          | `ana_flag_store_v2`         | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                                                                      |
-| `adminFeaturesStore` | `ana_admin_features_store`  | Cached GeoJSON boundaries; fetch state `'idle' \| 'loading' \| 'done' \| 'error'`.                                                               |
-| `validatorStore`     | —                     | Transient validation state; cleared after flagging completes.                                                                                    |
-| `circlePackingStore` | —                     | Tree data for the circle-packing reference visualisation.                                                                                        |
+| Store                | Storage key                | Purpose                                                                                                                                          |
+| -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `metricStore`        | `ana_metric_store_v2`      | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
+| `flagStore`          | `ana_flag_store_v2`        | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                                                                      |
+| `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON boundaries; fetch state `'idle' \| 'loading' \| 'done' \| 'error'`.                                                               |
+| `validatorStore`     | —                          | Transient validation state; cleared after flagging completes.                                                                                    |
+| `circlePackingStore` | —                          | Tree data for the circle-packing reference visualisation.                                                                                        |
 
----
-
-## Routes
+### Routes
 
 | Route        | Purpose                                                              |
 | ------------ | -------------------------------------------------------------------- |
@@ -227,22 +233,20 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 | `/validate`  | Validation details — cell errors and missingness report after upload |
 | `/merge`     | Merge tool — combines multiple deep-dive ZIP exports into one XLSX   |
 
----
+### Component map (`src/lib/components/`)
 
-## Component map (`src/lib/components/`)
+#### `results/`
 
-### `results/`
-
-| Component                | Purpose                                                                            |
-| ------------------------ | ---------------------------------------------------------------------------------- |
+| Component                | Purpose                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------- |
 | `ResultsOverview.svelte` | Overview tab — prelim-flag donut, UoA ranking table, choropleth map with layer filters |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                    |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                   |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                                                |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                         |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                        |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                       |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                                                    |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                    |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                             |
 
-### `viz/`
+#### `viz/`
 
 | Component                    | Purpose                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------- |
@@ -255,17 +259,13 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 | `UoaDetailPanel.svelte`      | Single-UoA detail view                                                                  |
 | `ChoroplethMap.svelte`       | Choropleth map (p-codes + admin boundaries); exports composite SVG via `exportMap.ts`   |
 
-### `ui/`
+#### `ui/`
 
 General-purpose UI primitives: `TooltipCard`, `LegendBadge`, `PrelimBadge`, `DataGuard`, `NavButton`, `ExploreNav`, …
 
 **`DataGuard.svelte`** — wraps any section that requires store data. Shows a loading/redirect state when `flagStore` or `metricStore` is not ready. Always use it to gate results pages.
 
----
-
-## Colour system (`src/lib/utils/colors.ts` + `src/app.css`)
-
-### System palette
+### Colour system (`src/lib/utils/colors.ts` + `src/app.css`)
 
 Defined once in `src/app.css` (`:root` block). Changing a base hex there updates the entire ramp for all visualisations automatically.
 
@@ -292,13 +292,9 @@ Ramp levels correspond to hierarchy depth:
 
 For non-browser contexts that need actual hex (e.g. ExcelJS in `deepdive.ts`), `deepdive.ts` reads CSS vars at runtime via `getComputedStyle(document.documentElement).getPropertyValue('--color-sys-X')`.
 
-### Flag / status colours
+Flag and status colours are defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Accessed via `FLAG_BADGE` and `prelimBadge` records in `colors.ts`.
 
-Defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Accessed via `FLAG_BADGE` and `prelimBadge` records in `colors.ts`.
-
----
-
-## Type system (`src/lib/types/`)
+### Type system (`src/lib/types/`)
 
 | File                | Contents                                                                                                                                                                                                       |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -319,30 +315,52 @@ Defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Acces
 | Tailwind CSS 4                 | Utility classes configured via `@plugin` in `app.css`                              |
 | DaisyUI 5                      | Component classes (`btn`, `badge`, `card`, …); two themes: `ana-light`, `ana-dark` |
 | D3                             | Visualisation primitives: scales, geo, force, zoom, pack, axis                     |
+| SveltePlot                     | Chart components built on Observable Plot (`svelteplot`)                           |
 | @tidyjs/tidy                   | Data wrangling in `flagger.ts`                                                     |
 | Zod (v4)                       | Schema validation for `reference.json` and `reference-circlepacking.json`          |
 | PapaParse                      | CSV parsing                                                                        |
 | Turf.js                        | Geospatial operations (buffer, dissolve, union, simplify)                          |
 | ExcelJS + fflate               | XLSX export and ZIP packaging                                                      |
+| Vitest                         | Test runner (`bun run test`)                                                       |
+| Lucide (`@lucide/svelte`)      | Icon set                                                                           |
+| i18n-iso-countries             | ISO country code lookups                                                           |
 
 ---
 
-## Development commands
+## Development
 
 ```bash
-bun run dev           # Start dev server
-bun run build         # Build static site
+# App
+bun run dev           # start dev server at http://localhost:5173
+bun run build         # production build (outputs to build/)
+bun run preview       # preview the production build locally
 bun run check         # Svelte type-checking (svelte-check)
 bun run lint          # ESLint
 bun run format        # Prettier
+bun run test          # run the test suite (Vitest)
 
-bun run generate:enums          # Regenerate TS enums from reference CSV
-bun run generate:reference-json # Regenerate reference.json + reference-circlepacking.json
-bun run validate:reference-json # Validate reference.json
-bun run validate:hypotheses     # Validate hypotheses JSON
-bun run validate:circle-packing # Validate reference-circlepacking.json
-bun run data:refresh            # Run all generation + validation in sequence
+# Data pipeline
+bun run generate:enums              # regenerate TS enums from reference CSV
+bun run generate:reference-json     # regenerate reference.json + reference-circlepacking.json
+bun run generate:input-data         # generate sample input data
+bun run validate:reference-json     # validate reference.json
+bun run validate:hypotheses-json    # validate hypotheses JSON
+bun run validate:circlepacking-json # validate reference-circlepacking.json
+bun run data:refresh                # run all generation + validation in sequence
 ```
+
+### Scripts reference
+
+| Command                        | Script                                   | Description                                                                      |
+| ------------------------------ | ---------------------------------------- | -------------------------------------------------------------------------------- |
+| `generate:enums`               | `scripts/generate-*-enum.ts`             | Regenerate TypeScript enums in `src/lib/types/generated/` from the reference CSV |
+| `generate:reference-json`      | `scripts/generate-reference-json.ts`     | Regenerate `reference.json` + `reference-circlepacking.json`                     |
+| `validate:reference-json`      | `scripts/validate-reference-json.ts`     | Validate `reference.json` against Zod schemas                                    |
+| `validate:hypotheses-json`     | `scripts/validate-hypotheses-json.ts`    | Validate hypotheses JSON                                                         |
+| `validate:circlepacking-json`  | `scripts/validate-circlepacking-json.ts` | Validate `reference-circlepacking.json` leaf structure                           |
+| `data:refresh`                 | —                                        | Run all generation + validation scripts in sequence                              |
+
+**TypeScript enums** in `src/lib/types/generated/` are auto-generated — do not edit them directly.
 
 ---
 
@@ -352,32 +370,32 @@ This section is for maintainers of the data pipeline or export logic. Frontend c
 
 ### Repository map (maintenance perspective)
 
-| Directory / file                           | What lives here                                                                         |
-| ------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `static/data/ANA_2025_reference.csv`       | Metric-level source of truth — edit here, then run `data:refresh`                       |
-| `static/data/system.csv`                   | Canonical list of valid system IDs + labels — used by validation and enum generation    |
-| `static/data/factor.csv`                   | Canonical `(factor, system)` pairs — used by validation and enum generation             |
-| `static/data/subfactor.csv`               | Canonical `(sub_factor, factor, system)` triples — used by validation and enum generation |
-| `static/data/reference.json`               | Generated — do not edit directly                                                        |
-| `static/data/reference-circlepacking.json` | Generated — do not edit directly                                                        |
-| `scripts/`                                 | Generation and validation scripts (Bun, not bundled into the app)                       |
-| `src/lib/engine/`                          | All data-processing logic: validation, flagging, export                                 |
-| `src/lib/types/`                           | TypeScript interfaces and Zod schemas                                                   |
-| `src/lib/stores/`                          | Runtime state (`metricStore` loads `reference.json`; `flagStore` holds pipeline output) |
-| `src/lib/components/` / `src/routes/`      | Frontend — not relevant for data/logic maintenance                                      |
+| Directory / file                           | What lives here                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `static/data/ANA_2025_reference.csv`       | Metric-level source of truth — edit here, then run `data:refresh`                         |
+| `static/data/system.csv`                   | Canonical list of valid system IDs + labels — used by validation and enum generation      |
+| `static/data/factor.csv`                   | Canonical `(factor, system)` pairs — used by validation and enum generation               |
+| `static/data/subfactor.csv`                | Canonical `(sub_factor, factor, system)` triples — used by validation and enum generation |
+| `static/data/reference.json`               | Generated — do not edit directly                                                          |
+| `static/data/reference-circlepacking.json` | Generated — do not edit directly                                                          |
+| `scripts/`                                 | Generation and validation scripts (Bun, not bundled into the app)                         |
+| `src/lib/engine/`                          | All data-processing logic: validation, flagging, export                                   |
+| `src/lib/types/`                           | TypeScript interfaces and Zod schemas                                                     |
+| `src/lib/stores/`                          | Runtime state (`metricStore` loads `reference.json`; `flagStore` holds pipeline output)   |
+| `src/lib/components/` / `src/routes/`      | Frontend — not relevant for data/logic maintenance                                        |
 
 ### CSV → JSON generation
 
 The three lookup CSVs (`system.csv`, `factor.csv`, `subfactor.csv`) define the valid hierarchy. `validate-reference-json.ts` cross-checks `reference.json` against them — every system ID must appear in `system.csv`, every `(factor, system)` pair in `factor.csv`, every `(sub_factor, factor, system)` triple in `subfactor.csv`. The same files are also the source for the generated TypeScript enums.
 
-| Script                                   | Input                                              | Output                                            |
-| ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------- |
-| `scripts/generate-reference-json.ts`     | `ANA_2025_reference.csv`                           | `reference.json` + `reference-circlepacking.json` |
-| `scripts/validate-reference-json.ts`     | `reference.json` + `system/factor/subfactor.csv`   | — (exits non-zero on error)                       |
-| `scripts/validate-circlepacking-json.ts` | `reference-circlepacking.json`                     | —                                                 |
-| `scripts/generate-system-enum.ts`        | `system.csv`                                       | `src/lib/types/generated/system-enum.ts`          |
-| `scripts/generate-factor-enum.ts`        | `factor.csv`                                       | `src/lib/types/generated/factor-enum.ts`          |
-| `scripts/generate-subfactor-enum.ts`     | `subfactor.csv`                                    | `src/lib/types/generated/subfactor-enum.ts`       |
+| Script                                   | Input                                            | Output                                            |
+| ---------------------------------------- | ------------------------------------------------ | ------------------------------------------------- |
+| `scripts/generate-reference-json.ts`     | `ANA_2025_reference.csv`                         | `reference.json` + `reference-circlepacking.json` |
+| `scripts/validate-reference-json.ts`     | `reference.json` + `system/factor/subfactor.csv` | — (exits non-zero on error)                       |
+| `scripts/validate-circlepacking-json.ts` | `reference-circlepacking.json`                   | —                                                 |
+| `scripts/generate-system-enum.ts`        | `system.csv`                                     | `src/lib/types/generated/system-enum.ts`          |
+| `scripts/generate-factor-enum.ts`        | `factor.csv`                                     | `src/lib/types/generated/factor-enum.ts`          |
+| `scripts/generate-subfactor-enum.ts`     | `subfactor.csv`                                  | `src/lib/types/generated/subfactor-enum.ts`       |
 
 Run everything in sequence: `bun run data:refresh`
 
@@ -435,14 +453,14 @@ System colours are resolved at runtime via `getComputedStyle(document.documentEl
 
 ### Maintenance quick-reference
 
-| Task                                         | Files to touch                                                                                                                    |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Add / remove a metric                        | `ANA_2025_reference.csv` → `bun run data:refresh`                                                                                 |
-| Change flagging thresholds                   | `ANA_2025_reference.csv` → `bun run data:refresh` (values come from CSV)                                                          |
-| Add a new system                             | `system.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                                  |
-| Add a new factor                             | `factor.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                                  |
-| Add a new sub-factor                         | `subfactor.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                               |
-| Rename / remove a system, factor, subfactor  | Update lookup CSV + `ANA_2025_reference.csv` → `bun run data:refresh` → `bun run generate:enums` → search codebase for old ID    |
-| Change rollup or decision-tree logic         | `src/lib/engine/flagger.ts`                                                                                                       |
-| Change deep-dive XLSX layout or columns      | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts`                                                                       |
-| Add a new required CSV field                 | `ANA_2025_reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |
+| Task                                        | Files to touch                                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Add / remove a metric                       | `ANA_2025_reference.csv` → `bun run data:refresh`                                                                                  |
+| Change flagging thresholds                  | `ANA_2025_reference.csv` → `bun run data:refresh` (values come from CSV)                                                           |
+| Add a new system                            | `system.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                                   |
+| Add a new factor                            | `factor.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                                   |
+| Add a new sub-factor                        | `subfactor.csv` → `ANA_2025_reference.csv` → `bun run data:refresh`                                                                |
+| Rename / remove a system, factor, subfactor | Update lookup CSV + `ANA_2025_reference.csv` → `bun run data:refresh` → `bun run generate:enums` → search codebase for old ID      |
+| Change rollup or decision-tree logic        | `src/lib/engine/flagger.ts`                                                                                                        |
+| Change deep-dive XLSX layout or columns     | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts`                                                                        |
+| Add a new required CSV field                | `ANA_2025_reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |
