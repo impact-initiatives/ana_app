@@ -26,7 +26,7 @@ The ANA app processes humanitarian data in three steps:
 
 Most framework changes — adding or editing metrics, adjusting thresholds, updating labels — only require editing `static/data/reference.csv` and running `bun run data:refresh`.
 
-Adding or renaming a system, factor, or sub-factor also requires updating the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`). The **flagging** rollup logic and the preliminary-flag decision tree are hardcoded in `src/lib/engine/flagger.ts` and are not controlled by the CSV. The validator logic is hardcoded too in `src/lib/engine/validator.ts` and deep-dives XSLX pre-populating and formatting in `src/lib/engine/deepdives.ts`
+Adding or renaming a system, factor, or sub-factor also requires updating the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`). The **flagging** rollup logic and the preliminary-flag decision tree are hardcoded in `src/lib/engine/flagger.ts` and are not controlled by the CSV. The validator logic is hardcoded too in `src/lib/engine/validator.ts` and deep-dive XLSX pre-populating and formatting in `src/lib/engine/deepdive.ts`
 
 See the [Maintenance guide](#maintenance-guide--data-pipeline-and-export-logic) for step-by-step instructions on all of the above.
 
