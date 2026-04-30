@@ -22,10 +22,10 @@ export function parsePcode(s: string) {
 }
 
 type Analysis = {
-  action: 'none' | 'error' | 'adm1' | 'adm2';
+  action: 'none' | 'error' | 'adm1' | 'adm2' | 'mixed';
   message?: string;
   pcode?: string | null;
-  level?: 'ADM1' | 'ADM2' | '';
+  level?: 'ADM1' | 'ADM2' | 'MIXED' | '';
   parsed?: any[];
 };
 
@@ -43,7 +43,11 @@ export function analyzeUoas(uoas: string[]): Analysis {
   const pcode = pcodes[0];
 
   const levels = Array.from(new Set(pcodeParsed.map((p) => p.parsed.level).filter(Boolean)));
-  if (levels.length > 1) return { action: 'error', message: 'mixed admin levels detected', parsed };
+  if (levels.length > 1) {
+    const isAdm1AndAdm2 = levels.length === 2 && levels.includes('ADM1') && levels.includes('ADM2');
+    if (!isAdm1AndAdm2) return { action: 'error', message: 'unsupported mixed admin levels detected', parsed };
+    return { action: 'mixed', pcode, level: 'MIXED', parsed };
+  }
   const level = (levels[0] || 'ADM1') as 'ADM1' | 'ADM2';
 
   return { action: level === 'ADM1' ? 'adm1' : 'adm2', pcode, level, parsed };
