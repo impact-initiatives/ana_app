@@ -205,8 +205,8 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
  * Convention: SCREAMING_SNAKE_CASE (Renamed from prelimBadge).
  */
 export const PRELIM_BADGE_MAP: Record<PrelimFlag, FlagBadge> = {
-	em: { bg: 'var(--color-em)', label: 'Emergency' },
-	roem: { bg: 'var(--color-roem)', label: 'Risk of Emergency' },
+	em: { bg: 'var(--color-em)', label: 'EM' },
+	roem: { bg: 'var(--color-roem)', label: 'RoEM' },
 	acute: { bg: 'var(--color-acute)', label: 'Acute Needs' },
 	acute_needs: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
 	insufficient_evidence: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
