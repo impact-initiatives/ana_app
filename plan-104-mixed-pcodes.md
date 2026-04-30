@@ -9,11 +9,11 @@ Only ADM1 and ADM2 are supported — no deeper levels.
 
 ## Tasks
 
-- [ ] **Task 1** — `pcode.ts`: add `'mixed'` action for same-country mixed levels
-- [ ] **Task 2** — `fetchAdmin.ts`: fetch both ADM1 polygons + ADM2 polygons for MIXED; return `adm1Polygons`
-- [ ] **Task 3** — `adminFeaturesStore.svelte.ts`: add `adm1Polygons` field; merge label map from both levels
-- [ ] **Task 4** — `+page.svelte`: propagate `'mixed'` through derived values and effect
-- [ ] **Task 5** — `ChoroplethMap.svelte`: two-layer MIXED rendering (ADM1 fill → ADM2 fill → ADM1 outline)
+- [x] **Task 1** — `pcode.ts`: add `'mixed'` action for same-country mixed levels
+- [x] **Task 2** — `fetchAdmin.ts`: fetch both ADM1 polygons + ADM2 polygons for MIXED; return `adm1Polygons`
+- [x] **Task 3** — `adminFeaturesStore.svelte.ts`: add `adm1Polygons` field; merge label map from both levels
+- [x] **Task 4** — `+page.svelte`: propagate `'mixed'` through derived values and effect
+- [x] **Task 5** — `ChoroplethMap.svelte`: two-layer MIXED rendering (ADM1 fill → ADM2 fill → ADM1 outline)
 
 ---
 
