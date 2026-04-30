@@ -172,13 +172,13 @@
 	const fillFeaturesAdm2 = $derived.by(() => {
 		if (level !== 'MIXED') return [];
 		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
-		// transparent = true: unmatched ADM2 polygons don't mask ADM1 data underneath
+		// Only render ADM2 features that have matching data — unmatched features would sit
+		// invisible on top and swallow pointer events from the ADM1 layer underneath.
 		return enrichFeatures(
 			adm2?.features ?? [],
 			(f) => f.properties?.adm2_source_code as string | undefined,
-			lookup,
-			true
-		);
+			lookup
+		).filter((f) => f.properties.hasData);
 	});
 
 	// Tooltip derived values from the enriched hovered feature
