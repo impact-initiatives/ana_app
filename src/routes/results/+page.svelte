@@ -3,7 +3,6 @@
 	import { asset } from '$app/paths';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
-	import { circlePackingStore, loadCirclePackingData } from '$lib/stores/circlePackingStore.svelte';
 	import {
 		adminFeaturesStore,
 		setAdminFeatures,
@@ -427,8 +426,6 @@
 	// ── Section 4: Coverage ───────────────────────────────────────────────────
 
 	let coverageUoa = $state('');
-	let showAvailableOnly = $state(false);
-	let showCoverageTable = $state(false);
 
 	// Shared sorted UoA list — used by coverage selector and export.
 	const uoaList = $derived([...new Set(flagged.map((r) => String(r['uoa'] ?? '')))].sort());
@@ -449,24 +446,6 @@
 		flagged.find((r) => String(r['uoa']) === effectiveCoverageUoa) ?? null
 	);
 
-	function filterAvailable(node: any, row: Record<string, any> | null): any | null {
-		if (!node) return null;
-		if (node.metric) {
-			const flagLabel = row ? String(row[`${node.id}_status`] ?? 'no_data') : 'no_data';
-			return flagLabel === 'no_data' ? null : node;
-		}
-		if (!node.children) return node;
-		const kept = node.children.map((c: any) => filterAvailable(c, row)).filter(Boolean);
-		return kept.length > 0 ? { ...node, children: kept } : null;
-	}
-
-	const circlePackingDisplayData = $derived(
-		circlePackingStore.data
-			? showAvailableOnly && coverageSelectedRow
-				? filterAvailable(circlePackingStore.data, coverageSelectedRow)
-				: circlePackingStore.data
-			: null
-	);
 
 	// ── Section 5: Export ─────────────────────────────────────────────────────
 
@@ -534,7 +513,6 @@
 	});
 
 	onMount(() => {
-		loadCirclePackingData(asset('/data/reference-circlepacking.json'));
 		// Defer heavy $derived computations to the next task so the browser
 		// gets one full paint (showing ExploreNav) before blocking the thread.
 		setTimeout(async () => {
@@ -708,10 +686,8 @@
 						<ResultsCoverage
 							{coverageUoaOptions}
 							coverageUoa={effectiveCoverageUoa}
-							bind:showAvailableOnly
-							bind:showCoverageTable
-							{circlePackingDisplayData}
 							{coverageSelectedRow}
+							filteredRows={filteredFlagged}
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}

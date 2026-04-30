@@ -1,10 +1,7 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
 	import RadioToggle from '$lib/components/ui/RadioToggle.svelte';
-	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
-	import CirclePacking from '$lib/components/viz/CirclePacking.svelte';
 	import CoverageDetailCards from '$lib/components/viz/CoverageDetailCards.svelte';
-	import { circlePackingStore } from '$lib/stores/circlePackingStore.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { fade } from 'svelte/transition';
@@ -14,10 +11,8 @@
 	interface Props {
 		coverageUoaOptions: string[];
 		coverageUoa: string;
-		showAvailableOnly: boolean;
-		showCoverageTable: boolean;
-		circlePackingDisplayData: unknown;
 		coverageSelectedRow: Row | null;
+		filteredRows: Row[];
 		systems: { id: string; label: string }[];
 		referenceJson: unknown;
 		oncoverageUoaChange: (v: string) => void;
@@ -26,14 +21,70 @@
 	let {
 		coverageUoaOptions,
 		coverageUoa,
-		showAvailableOnly = $bindable(false),
-		showCoverageTable = $bindable(false),
-		circlePackingDisplayData,
 		coverageSelectedRow,
+		filteredRows,
 		systems,
 		referenceJson,
 		oncoverageUoaChange
 	}: Props = $props();
+
+	// false = Overall (default), true = Per UoA
+	let isPerUoa = $state(false);
+
+	// Aggregated row: sum flag_n / no_flag_n / missing_n across all filtered rows,
+	// plus uoa_flagged_n (count of rows where that system/factor is flagged).
+	const overallRow = $derived.by<Row>(() => {
+		const json = referenceJson as any;
+		const agg: Row = { uoa: '__overall__' };
+		if (!json?.systems || filteredRows.length === 0) return agg;
+
+		for (const sys of json.systems) {
+			const sysId: string = sys.id;
+			let sUoaFlagged = 0,
+				sUoaNoFlag = 0,
+				sUoaInsuff = 0,
+				sUoaNoData = 0;
+
+			for (const row of filteredRows) {
+				const st = String(row[`${sysId}.status`] ?? 'no_data');
+				if (st === 'flag') sUoaFlagged++;
+				else if (st === 'no_flag') sUoaNoFlag++;
+				else if (st === 'insufficient_evidence') sUoaInsuff++;
+				else sUoaNoData++;
+			}
+
+			agg[`${sysId}.uoa_flagged_n`] = sUoaFlagged;
+			agg[`${sysId}.uoa_no_flag_n`] = sUoaNoFlag;
+			agg[`${sysId}.uoa_insuff_n`] = sUoaInsuff;
+			agg[`${sysId}.uoa_no_data_n`] = sUoaNoData;
+
+			if (!Array.isArray(sys.factors)) continue;
+			for (const factor of sys.factors) {
+				const fKey = `${sysId}.${factor.id}`;
+				let fUoaFlagged = 0,
+					fUoaNoFlag = 0,
+					fUoaInsuff = 0,
+					fUoaNoData = 0;
+
+				for (const row of filteredRows) {
+					const ft = String(row[`${fKey}.status`] ?? 'no_data');
+					if (ft === 'flag') fUoaFlagged++;
+					else if (ft === 'no_flag') fUoaNoFlag++;
+					else if (ft === 'insufficient_evidence') fUoaInsuff++;
+					else fUoaNoData++;
+				}
+
+				agg[`${fKey}.uoa_flagged_n`] = fUoaFlagged;
+				agg[`${fKey}.uoa_no_flag_n`] = fUoaNoFlag;
+				agg[`${fKey}.uoa_insuff_n`] = fUoaInsuff;
+				agg[`${fKey}.uoa_no_data_n`] = fUoaNoData;
+			}
+		}
+
+		return agg;
+	});
+
+	const activeRow = $derived(isPerUoa ? coverageSelectedRow : overallRow);
 </script>
 
 <section>
@@ -41,19 +92,19 @@
 		Data Coverage
 	</h1>
 
-	{#if circlePackingStore.loading}
-		<div class="flex items-center justify-center gap-3 py-16">
-			<span class="loading loading-spinner loading-md text-primary"></span>
-			<p class="text-base-content/60 text-sm">Loading indicator framework…</p>
-		</div>
-	{:else if circlePackingStore.error}
-		<p class="text-error text-sm">{circlePackingStore.error}</p>
-	{:else}
-		<div class="space-y-4">
-			<!-- Controls -->
-			<Card>
-				<div class="flex flex-wrap items-end gap-6">
-					<div class="max-w-72 min-w-60 flex-1">
+	<div class="space-y-4">
+		<!-- Controls -->
+		<Card>
+			<div class="flex flex-wrap items-end gap-6">
+				<RadioToggle
+					bind:value={isPerUoa}
+					label="Scope"
+					labelFalse="Overall"
+					labelTrue="Per UoA"
+					name="coverageScope"
+				/>
+				{#if isPerUoa}
+					<div class="max-w-72 min-w-60 flex-1" transition:fade={{ duration: 150 }}>
 						<Select
 							label="Unit of analysis"
 							options={coverageUoaOptions.map((uoa) => ({ value: uoa, label: uoaLabel(uoa) }))}
@@ -62,48 +113,20 @@
 							onchange={(val) => oncoverageUoaChange(Array.isArray(val) ? (val[0] ?? '') : val)}
 						/>
 					</div>
-					<RadioToggle
-						bind:value={showCoverageTable}
-						label="View"
-						labelFalse="Cards"
-						labelTrue="Circle Pack"
-						name="coverageView"
-					/>
-					{#if showCoverageTable}
-						<div transition:fade={{ duration: 200 }}>
-							<RadioToggle
-								bind:value={showAvailableOnly}
-								label="Show"
-								labelFalse="All metrics"
-								labelTrue="Available only"
-								name="availability"
-							/>
-						</div>
-					{/if}
-				</div>
-			</Card>
-
-			{#if !showCoverageTable}
-				{#if coverageSelectedRow !== null}
-					<div transition:fade={{ duration: 150 }}>
-						<CoverageDetailCards row={coverageSelectedRow} {systems} {referenceJson} />
-					</div>
 				{/if}
-			{:else}
-				<div transition:fade={{ duration: 150 }}>
-					<Card bodyClass="rounded-box overflow-hidden p-0">
-						<div class="px-4 pt-3 pb-1">
-							<LegendBadge />
-						</div>
-						<CirclePacking
-							data={circlePackingDisplayData as any}
-							flagRow={coverageSelectedRow}
-							nodePadding={4}
-							paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
-						/>
-					</Card>
-				</div>
-			{/if}
-		</div>
-	{/if}
+			</div>
+		</Card>
+
+		{#if activeRow !== null}
+			<div transition:fade={{ duration: 150 }}>
+				<CoverageDetailCards
+					row={activeRow}
+					{systems}
+					{referenceJson}
+					mode={isPerUoa ? 'per-uoa' : 'overall'}
+					totalUoas={filteredRows.length}
+				/>
+			</div>
+		{/if}
+	</div>
 </section>
