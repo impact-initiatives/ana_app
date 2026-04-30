@@ -378,6 +378,7 @@
 				<ChoroplethMap
 					adm1={adminFeaturesStore.adm1}
 					adm2={adminFeaturesStore.adm2}
+					adm1Polygons={adminFeaturesStore.adm1Polygons}
 					rows={filteredFlagged}
 					level={pcodeLevel}
 					country={adminFeaturesStore.countryName}
