@@ -11,19 +11,22 @@ export type FetchState = 'idle' | 'loading' | 'done' | 'error';
 export interface AdminFeaturesState {
   adm1: any | null;
   adm2: any | null;
+  /** ADM1 polygon features — only populated in MIXED mode for filling ADM1-level UoAs on the map. */
+  adm1Polygons: any | null;
   /** Identifies which country + level was last fetched, to avoid redundant requests. */
   cachedKey: string | null;
   /** Human-readable country name resolved from the ISO-2 prefix of cachedKey via country-list-js. */
   countryName: string | null;
   fetchState: FetchState;
   fetchError: string | null;
-  /** pcode → human-readable admin name (gis_name ?? name). Built from adm2 features; falls back to adm1. */
+  /** pcode → human-readable admin name (gis_name ?? name). Built from adm2 + adm1Polygons features. */
   pcodeLabelMap: Record<string, string> | null;
 }
 
 const initialState: AdminFeaturesState = {
   adm1: null,
   adm2: null,
+  adm1Polygons: null,
   cachedKey: null,
   countryName: null,
   fetchState: 'idle',
@@ -69,26 +72,33 @@ function persist(value: AdminFeaturesState): void {
 
 export const adminFeaturesStore = $state<AdminFeaturesState>(loadFromStorage());
 
-function buildPcodeLabelMap(adm2: any, adm1: any): Record<string, string> {
+function buildPcodeLabelMap(adm2: any, adm1: any, adm1Polygons?: any): Record<string, string> {
   const map: Record<string, string> = {};
-  const features = adm2?.features?.length ? adm2.features : (adm1?.features ?? []);
-  for (const f of features) {
-    const code: string | undefined =
-      f.properties?.adm2_source_code ?? f.properties?.adm1_source_code ?? f.properties?.pcode;
+  // ADM2 features — keyed by adm2_source_code
+  for (const f of (adm2?.features ?? [])) {
+    const code: string | undefined = f.properties?.adm2_source_code;
+    const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
+    if (code && name) map[code] = name;
+  }
+  // ADM1 features — use adm1Polygons when available (lines only carry adm1_pcode, not gis_name)
+  const adm1Source = adm1Polygons ?? adm1;
+  for (const f of (adm1Source?.features ?? [])) {
+    const code: string | undefined = f.properties?.adm1_source_code ?? f.properties?.pcode;
     const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
     if (code && name) map[code] = name;
   }
   return map;
 }
 
-export function setAdminFeatures(adm1: any, adm2: any, key: string) {
+export function setAdminFeatures(adm1: any, adm2: any, key: string, adm1Polygons?: any) {
   adminFeaturesStore.adm1 = adm1;
   adminFeaturesStore.adm2 = adm2;
+  adminFeaturesStore.adm1Polygons = adm1Polygons ?? null;
   adminFeaturesStore.cachedKey = key;
   adminFeaturesStore.countryName = countryNameFromKey(key);
   adminFeaturesStore.fetchState = 'done';
   adminFeaturesStore.fetchError = null;
-  adminFeaturesStore.pcodeLabelMap = buildPcodeLabelMap(adm2, adm1);
+  adminFeaturesStore.pcodeLabelMap = buildPcodeLabelMap(adm2, adm1, adm1Polygons);
   persist($state.snapshot(adminFeaturesStore) as AdminFeaturesState);
 }
 
@@ -114,6 +124,7 @@ export function uoaLabel(pcode: unknown): string {
 export function clearAdminFeatures() {
   adminFeaturesStore.adm1 = null;
   adminFeaturesStore.adm2 = null;
+  adminFeaturesStore.adm1Polygons = null;
   adminFeaturesStore.cachedKey = null;
   adminFeaturesStore.countryName = null;
   adminFeaturesStore.fetchState = 'idle';
