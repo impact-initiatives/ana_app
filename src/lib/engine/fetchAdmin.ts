@@ -14,7 +14,7 @@ async function queryFeatureServerLayer(base: string, value: string, outFields = 
 }
 
 // Fetch ADM1 and/or ADM2 features according to analyzed decision.
-export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2') {
+export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2' | 'MIXED') {
   let adm1: any = null;
   let adm2: any = null;
   // If the provided identifier looks like a pcode (letters+digits), try field-based queries.
@@ -82,6 +82,45 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
         adm1 = { type: 'FeatureCollection', features: adm1Lines };
       }
       if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
+    } else if (level === 'MIXED') {
+      // Fetch ADM2 polygons (for coloring ADM2-level UoAs)
+      try {
+        adm2 = await queryFeatureServerLayer(ADM2_FEATURESERVER, iso3, '*', 'iso3');
+      } catch (e:any) {
+        adm2 = { error: String(e) };
+      }
+      if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
+
+      // Fetch ADM1 polygons — kept as polygons for coloring ADM1-level UoAs
+      let adm1Polygons: any = null;
+      try {
+        adm1Polygons = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
+      } catch (e:any) {
+        adm1Polygons = null;
+      }
+      if (adm1Polygons?.type === 'FeatureCollection') {
+        adm1Polygons = simplify(adm1Polygons, { tolerance: 0.01, highQuality: false, mutate: true });
+      }
+
+      // Also convert ADM1 polygons to lines for the outline overlay
+      if (adm1Polygons?.features) {
+        const adm1Lines: any[] = [];
+        for (const feature of adm1Polygons.features) {
+          const line = polygonToLine(feature);
+          if (line.type === 'FeatureCollection') {
+            for (const f of line.features) {
+              f.properties = { adm1_pcode: feature.properties?.adm1_pcode };
+              adm1Lines.push(f);
+            }
+          } else {
+            line.properties = { adm1_pcode: feature.properties?.adm1_pcode };
+            adm1Lines.push(line);
+          }
+        }
+        adm1 = { type: 'FeatureCollection', features: adm1Lines };
+      }
+
+      return { adm1, adm2, adm1Polygons };
     } else {
       try {
         adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
