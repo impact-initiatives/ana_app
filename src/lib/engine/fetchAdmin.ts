@@ -14,7 +14,7 @@ async function queryFeatureServerLayer(base: string, value: string, outFields = 
 }
 
 // Fetch ADM1 and/or ADM2 features according to analyzed decision.
-export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2') {
+export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2' | 'MIXED') {
   let adm1: any = null;
   let adm2: any = null;
   // If the provided identifier looks like a pcode (letters+digits), try field-based queries.
@@ -56,16 +56,16 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
       }
       // Fetch ADM1 polygons directly and convert to lines — avoids topology issues
       // that arise from trying to derive ADM1 boundaries by unioning ADM2 geometries.
-      let adm1Polygons: any = null;
+      let adm1Raw: any = null;
       try {
-        adm1Polygons = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
+        adm1Raw = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
       } catch (e:any) {
-        adm1Polygons = null;
+        adm1Raw = null;
       }
-      if (adm1Polygons) {
-        adm1Polygons = simplify(adm1Polygons, { tolerance: 0.01, highQuality: false, mutate: true });
+      if (adm1Raw) {
+        adm1Raw = simplify(adm1Raw, { tolerance: 0.01, highQuality: false, mutate: true });
         const adm1Lines: any[] = [];
-        for (const feature of adm1Polygons.features) {
+        for (const feature of adm1Raw.features) {
           const line = polygonToLine(feature);
           // polygonToLine returns a Feature when input is a Polygon,
           // but a FeatureCollection when input is a MultiPolygon (e.g. ADM1 with islands).
@@ -82,6 +82,27 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
         adm1 = { type: 'FeatureCollection', features: adm1Lines };
       }
       if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
+    } else if (level === 'MIXED') {
+      // Fetch ADM2 polygons (for coloring ADM2-level UoAs)
+      try {
+        adm2 = await queryFeatureServerLayer(ADM2_FEATURESERVER, iso3, '*', 'iso3');
+      } catch (e:any) {
+        adm2 = { error: String(e) };
+      }
+      if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
+
+      // Fetch ADM1 polygons — stored as polygons (not lines) so they can be both filled
+      // (ADM1-level UoAs) and used as outlines (fillOpacity=0 renders identically to lines).
+      try {
+        adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
+      } catch (e:any) {
+        adm1 = null;
+      }
+      if (adm1?.type === 'FeatureCollection') {
+        adm1 = simplify(adm1, { tolerance: 0.01, highQuality: false, mutate: true });
+      }
+
+      return { adm1, adm2 };
     } else {
       try {
         adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');

@@ -22,10 +22,10 @@ export function parsePcode(s: string) {
 }
 
 type Analysis = {
-  action: 'none' | 'error' | 'adm1' | 'adm2';
+  action: 'none' | 'error' | 'adm1' | 'adm2' | 'mixed';
   message?: string;
   pcode?: string | null;
-  level?: 'ADM1' | 'ADM2' | '';
+  level?: 'ADM1' | 'ADM2' | 'MIXED' | '';
   parsed?: any[];
 };
 
@@ -43,7 +43,21 @@ export function analyzeUoas(uoas: string[]): Analysis {
   const pcode = pcodes[0];
 
   const levels = Array.from(new Set(pcodeParsed.map((p) => p.parsed.level).filter(Boolean)));
-  if (levels.length > 1) return { action: 'error', message: 'mixed admin levels detected', parsed };
+  if (levels.length > 1) {
+    const isAdm1AndAdm2 = levels.length === 2 && levels.includes('ADM1') && levels.includes('ADM2');
+    if (!isAdm1AndAdm2) return { action: 'error', message: 'unsupported mixed admin levels detected', parsed };
+
+    // Reject overlap: an ADM1 UoA whose code is a prefix of an ADM2 UoA in the same dataset.
+    // e.g. SD01 (ADM1) + SD01001 (ADM2) → the ADM1 area and its own sub-areas both appear.
+    const adm1Codes = pcodeParsed.filter((p) => p.parsed.level === 'ADM1').map((p) => p.parsed.code as string);
+    const adm2Codes = pcodeParsed.filter((p) => p.parsed.level === 'ADM2').map((p) => p.parsed.code as string);
+    const overlapping = adm1Codes.find((a1) => adm2Codes.some((a2) => a2.startsWith(a1)));
+    if (overlapping) {
+      return { action: 'error', message: `ADM1 UoA ${overlapping} overlaps with ADM2 sub-areas in the same dataset`, parsed };
+    }
+
+    return { action: 'mixed', pcode, level: 'MIXED', parsed };
+  }
   const level = (levels[0] || 'ADM1') as 'ADM1' | 'ADM2';
 
   return { action: level === 'ADM1' ? 'adm1' : 'adm2', pcode, level, parsed };

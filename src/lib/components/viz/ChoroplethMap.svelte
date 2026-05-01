@@ -24,7 +24,7 @@
 		adm1: GeoFC;
 		adm2: GeoFC | null;
 		rows: Row[];
-		level: 'ADM1' | 'ADM2';
+		level: 'ADM1' | 'ADM2' | 'MIXED';
 		/** Human-readable country name for the export title. */
 		country?: string | null;
 		/** Which field to colour by. Defaults to prelim flag. */
@@ -49,8 +49,7 @@
 		layerTitle = null
 	}: Props = $props();
 
-	let hoveredFeature: { properties: Record<string, unknown>; geometry: unknown } | null =
-		$state(null);
+	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(null);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
 	let containerWidth = $state(0);
@@ -107,28 +106,20 @@
 
 	const NO_DATA_COLOR = getPrelimBadge('no_data')?.bg ?? 'var(--color-no-data)';
 
-	// Pre-extract p-codes per feature — only reruns when GeoJSON or level changes, not on rows filter.
-	const featureWithCodes = $derived.by(() => {
-		const source = level === 'ADM2' ? (adm2?.features ?? []) : (adm1?.features ?? []);
-		return source.map((f) => ({
-			feature: f,
-			code:
-				level === 'ADM2'
-					? (f.properties?.adm2_source_code as string | undefined)
-					: ((f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined)
-		}));
-	});
-
-	// Enrich each fill feature with flagColor + flagLabel — reruns on rows or layer change.
-	const fillFeatures = $derived.by(() => {
-		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
-		return featureWithCodes.map(({ feature: f, code }) => {
+	function enrichFeatures(
+		features: GeoFC['features'],
+		getCode: (f: GeoFC['features'][number]) => string | undefined,
+		lookup: Map<string, Row>,
+		transparent = false
+	) {
+		return features.map((f) => {
+			const code = getCode(f);
 			const row = code ? lookup.get(code) : undefined;
 			let flagColor: string;
 			let flagLabel: string;
 
 			if (!row) {
-				flagColor = NO_DATA_COLOR;
+				flagColor = transparent ? 'transparent' : NO_DATA_COLOR;
 				flagLabel = getPrelimBadge('no_data')?.label ?? 'No Data';
 			} else if (layer.type === 'prelim') {
 				const flag = String(row.prelim_flag ?? '');
@@ -144,18 +135,67 @@
 
 			return { ...f, properties: { ...f.properties, flagColor, flagLabel, hasData: !!row, code } };
 		});
+	}
+
+	// Fill features for ADM1 and ADM2 layers — reruns on rows or layer change.
+	const fillFeatures = $derived.by(() => {
+		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
+		if (level === 'ADM2') {
+			return enrichFeatures(
+				adm2?.features ?? [],
+				(f) => f.properties?.adm2_source_code as string | undefined,
+				lookup
+			);
+		}
+		// ADM1-only: use adm1 polygons
+		return enrichFeatures(
+			adm1?.features ?? [],
+			(f) => (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined,
+			lookup
+		);
+	});
+
+	// MIXED mode: separate fill layers for ADM1 polygons and ADM2 polygons.
+	// adm1 carries polygons in MIXED mode (not lines), so it can be both filled and used as outline.
+	const fillFeaturesAdm1 = $derived.by(() => {
+		if (level !== 'MIXED') return [];
+		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
+		return enrichFeatures(
+			adm1?.features ?? [],
+			(f) => (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined,
+			lookup
+		);
+	});
+
+	const fillFeaturesAdm2 = $derived.by(() => {
+		if (level !== 'MIXED') return [];
+		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
+		// Only render ADM2 features that have matching data — unmatched features would sit
+		// invisible on top and swallow pointer events from the ADM1 layer underneath.
+		return enrichFeatures(
+			adm2?.features ?? [],
+			(f) => f.properties?.adm2_source_code as string | undefined,
+			lookup
+		).filter((f) => f.properties.hasData);
 	});
 
 	// Tooltip derived values from the enriched hovered feature
 	const tooltipTitle = $derived(
-		hoveredFeature?.properties?.gis_name ??
-			hoveredFeature?.properties?.name ??
-			hoveredFeature?.properties?.code ??
-			''
+		String(
+			hoveredFeature?.properties?.gis_name ??
+				hoveredFeature?.properties?.name ??
+				hoveredFeature?.properties?.code ??
+				''
+		)
 	);
 	const tooltipSwatch = $derived(
 		hoveredFeature
-			? [{ color: hoveredFeature.properties.flagColor, label: hoveredFeature.properties.flagLabel }]
+			? [
+					{
+						color: String(hoveredFeature.properties.flagColor),
+						label: String(hoveredFeature.properties.flagLabel)
+					}
+				]
 			: []
 	);
 	const tooltipRows = $derived(
@@ -181,6 +221,37 @@
 -->
 <div bind:clientWidth={containerWidth}>
 	{#if plotHeight > 0}
+		{#snippet interactionHandlers(features: typeof fillFeatures)}
+			<Geo
+				data={features}
+				fill={{ value: (d) => d.properties.flagColor, scale: null }}
+				stroke="var(--color-base-content)"
+				strokeWidth={0.5}
+				cursor={onuoaclick ? 'pointer' : undefined}
+				onmouseover={(_e, f) => {
+					if (hoveredFeature !== f) hoveredFeature = f;
+				}}
+				onmousemove={(e) => {
+					const me = e as unknown as MouseEvent;
+					tooltipX = me.clientX;
+					tooltipY = me.clientY;
+				}}
+				onmouseout={() => {
+					hoveredFeature = null;
+				}}
+				onclick={(_e, f) => {
+					const props = f.properties as Record<string, unknown>;
+					const code = props?.code as string | undefined;
+					if (code) {
+						const name = (adminFeaturesStore.pcodeLabelMap?.[code] ??
+							props?.gis_name ??
+							props?.name ??
+							null) as string | null;
+						onuoaclick?.(code, name);
+					}
+				}}
+			/>
+		{/snippet}
 		<!-- mapEl wraps only the Plot — keeps querySelector('svg') unambiguous -->
 		<div bind:this={mapEl}>
 			<Plot
@@ -193,36 +264,14 @@
 						geoIdentity().reflectY(true).fitSize([width, height], adm1) as any
 				}}
 			>
-				<!-- Colored fill layer -->
-				<Geo
-					data={fillFeatures}
-					fill={{ value: (d) => d.properties.flagColor, scale: null }}
-					stroke="var(--color-base-content)"
-					strokeWidth={0.5}
-					cursor={onuoaclick ? 'pointer' : undefined}
-					onmouseover={(_e, f) => {
-						if (hoveredFeature !== f) hoveredFeature = f;
-					}}
-					onmousemove={(e) => {
-						const me = e as unknown as MouseEvent;
-						tooltipX = me.clientX;
-						tooltipY = me.clientY;
-					}}
-					onmouseout={() => {
-						hoveredFeature = null;
-					}}
-					onclick={(_e, f) => {
-						const props = f.properties as Record<string, unknown>;
-						const code = props?.code as string | undefined;
-						if (code) {
-							const name = (adminFeaturesStore.pcodeLabelMap?.[code] ??
-								props?.gis_name ??
-								props?.name ??
-								null) as string | null;
-							onuoaclick?.(code, name);
-						}
-					}}
-				/>
+				{#if level === 'MIXED'}
+					<!-- MIXED: ADM1 fill (bottom), ADM2 fill on top (transparent where unmatched) -->
+					{@render interactionHandlers(fillFeaturesAdm1)}
+					{@render interactionHandlers(fillFeaturesAdm2)}
+				{:else}
+					<!-- ADM1 or ADM2: single fill layer -->
+					{@render interactionHandlers(fillFeatures)}
+				{/if}
 
 				<!-- Hover highlight layer — separate Geo so SveltePlot re-renders on state change -->
 				{#if hoveredFeature}

@@ -129,8 +129,12 @@
 	const uoaAnalysis = $derived(
 		flagged.length > 0 ? analyzeUoas(flagged.map((r) => String(r.uoa))) : null
 	);
-	const hasPcodes = $derived(uoaAnalysis?.action === 'adm1' || uoaAnalysis?.action === 'adm2');
-	const pcodeLevel = $derived<'ADM1' | 'ADM2'>(uoaAnalysis?.action === 'adm2' ? 'ADM2' : 'ADM1');
+	const hasPcodes = $derived(
+		uoaAnalysis?.action === 'adm1' || uoaAnalysis?.action === 'adm2' || uoaAnalysis?.action === 'mixed'
+	);
+	const pcodeLevel = $derived<'ADM1' | 'ADM2' | 'MIXED'>(
+		uoaAnalysis?.action === 'adm2' ? 'ADM2' : uoaAnalysis?.action === 'mixed' ? 'MIXED' : 'ADM1'
+	);
 
 	const pcodeKey = $derived.by(() => {
 		if (!uoaAnalysis || !hasPcodes) return null;
