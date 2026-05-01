@@ -56,16 +56,16 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
       }
       // Fetch ADM1 polygons directly and convert to lines — avoids topology issues
       // that arise from trying to derive ADM1 boundaries by unioning ADM2 geometries.
-      let adm1Polygons: any = null;
+      let adm1Raw: any = null;
       try {
-        adm1Polygons = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
+        adm1Raw = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
       } catch (e:any) {
-        adm1Polygons = null;
+        adm1Raw = null;
       }
-      if (adm1Polygons) {
-        adm1Polygons = simplify(adm1Polygons, { tolerance: 0.01, highQuality: false, mutate: true });
+      if (adm1Raw) {
+        adm1Raw = simplify(adm1Raw, { tolerance: 0.01, highQuality: false, mutate: true });
         const adm1Lines: any[] = [];
-        for (const feature of adm1Polygons.features) {
+        for (const feature of adm1Raw.features) {
           const line = polygonToLine(feature);
           // polygonToLine returns a Feature when input is a Polygon,
           // but a FeatureCollection when input is a MultiPolygon (e.g. ADM1 with islands).
@@ -91,36 +91,18 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
       }
       if (adm2?.type === 'FeatureCollection') adm2 = simplify(adm2, { tolerance: 0.005, highQuality: false, mutate: true });
 
-      // Fetch ADM1 polygons — kept as polygons for coloring ADM1-level UoAs
-      let adm1Polygons: any = null;
+      // Fetch ADM1 polygons — stored as polygons (not lines) so they can be both filled
+      // (ADM1-level UoAs) and used as outlines (fillOpacity=0 renders identically to lines).
       try {
-        adm1Polygons = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
+        adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');
       } catch (e:any) {
-        adm1Polygons = null;
+        adm1 = null;
       }
-      if (adm1Polygons?.type === 'FeatureCollection') {
-        adm1Polygons = simplify(adm1Polygons, { tolerance: 0.01, highQuality: false, mutate: true });
-      }
-
-      // Also convert ADM1 polygons to lines for the outline overlay
-      if (adm1Polygons?.features) {
-        const adm1Lines: any[] = [];
-        for (const feature of adm1Polygons.features) {
-          const line = polygonToLine(feature);
-          if (line.type === 'FeatureCollection') {
-            for (const f of line.features) {
-              f.properties = { adm1_pcode: feature.properties?.adm1_pcode };
-              adm1Lines.push(f);
-            }
-          } else {
-            line.properties = { adm1_pcode: feature.properties?.adm1_pcode };
-            adm1Lines.push(line);
-          }
-        }
-        adm1 = { type: 'FeatureCollection', features: adm1Lines };
+      if (adm1?.type === 'FeatureCollection') {
+        adm1 = simplify(adm1, { tolerance: 0.01, highQuality: false, mutate: true });
       }
 
-      return { adm1, adm2, adm1Polygons };
+      return { adm1, adm2 };
     } else {
       try {
         adm1 = await queryFeatureServerLayer(ADM1_FEATURESERVER, iso3, '*', 'iso3');

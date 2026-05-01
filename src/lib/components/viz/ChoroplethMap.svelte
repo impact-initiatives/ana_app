@@ -23,8 +23,6 @@
 	interface Props {
 		adm1: GeoFC;
 		adm2: GeoFC | null;
-		/** ADM1 polygon features — only set in MIXED mode for filling ADM1-level UoAs. */
-		adm1Polygons?: GeoFC | null;
 		rows: Row[];
 		level: 'ADM1' | 'ADM2' | 'MIXED';
 		/** Human-readable country name for the export title. */
@@ -42,7 +40,6 @@
 	let {
 		adm1,
 		adm2,
-		adm1Polygons = null,
 		rows,
 		level,
 		country = null,
@@ -159,11 +156,12 @@
 	});
 
 	// MIXED mode: separate fill layers for ADM1 polygons and ADM2 polygons.
+	// adm1 carries polygons in MIXED mode (not lines), so it can be both filled and used as outline.
 	const fillFeaturesAdm1 = $derived.by(() => {
 		if (level !== 'MIXED') return [];
 		const lookup = new Map(rows.map((r) => [String(r.uoa), r]));
 		return enrichFeatures(
-			adm1Polygons?.features ?? [],
+			adm1?.features ?? [],
 			(f) => (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined,
 			lookup
 		);

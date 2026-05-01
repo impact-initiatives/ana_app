@@ -161,7 +161,7 @@
 		setAdminFetchState('loading');
 		fetchAdminsForCountry(pcode as string, pcodeLevel)
 			.then((res) => {
-				setAdminFeatures(res?.adm1 ?? null, res?.adm2 ?? null, pcodeKey!, res?.adm1Polygons ?? undefined);
+				setAdminFeatures(res?.adm1 ?? null, res?.adm2 ?? null, pcodeKey!);
 			})
 			.catch((e) => {
 				setAdminFetchState('error', String(e));
