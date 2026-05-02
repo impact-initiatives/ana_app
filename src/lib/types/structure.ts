@@ -83,7 +83,7 @@ export interface Thresholds {
 
 /**
  * A single measurable metric — the leaf of the indicator hierarchy.
- * One row in ANA_2025_reference.csv = one Metric (identified by Metric ID, e.g. MET001).
+ * One row in reference.csv = one Metric (identified by Metric ID, e.g. MET001).
  */
 export interface Metric {
 	metric: MetricID;

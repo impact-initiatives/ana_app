@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import CirclePacking from '$lib/components/viz/CirclePacking.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
-	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
@@ -62,24 +60,6 @@
 
 	const filteredData = $derived(data ? filterTree(data, selectedLevels, selectedConcepts) : null);
 	const referenceObjects = $derived(buildReferenceRows(metricStore.referenceJson));
-
-	const levelOptions = $derived(
-		tidy(
-			referenceObjects,
-			filter((d) => d.level !== ''),
-			distinct(['level']),
-			arrange(asc('level'))
-		).map((d) => ({ value: d.level, label: d.level }))
-	);
-
-	const conceptOptions = $derived(
-		tidy(
-			referenceObjects,
-			filter((d) => d.risk_concept !== ''),
-			distinct(['risk_concept']),
-			arrange(asc('risk_concept'))
-		).map((d) => ({ value: d.risk_concept, label: d.risk_concept }))
-	);
 
 	const refColOptions: Record<string, { wrap: boolean; extraClass?: string; bg?: string }> = {
 		risk_concept: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
@@ -301,7 +281,7 @@
 				</p>
 			{:else}
 				<CirclePacking
-					data={filteredData}
+					data={data}
 					nodePadding={4}
 					paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
 				/>

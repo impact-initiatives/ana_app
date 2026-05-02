@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * generate-indicators-json.ts
- * Converts static/data/ANA_2025_reference.csv → static/data/reference.json
+ * Converts static/data/reference.csv → static/data/reference.json
  * Run validate-indicators.ts afterwards to check schema + id consistency.
  *
  * Usage:
@@ -14,7 +14,7 @@ import Papa from 'papaparse';
 import type { Metric, Indicator, IndicatorsRoot } from '$lib/types/structure';
 
 const DATA_DIR = path.join(process.cwd(), 'static', 'data');
-const CSV_DEFAULT = path.join(DATA_DIR, 'ANA_2025_reference.csv');
+const CSV_DEFAULT = path.join(DATA_DIR, 'reference.csv');
 const OUT_DEFAULT = path.join(DATA_DIR, 'reference.json');
 
 // ── CLI ───────────────────────────────────────────────────────────────────────

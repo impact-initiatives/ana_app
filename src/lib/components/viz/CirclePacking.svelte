@@ -361,7 +361,7 @@
 	aria-label="Zoomable circle packing chart — click to zoom out"
 	style:max-width="100%"
 	style:height="auto"
-	style:font="10px sans-serif"
+	style:font="10px"
 	onclick={() => root && zoomTo(root)}
 	onkeydown={(e) => {
 		if (e.key === 'Enter' || e.key === ' ') {
@@ -436,7 +436,7 @@
 								: relDepth === 2
 									? factorLabelFontSize
 									: subfactorLabelFontSize}px; transition: font-size 750ms cubic-bezier(0.645, 0.045, 0.355, 1.000);"
-							font-family="'Roboto Condensed', sans-serif"
+							font-family="'Roboto Condensed'"
 							text-anchor="middle"
 							fill="currentColor"
 							class="text-base-content"

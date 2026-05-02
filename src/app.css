@@ -9,7 +9,7 @@
 @import 'tailwindcss';
 
 @theme {
-	--font-hand: 'Gloria Hallelujah', cursive;
+	--font-hand: 'Gloria Hallelujah';
 }
 
 @plugin 'daisyui' {
@@ -338,7 +338,7 @@
 
 /* Body: Noto Sans with system fallbacks */
 body {
-	font-family: 'Noto Sans', system-ui, sans-serif;
+	font-family: 'Noto Sans';
 }
 
 /* Headings + navbar: Roboto Condensed for visual density */
@@ -347,5 +347,5 @@ h2,
 h3,
 h4,
 .navbar {
-	font-family: 'Roboto Condensed', sans-serif;
+	font-family: 'Roboto Condensed';
 }

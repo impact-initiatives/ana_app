@@ -13,7 +13,7 @@ const PAINT_PROPS = [
 	'font-weight'
 ] as const;
 
-const FONT = 'system-ui, -apple-system, Arial, sans-serif';
+const FONT = 'Segoe UI';
 const PRELIM_KEYS = PRELIM_FLAG_KEYS;
 const FLAGGED_STATUSES = ACUTE_PRELIM_FLAGS;
 

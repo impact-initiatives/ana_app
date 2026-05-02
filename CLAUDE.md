@@ -80,7 +80,7 @@ All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores
 
 ### Key Data Structures
 
-**`reference.json`** (static asset at `static/data/reference.json`, generated from `ANA_2025_reference.csv`):
+**`reference.json`** (static asset at `static/data/reference.json`, generated from `reference.csv`):
 
 ```
 systems[] → factors[] → sub_factors[] → indicators[] → metrics[]
@@ -121,14 +121,14 @@ Status vocabulary (applies at every rollup level):
 
 #### `results/`
 
-| Component                | Purpose                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking, choropleth map with cascade layer filters       |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                          |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                         |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                                                      |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                      |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                               |
+| Component                | Purpose                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking, choropleth map with cascade layer filters |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                    |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                   |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                                                |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                         |
 
 #### `viz/`
 
@@ -184,12 +184,12 @@ Defined in `src/app.css` (`:root` block). Changing a base hex there updates the 
 
 ### Tooling
 
-Use `npx @sveltejs/mcp` when uncertain about Svelte 5 syntax:
+Use `bun x @sveltejs/mcp` when uncertain about Svelte 5 syntax:
 
 ```bash
-npx @sveltejs/mcp list-sections                          # browse available docs
-npx @sveltejs/mcp get-documentation "\$state,\$derived"  # fetch specific docs
-npx @sveltejs/mcp svelte-autofixer ./src/lib/Foo.svelte  # lint a component
+bun x @sveltejs/mcp list-sections                          # browse available docs
+bun x @sveltejs/mcp get-documentation "\$state,\$derived"  # fetch specific docs
+bun x @sveltejs/mcp svelte-autofixer ./src/lib/Foo.svelte  # lint a component
 ```
 
 Run `svelte-autofixer` before finalizing any new or significantly modified component. When passing runes inline, escape `$` as `\$` to avoid shell substitution.
