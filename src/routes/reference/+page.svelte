@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import CirclePacking from '$lib/components/viz/CirclePacking.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
+	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
@@ -54,12 +56,31 @@
 			return levelOk && conceptOk ? node : null;
 		}
 		if (!node.children) return node;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const kept = node.children.map((c: any) => filterTree(c, levels, concepts)).filter(Boolean);
 		return kept.length > 0 ? { ...node, children: kept } : null;
 	}
 
 	const filteredData = $derived(data ? filterTree(data, selectedLevels, selectedConcepts) : null);
 	const referenceObjects = $derived(buildReferenceRows(metricStore.referenceJson));
+
+	const levelOptions = $derived(
+		tidy(
+			referenceObjects,
+			filter((d) => d.level !== ''),
+			distinct(['level']),
+			arrange(asc('level'))
+		).map((d) => ({ value: d.level, label: d.level }))
+	);
+
+	const conceptOptions = $derived(
+		tidy(
+			referenceObjects,
+			filter((d) => d.risk_concept !== ''),
+			distinct(['risk_concept']),
+			arrange(asc('risk_concept'))
+		).map((d) => ({ value: d.risk_concept, label: d.risk_concept }))
+	);
 
 	const refColOptions: Record<string, { wrap: boolean; extraClass?: string; bg?: string }> = {
 		risk_concept: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
@@ -125,23 +146,13 @@
 			(conceptOptions.length > 0 && selectedConcepts.length === 0)
 	);
 
-	const filteredTableRows = $derived(
-		tidy(
-			referenceObjects,
-			filter(
-				(d) =>
-					(selectedLevels.length === 0 || selectedLevels.includes(d.level)) &&
-					(selectedConcepts.length === 0 || selectedConcepts.includes(d.risk_concept))
-			)
-		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
-	);
-
 	const tableRows = $derived(
-		showAdvancedCols
-			? filteredTableRows
-			: filteredTableRows.map((row) =>
+		(showAdvancedCols
+			? referenceObjects
+			: referenceObjects.map((row) =>
 					Object.fromEntries(Object.entries(row).filter(([k]) => !ADVANCED_COLS.has(k)))
 				)
+		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
@@ -171,7 +182,7 @@
 		<!-- View tabs -->
 		<div class="mb-0 flex items-end">
 			<div class="tabs tabs-lift" role="tablist">
-				{#each [['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const as [id, label] (id)}
+				{#each ([['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const) as [id, label] (id)}
 					<button
 						role="tab"
 						class="tab {activeView === id ? 'tab-active' : ''}"
@@ -207,8 +218,7 @@
 					/>
 				</div>
 				{#if filtersActive}
-					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button
-					>
+					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button>
 				{/if}
 			</div>
 		{:else if activeView === 'table'}
@@ -281,7 +291,7 @@
 				</p>
 			{:else}
 				<CirclePacking
-					data={data}
+					data={filteredData}
 					nodePadding={4}
 					paddingByDepth={{ 0: 60, 1: 40, 2: 5, 3: 5 }}
 				/>
