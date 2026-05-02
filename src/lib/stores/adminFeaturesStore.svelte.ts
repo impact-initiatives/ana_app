@@ -17,7 +17,7 @@ export interface AdminFeaturesState {
   countryName: string | null;
   fetchState: FetchState;
   fetchError: string | null;
-  /** pcode → human-readable admin name (gis_name ?? name). Built from adm2 features; falls back to adm1. */
+  /** pcode → human-readable admin name (gis_name ?? name). Built from adm2 + adm1 features. */
   pcodeLabelMap: Record<string, string> | null;
 }
 
@@ -71,10 +71,15 @@ export const adminFeaturesStore = $state<AdminFeaturesState>(loadFromStorage());
 
 function buildPcodeLabelMap(adm2: any, adm1: any): Record<string, string> {
   const map: Record<string, string> = {};
-  const features = adm2?.features?.length ? adm2.features : (adm1?.features ?? []);
-  for (const f of features) {
-    const code: string | undefined =
-      f.properties?.adm2_source_code ?? f.properties?.adm1_source_code ?? f.properties?.pcode;
+  // ADM2 features — keyed by adm2_source_code
+  for (const f of (adm2?.features ?? [])) {
+    const code: string | undefined = f.properties?.adm2_source_code;
+    const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
+    if (code && name) map[code] = name;
+  }
+  // ADM1 features — polygons in ADM1/MIXED mode (carry gis_name); lines in ADM2 mode (no gis_name, skipped harmlessly)
+  for (const f of (adm1?.features ?? [])) {
+    const code: string | undefined = f.properties?.adm1_source_code ?? f.properties?.pcode;
     const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
     if (code && name) map[code] = name;
   }

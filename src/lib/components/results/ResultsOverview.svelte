@@ -28,7 +28,7 @@
 		systems: System[];
 		systemCodes: Map<string, string[]>;
 		hasPcodes: boolean;
-		pcodeLevel: 'ADM1' | 'ADM2';
+		pcodeLevel: 'ADM1' | 'ADM2' | 'MIXED';
 		selectedPrelimKeys: string[] | null;
 		selectedMapUoa: string | null;
 		selectedMapAdminName: string | null;

@@ -13,7 +13,7 @@ const PAINT_PROPS = [
 	'font-weight'
 ] as const;
 
-const FONT = 'system-ui, -apple-system, Arial, sans-serif';
+const FONT = 'Segoe UI';
 const PRELIM_KEYS = PRELIM_FLAG_KEYS;
 const FLAGGED_STATUSES = ACUTE_PRELIM_FLAGS;
 
@@ -97,7 +97,7 @@ function wrapText(text: string, maxWidth: number, fontSize: number, bold = false
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export interface ExportMapOpts {
-	level: 'ADM1' | 'ADM2';
+	level: 'ADM1' | 'ADM2' | 'MIXED';
 	country: string | null;
 	/** Rows from flagStore — used to compute flagged count when flaggedCount is omitted. */
 	rows: { prelim_flag?: unknown }[];
@@ -273,7 +273,7 @@ export function downloadSvg(svgString: string, filename: string): void {
 }
 
 /** Build a descriptive filename: `choropleth_{country}_{level}_{YYYY-MM-DD}.svg` */
-export function buildMapFilename(level: 'ADM1' | 'ADM2', country: string | null): string {
+export function buildMapFilename(level: 'ADM1' | 'ADM2' | 'MIXED', country: string | null): string {
 	const slug = country ? country.toUpperCase().replace(/[^A-Z0-9-]/g, '') : 'map';
 	const date = new Date().toISOString().slice(0, 10);
 	return `choropleth_${slug}_${level}_${date}.svg`;

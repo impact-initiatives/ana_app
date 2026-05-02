@@ -3,7 +3,6 @@
 	import { asset } from '$app/paths';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
-	import { circlePackingStore, loadCirclePackingData } from '$lib/stores/circlePackingStore.svelte';
 	import {
 		adminFeaturesStore,
 		setAdminFeatures,
@@ -130,8 +129,12 @@
 	const uoaAnalysis = $derived(
 		flagged.length > 0 ? analyzeUoas(flagged.map((r) => String(r.uoa))) : null
 	);
-	const hasPcodes = $derived(uoaAnalysis?.action === 'adm1' || uoaAnalysis?.action === 'adm2');
-	const pcodeLevel = $derived<'ADM1' | 'ADM2'>(uoaAnalysis?.action === 'adm2' ? 'ADM2' : 'ADM1');
+	const hasPcodes = $derived(
+		uoaAnalysis?.action === 'adm1' || uoaAnalysis?.action === 'adm2' || uoaAnalysis?.action === 'mixed'
+	);
+	const pcodeLevel = $derived<'ADM1' | 'ADM2' | 'MIXED'>(
+		uoaAnalysis?.action === 'adm2' ? 'ADM2' : uoaAnalysis?.action === 'mixed' ? 'MIXED' : 'ADM1'
+	);
 
 	const pcodeKey = $derived.by(() => {
 		if (!uoaAnalysis || !hasPcodes) return null;
@@ -427,8 +430,6 @@
 	// ── Section 4: Coverage ───────────────────────────────────────────────────
 
 	let coverageUoa = $state('');
-	let showAvailableOnly = $state(false);
-	let showCoverageTable = $state(false);
 
 	// Shared sorted UoA list — used by coverage selector and export.
 	const uoaList = $derived([...new Set(flagged.map((r) => String(r['uoa'] ?? '')))].sort());
@@ -449,24 +450,6 @@
 		flagged.find((r) => String(r['uoa']) === effectiveCoverageUoa) ?? null
 	);
 
-	function filterAvailable(node: any, row: Record<string, any> | null): any | null {
-		if (!node) return null;
-		if (node.metric) {
-			const flagLabel = row ? String(row[`${node.id}_status`] ?? 'no_data') : 'no_data';
-			return flagLabel === 'no_data' ? null : node;
-		}
-		if (!node.children) return node;
-		const kept = node.children.map((c: any) => filterAvailable(c, row)).filter(Boolean);
-		return kept.length > 0 ? { ...node, children: kept } : null;
-	}
-
-	const circlePackingDisplayData = $derived(
-		circlePackingStore.data
-			? showAvailableOnly && coverageSelectedRow
-				? filterAvailable(circlePackingStore.data, coverageSelectedRow)
-				: circlePackingStore.data
-			: null
-	);
 
 	// ── Section 5: Export ─────────────────────────────────────────────────────
 
@@ -534,7 +517,6 @@
 	});
 
 	onMount(() => {
-		loadCirclePackingData(asset('/data/reference-circlepacking.json'));
 		// Defer heavy $derived computations to the next task so the browser
 		// gets one full paint (showing ExploreNav) before blocking the thread.
 		setTimeout(async () => {
@@ -585,6 +567,7 @@
 					overviewSelectedUoas = null;
 					selectedPrelimKeys = null;
 					groupByCol = null;
+					deselectedGroupValues = { col: '', values: new Set() };
 				}}
 			/>
 		</aside>
@@ -596,6 +579,36 @@
 
 		<!-- Right panel: offset by ExploreNav height only; sidebar is in-flow via flex -->
 		<div class="min-w-0 w-full pt-12">
+
+				<!-- Mobile-only filters card (visible instead of sidebar on small screens) -->
+				<div class="border-base-300 bg-base-100 border-b lg:hidden">
+					<FiltersSidebar
+						flaggedTotal={flagged.length}
+						filteredTotal={filteredFlagged.length}
+						{isFiltered}
+						{overviewUoaOptions}
+						{overviewSelectedUoas}
+						{selectedPrelimKeys}
+						{PRELIM_KEYS}
+						{prelimOptions}
+						{metadataCols}
+						{groupByCol}
+						{groupByOptions}
+						{selectedGroupValues}
+						selectClass="w-60"
+						onoverviewuoaschange={onOverviewUoasChange}
+						onprelimkeyschange={onPrelimKeysChange}
+						ongroupbycol={(v) => (groupByCol = v)}
+						ongroupvalueschange={onGroupValuesChange}
+						onclearfilters={() => {
+							overviewSelectedUoas = null;
+							selectedPrelimKeys = null;
+							groupByCol = null;
+							deselectedGroupValues = { col: '', values: new Set() };
+						}}
+					/>
+				</div>
+
 				<!-- Overview -->
 				<div id="overview" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
@@ -677,10 +690,8 @@
 						<ResultsCoverage
 							{coverageUoaOptions}
 							coverageUoa={effectiveCoverageUoa}
-							bind:showAvailableOnly
-							bind:showCoverageTable
-							{circlePackingDisplayData}
 							{coverageSelectedRow}
+							filteredRows={filteredFlagged}
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}

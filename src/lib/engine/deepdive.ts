@@ -578,12 +578,14 @@ export async function buildDeepDiveBuffer(
 						if (!ind || !Array.isArray(ind.metrics)) continue;
 						for (const met of ind.metrics) {
 							if (!met || !met.metric) continue;
+							const metStatus = String(uoaRow[`${met.metric}_status`] ?? 'no_data');
+							if (metStatus === 'no_data') continue;
 							addIndicatorRow(ws, {
 								id: met.metric,
 								label: ind.label ?? null,
 								metric: met.label ?? null,
 								value: uoaRow[met.metric] ?? null,
-								flagLabelStr: String(uoaRow[`${met.metric}_status`] ?? 'no_data'),
+								flagLabelStr: metStatus,
 								an: met.thresholds?.an ?? null,
 								direction: met.above_or_below ?? null
 							}, hypIds.length);

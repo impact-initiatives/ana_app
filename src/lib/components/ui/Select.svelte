@@ -32,9 +32,11 @@
 		autoSelectFirst?: boolean;
 		/** Extra classes for the dropdown panel — use to override the default width (e.g. `"w-full"` in a narrow sidebar). */
 		dropdownClass?: string;
+		/** Extra classes applied to the root container div (e.g. `"w-60"` to constrain trigger + dropdown width). */
+		class?: string;
 	}
 
-	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72' }: Props = $props();
+	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72', class: className = '' }: Props = $props();
 
 	// Mode derived from the shape of selected — no separate prop needed.
 	const isMultiple = $derived(Array.isArray(selected));
@@ -142,7 +144,7 @@
 
 <svelte:window onclick={onWindowClick} />
 
-<div class="relative flex flex-col gap-1" bind:this={containerEl}>
+<div class={['relative flex flex-col gap-1', className]} bind:this={containerEl}>
 	{#if label}
 		<span class="mt-2 text-xs font-semibold tracking-wide uppercase">{label}</span>
 	{/if}
