@@ -38,7 +38,7 @@
 	--color-base-content-dimmed: oklch(30% 0.01 245 / 0.8);
 
 	/* App shell background — distinctly tinted cool canvas so cards feel elevated */
-	--color-base-app: oklch(97% 0.016 248);
+	--color-base-app: oklch(98% 0.016 248);
 
 	/* Primary — brand #345a74 */
 	--color-primary: oklch(45% 0.12 240);
