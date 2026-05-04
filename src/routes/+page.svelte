@@ -18,6 +18,7 @@
 	import { validateCsv, type ValidationResult } from '$lib/engine/validator';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
+	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
 
 	interface ParseError {
 		message: string;
@@ -37,6 +38,7 @@
 	let mounted = $state(false);
 
 	const metricMap = $derived(metricStore.metricMap);
+	const flagKeys = Object.keys(FLAG_BADGE_MAP);
 
 	const hasPreviousResults = $derived(
 		flagStore.flaggedResult !== null &&
@@ -233,7 +235,7 @@
 							<!-- Mini header -->
 							<div class="flex items-center justify-between">
 								<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
-									>Preliminary results</span
+									>Preliminary flagging</span
 								>
 								<span class="badge badge-success badge-sm">Processed</span>
 							</div>
@@ -256,11 +258,13 @@
 							</div>
 
 							<!-- Legend badges -->
+
 							<div class="flex flex-wrap gap-1.5">
-								<span class="badge badge-primary badge-sm gap-1"> Flag </span>
-								<span class="badge badge-secondary badge-sm gap-1"> No Flag </span>
-								<span class="badge badge-warning badge-sm gap-1"> Insufficient </span>
-								<span class="badge badge-ghost badge-sm gap-1"> No Data </span>
+								{#each flagKeys as key (key)}
+									<span class="badge badge-sm" style={getFlagBadge(key).badgeStyle}>
+										{getFlagBadge(key).label}
+									</span>
+								{/each}
 							</div>
 						</div>
 					</div>
