@@ -9,6 +9,7 @@
 		{ href: resolve('/'), label: 'Home' },
 		{ href: resolve('/results'), label: 'Results' },
 		{ href: resolve('/reference'), label: 'Reference' },
+		{ href: resolve('/merge'), label: 'Merge' },
 		{ href: `${resolve('/results')}#export`, label: 'Export' }
 	];
 </script>
@@ -35,7 +36,7 @@
 						<li>
 							<a
 								href={link.href}
-								class="text-base-content/70 hover:text-primary text-sm transition-colors duration-150"
+								class="text-base-content/75 hover:text-primary text-sm transition-colors duration-150"
 							>
 								{link.label}
 							</a>

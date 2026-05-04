@@ -5,6 +5,8 @@
 		downloadMergeXlsx,
 		type ParsedMergeResult
 	} from '$lib/engine/mergeDeepDives';
+	import PageHeader from '$lib/components/ui/PageHeader.svelte';
+	import DataTable from '$lib/components/ui/DataTable.svelte';
 
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let fileName = $state('');
@@ -40,8 +42,13 @@
 		if (f && f.name.toLowerCase().endsWith('.zip')) processFile(f);
 	}
 
-	function onDragOver(e: DragEvent) { e.preventDefault(); isDragging = true; }
-	function onDragLeave() { isDragging = false; }
+	function onDragOver(e: DragEvent) {
+		e.preventDefault();
+		isDragging = true;
+	}
+	function onDragLeave() {
+		isDragging = false;
+	}
 
 	function clearAll() {
 		if (fileInput) fileInput.value = '';
@@ -63,23 +70,14 @@
 		downloadMergeXlsx(parsed, adminFeaturesStore.pcodeLabelMap ?? {}, `${baseName}_merged.xlsx`);
 	}
 
-	const PREVIEW_COLS = ['uoa', 'prelimFlag', 'finalFlag', 'system', 'conclusion'] as const;
-	const PREVIEW_LABELS: Record<(typeof PREVIEW_COLS)[number], string> = {
-		uoa: 'UoA',
-		prelimFlag: 'Prelim flag',
-		finalFlag: 'Final flag',
-		system: 'System',
-		conclusion: 'Chosen Conclusion'
-	};
-
 	const previewRows = $derived(parsed?.synthesis.slice(0, 5) ?? []);
 </script>
 
-<div class="container mx-auto max-w-5xl px-4 py-8">
-	<h1 class="mb-1 text-2xl font-bold">Merge deep-dives</h1>
-	<p class="text-base-content/60 mb-6 text-sm">
-		Upload the filled-in deep-dive ZIP to consolidate analyst assessments into a single XLSX.
-	</p>
+<div class="mx-auto max-w-5xl px-4 py-8">
+	<PageHeader
+		title="Merge deep-dives"
+		subtitle="Upload the filled-in deep-dive ZIP to consolidate analytical conclusions into a single XLSX."
+	/>
 
 	<!-- Hidden file input -->
 	<input
@@ -110,49 +108,91 @@
 		ondragover={onDragOver}
 		ondragleave={onDragLeave}
 		onclick={triggerBrowse}
-		onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') triggerBrowse(); }}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') triggerBrowse();
+		}}
 	>
 		<!-- Icon -->
 		{#if status === 'parsing'}
 			<span class="loading loading-spinner loading-md text-primary"></span>
 		{:else if status === 'done'}
-			<svg xmlns="http://www.w3.org/2000/svg" class="text-success size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="text-success size-8"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
 			</svg>
 		{:else if status === 'error'}
-			<svg xmlns="http://www.w3.org/2000/svg" class="text-error size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="text-error size-8"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line
+					x1="12"
+					y1="16"
+					x2="12.01"
+					y2="16"
+				/>
 			</svg>
 		{:else}
-			<svg xmlns="http://www.w3.org/2000/svg" class="text-primary size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="text-primary size-8"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline
+					points="17 8 12 3 7 8"
+				/><line x1="12" y1="3" x2="12" y2="15" />
 			</svg>
 		{/if}
 
 		<!-- Text -->
 		{#if status === 'parsing'}
-			<p class="text-sm font-medium">Parsing…</p>
+			<p>Parsing…</p>
 		{:else if status === 'done'}
-			<p class="text-success truncate text-sm font-semibold">{fileName}</p>
-			<p class="text-base-content/60 text-xs">Parsed successfully — see results below</p>
+			<p class="text-success truncatefont-semibold">{fileName}</p>
+			<p class="text-base-content/85">Parsed successfully — see results below</p>
 		{:else if status === 'error'}
-			<p class="text-error text-sm font-semibold">{fileName || 'Parse failed'}</p>
-			<p class="text-base-content/60 text-xs">{errorMsg || 'Click to try again'}</p>
+			<p class="text-error font-semibold">{fileName || 'Parse failed'}</p>
+			<p class="text-base-content/85">{errorMsg || 'Click to try again'}</p>
 		{:else}
-			<p class="text-base-content/70 text-sm font-medium">
+			<p class="text-base-content/85 text-md">
 				{isDragging ? 'Drop to upload' : 'Drop your filled-in deep-dives ZIP here'}
 			</p>
-			<p class="text-base-content/40 text-xs">or click to browse (.zip)</p>
+			<p class="text-base-content/75 text-sm">or click to browse (.zip)</p>
 		{/if}
 
 		<!-- Clear button (click-isolated) -->
 		{#if status === 'done' || status === 'error'}
 			<div
 				role="presentation"
-				onclick={(e) => { e.stopPropagation(); clearAll(); }}
+				onclick={(e) => {
+					e.stopPropagation();
+					clearAll();
+				}}
 				onkeydown={(e) => e.stopPropagation()}
 			>
-				<button class="btn btn-ghost btn-xs mt-1">Clear</button>
+				<button class="btn btn-outline btn-error btn-sm mt-1">Clear</button>
 			</div>
 		{/if}
 	</div>
@@ -191,40 +231,15 @@
 
 			<!-- Preview table -->
 			{#if previewRows.length}
-				<div>
-					<p class="text-base-content/50 mb-2 text-xs font-medium uppercase tracking-wide">
-						Synthesis preview (first {previewRows.length} rows)
-					</p>
-					<div class="overflow-x-auto rounded-lg border">
-						<table class="table table-sm">
-							<thead>
-								<tr>
-									{#each PREVIEW_COLS as col (col)}
-										<th class="text-xs">{PREVIEW_LABELS[col]}</th>
-									{/each}
-								</tr>
-							</thead>
-							<tbody>
-								{#each previewRows as row, i (i)}
-									<tr class="hover">
-										{#each PREVIEW_COLS as col (col)}
-											<td class="max-w-[160px] truncate text-xs" title={row[col]}>
-												{#if row[col]}
-													{row[col]}
-												{:else}
-													<span class="text-base-content/30">—</span>
-												{/if}
-											</td>
-										{/each}
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				</div>
+				<DataTable
+					rows={previewRows}
+					tableClass="table-xs"
+					headerRowClass="text-base-content text-xs"
+					humanizeHeaders
+				></DataTable>
 			{:else}
 				<div role="alert" class="alert alert-warning">
-					<span class="text-sm">No synthesis data found in the uploaded ZIP.</span>
+					<span class="text-sm">No well-filled conclusions found in the uploaded ZIP.</span>
 				</div>
 			{/if}
 

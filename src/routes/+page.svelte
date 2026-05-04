@@ -18,6 +18,7 @@
 	import { validateCsv, type ValidationResult } from '$lib/engine/validator';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
+	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
 
 	interface ParseError {
 		message: string;
@@ -37,6 +38,53 @@
 	let mounted = $state(false);
 
 	const metricMap = $derived(metricStore.metricMap);
+	const flagKeys = Object.keys(FLAG_BADGE_MAP);
+
+	const gridData = [
+		'flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_data',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'insufficient_evidence',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_data',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'insufficient_evidence',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag'
+	];
+
+	const cells = $derived(
+		gridData.map((status, index) => {
+			const config = getFlagBadge(status);
+			return {
+				index,
+				status,
+				background: config ? config.badgeTintStyle : 'var(--color-no-data-tint)'
+			};
+		})
+	);
 
 	const hasPreviousResults = $derived(
 		flagStore.flaggedResult !== null &&
@@ -132,11 +180,11 @@
 	<title>ANA | Acute Needs Analysis</title>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl px-4">
+<div class="mx-auto max-w-6xl px-4">
 	<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
 	<section
 		aria-label="Introduction"
-		class="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-6xl flex-col justify-center pt-4 pb-24 lg:pt-0 lg:pb-32"
+		class="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-5xl flex-col justify-center pt-4 pb-24 lg:pt-0 lg:pb-32"
 	>
 		<div class="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
 			<!-- Left: text + CTA -->
@@ -184,15 +232,15 @@
 						class="mb-4 text-4xl leading-tight font-bold sm:text-5xl lg:text-6xl"
 						in:fly={{ y: 20, duration: 500, delay: 80, easing: cubicOut, opacity: 0 }}
 					>
-						Screen humanitarian data for<br class="hidden sm:block" />
+						Screen humanitarian data for
 						<span class="text-primary"> Risk of Excess Mortality</span>
 					</h1>
 					<p
-						class="text-base-content/80 mx-auto mt-4 max-w-lg text-lg leading-relaxed lg:mx-0"
+						class="text-base-content/85 mx-auto mt-4 max-w-lg text-lg leading-relaxed lg:mx-0"
 						in:fly={{ y: 20, duration: 500, delay: 180, easing: cubicOut, opacity: 0 }}
 					>
 						Validate, flag, and visualize all units of analysis against reference thresholds —
-						automatically. Upload your data and ANA does the rest.
+						automatically. Upload your data and the Acute Needs Analysis (ANA) app does the rest.
 					</p>
 					<div
 						class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
@@ -233,34 +281,33 @@
 							<!-- Mini header -->
 							<div class="flex items-center justify-between">
 								<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
-									>Preliminary results</span
+									>Preliminary flagging</span
 								>
-								<span class="badge badge-success badge-sm">Processed</span>
+								<span
+									class=" border-success/30 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
+									>Processed</span
+								>
 							</div>
 
 							<!-- Mini heatmap grid -->
 							<div class="grid grid-cols-8 gap-1" aria-hidden="true">
-								{#each ['flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_data', 'no_flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_flag', 'insuff', 'no_flag', 'flag', 'no_flag', 'no_data', 'no_flag', 'flag', 'no_flag', 'no_flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_flag', 'no_flag', 'insuff', 'no_flag', 'flag', 'no_flag', 'no_flag'] as cell, idx (idx)}
+								{#each cells as cell (cell.index)}
 									<div
 										class="cell aspect-square rounded-sm"
-										style:background-color={cell === 'flag'
-											? 'var(--color-flag-tint)'
-											: cell === 'no_flag'
-												? 'var(--color-no-flag-tint)'
-												: cell === 'insuff'
-													? 'var(--color-insufficient-tint)'
-													: 'var(--color-no-data-tint)'}
-										style:--i={idx}
+										style={cell.background}
+										style:--i={cell.index}
 									></div>
 								{/each}
 							</div>
 
 							<!-- Legend badges -->
+
 							<div class="flex flex-wrap gap-1.5">
-								<span class="badge badge-primary badge-sm gap-1"> Flag </span>
-								<span class="badge badge-secondary badge-sm gap-1"> No Flag </span>
-								<span class="badge badge-warning badge-sm gap-1"> Insufficient </span>
-								<span class="badge badge-ghost badge-sm gap-1"> No Data </span>
+								{#each flagKeys as key (key)}
+									<span class="badge badge-sm" style={getFlagBadge(key).badgeStyle}>
+										{getFlagBadge(key).label}
+									</span>
+								{/each}
 							</div>
 						</div>
 					</div>
@@ -503,7 +550,7 @@
 	<!-- ── Caveat note ────────────────────────────────────────────────────────── -->
 	<div
 		role="alert"
-		class="alert alert-info alert-soft mt-6 mb-6"
+		class="alert alert-info alert-outline mt-6 mb-6"
 		style="opacity: 0"
 		{@attach revealOnScroll({ y: 16, duration: 400, delay: 100 })}
 	>

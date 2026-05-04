@@ -30,15 +30,15 @@
 	default: false;
 	prefersdark: false;
 
-	/* Base — cool slate with a clear blue-grey personality */
-	--color-base-100: oklch(98% 0.01 248);
-	--color-base-200: oklch(92% 0.016 248);
-	--color-base-300: oklch(82% 0.018 248);
+	/* Base — near-white cards on a cool blue-grey canvas */
+	--color-base-100: oklch(99% 0.003 248);
+	--color-base-200: oklch(94% 0.008 248);
+	--color-base-300: oklch(85% 0.01 248);
 	--color-base-content: oklch(11% 0.01 245);
 	--color-base-content-dimmed: oklch(30% 0.01 245 / 0.8);
 
-	/* App shell background — barely deeper than base-100 */
-	--color-base-app: oklch(97% 0.012 248);
+	/* App shell background — distinctly tinted cool canvas so cards feel elevated */
+	--color-base-app: oklch(98% 0.016 248);
 
 	/* Primary — brand #345a74 */
 	--color-primary: oklch(45% 0.12 240);
@@ -73,8 +73,8 @@
 	--size-selector: 0.25rem;
 	--size-field: 0.25rem;
 	--border: 1px;
-	--depth: 0;
-	--noise: 0;
+	--depth: 1;
+	--noise: 1;
 
 	/* ── Flag-status colour tokens (light) ──────────────────────────────────*/
 	--color-flag: var(--color-primary);
@@ -102,15 +102,15 @@
 	default: true;
 	prefersdark: true;
 
-	/* Base — deep saturated navy for strong contrast */
-	--color-base-100: oklch(22% 0.022 240);
-	--color-base-200: oklch(30% 0.028 240);
-	--color-base-300: oklch(50% 0.036 240);
+	/* Base — dark navy cards on a near-black canvas; chroma kept calm */
+	--color-base-100: oklch(25% 0.014 240);
+	--color-base-200: oklch(33% 0.012 240);
+	--color-base-300: oklch(46% 0.014 240);
 	--color-base-content: oklch(99% 0.002 240);
 	--color-base-content-dimmed: oklch(70% 0.002 240 / 0.8);
 
-	/* App shell background — barely deeper than base-100 */
-	--color-base-app: oklch(11% 0.022 240);
+	/* App shell background — darker so cards (25%) feel clearly elevated */
+	--color-base-app: oklch(9% 0.005 240);
 
 	/* Primary — brighter for dark bg readability */
 	--color-primary: oklch(70% 0.18 240);
@@ -145,16 +145,8 @@
 	--size-selector: 0.25rem;
 	--size-field: 0.25rem;
 	--border: 1px;
-	--depth: 0;
-	--noise: 0;
-
-	/* ── Shadow overrides for dark theme ────────────────────────────────────
-	   Tailwind defaults use rgb(0 0 0 / 0.05–0.15) — invisible on dark bg.
-	   Higher opacity makes depth visible without being harsh.               */
-	--shadow-sm: 0 1px 3px 0 oklch(0% 0 0 / 0.4);
-	--shadow: 0 2px 6px 0 oklch(0% 0 0 / 0.45), 0 1px 2px -1px oklch(0% 0 0 / 0.45);
-	--shadow-md: 0 4px 10px -1px oklch(0% 0 0 / 0.5), 0 2px 4px -2px oklch(0% 0 0 / 0.5);
-	--shadow-lg: 0 10px 20px -3px oklch(0% 0 0 / 0.55), 0 4px 6px -4px oklch(0% 0 0 / 0.55);
+	--depth: 1;
+	--noise: 1;
 
 	/* ── Flag-status colour tokens (dark — tints mixed with dark base, not white) */
 	--color-flag: var(--color-primary);
@@ -181,7 +173,7 @@
 
 /* Global base size — 18px so text-sm ≈ 15.75px, text-base = 18px */
 :root {
-	font-size: 18px;
+	font-size: 17px;
 
 	/* ── System palette ───────────────────────────────────────────────────────
 	   Single source of truth for all system-level visualisations.
@@ -328,6 +320,12 @@
 	--color-sys-default-d5: var(--color-sys-default);
 }
 
+/* Dark mode card border — cards get no border by default; add one so they're
+   visible even when shadows can't contrast against a dark canvas */
+[data-theme='ana-dark'] .card {
+	border: 1px solid oklch(40% 0.018 240);
+}
+
 /* Logo theme swap: .logo-light shown in ana-light, .logo-dark shown in ana-dark */
 [data-theme='ana-light'] .logo-dark {
 	display: none;
@@ -339,6 +337,7 @@
 /* Body: Noto Sans with system fallbacks */
 body {
 	font-family: 'Noto Sans';
+	background-color: var(--color-base-app);
 }
 
 /* Headings + navbar: Roboto Condensed for visual density */

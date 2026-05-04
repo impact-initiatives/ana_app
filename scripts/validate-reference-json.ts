@@ -35,7 +35,7 @@
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
-import { safeValidateReferenceRoot, formatZodErrors } from '$lib/types/reference-json';
+import { safeValidateReferenceRoot } from '$lib/types/reference-json';
 import { SystemIDEnum } from '$lib/types/generated/system-enum';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
@@ -138,6 +138,278 @@ Checks performed:
 `);
 }
 
+// ── Output helpers ────────────────────────────────────────────────────────────
+
+const TRUNC_WIDTH = 22;
+
+function trunc(s: string, n = TRUNC_WIDTH): string {
+	if (!s) return '';
+	return s.length <= n ? s : s.slice(0, n - 1) + '…';
+}
+
+function printTable(headers: string[], rows: string[][]): void {
+	if (rows.length === 0) return;
+	const widths = headers.map((h, i) =>
+		Math.max(h.length, ...rows.map((r) => (r[i] ?? '').length))
+	);
+	const pad = (s: string, w: number) => s.padEnd(w);
+	const sep = widths.map((w) => '─'.repeat(w)).join('  ');
+	console.error('  ' + headers.map((h, i) => pad(h, widths[i])).join('  '));
+	console.error('  ' + sep);
+	for (const row of rows) {
+		console.error('  ' + row.map((c, i) => pad(c ?? '', widths[i])).join('  '));
+	}
+}
+
+// ── Label map ─────────────────────────────────────────────────────────────────
+
+interface Crumb {
+	system: string;
+	factor: string;
+	subfactor: string;
+	indicator: string;
+	metric: string;
+}
+
+const EMPTY_CRUMB: Crumb = { system: '', factor: '', subfactor: '', indicator: '', metric: '' };
+
+function buildLabelMap(data: unknown): Map<string, Crumb> {
+	const map = new Map<string, Crumb>();
+	const root = data as {
+		systems?: Array<{
+			id?: string;
+			label?: string;
+			factors?: Array<{
+				id?: string;
+				label?: string;
+				sub_factors?: Array<{
+					id?: string;
+					label?: string;
+					indicators?: Array<{
+						id?: string;
+						label?: string;
+						metrics?: Array<{ metric?: string; label?: string }>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		const sys = root.systems![si];
+		const sysLabel = sys.label ?? sys.id ?? '';
+		const sysLoc = `systems[${si}]`;
+		const sysCrumb: Crumb = { ...EMPTY_CRUMB, system: sysLabel };
+		map.set(sysLoc, sysCrumb);
+
+		for (let fi = 0; fi < (sys.factors?.length ?? 0); fi++) {
+			const fac = sys.factors![fi];
+			const facLabel = fac.label ?? fac.id ?? '';
+			const facLoc = `${sysLoc}.factors[${fi}]`;
+			const facCrumb: Crumb = { ...sysCrumb, factor: facLabel };
+			map.set(facLoc, facCrumb);
+
+			for (let sfi = 0; sfi < (fac.sub_factors?.length ?? 0); sfi++) {
+				const sf = fac.sub_factors![sfi];
+				const sfLabel = sf.label ?? sf.id ?? '';
+				const sfLoc = `${facLoc}.sub_factors[${sfi}]`;
+				const sfCrumb: Crumb = { ...facCrumb, subfactor: sfLabel };
+				map.set(sfLoc, sfCrumb);
+
+				for (let ii = 0; ii < (sf.indicators?.length ?? 0); ii++) {
+					const ind = sf.indicators![ii];
+					const indLabel = ind.label ?? ind.id ?? '';
+					const indLoc = `${sfLoc}.indicators[${ii}]`;
+					const indCrumb: Crumb = { ...sfCrumb, indicator: indLabel };
+					map.set(indLoc, indCrumb);
+
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						const metLoc = `${indLoc}.metrics[${mi}]`;
+						map.set(metLoc, { ...indCrumb, metric: m.metric ?? '' });
+					}
+				}
+			}
+		}
+	}
+
+	return map;
+}
+
+/** Look up the most specific crumb available for a location string. */
+function resolveLocation(map: Map<string, Crumb>, location: string): Crumb {
+	const parts = location.split('.');
+	for (let i = parts.length; i >= 1; i--) {
+		const crumb = map.get(parts.slice(0, i).join('.'));
+		if (crumb) return crumb;
+	}
+	return EMPTY_CRUMB;
+}
+
+// ── Zod issue helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Converts a Zod path array to a label-map location key.
+ * ['systems', 0, 'factors', 0, 'sub_factors', 0, 'indicators', 0, 'metrics', 0, 'field']
+ * → 'systems[0].factors[0].sub_factors[0].indicators[0].metrics[0]'
+ */
+function zodPathToLocation(path: PropertyKey[]): string {
+	const parts: string[] = [];
+	for (let i = 0; i < path.length; i++) {
+		const seg = path[i];
+		if (typeof seg === 'string') {
+			const next = path[i + 1];
+			if (typeof next === 'number') {
+				parts.push(`${seg}[${next}]`);
+				i++;
+			}
+		}
+	}
+	return parts.join('.');
+}
+
+function getValue(data: unknown, path: PropertyKey[]): unknown {
+	let cur = data;
+	for (const seg of path) {
+		if (cur == null || typeof cur !== 'object') return undefined;
+		cur = (cur as Record<PropertyKey, unknown>)[seg];
+	}
+	return cur;
+}
+
+type ZodIssue = { path: PropertyKey[]; message: string; code: string };
+
+function printZodIssues(
+	error: { issues: ZodIssue[] },
+	data: unknown,
+	labelMap: Map<string, Crumb>
+): void {
+	const sysIdErrors: ZodIssue[] = [];
+	const facIdErrors: ZodIssue[] = [];
+	const sfIdErrors: ZodIssue[] = [];
+	const aboveOrBelowErrors: ZodIssue[] = [];
+	const preferenceErrors: ZodIssue[] = [];
+	const typeErrors: ZodIssue[] = [];
+	const thresholdErrors: ZodIssue[] = [];
+	const otherErrors: ZodIssue[] = [];
+
+	for (const issue of error.issues) {
+		const p = issue.path;
+		const terminal = p[p.length - 1];
+		if (terminal === 'id') {
+			if (p.length === 3) sysIdErrors.push(issue);
+			else if (p.length === 5) facIdErrors.push(issue);
+			else if (p.length === 7) sfIdErrors.push(issue);
+			else otherErrors.push(issue);
+		} else if (terminal === 'above_or_below') {
+			aboveOrBelowErrors.push(issue);
+		} else if (terminal === 'preference') {
+			preferenceErrors.push(issue);
+		} else if (terminal === 'type') {
+			typeErrors.push(issue);
+		} else if (terminal === 'an' || terminal === 'van') {
+			thresholdErrors.push(issue);
+		} else {
+			otherErrors.push(issue);
+		}
+	}
+
+	if (sysIdErrors.length > 0) {
+		console.error(`\n  Invalid system IDs (${sysIdErrors.length}) — see static/data/system.csv:`);
+		printTable(
+			['System (value)'],
+			sysIdErrors.map((iss) => [String(getValue(data, iss.path) ?? '(missing)')])
+		);
+	}
+
+	if (facIdErrors.length > 0) {
+		console.error(`\n  Invalid factor IDs (${facIdErrors.length}) — see static/data/factor.csv:`);
+		printTable(
+			['System', 'Factor (value)'],
+			facIdErrors.map((iss) => {
+				const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
+				return [trunc(crumb.system), String(getValue(data, iss.path) ?? '(missing)')];
+			})
+		);
+	}
+
+	if (sfIdErrors.length > 0) {
+		console.error(
+			`\n  Invalid subfactor IDs (${sfIdErrors.length}) — see static/data/subfactor.csv:`
+		);
+		printTable(
+			['System', 'Factor', 'Subfactor (value)'],
+			sfIdErrors.map((iss) => {
+				const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
+				return [
+					trunc(crumb.system),
+					trunc(crumb.factor),
+					String(getValue(data, iss.path) ?? '(missing)')
+				];
+			})
+		);
+	}
+
+	const metricHeaders = ['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Value'];
+	const metricRow = (iss: ZodIssue): string[] => {
+		const loc = zodPathToLocation(iss.path);
+		const crumb = labelMap.get(loc) ?? resolveLocation(labelMap, loc);
+		return [
+			trunc(crumb.system),
+			trunc(crumb.factor),
+			trunc(crumb.subfactor),
+			trunc(crumb.indicator),
+			crumb.metric,
+			String(getValue(data, iss.path) ?? '(missing)')
+		];
+	};
+
+	if (aboveOrBelowErrors.length > 0) {
+		console.error(
+			`\n  above_or_below — must be "Above" or "Below" (${aboveOrBelowErrors.length}):`
+		);
+		printTable(metricHeaders, aboveOrBelowErrors.map(metricRow));
+	}
+
+	if (preferenceErrors.length > 0) {
+		console.error(`\n  preference — must be 1, 2, or 3 (${preferenceErrors.length}):`);
+		printTable(metricHeaders, preferenceErrors.map(metricRow));
+	}
+
+	if (typeErrors.length > 0) {
+		console.error(`\n  type — invalid syntax (${typeErrors.length}):`);
+		printTable(metricHeaders, typeErrors.map(metricRow));
+	}
+
+	if (thresholdErrors.length > 0) {
+		console.error(`\n  threshold errors (${thresholdErrors.length}):`);
+		printTable(
+			['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Field', 'Value'],
+			thresholdErrors.map((iss) => {
+				const loc = zodPathToLocation(iss.path);
+				const crumb = labelMap.get(loc) ?? resolveLocation(labelMap, loc);
+				const field = iss.path.slice(-2).map(String).join('.');
+				return [
+					trunc(crumb.system),
+					trunc(crumb.factor),
+					trunc(crumb.subfactor),
+					trunc(crumb.indicator),
+					crumb.metric,
+					field,
+					String(getValue(data, iss.path) ?? '(missing)')
+				];
+			})
+		);
+	}
+
+	if (otherErrors.length > 0) {
+		console.error(`\n  Other schema errors (${otherErrors.length}):`);
+		for (const iss of otherErrors) {
+			console.error(`    ${iss.path.map(String).join('.')}: ${iss.message}`);
+		}
+	}
+}
+
 // ── Lookup CSV row shapes ─────────────────────────────────────────────────────
 
 interface FactorRow {
@@ -161,7 +433,7 @@ function parseCsv<T>(filePath: string, label: string): T[] | null {
 	}
 
 	const raw = fs.readFileSync(filePath, 'utf-8');
-	const content = raw.startsWith('\uFEFF') ? raw.slice(1) : raw; // strip BOM
+	const content = raw.startsWith('﻿') ? raw.slice(1) : raw; // strip BOM
 
 	const result = Papa.parse<T>(content, { header: true, skipEmptyLines: true });
 
@@ -250,7 +522,7 @@ function checkLookupConsistency(
 	return errors;
 }
 
-function printLookupErrors(errors: LookupError[]): void {
+function printLookupErrors(errors: LookupError[], labelMap: Map<string, Crumb>): void {
 	const byFactors = errors.filter((e) => e.kind === 'factor');
 	const bySubfactors = errors.filter((e) => e.kind === 'subfactor');
 
@@ -258,24 +530,30 @@ function printLookupErrors(errors: LookupError[]): void {
 	console.error('   Regenerate reference.json or update the lookup CSVs so the ids match.\n');
 
 	if (byFactors.length > 0) {
-		console.error(`── Unknown factors (${byFactors.length}) ──────────────────────────────────`);
-		for (const e of byFactors) {
-			const [facId, sysId] = e.key.split('::');
-			console.error(
-				`  ${e.location}: factor "${facId}" under system "${sysId}" not found in factor.csv`
-			);
-		}
+		console.error(
+			`── Unknown factors (${byFactors.length}) — see static/data/factor.csv:`
+		);
+		printTable(
+			['System', 'Factor (value)'],
+			byFactors.map((e) => {
+				const crumb = resolveLocation(labelMap, e.location);
+				return [trunc(crumb.system), e.id];
+			})
+		);
 		console.error('');
 	}
 
 	if (bySubfactors.length > 0) {
-		console.error(`── Unknown sub-factors (${bySubfactors.length}) ────────────────────────────`);
-		for (const e of bySubfactors) {
-			const [sfId, facId, sysId] = e.key.split('::');
-			console.error(
-				`  ${e.location}: sub_factor "${sfId}" under factor "${facId}" / system "${sysId}" not found in subfactor.csv`
-			);
-		}
+		console.error(
+			`── Unknown subfactors (${bySubfactors.length}) — see static/data/subfactor.csv:`
+		);
+		printTable(
+			['System', 'Factor', 'Subfactor (value)'],
+			bySubfactors.map((e) => {
+				const crumb = resolveLocation(labelMap, e.location);
+				return [trunc(crumb.system), trunc(crumb.factor), e.id];
+			})
+		);
 		console.error('');
 	}
 
@@ -711,6 +989,8 @@ async function main(): Promise<void> {
 		return;
 	}
 
+	const labelMap = buildLabelMap(data);
+
 	// ── Load lookup CSVs ───────────────────────────────────────────────────────
 	const factorRows = parseCsv<FactorRow>(factorPath, 'factor CSV');
 	const subfactorRows = parseCsv<SubfactorRow>(subfactorPath, 'subfactor CSV');
@@ -737,12 +1017,7 @@ async function main(): Promise<void> {
 		pass1Ok = true;
 	} else {
 		console.error('  ❌ Failed');
-		try {
-			const messages = formatZodErrors(zodResult.error);
-			messages.forEach((m) => console.error('  -', m));
-		} catch {
-			console.error('  Validation error (raw):', zodResult.error);
-		}
+		printZodIssues(zodResult.error, data, labelMap);
 	}
 
 	// ── Pass 2: Lookup CSV consistency ─────────────────────────────────────────
@@ -753,7 +1028,7 @@ async function main(): Promise<void> {
 		console.log('  ✅ Passed');
 		pass2Ok = true;
 	} else {
-		printLookupErrors(lookupErrors);
+		printLookupErrors(lookupErrors, labelMap);
 	}
 
 	// ── Pass 3: Required system IDs ───────────────────────────────────────────
@@ -771,7 +1046,7 @@ async function main(): Promise<void> {
 		);
 	}
 
-	// ── Pass 4: Threshold value sanity ───────────────────────────────────────────
+	// ── Pass 4: Threshold value sanity ────────────────────────────────────────
 	console.log('\nPass 4 — Threshold value sanity...');
 	const thresholdErrors = checkThresholdValues(data);
 
@@ -783,8 +1058,31 @@ async function main(): Promise<void> {
 			`  ❌ Failed — ${thresholdErrors.length} metric(s) have zero or negative threshold values.\n` +
 			'  factor_threshold=0 always flags; evidence_threshold=0 always concludes no_flag.\n'
 		);
+
+		const byField = new Map<string, ThresholdValueError[]>();
 		for (const e of thresholdErrors) {
-			console.error(`  ${e.location}: metric "${e.metric}" has ${e.field}=${e.value}`);
+			const list = byField.get(e.field) ?? [];
+			list.push(e);
+			byField.set(e.field, list);
+		}
+
+		for (const [field, errs] of byField) {
+			console.error(`  ${field} ≤ 0 (${errs.length}):`);
+			printTable(
+				['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Value'],
+				errs.map((e) => {
+					const crumb = resolveLocation(labelMap, e.location);
+					return [
+						trunc(crumb.system),
+						trunc(crumb.factor),
+						trunc(crumb.subfactor),
+						trunc(crumb.indicator),
+						e.metric,
+						String(e.value)
+					];
+				})
+			);
+			console.error('');
 		}
 	}
 
@@ -797,10 +1095,47 @@ async function main(): Promise<void> {
 		pass5Ok = true;
 	} else {
 		console.error(`  ❌ Failed — ${duplicateErrors.length} duplicate ID(s) found.\n`);
+
+		const byKind = new Map<string, DuplicateIDError[]>();
 		for (const e of duplicateErrors) {
-			console.error(
-				`  ${e.location}: duplicate ${e.kind} id "${e.id}" (first seen at ${e.firstSeen})`
-			);
+			const list = byKind.get(e.kind) ?? [];
+			list.push(e);
+			byKind.set(e.kind, list);
+		}
+
+		for (const [kind, errs] of byKind) {
+			console.error(`  Duplicate ${kind} IDs (${errs.length}):`);
+			if (kind === 'metric') {
+				printTable(
+					['Metric', 'System', 'Factor', 'Subfactor', 'First seen'],
+					errs.map((e) => {
+						const crumb = resolveLocation(labelMap, e.location);
+						return [e.id, trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.firstSeen];
+					})
+				);
+			} else if (kind === 'subfactor') {
+				printTable(
+					['Subfactor', 'System', 'Factor', 'First seen'],
+					errs.map((e) => {
+						const crumb = resolveLocation(labelMap, e.location);
+						return [e.id, trunc(crumb.system), trunc(crumb.factor), e.firstSeen];
+					})
+				);
+			} else if (kind === 'factor') {
+				printTable(
+					['Factor', 'System', 'First seen'],
+					errs.map((e) => {
+						const crumb = resolveLocation(labelMap, e.location);
+						return [e.id, trunc(crumb.system), e.firstSeen];
+					})
+				);
+			} else {
+				printTable(
+					['System', 'First seen'],
+					errs.map((e) => [e.id, e.firstSeen])
+				);
+			}
+			console.error('');
 		}
 	}
 
@@ -815,17 +1150,42 @@ async function main(): Promise<void> {
 	} else {
 		if (integerErrors.length > 0) {
 			console.error(`  ❌ Non-integer threshold values (${integerErrors.length}):`);
-			for (const e of integerErrors) {
-				console.error(`  ${e.location}: metric "${e.metric}" has ${e.field}=${e.value}`);
-			}
+			printTable(
+				['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Field', 'Value'],
+				integerErrors.map((e) => {
+					const crumb = resolveLocation(labelMap, e.location);
+					return [
+						trunc(crumb.system),
+						trunc(crumb.factor),
+						trunc(crumb.subfactor),
+						trunc(crumb.indicator),
+						e.metric,
+						e.field,
+						String(e.value)
+					];
+				})
+			);
+			console.error('');
 		}
 		if (plausibilityErrors.length > 0) {
-			console.error(`  ❌ Threshold exceeds group size (${plausibilityErrors.length}):`);
-			for (const e of plausibilityErrors) {
-				console.error(
-					`  ${e.location}: ${e.kind}=${e.value} > group size ${e.groupSize} [${e.groupKey}]`
-				);
-			}
+			console.error(
+				`  ❌ Threshold exceeds group size — group can never reach the state (${plausibilityErrors.length}):`
+			);
+			printTable(
+				['System', 'Factor', 'Subfactor', 'Field', 'Value', 'Group size'],
+				plausibilityErrors.map((e) => {
+					const crumb = resolveLocation(labelMap, e.location);
+					return [
+						trunc(crumb.system),
+						trunc(crumb.factor),
+						trunc(crumb.subfactor),
+						e.kind,
+						String(e.value),
+						String(e.groupSize)
+					];
+				})
+			);
+			console.error('');
 		}
 	}
 
@@ -837,13 +1197,25 @@ async function main(): Promise<void> {
 		console.log('  ✅ Passed');
 		pass7Ok = true;
 	} else {
-		console.error(`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).\n`);
-		for (const e of vanErrors) {
-			console.error(
-				`  ${e.location}: metric "${e.metric}" [${e.above_or_below}] an=${e.an}, van=${e.van}` +
-				` — expected van ${e.above_or_below === 'Above' ? '>' : '<'} an`
-			);
-		}
+		console.error(
+			`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).\n`
+		);
+		printTable(
+			['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Dir', 'AN', 'VAN'],
+			vanErrors.map((e) => {
+				const crumb = resolveLocation(labelMap, e.location);
+				return [
+					trunc(crumb.system),
+					trunc(crumb.factor),
+					trunc(crumb.subfactor),
+					trunc(crumb.indicator),
+					e.metric,
+					e.above_or_below,
+					String(e.an),
+					String(e.van)
+				];
+			})
+		);
 	}
 
 	// ── Result ─────────────────────────────────────────────────────────────────

@@ -133,6 +133,8 @@
 		}
 	}
 
+	import Search from './Search.svelte';
+
 	// ── Outside click ─────────────────────────────────────────────────────────
 
 	function onWindowClick(e: MouseEvent) {
@@ -203,14 +205,11 @@
 	{#if open}
 		<div class={['menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 border p-0', dropdownClass]}>
 			<!-- Search (shared) -->
-			<div class="border-base-200 flex items-center gap-1.5 border-b p-2">
-				<input
-					type="text"
-					class="input input-sm bg-base-100 min-w-0 flex-1 border text-xs"
-					placeholder="Search…"
+			<div class="border-base-200 border-b p-2">
+				<Search
 					bind:value={searchQuery}
-					bind:this={searchInputEl}
-					onclick={(e) => e.stopPropagation()}
+					bind:inputEl={searchInputEl}
+					extraClass="w-full text-xs"
 					onkeydown={(e) => {
 						if (e.key === 'Enter') {
 							e.preventDefault();

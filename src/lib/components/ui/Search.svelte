@@ -5,19 +5,24 @@
 		extraClass?: string;
 		required?: boolean;
 		oninput?: (value: string) => void;
+		onkeydown?: (e: KeyboardEvent) => void;
+		inputEl?: HTMLInputElement;
 	}
 
 	let {
 		value = $bindable(''),
+		inputEl = $bindable(undefined),
 		placeholder = 'Search…',
 		extraClass = '',
 		required = false,
-		oninput
+		oninput,
+		onkeydown
 	}: Props = $props();
 </script>
 
 <label
-	class={'input input-sm text-base-content border-base-content/30 border bg-base-100 ' + extraClass}
+	class={'input input-sm text-base-content border-base-content/50 bg-base-100 focus-within:border-primary border focus-within:border-2 focus-within:shadow-none focus-within:outline-none ' +
+		extraClass}
 >
 	<svg
 		class="h-[1em] opacity-80"
@@ -38,10 +43,12 @@
 	</svg>
 	<input
 		type="search"
-		class="grow"
+		class="grow outline-none focus:outline-none focus-visible:outline-none focus:shadow-none"
 		{placeholder}
 		bind:value
+		bind:this={inputEl}
 		oninput={() => oninput?.(value)}
+		{onkeydown}
 		aria-label={placeholder}
 		{required}
 	/>

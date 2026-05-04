@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { SystemIDEnum } from './generated/system-enum';
+import { SubFactorIDEnum } from './generated/subfactor-enum';
+import { FactorIDEnum } from './generated/factor-enum';
 import {
 	type Thresholds,
 	type Metric,
@@ -146,7 +148,7 @@ export const IndicatorSchema = z
 
 const SubFactorSchema = z
 	.object({
-		id: z.string(),
+		id: z.enum(SubFactorIDEnum),
 		label: z.string().nullable().optional(),
 		indicators: z.array(IndicatorSchema)
 	})
@@ -154,7 +156,7 @@ const SubFactorSchema = z
 
 const FactorSchema = z
 	.object({
-		id: z.string(),
+		id: z.enum(FactorIDEnum),
 		label: z.string().nullable().optional(),
 		sub_factors: z.array(SubFactorSchema)
 	})

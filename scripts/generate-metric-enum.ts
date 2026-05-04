@@ -83,14 +83,14 @@ function main(): void {
 	const entries: Array<{ key: string; value: string }> = [];
 
 	for (const row of result.data) {
-		const id = (row['Metric ID'] ?? '').trim();
+		const id = (row['MET_ID'] ?? '').trim();
 		if (!id.startsWith('MET') || seen.has(id)) continue;
 		seen.add(id);
 		entries.push({ key: toEnumKey(id), value: id });
 	}
 
 	if (entries.length === 0) {
-		console.error('No MET* IDs found in CSV. Check the "Metric ID" column header.');
+		console.error('No MET* IDs found in CSV. Check the "MET_ID" column header.');
 		process.exitCode = 1;
 		return;
 	}
