@@ -40,6 +40,52 @@
 	const metricMap = $derived(metricStore.metricMap);
 	const flagKeys = Object.keys(FLAG_BADGE_MAP);
 
+	const gridData = [
+		'flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_data',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'insufficient_evidence',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_data',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag',
+		'no_flag',
+		'insufficient_evidence',
+		'no_flag',
+		'flag',
+		'no_flag',
+		'no_flag'
+	];
+
+	const cells = $derived(
+		gridData.map((status, index) => {
+			const config = getFlagBadge(status);
+			return {
+				index,
+				status,
+				background: config ? config.badgeTintStyle : 'var(--color-no-data-tint)'
+			};
+		})
+	);
+
 	const hasPreviousResults = $derived(
 		flagStore.flaggedResult !== null &&
 			flagStore.flaggedResult.length > 0 &&
@@ -245,17 +291,11 @@
 
 							<!-- Mini heatmap grid -->
 							<div class="grid grid-cols-8 gap-1" aria-hidden="true">
-								{#each ['flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_data', 'no_flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_flag', 'insuff', 'no_flag', 'flag', 'no_flag', 'no_data', 'no_flag', 'flag', 'no_flag', 'no_flag', 'no_flag', 'no_flag', 'flag', 'no_flag', 'no_flag', 'no_flag', 'insuff', 'no_flag', 'flag', 'no_flag', 'no_flag'] as cell, idx (idx)}
+								{#each cells as cell (cell.index)}
 									<div
 										class="cell aspect-square rounded-sm"
-										style:background-color={cell === 'flag'
-											? 'var(--color-flag-tint)'
-											: cell === 'no_flag'
-												? 'var(--color-no-flag-tint)'
-												: cell === 'insuff'
-													? 'var(--color-insufficient-tint)'
-													: 'var(--color-no-data-tint)'}
-										style:--i={idx}
+										style={cell.background}
+										style:--i={cell.index}
 									></div>
 								{/each}
 							</div>
