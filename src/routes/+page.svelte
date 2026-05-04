@@ -237,7 +237,10 @@
 								<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
 									>Preliminary flagging</span
 								>
-								<span class="badge badge-success badge-sm">Processed</span>
+								<span
+									class=" border-success/30 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
+									>Processed</span
+								>
 							</div>
 
 							<!-- Mini heatmap grid -->
