@@ -9,6 +9,7 @@
 		{ href: resolve('/'), label: 'Home' },
 		{ href: resolve('/results'), label: 'Results' },
 		{ href: resolve('/reference'), label: 'Reference' },
+		{ href: resolve('/merge'), label: 'Merge' },
 		{ href: `${resolve('/results')}#export`, label: 'Export' }
 	];
 </script>
