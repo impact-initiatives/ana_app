@@ -180,11 +180,11 @@
 	<title>ANA | Acute Needs Analysis</title>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl px-4">
+<div class="mx-auto max-w-6xl px-4">
 	<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
 	<section
 		aria-label="Introduction"
-		class="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-6xl flex-col justify-center pt-4 pb-24 lg:pt-0 lg:pb-32"
+		class="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-5xl flex-col justify-center pt-4 pb-24 lg:pt-0 lg:pb-32"
 	>
 		<div class="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
 			<!-- Left: text + CTA -->
@@ -232,15 +232,15 @@
 						class="mb-4 text-4xl leading-tight font-bold sm:text-5xl lg:text-6xl"
 						in:fly={{ y: 20, duration: 500, delay: 80, easing: cubicOut, opacity: 0 }}
 					>
-						Screen humanitarian data for<br class="hidden sm:block" />
+						Screen humanitarian data for
 						<span class="text-primary"> Risk of Excess Mortality</span>
 					</h1>
 					<p
-						class="text-base-content/80 mx-auto mt-4 max-w-lg text-lg leading-relaxed lg:mx-0"
+						class="text-base-content/85 mx-auto mt-4 max-w-lg text-lg leading-relaxed lg:mx-0"
 						in:fly={{ y: 20, duration: 500, delay: 180, easing: cubicOut, opacity: 0 }}
 					>
 						Validate, flag, and visualize all units of analysis against reference thresholds —
-						automatically. Upload your data and ANA does the rest.
+						automatically. Upload your data and the Acute Needs Analysis (ANA) app does the rest.
 					</p>
 					<div
 						class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
