@@ -30,15 +30,15 @@
 	default: false;
 	prefersdark: false;
 
-	/* Base — cool slate with a clear blue-grey personality */
-	--color-base-100: oklch(98% 0.01 248);
-	--color-base-200: oklch(92% 0.016 248);
-	--color-base-300: oklch(82% 0.018 248);
+	/* Base — white cards on a cool grey canvas */
+	--color-base-100: oklch(100% 0 0);
+	--color-base-200: oklch(95% 0.004 248);
+	--color-base-300: oklch(86% 0.006 248);
 	--color-base-content: oklch(11% 0.01 245);
 	--color-base-content-dimmed: oklch(30% 0.01 245 / 0.8);
 
-	/* App shell background — barely deeper than base-100 */
-	--color-base-app: oklch(97% 0.012 248);
+	/* App shell background — clearly distinct grey canvas behind cards */
+	--color-base-app: oklch(92% 0.006 248);
 
 	/* Primary — brand #345a74 */
 	--color-primary: oklch(45% 0.12 240);
@@ -75,6 +75,10 @@
 	--border: 1px;
 	--depth: 0;
 	--noise: 0;
+	--shadow-sm: 0 1px 3px 0 oklch(0% 0 0 / 0.08);
+	--shadow: 0 2px 6px 0 oklch(0% 0 0 / 0.10), 0 1px 2px -1px oklch(0% 0 0 / 0.06);
+	--shadow-md: 0 4px 10px -1px oklch(0% 0 0 / 0.12), 0 2px 4px -2px oklch(0% 0 0 / 0.08);
+	--shadow-lg: 0 10px 20px -3px oklch(0% 0 0 / 0.14), 0 4px 6px -4px oklch(0% 0 0 / 0.08);
 
 	/* ── Flag-status colour tokens (light) ──────────────────────────────────*/
 	--color-flag: var(--color-primary);
