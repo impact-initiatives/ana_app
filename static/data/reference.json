@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29T06:22:00.233Z",
+  "generatedAt": "2026-05-04T13:25:31.613Z",
   "systems": [
     {
       "id": "mortality",
@@ -29,9 +29,7 @@
                       "remarks_limitations": "Need denominator",
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": 2,
-                        "van_label": null
+                        "van": 2
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -56,9 +54,7 @@
                       "remarks_limitations": "Need denominator",
                       "thresholds": {
                         "an": 2,
-                        "an_label": null,
-                        "van": 4,
-                        "van_label": null
+                        "van": 4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -101,9 +97,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.15,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -122,9 +116,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.1,
-                        "an_label": null,
-                        "van": 0.15,
-                        "van_label": null
+                        "van": 0.15
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -143,9 +135,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.15,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -170,9 +160,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.45,
-                        "van_label": null
+                        "van": 0.45
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -191,9 +179,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.45,
-                        "an_label": null,
-                        "van": 0.7,
-                        "van_label": null
+                        "van": 0.7
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -212,9 +198,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -239,9 +223,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -266,9 +248,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.7,
-                        "van_label": null
+                        "van": 0.7
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -293,9 +273,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 0,
@@ -332,9 +310,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 200,
-                        "an_label": null,
-                        "van": 300,
-                        "van_label": null
+                        "van": 300
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -353,9 +329,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 100,
-                        "an_label": null,
-                        "van": 140,
-                        "van_label": null
+                        "van": 140
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -374,9 +348,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 50,
-                        "an_label": null,
-                        "van": 100,
-                        "van_label": null
+                        "van": 100
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -401,9 +373,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -422,9 +392,7 @@
                       "remarks_limitations": "Not confirmed but can obtain symptomology",
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -443,9 +411,7 @@
                       "remarks_limitations": "Not confirmed but can obtain symptomology",
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -476,9 +442,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 10,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -497,9 +461,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": 2,
-                        "van_label": null
+                        "van": 2
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -524,9 +486,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -551,9 +511,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 10,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -572,9 +530,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 1,
-                        "van_label": null
+                        "van": 1
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -599,9 +555,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -626,9 +580,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -653,9 +605,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -680,9 +630,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -707,9 +655,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -740,9 +686,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 150,
-                        "an_label": null,
-                        "van": 200,
-                        "van_label": null
+                        "van": 200
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -767,9 +711,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -812,9 +754,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -839,9 +779,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": 0.1,
-                        "van_label": null
+                        "van": 0.1
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -866,9 +804,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": 0.1,
-                        "van_label": null
+                        "van": 0.1
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -899,9 +835,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 4,
-                        "an_label": null,
-                        "van": 5,
-                        "van_label": null
+                        "van": 5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -926,9 +860,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -953,9 +885,7 @@
                       "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -974,9 +904,7 @@
                       "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1001,9 +929,7 @@
                       "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1028,9 +954,7 @@
                       "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1055,9 +979,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1076,9 +998,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1103,9 +1023,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1130,9 +1048,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1169,9 +1085,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1190,9 +1104,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1211,9 +1123,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1238,9 +1148,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1265,9 +1173,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": 2,
-                        "van_label": null
+                        "van": 2
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1292,9 +1198,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1319,9 +1223,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1346,9 +1248,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1373,9 +1273,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1400,9 +1298,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": null,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1427,9 +1323,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": null,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1454,9 +1348,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1481,9 +1373,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1514,9 +1404,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1535,9 +1423,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1562,9 +1448,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1589,9 +1473,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 100,
-                        "an_label": null,
-                        "van": 200,
-                        "van_label": null
+                        "van": 200
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1616,9 +1498,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1643,9 +1523,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 100,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1664,9 +1542,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": null,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1691,9 +1567,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1718,9 +1592,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1745,9 +1617,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -1772,9 +1642,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1799,9 +1667,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1826,9 +1692,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1853,9 +1717,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1880,9 +1742,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -1913,9 +1773,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -1940,9 +1798,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -1967,9 +1823,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -1994,9 +1848,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2021,9 +1873,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2054,9 +1904,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2081,9 +1929,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2108,9 +1954,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2153,9 +1997,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 7.5,
-                        "an_label": null,
-                        "van": 0,
-                        "van_label": null
+                        "van": 0
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2174,9 +2016,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2201,9 +2041,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2222,9 +2060,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2249,9 +2085,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2270,9 +2104,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2297,9 +2129,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2330,9 +2160,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2357,9 +2185,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.8,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2378,9 +2204,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2417,9 +2241,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.8,
-                        "van_label": null
+                        "van": 0.8
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2444,9 +2266,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 4,
-                        "an_label": null,
-                        "van": 3,
-                        "van_label": null
+                        "van": 3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2465,9 +2285,7 @@
                       "remarks_limitations": "Question asks about the past month but can perhaps proxy from this",
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2492,9 +2310,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2513,9 +2329,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2534,9 +2348,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2561,9 +2373,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2594,9 +2404,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2621,9 +2429,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.6,
-                        "van_label": null
+                        "van": 0.6
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2648,9 +2454,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2669,9 +2473,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2696,9 +2498,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2723,9 +2523,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2750,9 +2548,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2783,9 +2579,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2810,9 +2604,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -2837,9 +2629,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 50,
-                        "an_label": null,
-                        "van": 100,
-                        "van_label": null
+                        "van": 100
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2858,9 +2648,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 50,
-                        "an_label": null,
-                        "van": 100,
-                        "van_label": null
+                        "van": 100
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2879,9 +2667,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2900,9 +2686,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -2927,9 +2711,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2954,9 +2736,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -2987,9 +2767,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -3020,9 +2798,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -3059,9 +2835,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 500,
-                        "an_label": null,
-                        "van": 1000,
-                        "van_label": null
+                        "van": 1000
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3080,9 +2854,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1000,
-                        "an_label": null,
-                        "van": 2000,
-                        "van_label": null
+                        "van": 2000
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3101,9 +2873,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": 2,
-                        "van_label": null
+                        "van": 2
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3128,9 +2898,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3161,9 +2929,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3188,9 +2954,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 100,
-                        "an_label": null,
-                        "van": 200,
-                        "van_label": null
+                        "van": 200
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3209,9 +2973,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3236,9 +2998,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3257,9 +3017,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3284,9 +3042,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3317,9 +3073,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3362,9 +3116,7 @@
                       "remarks_limitations": "Check contextualized options for inadequate shelter type",
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3389,9 +3141,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 50,
-                        "an_label": null,
-                        "van": 100,
-                        "van_label": null
+                        "van": 100
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3410,9 +3160,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3437,9 +3185,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -3470,9 +3216,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
@@ -3497,9 +3241,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 1,
-                        "van_label": null
+                        "van": 1
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3518,9 +3260,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3545,9 +3285,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -3572,9 +3310,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -3605,9 +3341,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 3.5,
-                        "an_label": null,
-                        "van": 2.5,
-                        "van_label": null
+                        "van": 2.5
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
@@ -3626,9 +3360,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.7,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
@@ -3653,9 +3385,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.05,
-                        "an_label": null,
-                        "van": 0.1,
-                        "van_label": null
+                        "van": 0.1
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -3692,9 +3422,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 100,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3725,9 +3453,7 @@
                       "remarks_limitations": "Check contextualized options for improved facilities",
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -3752,9 +3478,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3779,9 +3503,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3806,9 +3528,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3833,9 +3553,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3866,9 +3584,7 @@
                       "remarks_limitations": "Check contextualized options for unimproved facilities",
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3887,9 +3603,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3908,9 +3622,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -3935,9 +3647,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -3962,9 +3672,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -3989,9 +3697,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4034,9 +3740,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 15000,
-                        "an_label": null,
-                        "van": 20000,
-                        "van_label": null
+                        "van": 20000
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4055,9 +3759,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 250000,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4076,9 +3778,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 10,
-                        "an_label": null,
-                        "van": 5,
-                        "van_label": null
+                        "van": 5
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4103,9 +3803,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4124,9 +3822,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4145,9 +3841,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 10,
-                        "an_label": null,
-                        "van": 5,
-                        "van_label": null
+                        "van": 5
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4172,9 +3866,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 5,
-                        "an_label": null,
-                        "van": 10,
-                        "van_label": null
+                        "van": 10
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4193,9 +3885,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4220,9 +3910,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4247,9 +3935,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 5,
-                        "an_label": null,
-                        "van": 2,
-                        "van_label": null
+                        "van": 2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4268,9 +3954,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 20,
-                        "an_label": null,
-                        "van": 10,
-                        "van_label": null
+                        "van": 10
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4295,9 +3979,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4328,9 +4010,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4349,9 +4029,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4376,9 +4054,7 @@
                       "remarks_limitations": "Probably more of an infrequent expenditure situation?",
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4397,9 +4073,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4424,9 +4098,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4445,9 +4117,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4478,9 +4148,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.05,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4499,9 +4167,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.01,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4520,9 +4186,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.7,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4547,9 +4211,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.6,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4568,9 +4230,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4589,9 +4249,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.6,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4610,9 +4268,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.2,
-                        "van_label": null
+                        "van": 0.2
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4649,9 +4305,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.75,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4670,9 +4324,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4691,9 +4343,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.15,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4718,9 +4368,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.75,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
@@ -4739,9 +4387,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.03,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4760,9 +4406,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.15,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4787,9 +4431,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4808,9 +4450,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.3,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4829,9 +4469,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -4862,9 +4500,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.7,
-                        "van_label": null
+                        "van": 0.7
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -4889,9 +4525,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.7,
-                        "van_label": null
+                        "van": 0.7
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 0,
@@ -4916,9 +4550,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.3,
-                        "van_label": null
+                        "van": 0.3
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 0,
@@ -4961,9 +4593,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -4988,9 +4618,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5015,9 +4643,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5042,9 +4668,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5063,9 +4687,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5090,9 +4712,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5117,9 +4737,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
@@ -5150,9 +4768,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 1,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5177,9 +4793,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.2,
-                        "an_label": null,
-                        "van": 0.4,
-                        "van_label": null
+                        "van": 0.4
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5198,9 +4812,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.4,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5231,9 +4843,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5252,9 +4862,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.25,
-                        "an_label": null,
-                        "van": 0.5,
-                        "van_label": null
+                        "van": 0.5
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5273,9 +4881,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": 0.5,
-                        "an_label": null,
-                        "van": 0.75,
-                        "van_label": null
+                        "van": 0.75
                       },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
@@ -5300,9 +4906,7 @@
                       "remarks_limitations": null,
                       "thresholds": {
                         "an": null,
-                        "an_label": null,
-                        "van": null,
-                        "van_label": null
+                        "van": null
                       },
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
