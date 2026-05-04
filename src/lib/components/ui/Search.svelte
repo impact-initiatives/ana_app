@@ -17,7 +17,8 @@
 </script>
 
 <label
-	class={'input input-sm text-base-content border-base-content/30 border bg-base-100 ' + extraClass}
+	class={'input input-sm text-base-content border-base-content/50 bg-base-100 focus-within:border-primary border focus-within:border-2 focus-within:shadow-none focus-within:outline-none ' +
+		extraClass}
 >
 	<svg
 		class="h-[1em] opacity-80"
@@ -38,7 +39,7 @@
 	</svg>
 	<input
 		type="search"
-		class="grow"
+		class="grow outline-none focus:outline-none focus-visible:outline-none focus:shadow-none"
 		{placeholder}
 		bind:value
 		oninput={() => oninput?.(value)}
