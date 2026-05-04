@@ -34,7 +34,7 @@ function parseArgs(argv: string[]): { csvPath: string; outPath: string; help: bo
 // ── CSV row shape ─────────────────────────────────────────────────────────────
 
 interface RefRow {
-	'Metric ID': string;
+	MET_ID: string;
 	Level: string;
 	System: string;
 	Factor: string;
@@ -47,9 +47,7 @@ interface RefRow {
 	'MSNA indicator': string;
 	'Question KOBO Code': string;
 	'Remarks/Limitations': string;
-	'Acute needs threshold (4) - Label': string;
 	'Acute needs threshold (4)': string;
-	'Very acute needs threshold (5) - Label': string;
 	'Very acute needs threshold (5)': string;
 	'Above or below': string;
 	'Evidence threshold': string;
@@ -57,6 +55,20 @@ interface RefRow {
 	'Risk concept': string;
 	[key: string]: string;
 }
+
+const REQUIRED_COLUMNS: (keyof RefRow)[] = [
+	'MET_ID',
+	'System',
+	'Factor',
+	'Sub-Factor',
+	'Indicator',
+	'Preference',
+	'Type',
+	'Above or below',
+	'Evidence threshold',
+	'Factor threshold',
+	'Acute needs threshold (4)',
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -154,7 +166,7 @@ function build(rows: RefRow[]): {
 		`${sys}::${fac}::${sf}::${ind}`;
 
 	for (const row of rows) {
-		const id = row['Metric ID']?.trim();
+		const id = row['MET_ID']?.trim();
 		if (!id?.startsWith('MET')) continue;
 
 		const sysId = toSnakeCase(row['System'] ?? '');
@@ -206,9 +218,7 @@ function build(rows: RefRow[]): {
 			remarks_limitations: nullIfEmpty(row['Remarks/Limitations'] ?? ''),
 			thresholds: {
 				an: roundThreshold(row['Acute needs threshold (4)'] ?? ''),
-				an_label: nullIfEmpty(row['Acute needs threshold (4) - Label'] ?? ''),
-				van: roundThreshold(row['Very acute needs threshold (5)'] ?? ''),
-				van_label: nullIfEmpty(row['Very acute needs threshold (5) - Label'] ?? '')
+				van: roundThreshold(row['Very acute needs threshold (5)'] ?? '')
 			},
 			above_or_below: (row['Above or below'] ?? '').trim(),
 			evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
@@ -296,6 +306,17 @@ function main() {
 	console.log(`Reading: ${csvPath}`);
 	const rows = parseCsv<RefRow>(csvPath);
 	console.log(`Parsed ${rows.length} rows`);
+
+	if (rows.length > 0) {
+		const headers = Object.keys(rows[0]);
+		const missing = REQUIRED_COLUMNS.filter((c) => !headers.includes(c as string));
+		if (missing.length > 0) {
+			console.error(`Error: required column(s) missing from CSV:\n  ${missing.join('\n  ')}`);
+			console.error('Rename or add the column(s) and re-run.');
+			process.exitCode = 1;
+			return;
+		}
+	}
 
 	const { root, emptyTypeIds, circlePackingRoot } = build(rows);
 
