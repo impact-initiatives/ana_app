@@ -53,7 +53,7 @@ export function analyzeUoas(uoas: string[]): Analysis {
     const adm2Codes = pcodeParsed.filter((p) => p.parsed.level === 'ADM2').map((p) => p.parsed.code as string);
     const overlapping = adm1Codes.find((a1) => adm2Codes.some((a2) => a2.startsWith(a1)));
     if (overlapping) {
-      return { action: 'error', message: `ADM1 UoA ${overlapping} overlaps with ADM2 sub-areas in the same dataset`, parsed };
+      return { action: 'error', message: `Mixed admin levels: ADM1 UoA ${overlapping} overlaps with ADM2 sub-areas in the same dataset`, parsed };
     }
 
     return { action: 'mixed', pcode, level: 'MIXED', parsed };
