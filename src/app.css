@@ -106,15 +106,15 @@
 	default: true;
 	prefersdark: true;
 
-	/* Base — deep saturated navy for strong contrast */
-	--color-base-100: oklch(22% 0.022 240);
-	--color-base-200: oklch(30% 0.028 240);
-	--color-base-300: oklch(50% 0.036 240);
+	/* Base — dark navy cards on a near-black canvas; chroma kept calm */
+	--color-base-100: oklch(22% 0.012 240);
+	--color-base-200: oklch(30% 0.010 240);
+	--color-base-300: oklch(50% 0.016 240);
 	--color-base-content: oklch(99% 0.002 240);
 	--color-base-content-dimmed: oklch(70% 0.002 240 / 0.8);
 
-	/* App shell background — barely deeper than base-100 */
-	--color-base-app: oklch(11% 0.022 240);
+	/* App shell background — nearly achromatic so cards (0.012) feel elevated */
+	--color-base-app: oklch(11% 0.008 240);
 
 	/* Primary — brighter for dark bg readability */
 	--color-primary: oklch(70% 0.18 240);
