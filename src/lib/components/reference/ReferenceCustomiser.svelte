@@ -7,15 +7,14 @@
 	import { parseReferenceCsvText, validateRefRows } from '$lib/engine/referenceBuilder';
 	import { mergeCustomRows } from '$lib/engine/referenceMerger';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import CsvUploader from '$lib/components/data/CsvUploader.svelte';
 
 	// ── Local state ───────────────────────────────────────────────────────────
 
 	type UploadStatus = 'idle' | 'validating' | 'ready' | 'errors' | 'applying';
 
-	let fileInput = $state<HTMLInputElement | null>(null);
 	let fileName = $state('');
 	let status = $state<UploadStatus>('idle');
-	let isDragging = $state(false);
 	let parseErrors = $state<string[]>([]);
 	let validationErrors = $state<string[]>([]);
 	let validationWarnings = $state<string[]>([]);
@@ -76,20 +75,9 @@
 		}
 	}
 
-	function onInputChange(e: Event) {
-		const files = (e.target as HTMLInputElement).files;
-		if (files?.[0]) handleFile(files[0]);
-	}
-
-	function triggerBrowse() {
-		fileInput?.click();
-	}
-
 	function clearFile() {
-		if (fileInput) fileInput.value = '';
 		fileName = '';
 		status = 'idle';
-		isDragging = false;
 		parseErrors = [];
 		validationErrors = [];
 		validationWarnings = [];
@@ -149,78 +137,21 @@
 	</div>
 {/if}
 
-<!-- ── Collapsible section — <details> avoids click-propagation issues ────────── -->
-<details bind:open>
-	<summary
-		class="text-base-content/70 hover:text-base-content flex cursor-pointer select-none list-none items-center gap-1.5 text-xs font-medium transition-colors duration-150"
-	>
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			class={['size-3 transition-transform duration-150', open ? 'rotate-90' : ''].join(' ')}
-			viewBox="0 0 20 20"
-			fill="currentColor"
-			aria-hidden="true"
-		>
-			<path
-				fill-rule="evenodd"
-				d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-				clip-rule="evenodd"
-			/>
-		</svg>
-		Customise reference
+<!-- ── Collapsible card — details/summary variant avoids click-propagation issues ── -->
+<details class="collapse collapse-arrow bg-base-100 border-base-300 border" bind:open>
+	<summary class="collapse-title min-h-0 cursor-pointer select-none py-3">
+		<h3 class="text-sm font-semibold">Customise reference</h3>
 	</summary>
 
-	<div class="mt-2 space-y-3">
+	<div class="collapse-content space-y-3 pb-3 pt-0">
 		<p class="text-base-content/65 text-xs">
 			Upload a reference CSV to update thresholds, labels, or add country-specific metrics.
 			Only rows you include are changed — unmentioned metrics stay unchanged.
 		</p>
 
-		<!-- Hidden file input -->
-		<input
-			bind:this={fileInput}
-			type="file"
-			accept=".csv"
-			onchange={onInputChange}
-			class="sr-only"
-			aria-label="Choose a reference CSV file"
-		/>
-
-		<!-- Drop zone -->
-		{#if status === 'idle' || status === 'errors'}
-			<div
-				role="button"
-				tabindex="0"
-				aria-label={isDragging ? 'Drop to upload' : 'Drop a reference CSV or click to browse'}
-				class={[
-					'rounded-box flex cursor-pointer items-center gap-3 border-2 border-dashed px-4 py-3 text-sm transition-colors duration-150',
-					isDragging ? 'border-primary bg-primary/8' : 'border-base-300 hover:border-primary/60'
-				].join(' ')}
-				ondrop={(e) => { e.preventDefault(); isDragging = false; const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); }}
-				ondragover={(e) => { e.preventDefault(); isDragging = true; }}
-				ondragleave={() => { isDragging = false; }}
-				onclick={triggerBrowse}
-				onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') triggerBrowse(); }}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-primary size-5 shrink-0"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.5"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-					<polyline points="17 8 12 3 7 8" />
-					<line x1="12" y1="3" x2="12" y2="15" />
-				</svg>
-				<span class="text-base-content/70">
-					{isDragging ? 'Drop to upload' : 'Drop a reference CSV here, or click to browse'}
-				</span>
-			</div>
+		<!-- Drop zone — only visible in idle state; other states replace it below -->
+		{#if status === 'idle'}
+			<CsvUploader onparsed={(result) => handleFile(result.file)} oncleared={clearFile} />
 		{:else if status === 'validating' || status === 'applying'}
 			<div class="flex items-center gap-2.5 py-2">
 				<span class="loading loading-spinner loading-xs text-primary"></span>
@@ -265,14 +196,12 @@
 						<li>{applyError}</li>
 					{/if}
 				</ul>
-				{#if fileName}
-					<button
-						class="text-base-content/60 hover:text-base-content mt-2 cursor-pointer text-xs underline underline-offset-2"
-						onclick={clearFile}
-					>
-						Clear and try again
-					</button>
-				{/if}
+				<button
+					class="text-base-content/60 hover:text-base-content mt-2 cursor-pointer text-xs underline underline-offset-2"
+					onclick={clearFile}
+				>
+					Clear and try again
+				</button>
 			</div>
 		{/if}
 
