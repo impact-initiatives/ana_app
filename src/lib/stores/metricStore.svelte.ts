@@ -2,6 +2,8 @@ import { browser } from '$app/environment';
 import { asset } from '$app/paths';
 import type { Metric } from '$lib/types/structure';
 import type { MetricMap } from '$lib/engine/validator';
+import type { RefRow } from '$lib/engine/referenceBuilder';
+import type { MergeStats } from '$lib/engine/referenceMerger';
 
 /* --------------------- Fetch + flatten --------------------- */
 
@@ -53,17 +55,24 @@ function flattenMetrics(json: unknown): MetricMap {
 }
 
 const STORAGE_KEY = 'ana_metric_store_v2';
+const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
 	metricMap: MetricMap;
 	generatedAt: string | null;
+	customReferenceActive: boolean;
+	customMergeStats: MergeStats | null;
+	customAppliedAt: string | null;
 }
 
 const initialState: MetricStoreState = {
 	referenceJson: null,
 	metricMap: Object.create(null) as MetricMap,
-	generatedAt: null
+	generatedAt: null,
+	customReferenceActive: false,
+	customMergeStats: null,
+	customAppliedAt: null
 };
 
 function loadFromStorage(): MetricStoreState {
@@ -105,13 +114,79 @@ export async function loadMetrics(): Promise<void> {
 	try {
 		const json = await loadReference();
 		const incoming = (json as Record<string, any>).generatedAt as string | undefined;
-		if (incoming && incoming === metricStore.generatedAt) return;
+
+		// Check for stored custom rows and re-merge if present
+		const customRaw = browser ? localStorage.getItem(CUSTOM_ROWS_KEY) : null;
+		if (customRaw) {
+			try {
+				const { rows, stats, appliedAt } = JSON.parse(customRaw) as {
+					rows: RefRow[];
+					stats: MergeStats;
+					appliedAt: string;
+				};
+				// Lazy import to avoid loading merger before it's needed
+				const { mergeCustomRows } = await import('$lib/engine/referenceMerger');
+				const { mergedJson, mergedMetricMap } = mergeCustomRows(json as Record<string, unknown>, rows);
+				metricStore.referenceJson = mergedJson as Record<string, any>;
+				metricStore.metricMap = mergedMetricMap;
+				metricStore.generatedAt = incoming ?? null;
+				metricStore.customReferenceActive = true;
+				metricStore.customMergeStats = stats;
+				metricStore.customAppliedAt = appliedAt;
+				persist($state.snapshot(metricStore) as MetricStoreState);
+				return;
+			} catch (e) {
+				console.warn('[metricStore] Failed to re-apply custom reference, falling back to base:', e);
+			}
+		}
+
+		if (incoming && incoming === metricStore.generatedAt && !metricStore.customReferenceActive) return;
 		const map = flattenMetrics(json);
 		metricStore.referenceJson = json as Record<string, any>;
 		metricStore.metricMap = map;
 		metricStore.generatedAt = incoming ?? null;
+		metricStore.customReferenceActive = false;
+		metricStore.customMergeStats = null;
+		metricStore.customAppliedAt = null;
 		persist($state.snapshot(metricStore) as MetricStoreState);
 	} catch (e) {
 		console.error('[metricStore] Failed to load reference.json:', e);
 	}
+}
+
+/**
+ * Apply a merged custom reference to the store and persist the raw rows to localStorage.
+ * Called after successful parse → validate → merge in ReferenceCustomiser.
+ */
+export function applyCustomReference(
+	mergedJson: Record<string, any>,
+	mergedMetricMap: MetricMap,
+	stats: MergeStats,
+	rows: RefRow[]
+): void {
+	const appliedAt = new Date().toISOString();
+	metricStore.referenceJson = mergedJson;
+	metricStore.metricMap = mergedMetricMap;
+	metricStore.customReferenceActive = true;
+	metricStore.customMergeStats = stats;
+	metricStore.customAppliedAt = appliedAt;
+	persist($state.snapshot(metricStore) as MetricStoreState);
+	if (browser) {
+		try {
+			localStorage.setItem(CUSTOM_ROWS_KEY, JSON.stringify({ rows, stats, appliedAt }));
+		} catch (e) {
+			console.warn('[metricStore] Failed to persist custom reference rows:', e);
+		}
+	}
+}
+
+/**
+ * Remove the custom reference from localStorage and reload the base reference.
+ */
+export async function clearCustomReference(): Promise<void> {
+	if (browser) localStorage.removeItem(CUSTOM_ROWS_KEY);
+	metricStore.customReferenceActive = false;
+	metricStore.customMergeStats = null;
+	metricStore.customAppliedAt = null;
+	await loadMetrics();
 }
