@@ -14,6 +14,7 @@
 	interface Props {
 		accept?: string;
 		hintText?: string;
+		size?: 'sm' | 'md';
 		parseOptions?: Record<string, unknown>;
 		onparsed?: (result: ParseResult) => void;
 		onerror?: (detail: { message: string; errors?: unknown[] }) => void;
@@ -23,11 +24,14 @@
 	let {
 		accept = '.csv',
 		hintText = '',
+		size = 'md',
 		parseOptions = {},
 		onparsed,
 		onerror,
 		oncleared
 	}: Props = $props();
+
+	const sm = $derived(size === 'sm');
 
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let fileName = $state('');
@@ -111,7 +115,8 @@
 	tabindex="0"
 	aria-label={status === 'idle' ? 'Drop a CSV file or click to browse' : fileName}
 	class={[
-		'rounded-box flex items-center gap-4 border-2 border-dashed px-4 py-4 transition-colors duration-150',
+		'rounded-box flex items-center border-2 border-dashed transition-colors duration-150',
+		sm ? 'gap-3 px-3 py-2' : 'gap-4 px-4 py-4',
 		isDragging
 			? 'border-primary bg-primary/8 cursor-copy'
 			: status === 'done'
@@ -131,11 +136,11 @@
 	<!-- Icon -->
 	<div class="shrink-0">
 		{#if status === 'parsing'}
-			<span class="loading loading-spinner loading-sm text-primary"></span>
+			<span class={['loading loading-spinner text-primary', sm ? 'loading-xs' : 'loading-sm'].join(' ')}></span>
 		{:else if status === 'done'}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
-				class="text-success size-6"
+				class={['text-success', sm ? 'size-4' : 'size-6'].join(' ')}
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
@@ -150,7 +155,7 @@
 		{:else if status === 'error'}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
-				class="text-error size-6"
+				class={['text-error', sm ? 'size-4' : 'size-6'].join(' ')}
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
@@ -166,7 +171,7 @@
 		{:else}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
-				class="text-primary size-6"
+				class={['text-primary', sm ? 'size-4' : 'size-6'].join(' ')}
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
@@ -185,15 +190,15 @@
 	<!-- Text -->
 	<div class="min-w-0 flex-1">
 		{#if status === 'parsing'}
-			<p class="text-sm font-medium">Parsing…</p>
+			<p class={sm ? 'text-xs font-medium' : 'text-sm font-medium'}>Parsing…</p>
 		{:else if status === 'done'}
-			<p class="text-success truncate text-sm font-semibold">{fileName}</p>
+			<p class={['text-success truncate font-semibold', sm ? 'text-xs' : 'text-sm'].join(' ')}>{fileName}</p>
 			<p class="text-base-content/75 text-xs">Parsed successfully</p>
 		{:else if status === 'error'}
-			<p class="text-error truncate text-sm font-semibold">{fileName || 'Parse failed'}</p>
+			<p class={['text-error truncate font-semibold', sm ? 'text-xs' : 'text-sm'].join(' ')}>{fileName || 'Parse failed'}</p>
 			<p class="text-base-content/75 text-xs">Click to try again</p>
 		{:else}
-			<p class="text-base-content/75 text-sm">
+			<p class={['text-base-content/75', sm ? 'text-xs' : 'text-sm'].join(' ')}>
 				{isDragging ? 'Drop to upload' : 'Drop a CSV here, or click to browse'}
 			</p>
 			{#if hintText}

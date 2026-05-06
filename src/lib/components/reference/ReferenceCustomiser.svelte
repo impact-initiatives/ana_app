@@ -151,7 +151,7 @@
 
 		<!-- Drop zone — only visible in idle state; other states replace it below -->
 		{#if status === 'idle'}
-			<CsvUploader onparsed={(result) => handleFile(result.file)} oncleared={clearFile} />
+			<CsvUploader size="sm" onparsed={(result) => handleFile(result.file)} oncleared={clearFile} />
 		{:else if status === 'validating' || status === 'applying'}
 			<div class="flex items-center gap-2.5 py-2">
 				<span class="loading loading-spinner loading-xs text-primary"></span>
