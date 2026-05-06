@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseReferenceCsvText, validateRefRows } from '$lib/engine/referenceBuilder';
+import { parseReferenceCsvText, validateRefRows, type RefRow } from '$lib/engine/referenceBuilder';
 import baseJson from './fixtures/reference-mini-valid.json';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ const REQUIRED_HEADERS = [
 ].join(',');
 
 /** Build a minimal valid CSV row for MET001 (exists in mini fixture). */
-function validRow(overrides: Record<string, string> = {}): Record<string, string> {
+function validRow(overrides: Record<string, string> = {}): RefRow {
 	return {
 		MET_ID: 'MET001',
 		System: 'Mortality',
@@ -44,7 +44,7 @@ function validRow(overrides: Record<string, string> = {}): Record<string, string
 	};
 }
 
-function toCsv(rows: Record<string, string>[]): string {
+function toCsv(rows: RefRow[]): string {
 	if (rows.length === 0) return REQUIRED_HEADERS + '\n';
 	const headers = Object.keys(rows[0]);
 	return [

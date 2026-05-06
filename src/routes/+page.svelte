@@ -305,8 +305,8 @@
 
 							<div class="flex flex-wrap gap-1.5">
 								{#each flagKeys as key (key)}
-									<span class="badge badge-sm" style={getFlagBadge(key).badgeStyle}>
-										{getFlagBadge(key).label}
+									<span class="badge badge-sm" style={getFlagBadge(key)!.badgeStyle}>
+										{getFlagBadge(key)!.label}
 									</span>
 								{/each}
 							</div>
@@ -324,11 +324,6 @@
 		style="opacity: 0"
 		{@attach revealOnScroll({ y: 28, duration: 500 })}
 	>
-		<!-- Optional: customise reference before uploading data -->
-		<div class="mb-3">
-			<ReferenceCustomiser />
-		</div>
-
 		<Card title="Get started" subtitle="Upload a CSV file with your data.">
 			{#snippet titleActions()}
 				<button
@@ -442,6 +437,11 @@
 				</div>
 			{/if}
 		</Card>
+
+		<!-- Optional: customise reference before uploading data -->
+		<div class="mt-3">
+			<ReferenceCustomiser />
+		</div>
 
 		<!-- Post-processing CTA -->
 		{#if validationPassed}

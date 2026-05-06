@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { metricStore, applyCustomReference, clearCustomReference } from '$lib/stores/metricStore.svelte';
+	import {
+		metricStore,
+		applyCustomReference,
+		clearCustomReference
+	} from '$lib/stores/metricStore.svelte';
 	import { parseReferenceCsvText, validateRefRows } from '$lib/engine/referenceBuilder';
 	import { mergeCustomRows } from '$lib/engine/referenceMerger';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 
 	// ── Local state ───────────────────────────────────────────────────────────
 
-	type UploadStatus = 'idle' | 'validating' | 'ready' | 'errors' | 'applying' | 'applied';
+	type UploadStatus = 'idle' | 'validating' | 'ready' | 'errors' | 'applying';
 
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let fileName = $state('');
@@ -19,7 +23,6 @@
 	let applyError = $state<string | null>(null);
 	let open = $state(false);
 
-	// Parsed rows held in memory until Apply is clicked
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let pendingRows = $state<any[]>([]);
 
@@ -62,7 +65,8 @@
 			}
 
 			// Dry-run merge to get preview stats (not persisted yet)
-			const { stats } = mergeCustomRows(baseJson as Record<string, unknown>, rows);
+			const base = JSON.parse(JSON.stringify(baseJson)) as Record<string, unknown>;
+			const { stats } = mergeCustomRows(base, rows);
 			previewStats = { updated: stats.updated.length, added: stats.added.length };
 			pendingRows = rows;
 			status = 'ready';
@@ -77,15 +81,8 @@
 		if (files?.[0]) handleFile(files[0]);
 	}
 
-	function onDrop(e: DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-		const file = e.dataTransfer?.files?.[0];
-		if (file) handleFile(file);
-	}
-
 	function triggerBrowse() {
-		if (status === 'idle' || status === 'errors') fileInput?.click();
+		fileInput?.click();
 	}
 
 	function clearFile() {
@@ -108,16 +105,17 @@
 		status = 'applying';
 		applyError = null;
 		try {
-			const baseJson = metricStore.referenceJson as Record<string, unknown>;
-			const { mergedJson, mergedMetricMap, stats, zodErrors } = mergeCustomRows(baseJson, pendingRows);
+			const base = JSON.parse(JSON.stringify(metricStore.referenceJson)) as Record<string, unknown>;
+			const { mergedJson, mergedMetricMap, stats, zodErrors } = mergeCustomRows(base, pendingRows);
 			if (zodErrors.length > 0) {
 				applyError = `Merged reference failed structural validation:\n${zodErrors.join('\n')}`;
 				status = 'errors';
 				return;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			applyCustomReference(mergedJson as Record<string, any>, mergedMetricMap, stats, pendingRows);
-			status = 'applied';
 			open = false;
+			clearFile();
 		} catch (e) {
 			applyError = e instanceof Error ? e.message : String(e);
 			status = 'errors';
@@ -130,32 +128,31 @@
 	}
 </script>
 
-<!-- ── Active badge (always visible when custom reference is on) ────────────── -->
+<!-- ── Active badge ───────────────────────────────────────────────────────────── -->
 {#if metricStore.customReferenceActive && metricStore.customMergeStats}
-	<div class="border-warning/30 bg-warning/8 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2">
+	<div
+		class="border-warning/30 bg-warning/8 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2"
+	>
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 			<span class="badge badge-warning badge-sm">Custom reference active</span>
 			<span class="text-base-content/80 text-xs">
-				{metricStore.customMergeStats.updated.length} updated · {metricStore.customMergeStats.added.length} added
+				{metricStore.customMergeStats.updated.length} updated · {metricStore.customMergeStats.added
+					.length} added
 				{#if metricStore.customAppliedAt}
 					· applied {new Date(metricStore.customAppliedAt).toLocaleString()}
 				{/if}
 			</span>
 		</div>
-		<button
-			class="btn btn-ghost btn-xs cursor-pointer"
-			onclick={handleReset}
-		>
+		<button class="btn btn-ghost btn-xs cursor-pointer" onclick={handleReset}>
 			Reset to default
 		</button>
 	</div>
 {/if}
 
-<!-- ── Collapsible customise section ─────────────────────────────────────────── -->
-<details bind:open class="group">
+<!-- ── Collapsible section — <details> avoids click-propagation issues ────────── -->
+<details bind:open>
 	<summary
 		class="text-base-content/70 hover:text-base-content flex cursor-pointer select-none list-none items-center gap-1.5 text-xs font-medium transition-colors duration-150"
-		aria-expanded={open}
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +173,7 @@
 	<div class="mt-2 space-y-3">
 		<p class="text-base-content/65 text-xs">
 			Upload a reference CSV to update thresholds, labels, or add country-specific metrics.
-			Only changes rows you include — unmentioned metrics are unchanged.
+			Only rows you include are changed — unmentioned metrics stay unchanged.
 		</p>
 
 		<!-- Hidden file input -->
@@ -196,12 +193,10 @@
 				tabindex="0"
 				aria-label={isDragging ? 'Drop to upload' : 'Drop a reference CSV or click to browse'}
 				class={[
-					'rounded-box flex items-center gap-3 border-2 border-dashed px-4 py-3 text-sm transition-colors duration-150',
-					isDragging
-						? 'border-primary bg-primary/8 cursor-copy'
-						: 'border-base-300 hover:border-primary/60 cursor-pointer'
+					'rounded-box flex cursor-pointer items-center gap-3 border-2 border-dashed px-4 py-3 text-sm transition-colors duration-150',
+					isDragging ? 'border-primary bg-primary/8' : 'border-base-300 hover:border-primary/60'
 				].join(' ')}
-				ondrop={onDrop}
+				ondrop={(e) => { e.preventDefault(); isDragging = false; const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); }}
 				ondragover={(e) => { e.preventDefault(); isDragging = true; }}
 				ondragleave={() => { isDragging = false; }}
 				onclick={triggerBrowse}
@@ -226,18 +221,17 @@
 					{isDragging ? 'Drop to upload' : 'Drop a reference CSV here, or click to browse'}
 				</span>
 			</div>
-		{:else if status === 'validating'}
+		{:else if status === 'validating' || status === 'applying'}
 			<div class="flex items-center gap-2.5 py-2">
 				<span class="loading loading-spinner loading-xs text-primary"></span>
-				<span class="text-base-content/75 text-sm">Validating…</span>
+				<span class="text-base-content/75 text-sm">
+					{status === 'validating' ? 'Validating…' : 'Applying…'}
+				</span>
 			</div>
-		{:else if status === 'applying'}
-			<div class="flex items-center gap-2.5 py-2">
-				<span class="loading loading-spinner loading-xs text-primary"></span>
-				<span class="text-base-content/75 text-sm">Applying…</span>
-			</div>
-		{:else if status === 'ready' || status === 'applied'}
-			<div class="border-success/30 bg-success/6 flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
+		{:else if status === 'ready'}
+			<div
+				class="border-success/30 bg-success/6 flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+			>
 				<div class="min-w-0">
 					<p class="text-success truncate text-sm font-semibold">{fileName}</p>
 					{#if previewStats}
@@ -247,13 +241,17 @@
 						</p>
 					{/if}
 				</div>
-				<div role="presentation" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
+				<div
+					role="presentation"
+					onclick={(e) => e.stopPropagation()}
+					onkeydown={(e) => e.stopPropagation()}
+				>
 					<ButtonClear size="sm" onclick={clearFile} />
 				</div>
 			</div>
 		{/if}
 
-		<!-- Parse/validation errors -->
+		<!-- Parse / validation errors -->
 		{#if parseErrors.length > 0 || validationErrors.length > 0 || applyError}
 			<div class="bg-error/6 border-error/20 rounded-lg border px-3 py-2.5">
 				<p class="text-error text-xs font-semibold">
@@ -268,7 +266,10 @@
 					{/if}
 				</ul>
 				{#if fileName}
-					<button class="text-base-content/60 hover:text-base-content mt-2 cursor-pointer text-xs underline underline-offset-2" onclick={clearFile}>
+					<button
+						class="text-base-content/60 hover:text-base-content mt-2 cursor-pointer text-xs underline underline-offset-2"
+						onclick={clearFile}
+					>
 						Clear and try again
 					</button>
 				{/if}
@@ -278,7 +279,9 @@
 		<!-- Warnings (non-blocking) -->
 		{#if validationWarnings.length > 0 && validationErrors.length === 0}
 			<div class="bg-warning/6 border-warning/20 rounded-lg border px-3 py-2.5">
-				<p class="text-warning text-xs font-semibold">{validationWarnings.length} warning{validationWarnings.length !== 1 ? 's' : ''}</p>
+				<p class="text-warning text-xs font-semibold">
+					{validationWarnings.length} warning{validationWarnings.length !== 1 ? 's' : ''}
+				</p>
 				<ul class="text-base-content/80 mt-1 list-disc pl-4 text-xs">
 					{#each validationWarnings as w (w)}
 						<li>{w}</li>
@@ -289,10 +292,7 @@
 
 		<!-- Apply button -->
 		{#if status === 'ready'}
-			<button
-				class="btn btn-primary btn-sm w-full cursor-pointer"
-				onclick={handleApply}
-			>
+			<button class="btn btn-primary btn-sm w-full cursor-pointer" onclick={handleApply}>
 				Apply custom reference
 			</button>
 		{/if}

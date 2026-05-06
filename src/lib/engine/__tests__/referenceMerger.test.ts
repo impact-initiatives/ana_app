@@ -30,7 +30,7 @@ function row(overrides: Partial<Record<keyof RefRow, string>>): RefRow {
 	} as RefRow;
 }
 
-function getMetric(result: Record<string, unknown>, id: string) {
+function getMetric(result: Record<string, unknown>, id: string): unknown {
 	const root = result as {
 		systems: Array<{
 			factors: Array<{
