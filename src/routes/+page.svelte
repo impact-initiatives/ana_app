@@ -489,7 +489,7 @@
 					>
 						<!-- Background step number -->
 						<span
-							class="text-base-content/5 pointer-events-none absolute top-2 right-3 text-8xl leading-none font-bold select-none"
+							class="text-base-content/15 pointer-events-none absolute top-2 right-3 text-8xl leading-none font-bold select-none"
 							aria-hidden="true"
 						>
 							{String(i + 1).padStart(2, '0')}
