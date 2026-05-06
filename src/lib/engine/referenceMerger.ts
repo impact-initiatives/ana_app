@@ -128,8 +128,14 @@ export function mergeCustomRows(
 	baseJson: Record<string, unknown>,
 	customRows: RefRow[]
 ): { mergedJson: Record<string, unknown>; mergedMetricMap: MetricMap; stats: MergeStats; zodErrors: string[] } {
-	const merged = structuredClone(baseJson) as unknown as ReferenceRoot;
-	const stats: MergeStats = { updated: [], added: [], unchanged: 0 };
+	let merged: ReferenceRoot;
+
+	try {
+	merged = structuredClone(baseJson) as unknown as ReferenceRoot;
+	} catch (e) {
+	// Fallback for Proxies, functions, or circular refs
+	merged = JSON.parse(JSON.stringify(baseJson)) as unknown as ReferenceRoot;
+	}	const stats: MergeStats = { updated: [], added: [], unchanged: 0 };
 
 	// Build a flat map: MET_ID → Metric (reference into the cloned tree)
 	const metMap = flattenMetrics(merged as unknown);
