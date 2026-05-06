@@ -19,6 +19,7 @@
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
+	import ReferenceCustomiser from '$lib/components/reference/ReferenceCustomiser.svelte';
 
 	interface ParseError {
 		message: string;
@@ -323,6 +324,11 @@
 		style="opacity: 0"
 		{@attach revealOnScroll({ y: 28, duration: 500 })}
 	>
+		<!-- Optional: customise reference before uploading data -->
+		<div class="mb-3">
+			<ReferenceCustomiser />
+		</div>
+
 		<Card title="Get started" subtitle="Upload a CSV file with your data.">
 			{#snippet titleActions()}
 				<button
