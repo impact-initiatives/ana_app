@@ -1,0 +1,4 @@
+MET_ID,Level,System,Factor,Sub-Factor,Indicator,Preference,Type,Metric,MSNA module,MSNA indicator,Question KOBO Code,Remarks/Limitations,Acute needs threshold (4),Very acute needs threshold (5),Above or below,Evidence threshold,Factor threshold,Risk concept
+MET001,Mortality outcome,Mortality,Mortality,Mortality,Crude mortality rate,1,num[0+],Deaths per 10000 per day,Mortality,,,Country-adjusted threshold,0.75,1.5,Above,1,1,
+MET002,Mortality outcome,Mortality,Mortality,Mortality,U5 mortality rate,1,num[0+],Deaths of under fives per 10000 per day,Mortality,,,Country-adjusted threshold,1.5,3,Above,1,1,
+MET199,Mortality outcome,Mortality,Mortality,Mortality,Seasonal mortality adjustment,2,num[0+],Seasonal CDR adjustment,,,,Country-specific seasonal metric added for context,0.5,,Above,1,1,
