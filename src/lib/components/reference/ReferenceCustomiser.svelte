@@ -8,10 +8,13 @@
 	import { mergeCustomRows } from '$lib/engine/referenceMerger';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 	import CsvUploader from '$lib/components/data/CsvUploader.svelte';
+	import { buildReferenceRows } from '$lib/engine/metricMetadata';
 
 	// ── Local state ───────────────────────────────────────────────────────────
 
 	type UploadStatus = 'idle' | 'validating' | 'ready' | 'errors' | 'applying';
+
+	let detailsModal = $state<HTMLDialogElement | null>(null);
 
 	let fileName = $state('');
 	let status = $state<UploadStatus>('idle');
@@ -114,6 +117,42 @@
 		await clearCustomReference();
 		clearFile();
 	}
+
+	// ── Details modal / CSV download ──────────────────────────────────────────
+
+	function downloadMergedCsv() {
+		if (!metricStore.referenceJson) return;
+		const rows = buildReferenceRows(metricStore.referenceJson);
+		const headers = [
+			'MET_ID', 'Level', 'System', 'Factor', 'Sub-Factor', 'Indicator',
+			'Preference', 'Type', 'Metric', 'MSNA module', 'MSNA indicator',
+			'Question KOBO Code', 'Remarks/Limitations',
+			'Acute needs threshold (4)', 'Very acute needs threshold (5)',
+			'Above or below', 'Evidence threshold', 'Factor threshold', 'Risk concept'
+		];
+		const esc = (v: string) => `"${(v ?? '').replace(/"/g, '""')}"`;
+		const csv = [
+			headers.join(','),
+			...rows.map((r) =>
+				[
+					r.metric, r.level, r.system, r.factor, r.subfactor, r.indicator,
+					r.preference, r.type, r.label, r.msna_module, r.msna_indicator,
+					r.question_kobo_code, r.remarks_limitations,
+					r.threshold_an, r.threshold_van,
+					r.above_or_below, r.evidence_threshold, r.factor_threshold, r.risk_concept
+				]
+					.map(esc)
+					.join(',')
+			)
+		].join('\n');
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'reference-custom-full.csv';
+		a.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <!-- ── Active badge ───────────────────────────────────────────────────────────── -->
@@ -131,9 +170,17 @@
 				{/if}
 			</span>
 		</div>
-		<button class="btn btn-ghost btn-xs cursor-pointer" onclick={handleReset}>
-			Reset to default
-		</button>
+		<div class="flex items-center gap-1">
+			<button
+				class="btn btn-ghost btn-xs cursor-pointer"
+				onclick={() => detailsModal?.showModal()}
+			>
+				More details
+			</button>
+			<button class="btn btn-ghost btn-xs cursor-pointer" onclick={handleReset}>
+				Reset to default
+			</button>
+		</div>
 	</div>
 {/if}
 
@@ -227,3 +274,101 @@
 		{/if}
 	</div>
 </details>
+
+<!-- ── Details modal ─────────────────────────────────────────────────────────── -->
+<dialog bind:this={detailsModal} class="modal">
+	<div class="modal-box max-w-lg">
+		<!-- Header -->
+		<div class="mb-4 flex items-start justify-between gap-4">
+			<div>
+				<h3 class="text-base font-semibold">Custom reference details</h3>
+				{#if metricStore.customAppliedAt}
+					<p class="text-base-content/60 mt-0.5 text-xs">
+						Applied {new Date(metricStore.customAppliedAt).toLocaleString()}
+					</p>
+				{/if}
+			</div>
+			<form method="dialog">
+				<button class="btn btn-circle btn-ghost btn-outline btn-xs" aria-label="Close">✕</button>
+			</form>
+		</div>
+
+		<!-- Stats -->
+		{#if metricStore.customMergeStats}
+			<div class="mb-4 flex flex-wrap gap-2">
+				<span class="badge badge-warning badge-sm">
+					{metricStore.customMergeStats.updated.length} updated
+				</span>
+				<span class="badge badge-success badge-sm">
+					{metricStore.customMergeStats.added.length} added
+				</span>
+			</div>
+
+			<!-- Updated list -->
+			{#if metricStore.customMergeStats.updated.length > 0}
+				<div class="mb-4">
+					<p class="text-base-content/60 mb-1.5 text-xs font-semibold uppercase tracking-wide">
+						Updated ({metricStore.customMergeStats.updated.length})
+					</p>
+					<div class="bg-base-200 max-h-44 space-y-1 overflow-y-auto rounded-lg p-2">
+						{#each metricStore.customMergeStats.updated as id (id)}
+							<div class="flex items-baseline gap-2 text-xs">
+								<code class="text-warning shrink-0 font-mono">{id}</code>
+								<span class="text-base-content/60 truncate">
+									{metricStore.metricMap[id]?.label ?? ''}
+								</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Added list -->
+			{#if metricStore.customMergeStats.added.length > 0}
+				<div class="mb-4">
+					<p class="text-base-content/60 mb-1.5 text-xs font-semibold uppercase tracking-wide">
+						Added ({metricStore.customMergeStats.added.length})
+					</p>
+					<div class="bg-base-200 max-h-44 space-y-1 overflow-y-auto rounded-lg p-2">
+						{#each metricStore.customMergeStats.added as id (id)}
+							<div class="flex items-baseline gap-2 text-xs">
+								<code class="text-success shrink-0 font-mono">{id}</code>
+								<span class="text-base-content/60 truncate">
+									{metricStore.metricMap[id]?.label ?? ''}
+								</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		{/if}
+
+		<!-- Actions -->
+		<div class="modal-action">
+			<button class="btn btn-primary btn-sm cursor-pointer" onclick={downloadMergedCsv}>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="size-4"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+					<polyline points="7 10 12 15 17 10" />
+					<line x1="12" y1="3" x2="12" y2="15" />
+				</svg>
+				Download full reference CSV
+			</button>
+			<form method="dialog">
+				<button class="btn btn-ghost btn-sm cursor-pointer">Close</button>
+			</form>
+		</div>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>

@@ -292,6 +292,7 @@ export function buildReferenceRows(json: unknown): Record<string, string>[] {
 							threshold_an: str(t.an),
 							threshold_van: str(t.van),
 							msna_module: str(m.msna_module),
+							msna_indicator: str(m.msna_indicator),
 							question_kobo_code: str(m.question_kobo_code),
 							remarks_limitations: str(m.remarks_limitations)
 						});
