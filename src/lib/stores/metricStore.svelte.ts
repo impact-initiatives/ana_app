@@ -188,5 +188,6 @@ export async function clearCustomReference(): Promise<void> {
 	metricStore.customReferenceActive = false;
 	metricStore.customMergeStats = null;
 	metricStore.customAppliedAt = null;
+	metricStore.generatedAt = null; // force loadMetrics past the early-return guard
 	await loadMetrics();
 }
