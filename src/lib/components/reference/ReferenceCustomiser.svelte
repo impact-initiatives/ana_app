@@ -49,8 +49,7 @@
 			const details: ProcessResult['details'] = [
 				{ label: 'Validation errors', type: 'error', items: errors }
 			];
-			if (warnings.length)
-				details.push({ label: 'Warnings', type: 'warning', items: warnings });
+			if (warnings.length) details.push({ label: 'Warnings', type: 'warning', items: warnings });
 			return {
 				ok: false,
 				summary: `${errors.length} validation error${errors.length !== 1 ? 's' : ''}`,
@@ -119,22 +118,50 @@
 		if (!metricStore.referenceJson) return;
 		const rows = buildReferenceRows(metricStore.referenceJson);
 		const headers = [
-			'MET_ID', 'Level', 'System', 'Factor', 'Sub-Factor', 'Indicator',
-			'Preference', 'Type', 'Metric', 'MSNA module', 'MSNA indicator',
-			'Question KOBO Code', 'Remarks/Limitations',
-			'Acute needs threshold (4)', 'Very acute needs threshold (5)',
-			'Above or below', 'Evidence threshold', 'Factor threshold', 'Risk concept'
+			'MET_ID',
+			'Level',
+			'System',
+			'Factor',
+			'Sub-Factor',
+			'Indicator',
+			'Preference',
+			'Type',
+			'Metric',
+			'MSNA module',
+			'MSNA indicator',
+			'Question KOBO Code',
+			'Remarks/Limitations',
+			'Acute needs threshold (4)',
+			'Very acute needs threshold (5)',
+			'Above or below',
+			'Evidence threshold',
+			'Factor threshold',
+			'Risk concept'
 		];
 		const esc = (v: string) => `"${(v ?? '').replace(/"/g, '""')}"`;
 		const csv = [
 			headers.join(','),
 			...rows.map((r) =>
 				[
-					r.metric, r.level, r.system, r.factor, r.subfactor, r.indicator,
-					r.preference, r.type, r.label, r.msna_module, r.msna_indicator,
-					r.question_kobo_code, r.remarks_limitations,
-					r.threshold_an, r.threshold_van,
-					r.above_or_below, r.evidence_threshold, r.factor_threshold, r.risk_concept
+					r.metric,
+					r.level,
+					r.system,
+					r.factor,
+					r.subfactor,
+					r.indicator,
+					r.preference,
+					r.type,
+					r.label,
+					r.msna_module,
+					r.msna_indicator,
+					r.question_kobo_code,
+					r.remarks_limitations,
+					r.threshold_an,
+					r.threshold_van,
+					r.above_or_below,
+					r.evidence_threshold,
+					r.factor_threshold,
+					r.risk_concept
 				]
 					.map(esc)
 					.join(',')
@@ -150,45 +177,49 @@
 	}
 </script>
 
-<!-- ── Active badge ───────────────────────────────────────────────────────────── -->
-{#if metricStore.customReferenceActive && metricStore.customMergeStats}
-	<div
-		class="border-warning/30 bg-warning/8 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2"
-	>
-		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-			<span class="badge badge-warning badge-sm">Custom reference active</span>
-			<span class="text-base-content/80 text-xs">
-				{metricStore.customMergeStats.updated.length} updated · {metricStore.customMergeStats.added
-					.length} added
-				{#if metricStore.customAppliedAt}
-					· applied {new Date(metricStore.customAppliedAt).toLocaleString()}
-				{/if}
-			</span>
-		</div>
-		<div class="flex items-center gap-1">
-			<button
-				class="btn btn-ghost btn-xs cursor-pointer"
-				onclick={() => detailsModal?.showModal()}
-			>
-				More details
-			</button>
-			<button class="btn btn-ghost btn-xs cursor-pointer" onclick={handleReset}>
-				Reset to default
-			</button>
-		</div>
-	</div>
-{/if}
-
 <!-- ── Collapsible card — details/summary variant avoids click-propagation issues ── -->
-<details class="collapse collapse-arrow bg-base-100 border-base-300 border" bind:open>
-	<summary class="collapse-title min-h-0 cursor-pointer select-none py-3">
-		<h3 class="text-sm font-semibold">Customise reference</h3>
+<details class="collapse-arrow bg-base-100 border-base-300 collapse border" bind:open>
+	<summary class="collapse-title min-h-0 cursor-pointer py-3 select-none">
+		<div class="flex flex-wrap items-center gap-2">
+			<h3 class="text-sm font-semibold">Customise reference</h3>
+			{#if metricStore.customReferenceActive && metricStore.customMergeStats}
+				<span class="badge badge-warning badge-sm">Custom reference active</span>
+				<span class="badge badge-info badge-sm">
+					{metricStore.customMergeStats.updated.length} updated
+				</span>
+				<span class="badge badge-success badge-sm">
+					{metricStore.customMergeStats.added.length} added
+				</span>
+			{/if}
+		</div>
 	</summary>
 
-	<div class="collapse-content space-y-3 pb-3 pt-0">
+	<div class="collapse-content space-y-3 pt-0 pb-3">
+		{#if metricStore.customReferenceActive && metricStore.customMergeStats}
+			<div
+				class="border-warning/20 bg-warning/6 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2"
+			>
+				<span class="text-base-content/70 text-xs">
+					{#if metricStore.customAppliedAt}
+						Applied {new Date(metricStore.customAppliedAt).toLocaleString()}
+					{/if}
+				</span>
+				<div class="flex items-center gap-1">
+					<button
+						class="btn btn-ghost btn-xs cursor-pointer"
+						onclick={() => detailsModal?.showModal()}
+					>
+						More details
+					</button>
+					<button class="btn btn-ghost btn-xs cursor-pointer" onclick={handleReset}>
+						Reset to default
+					</button>
+				</div>
+			</div>
+		{/if}
 		<p class="text-base-content/65 text-xs">
-			Upload a reference CSV to update thresholds, labels, or add country-specific metrics.
-			Only rows you include are changed — unmentioned metrics stay unchanged.
+			Upload a reference CSV to update thresholds, labels, or add country-specific metrics. Only
+			rows you include are changed — unmentioned metrics stay unchanged.
 		</p>
 
 		{#key uploaderKey}
@@ -251,7 +282,7 @@
 		<!-- Stats -->
 		{#if metricStore.customMergeStats}
 			<div class="mb-4 flex flex-wrap gap-2">
-				<span class="badge badge-warning badge-sm">
+				<span class="badge badge-info badge-sm">
 					{metricStore.customMergeStats.updated.length} updated
 				</span>
 				<span class="badge badge-success badge-sm">
@@ -262,14 +293,14 @@
 			<!-- Updated list -->
 			{#if metricStore.customMergeStats.updated.length > 0}
 				<div class="mb-4">
-					<p class="text-base-content/60 mb-1.5 text-xs font-semibold uppercase tracking-wide">
+					<p class="text-base-content/75 mb-1.5 text-xs font-semibold tracking-wide uppercase">
 						Updated ({metricStore.customMergeStats.updated.length})
 					</p>
 					<div class="bg-base-200 max-h-44 space-y-1 overflow-y-auto rounded-lg p-2">
 						{#each metricStore.customMergeStats.updated as id (id)}
 							<div class="flex items-baseline gap-2 text-xs">
 								<code class="text-warning shrink-0 font-mono">{id}</code>
-								<span class="text-base-content/60 truncate">
+								<span class="text-base-content/75 truncate">
 									{metricStore.metricMap[id]?.label ?? ''}
 								</span>
 							</div>
@@ -281,14 +312,14 @@
 			<!-- Added list -->
 			{#if metricStore.customMergeStats.added.length > 0}
 				<div class="mb-4">
-					<p class="text-base-content/60 mb-1.5 text-xs font-semibold uppercase tracking-wide">
+					<p class="text-base-content/75 mb-1.5 text-xs font-semibold tracking-wide uppercase">
 						Added ({metricStore.customMergeStats.added.length})
 					</p>
 					<div class="bg-base-200 max-h-44 space-y-1 overflow-y-auto rounded-lg p-2">
 						{#each metricStore.customMergeStats.added as id (id)}
 							<div class="flex items-baseline gap-2 text-xs">
 								<code class="text-success shrink-0 font-mono">{id}</code>
-								<span class="text-base-content/60 truncate">
+								<span class="text-base-content/75 truncate">
 									{metricStore.metricMap[id]?.label ?? ''}
 								</span>
 							</div>
@@ -316,7 +347,7 @@
 					<polyline points="7 10 12 15 17 10" />
 					<line x1="12" y1="3" x2="12" y2="15" />
 				</svg>
-				Download full reference CSV
+				Download updated reference CSV
 			</button>
 			<form method="dialog">
 				<button class="btn btn-ghost btn-sm cursor-pointer">Close</button>
