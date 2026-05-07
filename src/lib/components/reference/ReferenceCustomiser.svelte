@@ -6,22 +6,16 @@
 	} from '$lib/stores/metricStore.svelte';
 	import { parseReferenceCsvText, validateRefRows } from '$lib/engine/referenceBuilder';
 	import { mergeCustomRows } from '$lib/engine/referenceMerger';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
-	import CsvUploader from '$lib/components/data/CsvUploader.svelte';
+	import Uploader, { type ProcessResult } from '$lib/components/data/Uploader.svelte';
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
 
 	// ── Local state ───────────────────────────────────────────────────────────
 
-	type UploadStatus = 'idle' | 'validating' | 'ready' | 'errors' | 'applying';
-
 	let detailsModal = $state<HTMLDialogElement | null>(null);
 
-	let fileName = $state('');
-	let status = $state<UploadStatus>('idle');
-	let parseErrors = $state<string[]>([]);
-	let validationErrors = $state<string[]>([]);
-	let validationWarnings = $state<string[]>([]);
-	let previewStats = $state<{ updated: number; added: number } | null>(null);
+	let uploaderKey = $state(0);
+	let readyToApply = $state(false);
+	let isApplying = $state(false);
 	let applyError = $state<string | null>(null);
 	let open = $state(false);
 
@@ -30,92 +24,93 @@
 
 	// ── File handling ─────────────────────────────────────────────────────────
 
-	async function handleFile(file: File) {
-		fileName = file.name;
-		status = 'validating';
-		parseErrors = [];
-		validationErrors = [];
-		validationWarnings = [];
-		previewStats = null;
-		applyError = null;
+	async function processRefCsv(file: File): Promise<ProcessResult> {
 		pendingRows = [];
 
-		try {
-			const csvText = await file.text();
-			const { rows, parseErrors: pe } = parseReferenceCsvText(csvText);
+		const csvText = await file.text();
+		const { rows, parseErrors: pe } = parseReferenceCsvText(csvText);
 
-			if (pe.length > 0) {
-				parseErrors = pe;
-				status = 'errors';
-				return;
-			}
-
-			const baseJson = metricStore.referenceJson;
-			if (!baseJson) {
-				validationErrors = ['Base reference not loaded — try again in a moment.'];
-				status = 'errors';
-				return;
-			}
-
-			const { errors, warnings } = validateRefRows(rows, baseJson as Record<string, unknown>);
-			validationWarnings = warnings;
-
-			if (errors.length > 0) {
-				validationErrors = errors;
-				status = 'errors';
-				return;
-			}
-
-			// Dry-run merge to get preview stats (not persisted yet)
-			const base = JSON.parse(JSON.stringify(baseJson)) as Record<string, unknown>;
-			const { stats } = mergeCustomRows(base, rows);
-			previewStats = { updated: stats.updated.length, added: stats.added.length };
-			pendingRows = rows;
-			status = 'ready';
-		} catch (e) {
-			validationErrors = [e instanceof Error ? e.message : String(e)];
-			status = 'errors';
+		if (pe.length > 0) {
+			return {
+				ok: false,
+				summary: `${pe.length} parse error${pe.length !== 1 ? 's' : ''}`,
+				details: [{ label: 'Parse errors', type: 'error', items: pe }]
+			};
 		}
+
+		const baseJson = metricStore.referenceJson;
+		if (!baseJson) {
+			return { ok: false, summary: 'Base reference not loaded — try again in a moment.' };
+		}
+
+		const { errors, warnings } = validateRefRows(rows, baseJson as Record<string, unknown>);
+
+		if (errors.length > 0) {
+			const details: ProcessResult['details'] = [
+				{ label: 'Validation errors', type: 'error', items: errors }
+			];
+			if (warnings.length)
+				details.push({ label: 'Warnings', type: 'warning', items: warnings });
+			return {
+				ok: false,
+				summary: `${errors.length} validation error${errors.length !== 1 ? 's' : ''}`,
+				details
+			};
+		}
+
+		// Dry-run merge to get preview stats (not persisted yet)
+		const base = JSON.parse(JSON.stringify(baseJson)) as Record<string, unknown>;
+		const { stats } = mergeCustomRows(base, rows);
+		pendingRows = rows;
+
+		const summary = `${stats.updated.length} to update · ${stats.added.length} to add`;
+		const details: ProcessResult['details'] = warnings.length
+			? [{ label: 'Warnings', type: 'warning', items: warnings }]
+			: undefined;
+
+		return { ok: true, summary, details };
+	}
+
+	function onRefAccepted() {
+		readyToApply = true;
 	}
 
 	function clearFile() {
-		fileName = '';
-		status = 'idle';
-		parseErrors = [];
-		validationErrors = [];
-		validationWarnings = [];
-		previewStats = null;
-		applyError = null;
 		pendingRows = [];
+		readyToApply = false;
+		isApplying = false;
+		applyError = null;
 	}
 
 	// ── Apply / Reset ─────────────────────────────────────────────────────────
 
 	async function handleApply() {
 		if (!pendingRows.length || !metricStore.referenceJson) return;
-		status = 'applying';
+		isApplying = true;
 		applyError = null;
 		try {
 			const base = JSON.parse(JSON.stringify(metricStore.referenceJson)) as Record<string, unknown>;
 			const { mergedJson, mergedMetricMap, stats, zodErrors } = mergeCustomRows(base, pendingRows);
 			if (zodErrors.length > 0) {
 				applyError = `Merged reference failed structural validation:\n${zodErrors.join('\n')}`;
-				status = 'errors';
+				isApplying = false;
 				return;
 			}
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			applyCustomReference(mergedJson as Record<string, any>, mergedMetricMap, stats, pendingRows);
 			open = false;
 			clearFile();
+			uploaderKey++; // reset Uploader to idle
 		} catch (e) {
 			applyError = e instanceof Error ? e.message : String(e);
-			status = 'errors';
+			isApplying = false;
 		}
 	}
 
 	async function handleReset() {
 		await clearCustomReference();
 		clearFile();
+		uploaderKey++;
 	}
 
 	// ── Details modal / CSV download ──────────────────────────────────────────
@@ -196,78 +191,38 @@
 			Only rows you include are changed — unmentioned metrics stay unchanged.
 		</p>
 
-		<!-- Drop zone — only visible in idle state; other states replace it below -->
-		{#if status === 'idle'}
-			<CsvUploader size="sm" onparsed={(result) => handleFile(result.file)} oncleared={clearFile} />
-		{:else if status === 'validating' || status === 'applying'}
-			<div class="flex items-center gap-2.5 py-2">
-				<span class="loading loading-spinner loading-xs text-primary"></span>
-				<span class="text-base-content/75 text-sm">
-					{status === 'validating' ? 'Validating…' : 'Applying…'}
-				</span>
-			</div>
-		{:else if status === 'ready'}
-			<div
-				class="border-success/30 bg-success/6 flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
-			>
-				<div class="min-w-0">
-					<p class="text-success truncate text-sm font-semibold">{fileName}</p>
-					{#if previewStats}
-						<p class="text-base-content/70 text-xs">
-							{previewStats.updated} metric{previewStats.updated !== 1 ? 's' : ''} to update
-							· {previewStats.added} to add
-						</p>
-					{/if}
-				</div>
-				<div
-					role="presentation"
-					onclick={(e) => e.stopPropagation()}
-					onkeydown={(e) => e.stopPropagation()}
-				>
-					<ButtonClear size="sm" onclick={clearFile} />
-				</div>
-			</div>
-		{/if}
+		{#key uploaderKey}
+			<Uploader
+				size="sm"
+				accept=".csv"
+				detailsMode="collapse"
+				process={processRefCsv}
+				onaccepted={onRefAccepted}
+				oncleared={clearFile}
+			/>
+		{/key}
 
-		<!-- Parse / validation errors -->
-		{#if parseErrors.length > 0 || validationErrors.length > 0 || applyError}
+		<!-- Apply error -->
+		{#if applyError}
 			<div class="bg-error/6 border-error/20 rounded-lg border px-3 py-2.5">
-				<p class="text-error text-xs font-semibold">
-					{parseErrors.length > 0 ? 'Parse errors' : 'Validation errors'}
-				</p>
-				<ul class="text-error mt-1 list-disc pl-4 text-xs">
-					{#each [...parseErrors, ...validationErrors] as err (err)}
-						<li>{err}</li>
-					{/each}
-					{#if applyError}
-						<li>{applyError}</li>
-					{/if}
-				</ul>
+				<p class="text-error text-xs font-semibold">Apply failed</p>
+				<p class="text-error mt-1 text-xs">{applyError}</p>
 				<button
 					class="text-base-content/60 hover:text-base-content mt-2 cursor-pointer text-xs underline underline-offset-2"
-					onclick={clearFile}
+					onclick={() => (applyError = null)}
 				>
-					Clear and try again
+					Dismiss
 				</button>
 			</div>
 		{/if}
 
-		<!-- Warnings (non-blocking) -->
-		{#if validationWarnings.length > 0 && validationErrors.length === 0}
-			<div class="bg-warning/6 border-warning/20 rounded-lg border px-3 py-2.5">
-				<p class="text-warning text-xs font-semibold">
-					{validationWarnings.length} warning{validationWarnings.length !== 1 ? 's' : ''}
-				</p>
-				<ul class="text-base-content/80 mt-1 list-disc pl-4 text-xs">
-					{#each validationWarnings as w (w)}
-						<li>{w}</li>
-					{/each}
-				</ul>
+		<!-- Apply / applying -->
+		{#if isApplying}
+			<div class="flex items-center gap-2.5 py-1">
+				<span class="loading loading-spinner loading-xs text-primary"></span>
+				<span class="text-base-content/75 text-sm">Applying…</span>
 			</div>
-		{/if}
-
-		<!-- Apply button -->
-		{#if status === 'ready'}
+		{:else if readyToApply}
 			<button class="btn btn-primary btn-sm w-full cursor-pointer" onclick={handleApply}>
 				Apply custom reference
 			</button>

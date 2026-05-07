@@ -5,7 +5,7 @@
 	import { resolve, asset } from '$app/paths';
 	import { revealOnScroll } from '$lib/utils/revealOnScroll.svelte';
 	import { steps } from '$lib/types/steps';
-	import CsvUploader from '$lib/components/data/CsvUploader.svelte';
+	import Uploader, { type ProcessResult } from '$lib/components/data/Uploader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
 	import { flagStore, clearFlagResult } from '$lib/stores/flagStore.svelte';
@@ -15,23 +15,16 @@
 		clearValidatorState
 	} from '$lib/stores/validatorStore.svelte';
 	import { adminFeaturesStore, clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
-	import { validateCsv, type ValidationResult } from '$lib/engine/validator';
+	import { validateCsv } from '$lib/engine/validator';
+	import { parseFile } from '$lib/engine/parser';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
 	import ReferenceCustomiser from '$lib/components/reference/ReferenceCustomiser.svelte';
 
-	interface ParseError {
-		message: string;
-	}
-
 	let lastHeader: string[] = $state([]);
 	let lastRows: Record<string, unknown>[] = $state([]);
-	let validationResult: ValidationResult | null = $state(null);
-	let parseErrors: ParseError[] | ParseError | null = $state(null);
 	let filename: string | null = $state(null);
-	let isValidating = $state(false);
-	let pipelineError = $state<string | null>(null);
 	let validationPassed = $state(false);
 	let formatModal = $state<HTMLDialogElement | null>(null);
 	let stepsModal = $state<HTMLDialogElement | null>(null);
@@ -102,74 +95,101 @@
 		loadMetrics();
 		lastHeader = validatorStore.lastHeader ?? [];
 		lastRows = validatorStore.lastRows ?? [];
-		validationResult = (validatorStore.validationResult as ValidationResult | null) ?? null;
-		parseErrors = (validatorStore.parseErrors as ParseError[] | ParseError | null) ?? null;
 		filename = validatorStore.filename ?? null;
 		mounted = true;
 	});
 
-	function onParsed(detail: {
-		errors?: unknown[];
-		header?: string[];
-		rows?: unknown[];
-		fileName?: string;
-	}) {
-		parseErrors = detail.errors?.length ? (detail.errors as ParseError[]) : null;
-		lastHeader = detail.header ?? [];
-		lastRows = (detail.rows ?? []) as Record<string, unknown>[];
-		filename = detail.fileName ?? null;
-		validationPassed = false;
-
+	async function processMetricsCsv(file: File): Promise<ProcessResult> {
 		clearFlagResult();
 		if (adminFeaturesStore.fetchState === 'error') clearAdminFeatures();
+		validationPassed = false;
 
-		isValidating = true;
-		pipelineError = null;
+		const parsed = await parseFile(file);
+		lastHeader = parsed.header;
+		lastRows = parsed.rows as unknown as Record<string, unknown>[];
+		filename = file.name;
 
-		// Defer to the next tick so the spinner renders before the synchronous
-		// validateCsv work blocks the main thread.
-		setTimeout(async () => {
-			validationResult = validateCsv(lastHeader, lastRows as unknown as unknown[][], metricMap);
-			isValidating = false;
-			saveValidatorState(
-				lastHeader,
-				lastRows,
-				validationResult as unknown as Record<string, unknown> | null,
-				parseErrors,
-				filename
-			);
-			if (validationResult?.ok && validationResult.numericObjects?.length) {
-				try {
-					await runPipeline({
-						header: lastHeader,
-						rows: lastRows,
-						filename,
-						metricMap,
-						referenceJson: metricStore.referenceJson
-					});
-				} catch (e) {
-					pipelineError = e instanceof Error ? e.message : String(e);
-				}
-				validationPassed = true;
+		const validation = validateCsv(lastHeader, parsed.rows as unknown as unknown[][], metricMap);
+		saveValidatorState(
+			lastHeader,
+			lastRows,
+			validation as unknown as Record<string, unknown> | null,
+			null,
+			filename
+		);
+
+		const parseErrorMsgs = parsed.errors.map((e) => e.message ?? String(e)).filter(Boolean);
+		if (!validation.ok || parseErrorMsgs.length > 0) {
+			const parts: string[] = [];
+			const details: ProcessResult['details'] = [];
+
+			if (parseErrorMsgs.length) {
+				parts.push(`${parseErrorMsgs.length} parse error${parseErrorMsgs.length !== 1 ? 's' : ''}`);
+				details.push({ label: 'Parse errors', type: 'error', items: parseErrorMsgs });
 			}
-		}, 0);
-	}
+			if (validation.headerErrors?.length) {
+				parts.push(
+					`${validation.headerErrors.length} header error${validation.headerErrors.length !== 1 ? 's' : ''}`
+				);
+				details.push({
+					label: 'Header errors',
+					type: 'error',
+					items: validation.headerErrors as string[]
+				});
+			}
+			if (validation.cellErrors?.length) {
+				const n = validation.cellErrors.length;
+				parts.push(`${n} cell error${n !== 1 ? 's' : ''}`);
+				details.push({
+					label: 'Cell errors',
+					type: 'error',
+					items: [`${n} cell error${n !== 1 ? 's' : ''} — full list on the details page`]
+				});
+			}
+			if (validation.warnings?.length) {
+				parts.push(`${validation.warnings.length} warning${validation.warnings.length !== 1 ? 's' : ''}`);
+				details.push({
+					label: 'Warnings',
+					type: 'warning',
+					items: validation.warnings as string[]
+				});
+			}
 
-	function onParseError(detail: { message: string; errors?: unknown[] }) {
-		parseErrors = detail ?? { message: 'Unknown parse error' };
-		validationResult = null;
-		lastHeader = [];
-		lastRows = [];
-		filename = null;
+			return {
+				ok: false,
+				summary: parts.join(' · ') || 'Validation failed',
+				details: details.length ? details : undefined
+			};
+		}
+
+		if (validation.numericObjects?.length) {
+			try {
+				await runPipeline({
+					header: lastHeader,
+					rows: lastRows,
+					filename,
+					metricMap,
+					referenceJson: metricStore.referenceJson
+				});
+			} catch (e) {
+				const msg = e instanceof Error ? e.message : String(e);
+				return { ok: false, summary: `Pipeline error: ${msg}` };
+			}
+		}
+
+		return {
+			ok: true,
+			summary: `${validation.numericObjects?.length ?? 0} rows · ${lastHeader.length} columns`,
+			details: validation.warnings?.length
+				? [{ label: 'Warnings', type: 'warning', items: validation.warnings as string[] }]
+				: undefined
+		};
 	}
 
 	function clearAll() {
-		validationResult = null;
 		lastHeader = [];
 		lastRows = [];
-		parseErrors = null;
 		filename = null;
-		pipelineError = null;
 		validationPassed = false;
 		clearValidatorState();
 		clearFlagResult();
@@ -349,93 +369,15 @@
 			{/snippet}
 
 			<div class="mt-4">
-				<CsvUploader onparsed={onParsed} onerror={onParseError} oncleared={clearAll} />
+				<Uploader
+					dropText="Drop a CSV here, or click to browse"
+					process={processMetricsCsv}
+					detailsMode="collapse"
+					detailsHref="/validate"
+					onaccepted={() => (validationPassed = true)}
+					oncleared={clearAll}
+				/>
 			</div>
-
-			<!-- Parse / pipeline errors -->
-			{#if parseErrors}
-				<div class="bg-error/8 border-error/15 mt-4 rounded-lg border px-4 py-3">
-					<p class="text-error text-sm font-semibold">Parsing errors</p>
-					<ul class="text-error mt-1 list-disc pl-5 text-sm">
-						{#if Array.isArray(parseErrors)}
-							{#each parseErrors as pe (JSON.stringify(pe))}
-								<li>{pe.message ?? JSON.stringify(pe)}</li>
-							{/each}
-						{:else}
-							<li>{parseErrors.message ?? JSON.stringify(parseErrors)}</li>
-						{/if}
-					</ul>
-				</div>
-			{/if}
-			{#if pipelineError}
-				<div class="bg-error/8 border-error/15 mt-4 rounded-lg border px-4 py-3">
-					<p class="text-error text-sm font-semibold">Processing error</p>
-					<p class="text-error mt-0.5 text-sm">{pipelineError}</p>
-				</div>
-			{/if}
-
-			<!-- Compact validation status -->
-			{#if isValidating}
-				<div class="mt-4 flex items-center gap-2.5">
-					<span class="loading loading-spinner loading-xs text-primary"></span>
-					<span class="text-base-content/75 text-sm">Validating…</span>
-				</div>
-			{:else if validationResult && !validationResult.ok}
-				<div
-					class="border-error/20 bg-error/6 mt-4 flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
-				>
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-						<span class="badge badge-error badge-sm">Validation failed</span>
-						<span class="text-base-content/85 text-xs">
-							{#if validationResult.headerErrors?.length}
-								{validationResult.headerErrors.length} header error{validationResult.headerErrors
-									.length !== 1
-									? 's'
-									: ''}
-								{#if validationResult.cellErrors?.length || validationResult.warnings?.length}·{/if}
-							{/if}
-							{#if validationResult.cellErrors?.length}
-								{validationResult.cellErrors.length} cell error{validationResult.cellErrors
-									.length !== 1
-									? 's'
-									: ''}
-								{#if validationResult.warnings?.length}·{/if}
-							{/if}
-							{#if validationResult.warnings?.length}
-								{validationResult.warnings.length} warning{validationResult.warnings.length !== 1
-									? 's'
-									: ''}
-							{/if}
-						</span>
-					</div>
-					<a
-						href={resolve('/validate')}
-						class="btn btn-error btn-outline btn-xs shrink-0 cursor-pointer gap-1"
-					>
-						View details
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="size-3"
-							viewBox="0 0 20 20"
-							fill="currentColor"
-							aria-hidden="true"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-					</a>
-				</div>
-			{:else if validationResult?.ok}
-				<div class="mt-4 flex items-center gap-2.5">
-					<span class="badge badge-success badge-sm">Validation passed</span>
-					<span class="text-base-content/70 text-xs">
-						{validationResult.numericObjects?.length ?? 0} rows · {lastHeader.length} columns
-					</span>
-				</div>
-			{/if}
 		</Card>
 
 		<!-- Optional: customise reference before uploading data -->
