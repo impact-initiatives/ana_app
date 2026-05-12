@@ -35,3 +35,5 @@ diversity,Diversity,food_consumption,food_system
 availability,Availability,hh_food_security,food_system
 accessibility,Accessibility,hh_food_security,food_system
 utilisation,Utilisation,hh_food_security,food_system
+availability,Availability,livelihoods,food_system
+accessibility,Accessibility,livelihoods,food_system
