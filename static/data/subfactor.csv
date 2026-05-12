@@ -28,7 +28,7 @@ accessibility,Accessibility,health_services,health_nutrition_services
 quality,Quality,health_services,health_nutrition_services
 quality,Quality,nutrition_services,health_nutrition_services
 access_to_nutrition,Access to nutrition,nutrition_services,health_nutrition_services
-quantity_diversity_proxy,Quantity and diversity (proxy),food_consumption,food_system
+quantity_and_diversity_proxy,Quantity and diversity (proxy),food_consumption,food_system
 quantity_proxy,Quantity (proxy),food_consumption,food_system
 quantity,Quantity,food_consumption,food_system
 diversity,Diversity,food_consumption,food_system
