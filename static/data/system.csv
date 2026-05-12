@@ -1,8 +1,8 @@
 system,system_label
 mortality,Mortality outcome
 health_outcomes,Health Outcomes
-food_systems,Food Systems
-water_systems,Water Systems
+food_system,Food System
+water_system,Water System
 living_conditions,Living Conditions
 market_functionality,Market Functionality
 health_nutrition_services,Health / Nutrition Services

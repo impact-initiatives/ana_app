@@ -1,14 +1,14 @@
 /**
  * THIS FILE IS GENERATED — DO NOT EDIT BY HAND
  * Generated from: ../../../../static/data/system.csv
- * Generated at: 2026-05-06T12:04:49.493Z
+ * Generated at: 2026-05-12T14:16:05.827Z
  */
 
 export enum SystemIDEnum {
 	Mortality = 'mortality',
 	HealthOutcomes = 'health_outcomes',
-	FoodSystems = 'food_systems',
-	WaterSystems = 'water_systems',
+	FoodSystem = 'food_system',
+	WaterSystem = 'water_system',
 	LivingConditions = 'living_conditions',
 	MarketFunctionality = 'market_functionality',
 	HealthNutritionServices = 'health_nutrition_services',
@@ -23,8 +23,8 @@ export type SystemID = SystemIDEnum;
 export const SystemLabels: Record<SystemIDEnum, string> = {
 	[SystemIDEnum.Mortality]: 'Mortality outcome',
 	[SystemIDEnum.HealthOutcomes]: 'Health Outcomes',
-	[SystemIDEnum.FoodSystems]: 'Food Systems',
-	[SystemIDEnum.WaterSystems]: 'Water Systems',
+	[SystemIDEnum.FoodSystem]: 'Food System',
+	[SystemIDEnum.WaterSystem]: 'Water System',
 	[SystemIDEnum.LivingConditions]: 'Living Conditions',
 	[SystemIDEnum.MarketFunctionality]: 'Market Functionality',
 	[SystemIDEnum.HealthNutritionServices]: 'Health / Nutrition Services',
