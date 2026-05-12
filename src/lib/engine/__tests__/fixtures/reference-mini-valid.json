@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2025-01-01T00:00:00.000Z",
+  "systems": [
+    {
+      "id": "mortality",
+      "label": "Mortality",
+      "factors": [
+        {
+          "id": "mortality",
+          "label": "Mortality",
+          "sub_factors": [
+            {
+              "id": "mortality",
+              "label": "Mortality",
+              "indicators": [
+                {
+                  "id": "crude_mortality_rate",
+                  "label": "Crude mortality rate",
+                  "metrics": [
+                    {
+                      "metric": "MET001",
+                      "label": "Deaths per 10,000 per day",
+                      "level": "Mortality outcome",
+                      "preference": 1,
+                      "type": "num[0+]",
+                      "msna_module": "Mortality",
+                      "msna_indicator": null,
+                      "question_kobo_code": "num_died",
+                      "remarks_limitations": null,
+                      "thresholds": { "an": 1, "van": 2 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1,
+                      "risk_concept": null
+                    }
+                  ]
+                },
+                {
+                  "id": "u5_mortality_rate",
+                  "label": "U5 mortality rate",
+                  "metrics": [
+                    {
+                      "metric": "MET002",
+                      "label": "Deaths of under fives per 10,000 per day",
+                      "level": "Mortality outcome",
+                      "preference": 1,
+                      "type": "num[0+]",
+                      "msna_module": "Mortality",
+                      "msna_indicator": null,
+                      "question_kobo_code": null,
+                      "remarks_limitations": null,
+                      "thresholds": { "an": 2, "van": 4 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1,
+                      "risk_concept": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "health_outcomes",
+      "label": "Health outcomes",
+      "factors": [
+        {
+          "id": "nutrition_status",
+          "label": "Nutrition status",
+          "sub_factors": [
+            {
+              "id": "acute_malnutrition",
+              "label": "Acute Malnutrition",
+              "indicators": [
+                {
+                  "id": "gam_prevalence",
+                  "label": "GAM Prevalence",
+                  "metrics": [
+                    {
+                      "metric": "MET003",
+                      "label": "GAM Prevalence",
+                      "level": "Health outcomes",
+                      "preference": 1,
+                      "type": "num[0:1]",
+                      "msna_module": null,
+                      "msna_indicator": null,
+                      "question_kobo_code": null,
+                      "remarks_limitations": null,
+                      "thresholds": { "an": 0.15, "van": 0.3 },
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1,
+                      "risk_concept": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
