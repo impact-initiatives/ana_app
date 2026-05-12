@@ -13,6 +13,7 @@ mortality,Mortality,mortality,mortality
 accessibility,Accessibility,market_functionality,market_functionality
 functionality,Functionality,market_functionality,market_functionality
 availability,Availability,market_functionality,market_functionality
+exposure_to_elements,Exposure to elements,environmental_hygiene,living_conditions
 exposure_to_elements,Exposure to elements,living_conditions,living_conditions
 protection_from_vectors,Protection from vectors,living_conditions,living_conditions
 overcrowding,Overcrowding,living_conditions,living_conditions
@@ -37,3 +38,4 @@ accessibility,Accessibility,hh_food_security,food_system
 utilisation,Utilisation,hh_food_security,food_system
 availability,Availability,livelihoods,food_system
 accessibility,Accessibility,livelihoods,food_system
+quality_availability,Quality & Availability,sanitation_hygiene,living_conditions
