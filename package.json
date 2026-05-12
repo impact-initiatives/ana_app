@@ -18,7 +18,7 @@
 		"validate:hypotheses-json": "bun ./scripts/validate-hypotheses-json.ts",
 		"validate:circlepacking-json": "bun ./scripts/validate-circlepacking-json.ts",
 		"generate:input-data": "bun ./scripts/generate-input-data.ts",
-		"data:refresh": "bun run generate:enums && bun run generate:reference-json && bun run validate:reference-json && bun run validate:hypotheses-json && bun run validate:circlepacking-json",
+		"data:refresh": "bun run generate:enums && bun run generate:reference-json && bun run validate:reference-json && bun run validate:hypotheses-json && bun run validate:circlepacking-json && bun run generate:input-data",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
