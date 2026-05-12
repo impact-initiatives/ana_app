@@ -23,7 +23,7 @@
     ]
   },
   {
-    "systemId": "food_systems",
+    "systemId": "food_system",
     "systemLabel": "Food System",
     "hypotheses": [
       {
@@ -49,7 +49,7 @@
     ]
   },
   {
-    "systemId": "water_systems",
+    "systemId": "water_system",
     "systemLabel": "Water System",
     "hypotheses": [
       {
