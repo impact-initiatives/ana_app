@@ -73,19 +73,29 @@
 		multiSelectedUoas = [...selectedUoas];
 	});
 
-	function getFeatureByUoa(uoa: string) {
-		const features =
-			pcodeLevel === 'ADM1'
-				? adminFeaturesStore.adm1?.features
-				: adminFeaturesStore.adm2?.features;
-		if (!features) return null;
-		return (
-			(features as any[]).find((f: any) =>
-				pcodeLevel === 'ADM1'
-					? (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
-					: f.properties?.adm2_source_code === uoa
-			) ?? null
+	function getFeatureByUoa(uoa: string): any | null {
+		// $state.snapshot strips the Svelte proxy so Turf geometry ops work correctly.
+		if (pcodeLevel === 'ADM1') {
+			const f = (adminFeaturesStore.adm1?.features as any[] ?? []).find(
+				(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
+			);
+			return f ? $state.snapshot(f) : null;
+		}
+		if (pcodeLevel === 'ADM2') {
+			const f = (adminFeaturesStore.adm2?.features as any[] ?? []).find(
+				(f: any) => f.properties?.adm2_source_code === uoa
+			);
+			return f ? $state.snapshot(f) : null;
+		}
+		// MIXED: UoAs may be ADM2 or ADM1 codes — search adm2 first
+		const fromAdm2 = (adminFeaturesStore.adm2?.features as any[] ?? []).find(
+			(f: any) => f.properties?.adm2_source_code === uoa
 		);
+		if (fromAdm2) return $state.snapshot(fromAdm2);
+		const fromAdm1 = (adminFeaturesStore.adm1?.features as any[] ?? []).find(
+			(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
+		);
+		return fromAdm1 ? $state.snapshot(fromAdm1) : null;
 	}
 
 	function isAdjacentToAny(uoa: string): boolean {
@@ -93,7 +103,13 @@
 		if (!candidate) return false;
 		for (const s of selectedUoas) {
 			const sf = getFeatureByUoa(s);
-			if (sf && booleanIntersects(candidate, sf)) return true;
+			if (sf) {
+				try {
+					if (booleanIntersects(candidate, sf)) return true;
+				} catch {
+					// ignore geometry errors for individual pairs
+				}
+			}
 		}
 		return false;
 	}
