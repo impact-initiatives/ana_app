@@ -430,8 +430,8 @@
 					</button>
 					<span class="text-base-content/85 text-xs">
 						{multiSelectMode
-							? 'Click adjacent areas to add them. Click a selected area to remove it.'
-							: 'Select contiguous areas to compare them side-by-side.'}
+							? 'Click adjacent UoAs to add them. Click a selected UoA to remove it.'
+							: 'Select contiguous UoAs to compare them side-by-side.'}
 					</span>
 				</div>
 				<div class="mb-4 flex items-center gap-4">
