@@ -83,7 +83,7 @@
 		circ.setAttribute('cx', '2.5');
 		circ.setAttribute('cy', '2.5');
 		circ.setAttribute('r', '1');
-		circ.setAttribute('style', 'fill: var(--color-base-content); opacity: 0.6');
+		circ.setAttribute('style', 'fill: var(--color-base-content)');
 		pat.appendChild(circ);
 		defs.appendChild(pat);
 	});
