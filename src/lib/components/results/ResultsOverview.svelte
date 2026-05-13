@@ -82,23 +82,23 @@
 	function getFeatureByUoa(uoa: string): any | null {
 		// $state.snapshot strips the Svelte proxy so Turf geometry ops work correctly.
 		if (pcodeLevel === 'ADM1') {
-			const f = (adminFeaturesStore.adm1?.features as any[] ?? []).find(
+			const f = ((adminFeaturesStore.adm1?.features as any[]) ?? []).find(
 				(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
 			);
 			return f ? $state.snapshot(f) : null;
 		}
 		if (pcodeLevel === 'ADM2') {
-			const f = (adminFeaturesStore.adm2?.features as any[] ?? []).find(
+			const f = ((adminFeaturesStore.adm2?.features as any[]) ?? []).find(
 				(f: any) => f.properties?.adm2_source_code === uoa
 			);
 			return f ? $state.snapshot(f) : null;
 		}
 		// MIXED: UoAs may be ADM2 or ADM1 codes — search adm2 first
-		const fromAdm2 = (adminFeaturesStore.adm2?.features as any[] ?? []).find(
+		const fromAdm2 = ((adminFeaturesStore.adm2?.features as any[]) ?? []).find(
 			(f: any) => f.properties?.adm2_source_code === uoa
 		);
 		if (fromAdm2) return $state.snapshot(fromAdm2);
-		const fromAdm1 = (adminFeaturesStore.adm1?.features as any[] ?? []).find(
+		const fromAdm1 = ((adminFeaturesStore.adm1?.features as any[]) ?? []).find(
 			(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
 		);
 		return fromAdm1 ? $state.snapshot(fromAdm1) : null;
@@ -426,25 +426,25 @@
 						class="btn btn-sm {multiSelectMode ? 'btn-primary' : 'btn-outline'} cursor-pointer"
 						onclick={toggleMultiSelect}
 					>
-						{multiSelectMode ? 'Exit selection' : 'Select areas'}
+						{multiSelectMode ? 'Exit selection' : 'Select UoAs'}
 					</button>
-					<span class="text-base-content/50 text-xs">
+					<span class="text-base-content/85 text-xs">
 						{multiSelectMode
 							? 'Click adjacent areas to add them. Click a selected area to remove it.'
 							: 'Select contiguous areas to compare them side-by-side.'}
 					</span>
+				</div>
+				<div class="mb-4 flex items-center gap-4">
 					{#if multiSelectMode && selectedUoas.size > 0}
-						<span class="text-base-content/60 text-xs">{selectedUoas.size} selected</span>
+						<span class="text-base-content/85 text-md">{selectedUoas.size} selected</span>
 					{/if}
 					{#if multiSelectMode && selectedUoas.size > 5}
-						<span class="badge badge-warning badge-sm"
-							>{selectedUoas.size} areas — consider narrowing selection</span
+						<span class="badge badge-warning badge-md"
+							>{selectedUoas.size} UoAs — consider narrowing selection</span
 						>
 					{/if}
 					{#if nonAdjacentWarning}
-						<span class="badge badge-error badge-sm"
-							>Area not adjacent to current selection</span
-						>
+						<span class="badge badge-error badge-md">UoAs not adjacent to current selection</span>
 					{/if}
 				</div>
 
