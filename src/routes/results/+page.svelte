@@ -555,7 +555,7 @@
 		<aside class="bg-base-100 border-base-300 hidden lg:block lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:w-64 lg:shrink-0 border-r">
 			<FiltersSidebar
 				flaggedTotal={flagged.length}
-				filteredTotal={filteredFlagged.length}
+				filteredTotal={effectiveFlagged.length}
 				{isFiltered}
 				{overviewUoaOptions}
 				{overviewSelectedUoas}
@@ -591,7 +591,7 @@
 				<div class="border-base-300 bg-base-100 border-b lg:hidden">
 					<FiltersSidebar
 						flaggedTotal={flagged.length}
-						filteredTotal={filteredFlagged.length}
+						filteredTotal={effectiveFlagged.length}
 						{isFiltered}
 						{overviewUoaOptions}
 						{overviewSelectedUoas}
@@ -623,7 +623,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsOverview
-							filteredFlagged={effectiveFlagged}
+							filteredFlagged={filteredFlagged}
 							{systems}
 							{systemCodes}
 							{hasPcodes}
