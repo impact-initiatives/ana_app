@@ -4,9 +4,11 @@
 	import ChoroplethMap from '$lib/components/viz/ChoroplethMap.svelte';
 	import type { MapLayer } from '$lib/components/viz/ChoroplethMap.svelte';
 	import UoaDetailPanel from '$lib/components/viz/UoaDetailPanel.svelte';
+	import UoaClusterPanel from '$lib/components/viz/UoaClusterPanel.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import booleanIntersects from '@turf/boolean-intersects';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import type { SelectGroup } from '$lib/components/ui/Select.svelte';
@@ -33,6 +35,7 @@
 		selectedMapUoa: string | null;
 		selectedMapAdminName: string | null;
 		selectedMapRow: Row | null;
+		multiSelectedUoas?: string[];
 		onselectinheatmap: (uoa: string, systemId: string) => void;
 		onmapselect: (uoa: string, adminName: string | null) => void;
 		onmapclear: () => void;
@@ -49,6 +52,7 @@
 		selectedMapUoa,
 		selectedMapAdminName,
 		selectedMapRow,
+		multiSelectedUoas = $bindable<string[]>([]),
 		onselectinheatmap,
 		onmapselect,
 		onmapclear,
@@ -58,6 +62,64 @@
 	// ── Map download ──────────────────────────────────────────────────────────────
 
 	let mapDownloadFn: (() => Promise<void>) | undefined = $state();
+
+	// ── Multi-select state ────────────────────────────────────────────────────────
+
+	let multiSelectMode = $state(false);
+	let selectedUoas = new SvelteSet<string>();
+	let nonAdjacentWarning = $state(false);
+
+	$effect(() => {
+		multiSelectedUoas = [...selectedUoas];
+	});
+
+	function getFeatureByUoa(uoa: string) {
+		const features =
+			pcodeLevel === 'ADM1'
+				? adminFeaturesStore.adm1?.features
+				: adminFeaturesStore.adm2?.features;
+		if (!features) return null;
+		return (
+			(features as any[]).find((f: any) =>
+				pcodeLevel === 'ADM1'
+					? (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
+					: f.properties?.adm2_source_code === uoa
+			) ?? null
+		);
+	}
+
+	function isAdjacentToAny(uoa: string): boolean {
+		const candidate = getFeatureByUoa(uoa);
+		if (!candidate) return false;
+		for (const s of selectedUoas) {
+			const sf = getFeatureByUoa(s);
+			if (sf && booleanIntersects(candidate, sf)) return true;
+		}
+		return false;
+	}
+
+	function handleMapClick(uoa: string, adminName: string | null) {
+		if (!multiSelectMode) {
+			onmapselect(uoa, adminName);
+			return;
+		}
+		if (selectedUoas.has(uoa)) {
+			selectedUoas.delete(uoa);
+			return;
+		}
+		if (selectedUoas.size === 0 || isAdjacentToAny(uoa)) {
+			selectedUoas.add(uoa);
+		} else {
+			nonAdjacentWarning = true;
+			setTimeout(() => (nonAdjacentWarning = false), 2000);
+		}
+	}
+
+	function toggleMultiSelect() {
+		multiSelectMode = !multiSelectMode;
+		selectedUoas.clear();
+		if (!multiSelectMode) onmapclear();
+	}
 
 	// ── Cascade filter state ──────────────────────────────────────────────────────
 
@@ -335,6 +397,30 @@
 					Fetching admin boundaries…
 				</div>
 			{:else if adminFeaturesStore.adm1}
+				<!-- Multi-select toggle + warnings -->
+				<div class="mb-3 flex flex-wrap items-center gap-2">
+					<button
+						type="button"
+						class="btn btn-sm {multiSelectMode ? 'btn-primary' : 'btn-outline'} cursor-pointer"
+						onclick={toggleMultiSelect}
+					>
+						{multiSelectMode ? 'Exit selection' : 'Select areas'}
+					</button>
+					{#if multiSelectMode && selectedUoas.size > 0}
+						<span class="text-base-content/60 text-xs">{selectedUoas.size} selected</span>
+					{/if}
+					{#if multiSelectMode && selectedUoas.size > 5}
+						<span class="badge badge-warning badge-sm"
+							>{selectedUoas.size} areas — consider narrowing selection</span
+						>
+					{/if}
+					{#if nonAdjacentWarning}
+						<span class="badge badge-error badge-sm"
+							>Area not adjacent to current selection</span
+						>
+					{/if}
+				</div>
+
 				<!-- Cascade layer filters -->
 				<div class="mb-4 flex flex-wrap items-end gap-3">
 					<div class="min-w-44">
@@ -383,10 +469,22 @@
 					country={adminFeaturesStore.countryName}
 					layer={mapLayer}
 					layerTitle={exportLayerTitle}
-					onuoaclick={(uoa, adminName) => onmapselect(uoa, adminName)}
+					selectedUoas={[...selectedUoas]}
+					onuoaclick={handleMapClick}
 					ondownloadready={(fn) => (mapDownloadFn = fn)}
 				/>
-				{#if selectedMapUoa}
+				{#if multiSelectMode && selectedUoas.size > 0}
+					<div class="mt-4">
+						<UoaClusterPanel
+							uoas={[...selectedUoas]}
+							rows={filteredFlagged}
+							{systems}
+							{systemCodes}
+							ondrilldown={onselectinheatmap}
+							onclear={() => selectedUoas.clear()}
+						/>
+					</div>
+				{:else if selectedMapUoa}
 					<div class="mt-4">
 						<UoaDetailPanel
 							uoa={selectedMapUoa}
