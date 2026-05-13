@@ -266,6 +266,13 @@
 
 	let selectedMapUoa = $state<string | null>(null);
 	let selectedMapAdminName = $state<string | null>(null);
+	let selectedMapUoas = $state<string[]>([]);
+
+	const systemMatrixRows = $derived(
+		selectedMapUoas.length > 0
+			? filteredFlagged.filter((r) => selectedMapUoas.includes(String(r.uoa)))
+			: filteredFlagged
+	);
 
 	const selectedMapRow = $derived(
 		selectedMapUoa !== null
@@ -625,6 +632,7 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
+							bind:multiSelectedUoas={selectedMapUoas}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -651,7 +659,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							{filteredFlagged}
+							filteredFlagged={systemMatrixRows}
 							{systems}
 							{systemCodes}
 							{subList}
