@@ -304,19 +304,6 @@
 					{@render interactionHandlers(fillFeatures)}
 				{/if}
 
-				<!-- Dotted selection rings for multi-selected UoAs -->
-				{#if selectedFeatures.length > 0}
-					<Geo
-						data={selectedFeatures}
-						fill={false}
-						fillOpacity={0}
-						stroke="var(--color-base-content)"
-						strokeWidth={2}
-						strokeDasharray="6,4"
-						style="pointer-events: none"
-					/>
-				{/if}
-
 				<!-- Hover highlight layer — separate Geo so SveltePlot re-renders on state change -->
 				{#if hoveredFeature}
 					<Geo
@@ -337,6 +324,19 @@
 					strokeWidth={2}
 					style="pointer-events: none"
 				/>
+
+				<!-- Dotted selection rings — rendered last so they sit above all other lines -->
+				{#if selectedFeatures.length > 0}
+					<Geo
+						data={selectedFeatures}
+						fill={false}
+						fillOpacity={0}
+						stroke="var(--color-base-content)"
+						strokeWidth={3.5}
+						strokeDasharray="6,4"
+						style="pointer-events: none"
+					/>
+				{/if}
 			</Plot>
 		</div>
 	{/if}
