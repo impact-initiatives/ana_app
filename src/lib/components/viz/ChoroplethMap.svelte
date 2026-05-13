@@ -182,6 +182,18 @@
 		).filter((f) => f.properties.hasData);
 	});
 
+	// Non-selected fill features to dim when any UoAs are selected.
+	const dimFeatures = $derived.by(() => {
+		if (selectedUoas.length === 0) return [];
+		const set = new Set(selectedUoas);
+		if (level === 'MIXED') {
+			return [...fillFeaturesAdm1, ...fillFeaturesAdm2].filter(
+				(f) => !set.has(f.properties.code as string)
+			);
+		}
+		return fillFeatures.filter((f) => !set.has(f.properties.code as string));
+	});
+
 	// Features to highlight with a selection ring.
 	const selectedFeatures = $derived.by(() => {
 		if (selectedUoas.length === 0) return [];
@@ -304,14 +316,26 @@
 					{@render interactionHandlers(fillFeatures)}
 				{/if}
 
-				<!-- Selection rings for multi-selected UoAs -->
+				<!-- Dim overlay for non-selected UoAs in multi-select mode -->
+				{#if dimFeatures.length > 0}
+					<Geo
+						data={dimFeatures}
+						fill="white"
+						fillOpacity={0.5}
+						stroke={false}
+						style="pointer-events: none"
+					/>
+				{/if}
+
+				<!-- Dotted selection rings for multi-selected UoAs -->
 				{#if selectedFeatures.length > 0}
 					<Geo
 						data={selectedFeatures}
 						fill={false}
 						fillOpacity={0}
-						stroke="var(--color-primary)"
-						strokeWidth={3}
+						stroke="var(--color-base-content)"
+						strokeWidth={2.5}
+						strokeDasharray="6,4"
 						style="pointer-events: none"
 					/>
 				{/if}
