@@ -35,6 +35,8 @@
 		ondownloadready?: (fn: () => Promise<void>) => void;
 		/** Title for the exported SVG. Overrides the default prelim title when set. */
 		layerTitle?: string | null;
+		/** UoA codes to render with a selection ring. Managed by parent. */
+		selectedUoas?: string[];
 	}
 
 	let {
@@ -46,7 +48,8 @@
 		layer = { type: 'prelim' },
 		onuoaclick,
 		ondownloadready,
-		layerTitle = null
+		layerTitle = null,
+		selectedUoas = []
 	}: Props = $props();
 
 	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(null);
@@ -179,6 +182,34 @@
 		).filter((f) => f.properties.hasData);
 	});
 
+	// Features to highlight with a selection ring.
+	const selectedFeatures = $derived.by(() => {
+		if (selectedUoas.length === 0) return [];
+		const set = new Set(selectedUoas);
+		if (level === 'ADM1') {
+			return adm1.features.filter((f) => {
+				const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+				return code && set.has(code);
+			});
+		}
+		if (level === 'ADM2') {
+			return (adm2?.features ?? []).filter((f) => {
+				const code = f.properties?.adm2_source_code as string | undefined;
+				return code && set.has(code);
+			});
+		}
+		// MIXED: UoAs can be either ADM1 or ADM2
+		const adm1Sel = adm1.features.filter((f) => {
+			const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+			return code && set.has(code);
+		});
+		const adm2Sel = (adm2?.features ?? []).filter((f) => {
+			const code = f.properties?.adm2_source_code as string | undefined;
+			return code && set.has(code);
+		});
+		return [...adm1Sel, ...adm2Sel];
+	});
+
 	// Tooltip derived values from the enriched hovered feature
 	const tooltipTitle = $derived(
 		String(
@@ -271,6 +302,18 @@
 				{:else}
 					<!-- ADM1 or ADM2: single fill layer -->
 					{@render interactionHandlers(fillFeatures)}
+				{/if}
+
+				<!-- Selection rings for multi-selected UoAs -->
+				{#if selectedFeatures.length > 0}
+					<Geo
+						data={selectedFeatures}
+						fill={false}
+						fillOpacity={0}
+						stroke="var(--color-primary)"
+						strokeWidth={3}
+						style="pointer-events: none"
+					/>
 				{/if}
 
 				<!-- Hover highlight layer — separate Geo so SveltePlot re-renders on state change -->
