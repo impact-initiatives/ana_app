@@ -63,6 +63,31 @@
 		if (mapEl) ondownloadready?.(handleSvgDownload);
 	});
 
+	// Inject a dot pattern into the SveltePlot SVG so selectedFeatures can use fill="url(#sel-dots)".
+	// Depends on plotHeight so it re-runs whenever Plot rebuilds its SVG.
+	$effect(() => {
+		if (!mapEl || plotHeight === 0) return;
+		const svg = mapEl.querySelector('svg');
+		if (!svg || svg.querySelector('#sel-dots')) return;
+		let defs = svg.querySelector('defs');
+		if (!defs) {
+			defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+			svg.insertBefore(defs, svg.firstChild);
+		}
+		const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+		pat.id = 'sel-dots';
+		pat.setAttribute('patternUnits', 'userSpaceOnUse');
+		pat.setAttribute('width', '5');
+		pat.setAttribute('height', '5');
+		const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		circ.setAttribute('cx', '2.5');
+		circ.setAttribute('cy', '2.5');
+		circ.setAttribute('r', '1');
+		circ.setAttribute('style', 'fill: var(--color-base-content); opacity: 0.35');
+		pat.appendChild(circ);
+		defs.appendChild(pat);
+	});
+
 	async function handleSvgDownload() {
 		hoveredFeature = null;
 		await tick();
@@ -325,12 +350,11 @@
 					style="pointer-events: none"
 				/>
 
-				<!-- Dotted selection rings — rendered last so they sit above all other lines -->
+				<!-- Selection fill + dashed ring — rendered last so they sit above all other lines -->
 				{#if selectedFeatures.length > 0}
 					<Geo
 						data={selectedFeatures}
-						fill={false}
-						fillOpacity={0}
+						fill={{ value: () => 'url(#sel-dots)', scale: null }}
 						stroke="var(--color-base-content)"
 						strokeWidth={3.5}
 						strokeDasharray="6,4"
