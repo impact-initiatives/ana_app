@@ -355,8 +355,7 @@
 					<Geo
 						data={selectedFeatures}
 						fill={{ value: () => 'url(#sel-dots)', scale: null }}
-						stroke="none"
-						style="pointer-events: none"
+						style="pointer-events: none; stroke: none"
 					/>
 				{/if}
 			</Plot>
