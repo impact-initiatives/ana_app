@@ -73,6 +73,12 @@
 		multiSelectedUoas = [...selectedUoas];
 	});
 
+	const effectiveRows = $derived(
+		selectedUoas.size > 0
+			? filteredFlagged.filter((r) => selectedUoas.has(String(r.uoa)))
+			: filteredFlagged
+	);
+
 	function getFeatureByUoa(uoa: string): any | null {
 		// $state.snapshot strips the Svelte proxy so Turf geometry ops work correctly.
 		if (pcodeLevel === 'ADM1') {
@@ -383,14 +389,14 @@
 	<div class="mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-5">
 		<div class="lg:col-span-2">
 			<PrelimFlagDonut
-				rows={filteredFlagged}
+				rows={effectiveRows}
 				selectedKeys={selectedPrelimKeys}
 				onsliceclick={ondonutsliceclick}
 			/>
 		</div>
 		<div class="lg:col-span-3">
 			<UoaRankingTable
-				rows={filteredFlagged}
+				rows={effectiveRows}
 				{systems}
 				{systemCodes}
 				onprelimclick={ondonutsliceclick}
@@ -422,6 +428,11 @@
 					>
 						{multiSelectMode ? 'Exit selection' : 'Select areas'}
 					</button>
+					<span class="text-base-content/50 text-xs">
+						{multiSelectMode
+							? 'Click adjacent areas to add them. Click a selected area to remove it.'
+							: 'Select contiguous areas to compare them side-by-side.'}
+					</span>
 					{#if multiSelectMode && selectedUoas.size > 0}
 						<span class="text-base-content/60 text-xs">{selectedUoas.size} selected</span>
 					{/if}
