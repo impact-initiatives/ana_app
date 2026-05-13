@@ -33,7 +33,7 @@
 
 	// ── Filters ───────────────────────────────────────────────────────────────
 	let prefFilter = new SvelteSet<number>([1, 2]);
-	let flagFilter = new SvelteSet<string>(['flag', 'no_flag', 'no_data']);
+	let flagFilter = new SvelteSet<string>(['flag', 'no_flag']);
 
 	function togglePref(p: number) {
 		if (prefFilter.has(p)) prefFilter.delete(p);
@@ -64,8 +64,16 @@
 
 	const FLAG_FILTER_OPTIONS = [
 		{ key: 'flag', label: FLAG_BADGE_MAP['flag'].label, cls: FLAG_BADGE_MAP['flag'].checkboxCls },
-		{ key: 'no_flag', label: FLAG_BADGE_MAP['no_flag'].label, cls: FLAG_BADGE_MAP['no_flag'].checkboxCls },
-		{ key: 'no_data', label: FLAG_BADGE_MAP['no_data'].label, cls: FLAG_BADGE_MAP['no_data'].checkboxCls }
+		{
+			key: 'no_flag',
+			label: FLAG_BADGE_MAP['no_flag'].label,
+			cls: FLAG_BADGE_MAP['no_flag'].checkboxCls
+		},
+		{
+			key: 'no_data',
+			label: FLAG_BADGE_MAP['no_data'].label,
+			cls: FLAG_BADGE_MAP['no_data'].checkboxCls
+		}
 	];
 
 	const totalVisible = $derived(
@@ -110,8 +118,14 @@
 	const dtCellBadges = {
 		status: {
 			[FLAG_BADGE_MAP.flag.label]: { style: FLAG_BADGE_MAP.flag.badgeStyle, class: 'border-0' },
-			[FLAG_BADGE_MAP.no_flag.label]: { style: FLAG_BADGE_MAP.no_flag.badgeStyle, class: 'border-0' },
-			[FLAG_BADGE_MAP.no_data.label]: { style: FLAG_BADGE_MAP.no_data.badgeStyle, class: 'border-0' }
+			[FLAG_BADGE_MAP.no_flag.label]: {
+				style: FLAG_BADGE_MAP.no_flag.badgeStyle,
+				class: 'border-0'
+			},
+			[FLAG_BADGE_MAP.no_data.label]: {
+				style: FLAG_BADGE_MAP.no_data.badgeStyle,
+				class: 'border-0'
+			}
 		}
 	};
 
