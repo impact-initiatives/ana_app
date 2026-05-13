@@ -350,14 +350,12 @@
 					style="pointer-events: none"
 				/>
 
-				<!-- Selection fill + dashed ring — rendered last so they sit above all other lines -->
+				<!-- Selection dot-fill — rendered last so it sits above all other lines -->
 				{#if selectedFeatures.length > 0}
 					<Geo
 						data={selectedFeatures}
 						fill={{ value: () => 'url(#sel-dots)', scale: null }}
-						stroke="var(--color-base-content)"
-						strokeWidth={3.5}
-						strokeDasharray="6,4"
+						stroke={false}
 						style="pointer-events: none"
 					/>
 				{/if}
