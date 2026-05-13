@@ -268,7 +268,7 @@
 	let selectedMapAdminName = $state<string | null>(null);
 	let selectedMapUoas = $state<string[]>([]);
 
-	const systemMatrixRows = $derived(
+	const effectiveFlagged = $derived(
 		selectedMapUoas.length > 0
 			? filteredFlagged.filter((r) => selectedMapUoas.includes(String(r.uoa)))
 			: filteredFlagged
@@ -623,7 +623,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsOverview
-							{filteredFlagged}
+							filteredFlagged={effectiveFlagged}
 							{systems}
 							{systemCodes}
 							{hasPcodes}
@@ -659,7 +659,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							filteredFlagged={systemMatrixRows}
+							filteredFlagged={effectiveFlagged}
 							{systems}
 							{systemCodes}
 							{subList}
@@ -699,7 +699,7 @@
 							{coverageUoaOptions}
 							coverageUoa={effectiveCoverageUoa}
 							{coverageSelectedRow}
-							filteredRows={filteredFlagged}
+							filteredRows={effectiveFlagged}
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}
