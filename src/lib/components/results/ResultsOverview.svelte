@@ -35,11 +35,11 @@
 		selectedMapUoa: string | null;
 		selectedMapAdminName: string | null;
 		selectedMapRow: Row | null;
-		multiSelectedUoas?: string[];
 		onselectinheatmap: (uoa: string, systemId: string) => void;
 		onmapselect: (uoa: string, adminName: string | null) => void;
 		onmapclear: () => void;
 		ondonutsliceclick: (key: string | null) => void;
+		onmapuoaschange?: (uoas: string[]) => void;
 	}
 
 	let {
@@ -52,11 +52,11 @@
 		selectedMapUoa,
 		selectedMapAdminName,
 		selectedMapRow,
-		multiSelectedUoas = $bindable<string[]>([]),
 		onselectinheatmap,
 		onmapselect,
 		onmapclear,
-		ondonutsliceclick
+		ondonutsliceclick,
+		onmapuoaschange
 	}: Props = $props();
 
 	// ── Map download ──────────────────────────────────────────────────────────────
@@ -68,10 +68,6 @@
 	let multiSelectMode = $state(false);
 	let selectedUoas = new SvelteSet<string>();
 	let nonAdjacentWarning = $state(false);
-
-	$effect(() => {
-		multiSelectedUoas = [...selectedUoas];
-	});
 
 	const effectiveRows = $derived(
 		selectedUoas.size > 0
@@ -127,19 +123,20 @@
 		}
 		if (selectedUoas.has(uoa)) {
 			selectedUoas.delete(uoa);
-			return;
-		}
-		if (selectedUoas.size === 0 || isAdjacentToAny(uoa)) {
+		} else if (selectedUoas.size === 0 || isAdjacentToAny(uoa)) {
 			selectedUoas.add(uoa);
 		} else {
 			nonAdjacentWarning = true;
 			setTimeout(() => (nonAdjacentWarning = false), 2000);
+			return;
 		}
+		onmapuoaschange?.([...selectedUoas]);
 	}
 
 	function toggleMultiSelect() {
 		multiSelectMode = !multiSelectMode;
 		selectedUoas.clear();
+		onmapuoaschange?.([]);
 		if (!multiSelectMode) onmapclear();
 	}
 
@@ -508,7 +505,7 @@
 							{systems}
 							{systemCodes}
 							ondrilldown={onselectinheatmap}
-							onclear={() => selectedUoas.clear()}
+							onclear={() => { selectedUoas.clear(); onmapuoaschange?.([]); }}
 						/>
 					</div>
 				{:else if selectedMapUoa}

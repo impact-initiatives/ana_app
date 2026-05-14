@@ -632,7 +632,7 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							bind:multiSelectedUoas={selectedMapUoas}
+							onmapuoaschange={(uoas) => (selectedMapUoas = uoas)}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
