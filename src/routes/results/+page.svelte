@@ -244,18 +244,23 @@
 		}
 	}
 
-	const filteredFlagged = $derived.by<Row[]>(() => {
+	// Rows filtered by group-by + prelim only — no UoA filter — so the choropleth map
+	// always receives a row for every UoA and colours all areas.
+	const filteredForMap = $derived.by<Row[]>(() => {
 		let rows = flagged;
 		if (groupByCol !== null && selectedGroupValues.length < groupByOptions.length) {
 			rows = rows.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')));
-		}
-		if (overviewSelectedUoas !== null) {
-			rows = rows.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
 		}
 		if (selectedPrelimKeys !== null) {
 			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
 		}
 		return rows;
+	});
+
+	// Full filter including UoA selection — used by every non-map component.
+	const filteredFlagged = $derived.by<Row[]>(() => {
+		if (overviewSelectedUoas === null) return filteredForMap;
+		return filteredForMap.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
 	});
 
 	const isFiltered = $derived(
@@ -266,17 +271,10 @@
 
 	let selectedMapUoa = $state<string | null>(null);
 	let selectedMapAdminName = $state<string | null>(null);
-	let selectedMapUoas = $state<string[]>([]);
-
-	const effectiveFlagged = $derived(
-		selectedMapUoas.length > 0
-			? filteredFlagged.filter((r) => selectedMapUoas.includes(String(r.uoa)))
-			: filteredFlagged
-	);
 
 	const selectedMapRow = $derived(
 		selectedMapUoa !== null
-			? (filteredFlagged.find((r) => String(r.uoa) === selectedMapUoa) ?? null)
+			? (filteredForMap.find((r) => String(r.uoa) === selectedMapUoa) ?? null)
 			: null
 	);
 
@@ -555,7 +553,7 @@
 		<aside class="bg-base-100 border-base-300 hidden lg:block lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:w-64 lg:shrink-0 border-r">
 			<FiltersSidebar
 				flaggedTotal={flagged.length}
-				filteredTotal={effectiveFlagged.length}
+				filteredTotal={filteredFlagged.length}
 				{isFiltered}
 				{overviewUoaOptions}
 				{overviewSelectedUoas}
@@ -591,7 +589,7 @@
 				<div class="border-base-300 bg-base-100 border-b lg:hidden">
 					<FiltersSidebar
 						flaggedTotal={flagged.length}
-						filteredTotal={effectiveFlagged.length}
+						filteredTotal={filteredFlagged.length}
 						{isFiltered}
 						{overviewUoaOptions}
 						{overviewSelectedUoas}
@@ -624,6 +622,7 @@
 					>
 						<ResultsOverview
 							filteredFlagged={filteredFlagged}
+							mapRows={filteredForMap}
 							{systems}
 							{systemCodes}
 							{hasPcodes}
@@ -632,7 +631,9 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							onmapuoaschange={(uoas) => (selectedMapUoas = uoas)}
+							onmapuoaschange={(uoas) => {
+								overviewSelectedUoas = uoas.length > 0 ? uoas : null;
+							}}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -659,7 +660,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							filteredFlagged={effectiveFlagged}
+							filteredFlagged={filteredFlagged}
 							{systems}
 							{systemCodes}
 							{subList}
@@ -699,7 +700,7 @@
 							{coverageUoaOptions}
 							coverageUoa={effectiveCoverageUoa}
 							{coverageSelectedRow}
-							filteredRows={effectiveFlagged}
+							filteredRows={filteredFlagged}
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}

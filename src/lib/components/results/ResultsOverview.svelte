@@ -27,6 +27,7 @@
 
 	interface Props {
 		filteredFlagged: Row[];
+		mapRows?: Row[];
 		systems: System[];
 		systemCodes: Map<string, string[]>;
 		hasPcodes: boolean;
@@ -44,6 +45,7 @@
 
 	let {
 		filteredFlagged,
+		mapRows,
 		systems,
 		systemCodes,
 		hasPcodes,
@@ -488,7 +490,7 @@
 				<ChoroplethMap
 					adm1={adminFeaturesStore.adm1}
 					adm2={adminFeaturesStore.adm2}
-					rows={filteredFlagged}
+					rows={mapRows ?? filteredFlagged}
 					level={pcodeLevel}
 					country={adminFeaturesStore.countryName}
 					layer={mapLayer}
