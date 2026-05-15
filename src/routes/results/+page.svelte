@@ -225,14 +225,32 @@
 
 	let selectedPrelimKeys = $state<string[] | null>(null);
 	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
-	const prelimOptions = PRELIM_FLAG_KEYS.map((key) => ({
-		value: key,
-		label: PRELIM_BADGE_MAP[key].label
-	}));
+
+	// Base: group-by filter only (no prelim, no UoA).
+	const filteredGroupOnly = $derived.by<Row[]>(() => {
+		let rows = flagged;
+		if (groupByCol !== null && selectedGroupValues.length < groupByOptions.length) {
+			rows = rows.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')));
+		}
+		return rows;
+	});
+
+	// Group + UoA — used to derive available prelim options for the sidebar dropdown.
+	const filteredGroupUoa = $derived.by<Row[]>(() => {
+		if (overviewSelectedUoas === null) return filteredGroupOnly;
+		return filteredGroupOnly.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
+	});
+
+	// Dynamic prelim options: only flags present in the current UoA selection.
+	const prelimOptions = $derived(
+		PRELIM_FLAG_KEYS.filter((key) =>
+			filteredGroupUoa.some((r) => String(r.prelim_flag ?? '') === key)
+		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }))
+	);
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		selectedPrelimKeys = arr.length === PRELIM_KEYS.length ? null : arr;
+		selectedPrelimKeys = arr.length === prelimOptions.length ? null : arr;
 	}
 
 	function handleDonutSliceClick(key: string | null) {
@@ -244,20 +262,15 @@
 		}
 	}
 
-	// Rows filtered by group-by + prelim only — no UoA filter — so the choropleth map
-	// always receives a row for every UoA and colours all areas.
+	// Group + prelim — no UoA filter — so the choropleth map always colours all areas.
 	const filteredForMap = $derived.by<Row[]>(() => {
-		let rows = flagged;
-		if (groupByCol !== null && selectedGroupValues.length < groupByOptions.length) {
-			rows = rows.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')));
-		}
-		if (selectedPrelimKeys !== null) {
-			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
-		}
-		return rows;
+		if (selectedPrelimKeys === null) return filteredGroupOnly;
+		return filteredGroupOnly.filter((r) =>
+			selectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
+		);
 	});
 
-	// Full filter including UoA selection — used by every non-map component.
+	// Full filter (group + prelim + UoA) — used by every non-map component.
 	const filteredFlagged = $derived.by<Row[]>(() => {
 		if (overviewSelectedUoas === null) return filteredForMap;
 		return filteredForMap.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
