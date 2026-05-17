@@ -182,7 +182,10 @@
 					)
 				]
 					.sort()
-					.map((v) => ({ value: v, label: v }))
+					.map((v) => {
+						const name = adminFeaturesStore.pcodeLabelMap?.[v];
+						return { value: v, label: name ? `${name} (${v})` : v };
+					})
 	);
 
 	let deselectedGroupValues = $state<{ col: string; values: Set<string> }>({
