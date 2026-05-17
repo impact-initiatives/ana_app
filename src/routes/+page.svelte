@@ -592,7 +592,8 @@
 					</div>
 					<p class="mt-1">
 						Extra columns (e.g. <code>region</code>, <code>partner</code>) are carried through and
-						available as filters in results views.
+						available as filters in results views. If values are p-codes, filter labels are resolved
+						to their admin names automatically.
 					</p>
 				</div>
 				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">

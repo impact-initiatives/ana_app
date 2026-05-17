@@ -33,7 +33,7 @@ export const steps: Step[] = [
 				},
 				{
 					label: 'Metadata columns',
-					body: 'Extra columns (e.g. region, partner) are carried through and available as filters in results views.'
+					body: 'Extra columns (e.g. region, partner) are carried through and available as filters in results views. If values are p-codes, filter labels are resolved to their admin names automatically.'
 				},
 				{
 					label: 'Values',
