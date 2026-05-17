@@ -188,66 +188,48 @@
 					})
 	);
 
-	let deselectedGroupValues = $state<{ col: string; values: Set<string> }>({
-		col: '',
-		values: new Set()
-	});
-
-	const selectedGroupValues = $derived<string[]>(
-		groupByOptions
-			.map((o) => o.value)
-			.filter(
-				(v) => deselectedGroupValues.col !== groupByCol || !deselectedGroupValues.values.has(v)
-			)
-	);
+	let selectedGroupValues = $state<string[] | null>(null);
 
 	function onGroupValuesChange(next: string | string[]) {
-		const nextSet = new Set(Array.isArray(next) ? next : [next]);
-		deselectedGroupValues = {
-			col: groupByCol ?? '',
-			values: new Set(groupByOptions.map((o) => o.value).filter((v) => !nextSet.has(v)))
-		};
+		const arr = Array.isArray(next) ? next : [next];
+		selectedGroupValues = arr.length === groupByOptions.length ? null : arr;
 	}
 
-	const overviewUoaOptions = $derived.by(() => {
+	const uoaOptions = $derived.by(() => {
 		const rows =
-			groupByCol !== null
-				? flagged.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')))
+			groupByCol !== null && selectedGroupValues !== null
+				? flagged.filter((r) => selectedGroupValues!.includes(String(r[groupByCol!] ?? '')))
 				: flagged;
 		return [...new Set(rows.map((r) => String(r.uoa)))]
 			.sort()
 			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
 	});
 
-	let overviewSelectedUoas = $state<string[] | null>(null);
+	let selectedUoas = $state<string[] | null>(null);
 
-	function onOverviewUoasChange(next: string | string[]) {
+	function onUoasChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		overviewSelectedUoas = arr.length === overviewUoaOptions.length ? null : arr;
+		selectedUoas = arr.length === uoaOptions.length ? null : arr;
 	}
 
 	let selectedPrelimKeys = $state<string[] | null>(null);
-	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
 
-	// Base: group-by filter only (no prelim, no UoA).
-	const filteredGroupOnly = $derived.by<Row[]>(() => {
-		let rows = flagged;
-		if (groupByCol !== null && selectedGroupValues.length < groupByOptions.length) {
-			rows = rows.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')));
-		}
-		return rows;
+	// Stage 1: group filter only
+	const filteredByGroup = $derived.by<Row[]>(() => {
+		if (groupByCol === null || selectedGroupValues === null) return flagged;
+		return flagged.filter((r) => selectedGroupValues!.includes(String(r[groupByCol!] ?? '')));
 	});
 
-	// Group + UoA — used to derive available prelim options for the sidebar dropdown.
-	const filteredGroupUoa = $derived.by<Row[]>(() => {
-		if (overviewSelectedUoas === null) return filteredGroupOnly;
-		return filteredGroupOnly.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
+	// Auxiliary: group + UoA, no prelim — drives dynamic prelim options only
+	const filteredForPrelimOpts = $derived.by<Row[]>(() => {
+		if (selectedUoas === null) return filteredByGroup;
+		return filteredByGroup.filter((r) => selectedUoas!.includes(String(r.uoa)));
 	});
 
-	// Dynamic prelim options: only flags present in the current UoA selection.
+	// Dynamic prelim options: only flags present in the current group + UoA selection.
 	const prelimOptions = $derived(
 		PRELIM_FLAG_KEYS.filter((key) =>
-			filteredGroupUoa.some((r) => String(r.prelim_flag ?? '') === key)
+			filteredForPrelimOpts.some((r) => String(r.prelim_flag ?? '') === key)
 		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }))
 	);
 
@@ -265,22 +247,22 @@
 		}
 	}
 
-	// Group + prelim — no UoA filter — so the choropleth map always colours all areas.
+	// Stage 2: group + prelim, no UoA — map always colours all areas
 	const filteredForMap = $derived.by<Row[]>(() => {
-		if (selectedPrelimKeys === null) return filteredGroupOnly;
-		return filteredGroupOnly.filter((r) =>
+		if (selectedPrelimKeys === null) return filteredByGroup;
+		return filteredByGroup.filter((r) =>
 			selectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
 		);
 	});
 
-	// Full filter (group + prelim + UoA) — used by every non-map component.
+	// Stage 3: full filter (group + prelim + UoA) — all non-map components
 	const filteredFlagged = $derived.by<Row[]>(() => {
-		if (overviewSelectedUoas === null) return filteredForMap;
-		return filteredForMap.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
+		if (selectedUoas === null) return filteredForMap;
+		return filteredForMap.filter((r) => selectedUoas!.includes(String(r.uoa)));
 	});
 
 	const isFiltered = $derived(
-		overviewSelectedUoas !== null || selectedPrelimKeys !== null || groupByCol !== null
+		selectedUoas !== null || selectedPrelimKeys !== null || groupByCol !== null
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -474,14 +456,6 @@
 
 	// ── Section 5: Export ─────────────────────────────────────────────────────
 
-	const allUoas = $derived(filteredUoaList);
-	let exportUoaOverride = $state<string[] | null>(null);
-	// Intersect manual override with current filtered list so stale selections are dropped.
-	const exportSelectedUoas = $derived(
-		exportUoaOverride
-			? exportUoaOverride.filter((u) => filteredUoaList.includes(u))
-			: filteredUoaList
-	);
 	const timestamp = $derived(new Date().toISOString().split('T')[0]);
 
 	function handleJSON() {
@@ -497,16 +471,12 @@
 		downloadXLSX(flagStore.flaggedResult, `flagged_data_${timestamp}.xlsx`);
 	}
 	async function handleDeepDive() {
-		if (!flagStore.flaggedResult || exportSelectedUoas.length === 0) return;
+		if (filteredFlagged.length === 0) return;
 		const json = metricStore.referenceJson;
 		if (!json) return;
-		const rows = flagStore.flaggedResult.filter((r) =>
-			exportSelectedUoas.includes(String(r['uoa'] ?? ''))
-		);
-		if (rows.length === 0) return;
 		const hypothesesResp = await fetch(asset('/data/hypotheses.json'));
 		const hypothesesData = await hypothesesResp.json();
-		await downloadDeepDiveZip(rows, json, hypothesesData, `deepdives_${timestamp}.zip`);
+		await downloadDeepDiveZip(filteredFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`);
 	}
 
 	// ── Observers: scroll spy ────────────────────────────────────────────────
@@ -571,24 +541,23 @@
 				flaggedTotal={flagged.length}
 				filteredTotal={filteredFlagged.length}
 				{isFiltered}
-				{overviewUoaOptions}
-				{overviewSelectedUoas}
+				{uoaOptions}
+				{selectedUoas}
 				{selectedPrelimKeys}
-				{PRELIM_KEYS}
 				{prelimOptions}
 				{metadataCols}
 				{groupByCol}
 				{groupByOptions}
 				{selectedGroupValues}
-				onoverviewuoaschange={onOverviewUoasChange}
+				onuoaschange={onUoasChange}
 				onprelimkeyschange={onPrelimKeysChange}
-				ongroupbycol={(v) => (groupByCol = v)}
+				ongroupbycol={(v) => { groupByCol = v; selectedGroupValues = null; }}
 				ongroupvalueschange={onGroupValuesChange}
 				onclearfilters={() => {
-					overviewSelectedUoas = null;
+					selectedUoas = null;
 					selectedPrelimKeys = null;
 					groupByCol = null;
-					deselectedGroupValues = { col: '', values: new Set() };
+					selectedGroupValues = null;
 				}}
 			/>
 		</aside>
@@ -607,25 +576,24 @@
 						flaggedTotal={flagged.length}
 						filteredTotal={filteredFlagged.length}
 						{isFiltered}
-						{overviewUoaOptions}
-						{overviewSelectedUoas}
+						{uoaOptions}
+						{selectedUoas}
 						{selectedPrelimKeys}
-						{PRELIM_KEYS}
 						{prelimOptions}
 						{metadataCols}
 						{groupByCol}
 						{groupByOptions}
 						{selectedGroupValues}
 						selectClass="w-60"
-						onoverviewuoaschange={onOverviewUoasChange}
+						onuoaschange={onUoasChange}
 						onprelimkeyschange={onPrelimKeysChange}
-						ongroupbycol={(v) => (groupByCol = v)}
+						ongroupbycol={(v) => { groupByCol = v; selectedGroupValues = null; }}
 						ongroupvalueschange={onGroupValuesChange}
 						onclearfilters={() => {
-							overviewSelectedUoas = null;
+							selectedUoas = null;
 							selectedPrelimKeys = null;
 							groupByCol = null;
-							deselectedGroupValues = { col: '', values: new Set() };
+							selectedGroupValues = null;
 						}}
 					/>
 				</div>
@@ -648,7 +616,7 @@
 							{selectedMapAdminName}
 							{selectedMapRow}
 							onmapuoaschange={(uoas) => {
-								overviewSelectedUoas = uoas.length > 0 ? uoas : null;
+								selectedUoas = uoas.length > 0 ? uoas : null;
 							}}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
@@ -731,14 +699,11 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsExport
-							{flagged}
-							{allUoas}
-							{exportSelectedUoas}
+							rows={filteredFlagged}
 							{handleJSON}
 							{handleCSV}
 							{handleXLSX}
 							{handleDeepDive}
-							onexportUoasChange={(v) => (exportUoaOverride = Array.isArray(v) ? v : [v])}
 						/>
 					</div>
 				</div>

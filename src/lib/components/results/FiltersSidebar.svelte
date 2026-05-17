@@ -8,18 +8,17 @@
 		flaggedTotal: number;
 		filteredTotal: number;
 		isFiltered: boolean;
-		overviewUoaOptions: Option[];
-		overviewSelectedUoas: string[] | null;
+		uoaOptions: Option[];
+		selectedUoas: string[] | null;
 		selectedPrelimKeys: string[] | null;
-		PRELIM_KEYS: readonly string[];
 		prelimOptions: Option[];
 		metadataCols: string[];
 		groupByCol: string | null;
 		groupByOptions: Option[];
-		selectedGroupValues: string[];
+		selectedGroupValues: string[] | null;
 		dropdownClass?: string;
 		selectClass?: string;
-		onoverviewuoaschange: (v: string | string[]) => void;
+		onuoaschange: (v: string | string[]) => void;
 		onprelimkeyschange: (v: string | string[]) => void;
 		ongroupbycol: (v: string | null) => void;
 		ongroupvalueschange: (v: string | string[]) => void;
@@ -30,10 +29,9 @@
 		flaggedTotal,
 		filteredTotal,
 		isFiltered,
-		overviewUoaOptions,
-		overviewSelectedUoas,
+		uoaOptions,
+		selectedUoas,
 		selectedPrelimKeys,
-		PRELIM_KEYS,
 		prelimOptions,
 		metadataCols,
 		groupByCol,
@@ -41,7 +39,7 @@
 		selectedGroupValues,
 		dropdownClass = 'w-full',
 		selectClass = '',
-		onoverviewuoaschange,
+		onuoaschange,
 		onprelimkeyschange,
 		ongroupbycol,
 		ongroupvalueschange,
@@ -66,10 +64,10 @@
 		{dropdownClass}
 		class={selectClass}
 		label="Units of analysis"
-		options={overviewUoaOptions}
-		selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
+		options={uoaOptions}
+		selected={selectedUoas ?? uoaOptions.map((o) => o.value)}
 		placeholder="All UOAs"
-		onchange={onoverviewuoaschange}
+		onchange={onuoaschange}
 	/>
 
 	<Select
@@ -77,7 +75,7 @@
 		class={selectClass}
 		label="Preliminary flag"
 		options={prelimOptions}
-		selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
+		selected={selectedPrelimKeys ?? prelimOptions.map((o) => o.value)}
 		placeholder="All flags"
 		onchange={onprelimkeyschange}
 	/>
@@ -99,7 +97,7 @@
 				class={selectClass}
 				label="Filter values"
 				options={groupByOptions}
-				selected={selectedGroupValues}
+				selected={selectedGroupValues ?? groupByOptions.map((o) => o.value)}
 				placeholder="Select values…"
 				onchange={ongroupvalueschange}
 			/>
