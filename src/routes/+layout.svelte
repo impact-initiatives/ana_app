@@ -182,6 +182,31 @@
 					</a>
 				{/each}
 
+				<!-- Upload shortcut — jumps to the CSV uploader on the home page -->
+				{#if !isActive('/')}
+					<a
+						href="{resolve('/')}#upload"
+						class="relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150 text-base-content/85 hover:text-base-content"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-4"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+							/>
+						</svg>
+						Upload
+					</a>
+				{/if}
+
 				<!-- Export shortcut — anchor to #export section on /results -->
 				<a
 					href="{resolve('/results')}#export"
@@ -279,6 +304,28 @@
 							</a>
 						</li>
 					{/each}
+					{#if !isActive('/')}
+						<li>
+							<a href="{resolve('/')}#upload">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="size-4"
+									aria-hidden="true"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+									/>
+								</svg>
+								Upload
+							</a>
+						</li>
+					{/if}
 					<li>
 						<a href="{resolve('/results')}#export">
 							<svg
