@@ -208,16 +208,14 @@ function buildGoodCsv(inds: IndMeta[], args: Args, mode: CsvMode): string {
 		uoaList = [...SS_ADM1_MIXED, ...SS_ADM2_MIXED.slice(0, uoas - SS_ADM1_MIXED.length)];
 	}
 
-	const isPlain = mode === 'plain';
-	const header = isPlain
-		? ['uoa', 'filter1', 'filter2', ...inds.map((i) => i.code)]
-		: ['uoa', ...inds.map((i) => i.code)];
+	const header = ['uoa', 'filter1', 'filter2', ...inds.map((i) => i.code)];
 	const lines: string[] = [header.join(',')];
 
 	for (const uoa of uoaList) {
-		const cells: string[] = isPlain
-			? [uoa, rng.pick(FILTER1_VALUES), rng.pick(FILTER2_VALUES)]
-			: [uoa];
+		// For pcode modes use the parent ADM1 pcode as filter1 (SS0101 → SS01; SS01 → SS01)
+		const filter1 =
+			mode === 'plain' ? rng.pick(FILTER1_VALUES) : uoa.length > 4 ? uoa.substring(0, 4) : uoa;
+		const cells: string[] = [uoa, filter1, rng.pick(FILTER2_VALUES)];
 
 		for (const ind of inds) {
 			if (ind.preference === 3) {
