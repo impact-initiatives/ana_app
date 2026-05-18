@@ -30,6 +30,13 @@ export enum MetricDirectionEnum {
 	Below = 'Below'
 }
 
+export enum EvidenceTypeEnum {
+	SupportingEvidence = 'Supporting evidence',
+	ANSignal = 'AN signal',
+	Outcome = 'Outcome',
+	Predictor = 'Predictor'
+}
+
 // ── Type-string parsing ───────────────────────────────────────────────────────
 
 /**
@@ -91,6 +98,7 @@ export interface Metric {
 	label?: string | null;
 	level?: string | null;
 	preference: number;
+	evidence_type: string | null;
 	type: MetricType;
 	msna_module?: string | null;
 	msna_indicator?: string | null;

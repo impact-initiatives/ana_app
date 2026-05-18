@@ -12,6 +12,7 @@ import {
 	type ReferenceRoot,
 	MetricPreferenceEnum,
 	MetricDirectionEnum,
+	EvidenceTypeEnum,
 	METRIC_TYPE_REGEX,
 	METRIC_ID_REGEX,
 	parseMetricType
@@ -20,6 +21,7 @@ export type { Thresholds, Metric, Indicator, SubFactor, Factor, System, Referenc
 export {
 	MetricPreferenceEnum,
 	MetricDirectionEnum,
+	EvidenceTypeEnum,
 	METRIC_TYPE_REGEX,
 	METRIC_ID_REGEX,
 	parseMetricType as parseIndicatorType
@@ -106,6 +108,14 @@ export const MetricSchema = z
 		label: z.string().nullable().optional(),
 		level: z.string().nullable().optional(),
 		preference: z.enum(MetricPreferenceEnum),
+		evidence_type: z
+			.enum([
+				EvidenceTypeEnum.SupportingEvidence,
+				EvidenceTypeEnum.ANSignal,
+				EvidenceTypeEnum.Outcome,
+				EvidenceTypeEnum.Predictor
+			])
+			.nullable(),
 		type: MetricTypeSchema,
 		msna_module: z.string().nullable().optional(),
 		msna_indicator: z.string().nullable().optional(),
@@ -122,7 +132,7 @@ export const MetricSchema = z
 		risk_concept: z.string().nullable().optional()
 	})
 	.superRefine((m, ctx) => {
-		const { thresholds } = m;
+		const { thresholds, evidence_type } = m;
 
 		// ── Rule: van requires an ─────────────────────────────────────────────
 		// This is a structural constraint on the JSON itself.
@@ -133,6 +143,21 @@ export const MetricSchema = z
 				path: ['thresholds', 'van'],
 				code: z.ZodIssueCode.custom,
 				message: 'thresholds.van cannot be set without thresholds.an'
+			});
+		}
+
+		// ── Rule: flaggable metrics must have a VAN threshold ─────────────────
+		// Supporting evidence metrics are excluded from the rollup; all others
+		// participate in the priority flag decision tree and require van.
+		if (
+			evidence_type !== null &&
+			evidence_type !== EvidenceTypeEnum.SupportingEvidence &&
+			(thresholds.van == null)
+		) {
+			ctx.addIssue({
+				path: ['thresholds', 'van'],
+				code: z.ZodIssueCode.custom,
+				message: `thresholds.van is required for evidence_type "${evidence_type}" (non-supporting-evidence metrics must have a VAN threshold)`
 			});
 		}
 	})
