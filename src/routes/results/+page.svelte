@@ -173,11 +173,11 @@
 
 	const groupByOptions = $derived.by<{ value: string; label: string }[]>(() => {
 		if (groupByCol === null) return [];
-		// Cross-filter: only show values present in rows matching current UoA + prelim selection
+		// Cross-filter from prelim only — UoA is excluded to avoid circular collapse
+		// (group selection cascades to UoA, which would narrow options back to one)
 		let rows: Row[] = flagged;
 		if (selectedPrelimKeys !== null)
 			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
-		if (selectedUoas !== null) rows = rows.filter((r) => selectedUoas!.includes(String(r.uoa)));
 		return [
 			...new Set(
 				rows
@@ -320,8 +320,6 @@
 	function applyGroupCol(col: string | null) {
 		groupByCol = col;
 		selectedGroupValues = null;
-		selectedUoas = null;
-		selectedPrelimKeys = null;
 	}
 
 	function clearAllFilters() {
