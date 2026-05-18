@@ -12,34 +12,36 @@ import type { FlagStatus } from '$lib/types/flags';
  * Lightweight, modular flagger
  *
  * - Entry: flagData(items, referenceJson)
- * 
- * Assumes validator has ensured `uoa` exists on every row and metric column names are the canonical IDs used in referenceJson.
+ *
+ * Assumes validator has ensured `uoa` exists on every row and metric column names
+ * are the canonical IDs used in referenceJson.
  *
  * Implementation notes:
- * - Missing canonical indicator columns are null-padded onto each input row before the mutate pass, so output rows always carry explicit nulls for every canonical id.
+ * - Missing canonical indicator columns are null-padded onto each input row before
+ *   the mutate pass, so output rows always carry explicit nulls for every canonical id.
  * - Per-metric flags and within-10% computations are generated via makeMetricSpec.
- *   Preference-3 metrics are excluded from the flagging pipeline (reference/circle-packing only).
- * - Subfactor status is evaluated using threshold groups from buildSubfactorList:
- *   metrics sharing the same (factor_threshold, evidence_threshold) pair are
- *   pooled and evaluated together. A subfactor flags if any group reaches its
- *   factor_threshold; it concludes no_flag if any group reaches its evidence_threshold.
- * - Factor and system statuses are rolled up from their children's statuses via
- *   rollupStatuses.
- * - prelim_flag is derived from system statuses using the ANA decision tree.
+ *   Preference-3 metrics are excluded from the flagging pipeline entirely.
+ *   Supporting-evidence metrics get metric-level flags but are excluded from
+ *   subfactor/factor/system rollup.
+ * - Subfactor status is evaluated using threshold groups from buildSubfactorList.
+ * - Factor and system statuses are rolled up from their children via rollupStatuses.
+ * - priority_flag is derived from system statuses using the ANA decision tree.
  *
  * Status vocabulary (used at all levels from metric to system):
- *   'flag'                 — threshold crossed / acute needs detected
- *   'no_flag'              — enough evidence to conclude no acute needs
- *   'insufficient_evidence'— some data present but not enough to conclude
- *   'no_data'              — no data at all for this level
- * 
- * Status vocabulary at prelim_flag level:
- *   'em' 				    	 — enough mortality data to conclude excess mortality
- *   'roem'              — enough across systems + health outcomes information to conclude Risk of Excess Mortality
- *   'acute_needs'       — enough evidence to conclude acute needs 
- * 	 'no_acute_needs'    — enough evidence to conclude no acute needs 
+ *   'flag'                  — threshold crossed / acute needs detected
+ *   'no_flag'               — enough evidence to conclude no acute needs
  *   'insufficient_evidence' — some data present but not enough to conclude
  *   'no_data'               — no data at all for this level
+ *
+ * Priority flag values (8-level decision tree):
+ *   'em'                    — excess mortality (mortality system flagged)
+ *   'ho_primary'            — HO proportion rule met
+ *   'ho_secondary'          — any HO metric has VAN flag
+ *   'an_primary'            — any HO AN flag, or any VAN flag, or ≥3 systems flagged
+ *   'an_secondary'          — 1–2 non-HO classification systems flagged
+ *   'insufficient_evidence' — some systems have gaps, none flagged
+ *   'no_data'               — all classification systems no_data
+ *   'no_acute_needs'        — all systems have sufficient data, none flagged
  */
 
 /* --------------------- Types --------------------- */
@@ -53,54 +55,49 @@ type MutateSpec = Record<string, (d: Row) => unknown>;
 
 const isNumber = (v: unknown): v is number => typeof v === 'number' && !Number.isNaN(v);
 
-
 /* ------------------- Metric level ------------------- */
-
 
 /**
  * Build a mutate spec object for a single metric ID.
  *
- * PURPOSE: Generates four transformation functions applied sequentially to every
- * row, so later entries can rely on values computed by earlier ones
- * (e.g. `_status` reads the `_flag` computed just before it).
- *
- * OUTPUT COLUMNS:
- * 1. {id}_flag               — boolean | null. Whether the metric crosses the AN threshold.
- * 2. {id}_status             — 'flag' | 'no_flag' | 'no_data'. Derived from the flag.
- * 3. {id}_within_10perc      — boolean | null. Value is within 10% of threshold (either side).
- * 4. {id}_within_10perc_change — boolean | null. Within 10% but has NOT yet crossed the threshold.
- *
- * @param id - Canonical metric ID (e.g. `"MET001"`).
- * @param md - Metric metadata from `getMetricMetadata` (needs `raw.thresholds.an` and `raw.above_or_below`).
- * @returns Object mapping column names to row-transform functions.
+ * OUTPUT COLUMNS (6 per metric):
+ * 1. {id}_flag                — boolean | null. AN threshold crossed.
+ * 2. {id}_status              — 'flag' | 'no_flag' | 'no_data'. From AN flag.
+ * 3. {id}_van_flag            — boolean | null. VAN threshold crossed (null if no VAN threshold).
+ * 4. {id}_van_status          — 'flag' | 'no_flag' | 'no_data'. From VAN flag.
+ * 5. {id}_within_10perc       — boolean | null. Value within 10% of AN threshold.
+ * 6. {id}_within_10perc_change — boolean | null. Within 10% but not yet flagged.
  */
 function makeMetricSpec(id: string, md: any): MutateSpec {
-
-	// Step 1: Access key needed items
-
-	// Construct the key for the boolean flag column (e.g., "MET001_flag")
 	const flagKey = `${id}_flag`;
-	// Extract the "Acute Needs" threshold from metadata. 
-	// If missing, we cannot calculate a flag, so we default to null.
+	const vanFlagKey = `${id}_van_flag`;
 	const th: number | null = md?.raw?.thresholds?.an ?? null;
-	// Extract the direction: 'Above' or 'Below'
+	const van: number | null = md?.raw?.thresholds?.van ?? null;
 	const dir: string | null = md?.raw?.above_or_below ?? null;
 
 	return {
-				/** 1. {id}_flag — true/false if value crosses the AN threshold; null if no threshold, direction, or value. */
 		[`${id}_flag`]: (d) => {
 			if (th === null || dir === null) return null;
 			const v = d[id];
 			if (v == null || !isNumber(v)) return null;
 			return dir === 'Above' ? v >= th : v <= th;
 		},
-		/** 2. {id}_status — 'flag' | 'no_flag' | 'no_data', derived from the flag computed above. */
 		[`${id}_status`]: (d) => {
 			const f = d[flagKey];
 			if (f == null) return 'no_data';
 			return f ? 'flag' : 'no_flag';
 		},
-		/** 3. {id}_within_10perc — true if |(v − th) / th| ≤ 0.1, regardless of direction; special-cased when th = 0. */
+		[`${id}_van_flag`]: (d) => {
+			if (van === null || dir === null) return null;
+			const v = d[id];
+			if (v == null || !isNumber(v)) return null;
+			return dir === 'Above' ? v >= van : v <= van;
+		},
+		[`${id}_van_status`]: (d) => {
+			const f = d[vanFlagKey];
+			if (f == null) return 'no_data';
+			return f ? 'flag' : 'no_flag';
+		},
 		[`${id}_within_10perc`]: (d) => {
 			if (th === null) return null;
 			const v = d[id];
@@ -108,8 +105,6 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 			if (th === 0) return v === 0;
 			return Math.abs((v - th) / th) <= 0.1;
 		},
-		
-		/** 4. {id}_within_10perc_change — true if within 10% of threshold but NOT yet flagged ("approaching"). */
 		[`${id}_within_10perc_change`]: (d) => {
 			if (th === null || dir === null || th === 0) return null;
 			const v = d[id];
@@ -121,63 +116,37 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 	};
 }
 
-
-
 /* ------------------- Subfactor level ------------------- */
 
 /**
  * Evaluate a single threshold group against a row.
  *
- * Counts flagged vs. no-flag metrics in the group, then compares against
- * `factor_threshold` and `evidence_threshold` to decide group status.
- * Metrics with null flags (no data) are ignored in both counts.
- *
- * @param group - Threshold group: `codes` (metric IDs), `factor_threshold`, `evidence_threshold`.
- * @param d - Row with pre-computed `{id}_flag` booleans for each code in the group.
- * @returns `'flag' | 'no_flag' | 'insufficient_evidence' | 'no_data'`
+ * Counts flagged vs. no-flag metrics, compares against factor_threshold and
+ * evidence_threshold. Metrics with null flags (no data) are ignored in both counts.
  */
 function evaluateGroup(group: ThresholdGroup, d: Row): Status {
-
-	// Step 0: Initialize 
 	let flag_n = 0;
 	let no_flag_n = 0;
 
-	// Step 1: Aggregate counts for the current row across all metrics in this group
 	for (const c of group.codes) {
-		// Access the pre-computed boolean flag for this specific metric (e.g., "MET001_flag")
 		const f = d[`${c}_flag`];
-		
-		if (f === true) {
-			flag_n++; 
-		} else if (f === false) {
-			no_flag_n++; 
-		}
-		// If f is null/undefined, skip it (contributes to the "missing data" gap)
+		if (f === true) flag_n++;
+		else if (f === false) no_flag_n++;
 	}
 
-	const data_n = flag_n + no_flag_n; // Total number of metrics with data in this group
-
-	// Step 2: Apply Decision Logic (Priority Order)
+	const data_n = flag_n + no_flag_n;
 	if (flag_n >= group.factor_threshold) return 'flag';
 	if (data_n >= group.evidence_threshold) return 'no_flag';
 	if (data_n === 0) return 'no_data';
 	return 'insufficient_evidence';
 }
 
-
-
 /* ---------------- Subfactor to System level ---------------- */
 
 /**
  * Roll up child status strings into a single parent status.
- * Used for subfactor→factor and factor→system rollups.
- *
  * Priority: flag > no_flag > insufficient_evidence > no_data.
- * Exception: all-no_data stays no_data rather than insufficient_evidence,
- * to distinguish "nothing collected" from "some data but not enough to conclude".
- *
- * @param statuses - Status values from child nodes (subfactors or factors).
- * @returns Aggregated parent status.
+ * All-no_data stays no_data (not insufficient_evidence).
  */
 function rollupStatuses(statuses: Status[]): Status {
 	if (statuses.length === 0) return 'no_data';
@@ -190,10 +159,6 @@ function rollupStatuses(statuses: Status[]): Status {
 /**
  * Build a mutate spec for group-level indicator counts (used by the heatmap).
  * Produces `${prefix}.missing_n`, `${prefix}.flag_n`, `${prefix}.no_flag_n`.
- *
- * @param prefix - Column prefix — typically a subfactor or factor path.
- * @param codes - Metric IDs to count across.
- * @returns Mutate spec object mapping column names to row-transform functions.
  */
 function makeCountSpec(prefix: string, codes: string[]): MutateSpec {
 	return {
@@ -209,10 +174,6 @@ function makeCountSpec(prefix: string, codes: string[]): MutateSpec {
 /**
  * Build a `{ [id]: metadata }` lookup for a list of metric IDs.
  * IDs whose metadata cannot be found are silently omitted.
- *
- * @param ids - Canonical metric IDs to look up.
- * @param referenceJson - Parsed `reference.json` passed to `getMetricMetadata`.
- * @returns Record mapping each metric ID to its metadata object.
  */
 function extractMetricMetadata(ids: string[], referenceJson: unknown): Record<string, any> {
 	return Object.fromEntries(
@@ -227,11 +188,12 @@ function extractMetricMetadata(ids: string[], referenceJson: unknown): Record<st
 
 /**
  * Flag data rows using the reference JSON metadata.
- * Runs five sequential mutate layers: metric → subfactor → factor → system → prelim_flag.
+ * Runs five sequential mutate layers: metric → subfactor → factor → system → priority_flag.
  *
  * @param items - Input rows; each must include a `uoa` field.
  * @param referenceJson - Parsed `reference.json`.
- * @returns Rows enriched with per-metric flags/statuses, rollup statuses at every level, and `prelim_flag`.
+ * @returns Rows enriched with per-metric flags/statuses, rollup statuses at every level,
+ *          VAN flags, and `priority_flag`.
  */
 export function flagData(items: Row[], referenceJson: unknown): Row[] {
 	if (!Array.isArray(items) || items.length === 0) return [];
@@ -239,16 +201,18 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 
 	// ── Setup ─────────────────────────────────────────────────────────────────
 
-	// all metric ids (order preserved by getAllMetricIds)
 	const allMetricIds: string[] = getAllMetricIds(referenceJson);
-
-	// metadata lookup: id → { raw, systemId, factorId, subfactorId, ... }
 	const metadata = extractMetricMetadata(allMetricIds, referenceJson);
 
-	// preference-3 metrics are for reference/circle-packing only — exclude from flagging
+	// preference-3 metrics are reference/circle-packing only — excluded entirely
 	const canonicalIds = allMetricIds.filter((id) => (metadata[id]?.raw?.preference ?? 1) !== 3);
 
-	// pad each row with explicit null for any canonical indicator column not present in input
+	// rollup ids exclude supporting-evidence metrics (they still get metric-level flags)
+	const rollupIds = canonicalIds.filter(
+		(id) => metadata[id]?.raw?.evidence_type !== 'Supporting evidence'
+	);
+
+	// pad each row with explicit null for any canonical column not in input
 	const padded: Row[] = items.map((r) => {
 		const out = { ...r };
 		for (const id of canonicalIds) {
@@ -257,25 +221,19 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		return out;
 	});
 
-	// ── Layer 1: indicator-level spec ─────────────────────────────────────────
-	// One spec object per indicator merged into one flat object.
-	// Within a single mutate() call, entries are applied sequentially (each entry
-	// receives the already-mutated row), so {id}_status can safely read {id}_flag.
+	// ── Layer 1: metric-level spec ────────────────────────────────────────────
+	// Runs for ALL canonicalIds (including supporting evidence metrics).
 	const metricSpec: MutateSpec = Object.assign(
 		{},
 		...canonicalIds.map((id) => makeMetricSpec(id, metadata[id]))
 	);
 
 	// ── Layer 2: subfactor-level spec ─────────────────────────────────────────
+	// Uses rollupIds only — supporting-evidence metrics excluded from counts and status.
 
-	const dataKeySet = new Set(canonicalIds);
+	const rollupKeySet = new Set(rollupIds);
 	const subList = buildSubfactorList(referenceJson) || [];
 
-	// Hierarchy lookup built while iterating subfactors, reused for layers 3 & 4.
-	// factorCodes[factorKey]     → indicator codes under that factor
-	// factorSfPaths[factorKey]   → subfactor paths under that factor
-	// systemCodes[systemId]      → indicator codes under that system
-	// systemFactorKeys[systemId] → factor keys under that system
 	const factorCodes: Record<string, string[]> = {};
 	const factorSfPaths: Record<string, string[]> = {};
 	const systemCodes: Record<string, string[]> = {};
@@ -284,16 +242,13 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 	const subfactorSpec: MutateSpec = {};
 
 	for (const { path, codes, groups } of subList) {
-		// restrict to indicators present in the canonical data
-		const inData = codes.filter((c: string) => dataKeySet.has(c));
+		const inData = codes.filter((c: string) => rollupKeySet.has(c));
 		if (inData.length === 0) continue;
 
-		// filter threshold groups to codes present in the data
 		const inDataGroups: ThresholdGroup[] = groups
-			.map((g: ThresholdGroup) => ({ ...g, codes: g.codes.filter((c: string) => dataKeySet.has(c)) }))
+			.map((g: ThresholdGroup) => ({ ...g, codes: g.codes.filter((c: string) => rollupKeySet.has(c)) }))
 			.filter((g: ThresholdGroup) => g.codes.length > 0);
 
-		// backward-compat counts + threshold-aware status
 		Object.assign(subfactorSpec, makeCountSpec(path, inData));
 		subfactorSpec[`${path}.status`] = (d) => {
 			if (inDataGroups.length === 0) return 'no_data';
@@ -304,7 +259,6 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 			return 'no_data';
 		};
 
-		// accumulate paths for layers 3 & 4
 		const [systemId, factorId] = path.split('.');
 		if (!systemId || !factorId) continue;
 		const factorKey = `${systemId}.${factorId}`;
@@ -312,13 +266,11 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		(factorCodes[factorKey] ??= []).push(...inData);
 		(factorSfPaths[factorKey] ??= []).push(path);
 		(systemCodes[systemId] ??= []).push(...inData);
-		// deduplicate: a factor key is pushed once per subfactor without this guard
 		const sfKeys = (systemFactorKeys[systemId] ??= []);
 		if (!sfKeys.includes(factorKey)) sfKeys.push(factorKey);
 	}
 
 	// ── Layer 3: factor-level spec ────────────────────────────────────────────
-	// Status is a rollup of the subfactor statuses written in Layer 2.
 	const factorSpec: MutateSpec = {};
 	for (const [factorKey, sfPaths] of Object.entries(factorSfPaths)) {
 		Object.assign(factorSpec, makeCountSpec(factorKey, factorCodes[factorKey]));
@@ -327,7 +279,6 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 	}
 
 	// ── Layer 4: system-level spec ────────────────────────────────────────────
-	// Status is a rollup of the factor statuses written in Layer 3.
 	const systemSpec: MutateSpec = {};
 	for (const [systemId, fKeys] of Object.entries(systemFactorKeys)) {
 		Object.assign(systemSpec, makeCountSpec(systemId, systemCodes[systemId]));
@@ -335,19 +286,11 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 			rollupStatuses(fKeys.map((k) => (d[`${k}.status`] ?? 'no_data') as Status));
 	}
 
-	// ── Layer 5: ANA preliminary flag classification ──────────────────────────
+	// ── Layer 5: priority flag decision tree ──────────────────────────────────
 
-	// Minimum other flagged classification systems required for ROEM.
-	const ROEM_MIN_OTHER_FLAGGED = 3;
-
-	// Use the full reference system list so systems absent from the CSV still
-	// contribute 'no_data' rather than being invisible to the decision tree.
 	const ref = referenceJson as ReferenceRoot;
 	const refSystemIds = ref.systems.map((s) => s.id);
 
-	// Required systems — absence already caught by validate-reference-json Pass 3,
-	// but guard here too so a misconfigured runtime fails loudly rather than silently
-	// downgrading EM/ROEM to ACUTE.
 	const mortalityId = refSystemIds.includes(SystemIDEnum.Mortality)
 		? SystemIDEnum.Mortality
 		: null;
@@ -368,49 +311,70 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		);
 	}
 
-	// Classification systems = all reference systems except market and mortality.
-	// • market_functionality: excluded by ANA design.
-	// • mortality: handled exclusively in step 1 (EM) — keeping it here would let a
-	//   flagged mortality system also trigger ACUTE (step 3), which is wrong.
+	// Classification systems = all except market_functionality and mortality
 	const classificationSystems = refSystemIds.filter(
 		(s) => s !== SystemIDEnum.MarketFunctionality && s !== SystemIDEnum.Mortality
 	);
 
-	const prelimFlagFn = (d: Row) => {
+	// Non-supporting-evidence HO metrics (for proportion rule and VAN checks)
+	const hoMetricIds = canonicalIds.filter(
+		(id) =>
+			metadata[id]?.systemId === healthOutcomesId &&
+			metadata[id]?.raw?.evidence_type !== 'Supporting evidence'
+	);
+
+	// All non-supporting-evidence metrics in classification systems (for VAN breadth check)
+	const allClassificationMetricIds = canonicalIds.filter(
+		(id) =>
+			classificationSystems.includes(metadata[id]?.systemId) &&
+			metadata[id]?.raw?.evidence_type !== 'Supporting evidence'
+	);
+
+	const priorityFlagFn = (d: Row): string => {
 		const status = (key: string): Status => ((d[`${key}.status`] as Status) ?? 'no_data');
 		const isFlagged = (key: string) => status(key) === 'flag';
-		const isInsuff  = (key: string) => status(key) === 'insufficient_evidence';
 
-		// 1. Emergency — mortality system flagged
+		// 0. Excess mortality — checked first; mortality data always overrides coverage gaps
 		if (isFlagged(mortalityId)) return 'em';
 
-		// 2. Risk of Emergency — health outcomes flagged AND ≥3 other classification systems flagged
-		const otherFlagged = classificationSystems
-			.filter((s) => s !== healthOutcomesId && isFlagged(s)).length;
-		if (isFlagged(healthOutcomesId) && otherFlagged >= ROEM_MIN_OTHER_FLAGGED) return 'roem';
-
-		// 3. Acute Needs — any classification system flagged
-		if (classificationSystems.some(isFlagged)) return 'acute';
-
-		// 4. Insufficient Evidence — no flag, at least one classification system insufficient
-		if (classificationSystems.some(isInsuff)) return 'insufficient_evidence';
-
-		// 5. No Data — no flag, no insufficient evidence, all classification systems have no data
+		// 1. Early exit: all classification systems have no data (and no mortality flag above)
 		if (classificationSystems.every((s) => status(s) === 'no_data')) return 'no_data';
 
-		// 6. No Acute Needs — mix of no_flag / no_data; enough evidence to rule out acute needs
-		return 'acute_needs';
+		// 2. HO proportion rule: (n>5 and ≥2/3 flag) OR (1≤n≤5 and ≥1/2 flag)
+		const hoAvail = hoMetricIds.filter((id) => d[`${id}_flag`] !== null).length;
+		const hoFlagged = hoMetricIds.filter((id) => d[`${id}_flag`] === true).length;
+		if (hoAvail > 5 && hoFlagged / hoAvail >= 2 / 3) return 'ho_primary';
+		if (hoAvail > 0 && hoAvail <= 5 && hoFlagged / hoAvail >= 0.5) return 'ho_primary';
+
+		// 3. Any HO metric has VAN flag
+		if (hoMetricIds.some((id) => d[`${id}_van_flag`] === true)) return 'ho_secondary';
+
+		// 4. AN depth & breadth
+		const anyHoAnFlag = hoMetricIds.some((id) => d[`${id}_flag`] === true);
+		const anyVanFlag = allClassificationMetricIds.some((id) => d[`${id}_van_flag`] === true);
+		const nSystemsFlagged = classificationSystems.filter((s) => isFlagged(s)).length;
+		if (anyHoAnFlag || anyVanFlag || nSystemsFlagged >= 3) return 'an_primary';
+
+		// 5. Any classification system flagged
+		if (classificationSystems.some(isFlagged)) return 'an_secondary';
+
+		// 6. No flags but some systems have gaps
+		const hasGaps = classificationSystems.some(
+			(s) => status(s) === 'no_data' || status(s) === 'insufficient_evidence'
+		);
+		if (hasGaps) return 'insufficient_evidence';
+
+		// 7. All systems have data, nothing flagged
+		return 'no_acute_needs';
 	};
 
 	// ── Pipeline ──────────────────────────────────────────────────────────────
-	// Five sequential mutate() steps, one per logical layer — mirrors dplyr's
-	// pipe: padded |> mutate(...) |> mutate(...) |> ...
 	return tidy(
 		padded,
-		mutate(metricSpec), // Layer 1: per-metric _flag, _status, _within_10perc (preference 1+2 only)
-		mutate(subfactorSpec), // Layer 2: subfactor counts + threshold-aware status
-		mutate(factorSpec),    // Layer 3: factor counts + rollup status
-		mutate(systemSpec),    // Layer 4: system counts + rollup status
-		mutate({ prelim_flag: prelimFlagFn }) // Layer 5: ANA classification
+		mutate(metricSpec),
+		mutate(subfactorSpec),
+		mutate(factorSpec),
+		mutate(systemSpec),
+		mutate({ priority_flag: priorityFlagFn })
 	);
 }

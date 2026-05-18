@@ -499,7 +499,7 @@ function addLandingPage(ws: Worksheet, uoaRow: Record<string, any>, sheetMeta: S
 		r.height = 20;
 	};
 
-	addOutcomeRow('Prelim flag', String(uoaRow['prelim_flag'] ?? ''), false);
+	addOutcomeRow('Priority flag', String(uoaRow['priority_flag'] ?? ''), false);
 	addOutcomeRow('Final flag', '', true);
 }
 

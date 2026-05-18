@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FLAG_BADGE_MAP, getFlagBadge, getPrelimBadge, systemBaseColor } from '$lib/utils/colors';
+	import { FLAG_BADGE_MAP, getFlagBadge, getPriorityBadge, systemBaseColor } from '$lib/utils/colors';
 	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 
@@ -22,7 +22,7 @@
 	const prelimCounts = $derived.by(() => {
 		const counts = new Map<string, number>();
 		for (const row of selectedRows) {
-			const key = String(row.prelim_flag ?? 'no_data');
+			const key = String(row.priority_flag ?? 'no_data');
 			counts.set(key, (counts.get(key) ?? 0) + 1);
 		}
 		return counts;

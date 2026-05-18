@@ -27,6 +27,7 @@ function validRow(overrides: Record<string, string> = {}): RefRow {
 		'Sub-Factor': 'Mortality',
 		Indicator: 'Crude mortality rate',
 		Preference: '1',
+		'Evidence type': 'AN signal',
 		Type: 'num[0+]',
 		Metric: 'Deaths per 10,000 per day',
 		'MSNA module': '',

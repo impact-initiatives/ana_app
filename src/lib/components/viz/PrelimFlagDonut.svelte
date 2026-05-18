@@ -2,8 +2,8 @@
 	import { pie } from 'd3-shape';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { getPrelimBadge } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { getPriorityBadge } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 	import Arc from './primitives/Arc.svelte';
@@ -30,9 +30,9 @@
 	// Radius: explicit override or auto-fit to container (max 120px)
 	const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 
-	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
+	const PRELIM_KEYS = PRIORITY_FLAG_KEYS; // local alias kept for readability
 
-	// ── Count rows per prelim_flag ────────────────────────────────────────────
+	// ── Count rows per priority_flag ────────────────────────────────────────────
 	interface Slice {
 		key: string;
 		count: number;
@@ -44,14 +44,14 @@
 		const counts: Record<string, number> = {};
 		for (const k of PRELIM_KEYS) counts[k] = 0;
 		for (const row of rows) {
-			const k = String(row.prelim_flag ?? '');
+			const k = String(row.priority_flag ?? '');
 			if (k in counts) counts[k]++;
 		}
 		return PRELIM_KEYS.map((k) => ({
 			key: k,
 			count: counts[k],
-			label: getPrelimBadge(k)?.label ?? k,
-			color: getPrelimBadge(k)?.bg ?? '#9ca3af'
+			label: getPriorityBadge(k)?.label ?? k,
+			color: getPriorityBadge(k)?.bg ?? '#9ca3af'
 		}));
 	});
 

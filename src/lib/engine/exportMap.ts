@@ -1,5 +1,5 @@
-import { getPrelimBadge } from '$lib/utils/colors';
-import { PRELIM_FLAG_KEYS, ACUTE_PRELIM_FLAGS, type PrelimFlag } from '$lib/types/flags';
+import { getPriorityBadge } from '$lib/utils/colors';
+import { PRIORITY_FLAG_KEYS, ACUTE_PRIORITY_FLAGS, type PriorityFlag } from '$lib/types/flags';
 
 const PAINT_PROPS = [
 	'fill',
@@ -14,8 +14,8 @@ const PAINT_PROPS = [
 ] as const;
 
 const FONT = 'Segoe UI';
-const PRELIM_KEYS = PRELIM_FLAG_KEYS;
-const FLAGGED_STATUSES = ACUTE_PRELIM_FLAGS;
+const PRELIM_KEYS = PRIORITY_FLAG_KEYS;
+const FLAGGED_STATUSES = ACUTE_PRIORITY_FLAGS;
 
 let _measureCanvas: HTMLCanvasElement | null = null;
 /** Measure rendered text width using canvas — exact, avoids character-width estimates. */
@@ -100,7 +100,7 @@ export interface ExportMapOpts {
 	level: 'ADM1' | 'ADM2' | 'MIXED';
 	country: string | null;
 	/** Rows from flagStore — used to compute flagged count when flaggedCount is omitted. */
-	rows: { prelim_flag?: unknown }[];
+	rows: { priority_flag?: unknown }[];
 	anaLogoSvg: string;
 	impactLogoSvg: string;
 	/** Pre-computed flagged count. Overrides the default prelim-based calculation. */
@@ -152,7 +152,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	// Resolve legend colours while container still alive
 	const resolvedColors: Record<string, string> = {};
 	for (const key of PRELIM_KEYS) {
-		const badge = getPrelimBadge(key);
+		const badge = getPriorityBadge(key);
 		if (badge) resolvedColors[key] = resolveVar(badge.bg, container);
 	}
 	const resolvedLegendEntries = legendEntriesOpt?.map((e) => ({
@@ -174,7 +174,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	const title = layerTitle ?? defaultTitle;
 	
 	const flaggedCount =
-		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.prelim_flag ?? '') as PrelimFlag)).length;
+		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.priority_flag ?? '') as PriorityFlag)).length;
 	
 	const now = new Date();
 	const datePart = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -210,7 +210,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 		resolvedLegendEntries ??
 		PRELIM_KEYS.map((key) => ({
 			color: resolvedColors[key] ?? '#999',
-			label: getPrelimBadge(key)?.label ?? key
+			label: getPriorityBadge(key)?.label ?? key
 		}));
 
 	for (const { color, label: entryLabel } of activeLegendEntries) {

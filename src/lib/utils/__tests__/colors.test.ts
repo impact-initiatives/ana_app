@@ -13,11 +13,11 @@ import {
 	colourForHierarchy,
 	formatMetricTooltip,
 	FLAG_BADGE_MAP,
-	PRELIM_BADGE_MAP,
+	PRIORITY_BADGE_MAP,
 	getFlagBadge,
-	getPrelimBadge
+	getPriorityBadge
 } from '$lib/utils/colors';
-import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 
 describe('dotFill', () => {
 	it('returns flag color for flag status', () => {
@@ -183,29 +183,29 @@ describe('getFlagBadge', () => {
 	});
 });
 
-describe('PRELIM_BADGE_MAP', () => {
-	it('has entries for all six prelim_flag values', () => {
-		for (const key of PRELIM_FLAG_KEYS) {
-			expect(PRELIM_BADGE_MAP).toHaveProperty(key);
+describe('PRIORITY_BADGE_MAP', () => {
+	it('has entries for all eight priority_flag values', () => {
+		for (const key of PRIORITY_FLAG_KEYS) {
+			expect(PRIORITY_BADGE_MAP).toHaveProperty(key);
 		}
 	});
 
 	it('each entry has a bg and label', () => {
-		for (const entry of Object.values(PRELIM_BADGE_MAP)) {
+		for (const entry of Object.values(PRIORITY_BADGE_MAP)) {
 			expect(entry).toHaveProperty('bg');
 			expect(entry).toHaveProperty('label');
 		}
 	});
 });
 
-describe('getPrelimBadge', () => {
+describe('getPriorityBadge', () => {
 	it('returns the badge for known keys', () => {
-		expect(getPrelimBadge('em')).toBe(PRELIM_BADGE_MAP.em);
-		expect(getPrelimBadge('no_data')).toBe(PRELIM_BADGE_MAP.no_data);
+		expect(getPriorityBadge('em')).toBe(PRIORITY_BADGE_MAP.em);
+		expect(getPriorityBadge('no_data')).toBe(PRIORITY_BADGE_MAP.no_data);
 	});
 
 	it('returns undefined for unknown keys', () => {
-		expect(getPrelimBadge('EM')).toBeUndefined();
-		expect(getPrelimBadge('unknown')).toBeUndefined();
+		expect(getPriorityBadge('EM')).toBeUndefined();
+		expect(getPriorityBadge('unknown')).toBeUndefined();
 	});
 });

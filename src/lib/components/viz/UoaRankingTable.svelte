@@ -3,7 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
-	import { PRELIM_FLAG_KEYS, ACUTE_PRELIM_FLAGS, type PrelimFlag } from '$lib/types/flags';
+	import { PRIORITY_ORDER, ACUTE_PRIORITY_FLAGS, type PriorityFlag } from '$lib/types/flags';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 
@@ -19,24 +19,24 @@
 
 	let { rows, systems, systemCodes, onprelimclick }: Props = $props();
 
-	const ACUTE_FLAGS = ACUTE_PRELIM_FLAGS;
+	const ACUTE_FLAGS = ACUTE_PRIORITY_FLAGS;
 
 	interface RankedRow {
 		uoa: string;
-		prelim_flag: string;
+		priority_flag: string;
 		flaggedSystems: number;
 		flaggedIndicators: number;
 		within10: number;
 	}
 
-	const PRELIM_ORDER = Object.fromEntries(PRELIM_FLAG_KEYS.map((k, i) => [k, i]));
+	const PRELIM_ORDER = PRIORITY_ORDER;
 
 	// Single pass: compute ranked rows + summary + sorted table in one $derived.
 	const processed = $derived.by(() => {
 		let total = 0, flagged = 0, totalFlags = 0, totalWithin10 = 0;
 		const ranked: RankedRow[] = rows.map((row) => {
 			const uoa = String(row.uoa ?? '');
-			const prelim_flag = String(row.prelim_flag ?? '');
+			const priority_flag = String(row.priority_flag ?? '');
 			let flaggedSystems = 0, flaggedIndicators = 0, within10 = 0;
 			for (const sys of systems) {
 				const codes = systemCodes.get(sys.id) ?? [];
@@ -48,14 +48,14 @@
 				if (sysFlagged) flaggedSystems++;
 			}
 			total++;
-			if (ACUTE_FLAGS.has(prelim_flag as PrelimFlag)) flagged++;
+			if (ACUTE_FLAGS.has(priority_flag as PriorityFlag)) flagged++;
 			totalFlags += flaggedIndicators;
 			totalWithin10 += within10;
-			return { uoa, prelim_flag, flaggedSystems, flaggedIndicators, within10 };
+			return { uoa, priority_flag, flaggedSystems, flaggedIndicators, within10 };
 		});
 
 		const sorted = [...ranked].sort((a, b) => {
-			const po = (PRELIM_ORDER[a.prelim_flag] ?? 99) - (PRELIM_ORDER[b.prelim_flag] ?? 99);
+			const po = (PRELIM_ORDER[a.priority_flag as PriorityFlag] ?? 99) - (PRELIM_ORDER[b.priority_flag as PriorityFlag] ?? 99);
 			if (po !== 0) return po;
 			const sd = b.flaggedSystems - a.flaggedSystems;
 			if (sd !== 0) return sd;
@@ -67,7 +67,7 @@
 		return {
 			summary: { total, flagged, totalFlags, totalWithin10 },
 			tableRows: sorted.map((r) => ({
-				UoA: r.uoa, Flag: r.prelim_flag, Systems: r.flaggedSystems, Metrics: r.flaggedIndicators, Near: r.within10
+				UoA: r.uoa, Flag: r.priority_flag, Systems: r.flaggedSystems, Metrics: r.flaggedIndicators, Near: r.within10
 			})),
 			rankedByUoa: new Map(ranked.map((r) => [r.uoa, r]))
 		};
@@ -81,7 +81,7 @@
 
 	function handleRowClick(cells: Record<string, string>) {
 		const r = rankedByUoa.get(cells['UoA'] ?? '');
-		onprelimclick?.(r?.prelim_flag ?? null);
+		onprelimclick?.(r?.priority_flag ?? null);
 	}
 </script>
 

@@ -16,8 +16,8 @@
 	import { quintOut } from 'svelte/easing';
 	import { appReady } from '$lib/stores/appReady.svelte';
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
-	import { PRELIM_BADGE_MAP } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { PRIORITY_BADGE_MAP } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 
 	import ResultsOverview from '$lib/components/results/ResultsOverview.svelte';
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
@@ -177,7 +177,7 @@
 		// (group selection cascades to UoA, which would narrow options back to one)
 		let rows: Row[] = flagged;
 		if (selectedPrelimKeys !== null)
-			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
+			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.priority_flag ?? '')));
 		return [
 			...new Set(
 				rows
@@ -207,7 +207,7 @@
 	const uoaOptions = $derived.by(() => {
 		let rows: Row[] = filteredByGroup;
 		if (selectedPrelimKeys !== null)
-			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
+			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.priority_flag ?? '')));
 		return [...new Set(rows.map((r) => String(r.uoa)))]
 			.sort()
 			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
@@ -219,9 +219,9 @@
 			selectedUoas === null
 				? filteredByGroup
 				: filteredByGroup.filter((r) => selectedUoas!.includes(String(r.uoa)));
-		return PRELIM_FLAG_KEYS.filter((key) =>
-			rows.some((r) => String(r.prelim_flag ?? '') === key)
-		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }));
+		return PRIORITY_FLAG_KEYS.filter((key) =>
+			rows.some((r) => String(r.priority_flag ?? '') === key)
+		).map((key) => ({ value: key, label: PRIORITY_BADGE_MAP[key].label }));
 	});
 
 	// ── Cascade helpers ───────────────────────────────────────────────────────
@@ -231,7 +231,7 @@
 		const allInScope = [...new Set(filteredByGroup.map((r) => String(r.uoa)))];
 		const matching = allInScope.filter((uoa) =>
 			filteredByGroup.some(
-				(r) => String(r.uoa) === uoa && keys.includes(String(r.prelim_flag ?? ''))
+				(r) => String(r.uoa) === uoa && keys.includes(String(r.priority_flag ?? ''))
 			)
 		);
 		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
@@ -241,12 +241,12 @@
 		if (uoas === null) return null;
 		const allInScope = [
 			...new Set(
-				filteredByGroup.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== '')
+				filteredByGroup.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== '')
 			)
 		];
 		const matching = allInScope.filter((flag) =>
 			filteredByGroup.some(
-				(r) => uoas.includes(String(r.uoa)) && String(r.prelim_flag ?? '') === flag
+				(r) => uoas.includes(String(r.uoa)) && String(r.priority_flag ?? '') === flag
 			)
 		);
 		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
@@ -255,7 +255,7 @@
 	function computeMatchingGroupValues(uoas: string[] | null, keys: string[] | null): string[] | null {
 		if (groupByCol === null) return null;
 		let rows: Row[] = flagged;
-		if (keys !== null) rows = rows.filter((r) => keys.includes(String(r.prelim_flag ?? '')));
+		if (keys !== null) rows = rows.filter((r) => keys.includes(String(r.priority_flag ?? '')));
 		if (uoas !== null) rows = rows.filter((r) => uoas.includes(String(r.uoa)));
 		const allGroupVals = [
 			...new Set(
@@ -299,10 +299,10 @@
 				: flagged.filter((r) => vals.includes(String(r[groupByCol!] ?? '')));
 		// Cascade to prelim: show chips for prelim keys present in group rows
 		const allPrelimsInFlagged = [
-			...new Set(flagged.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== ''))
+			...new Set(flagged.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== ''))
 		];
 		const prelimsInGroup = [
-			...new Set(groupRows.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== ''))
+			...new Set(groupRows.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== ''))
 		];
 		selectedPrelimKeys =
 			prelimsInGroup.length === 0 || prelimsInGroup.length === allPrelimsInFlagged.length
@@ -360,7 +360,7 @@
 	const filteredForMap = $derived.by<Row[]>(() => {
 		if (selectedPrelimKeys === null) return filteredByGroup;
 		return filteredByGroup.filter((r) =>
-			selectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
+			selectedPrelimKeys!.includes(String(r.priority_flag ?? ''))
 		);
 	});
 

@@ -3,8 +3,8 @@
 	import { geoIdentity, geoBounds } from 'd3-geo';
 	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
-	import { getPrelimBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { getPriorityBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
@@ -132,7 +132,7 @@
 		containerWidth > 0 ? Math.round(Math.max(150, Math.min(700, containerWidth / aspectRatio))) : 0
 	);
 
-	const NO_DATA_COLOR = getPrelimBadge('no_data')?.bg ?? 'var(--color-no-data)';
+	const NO_DATA_COLOR = getPriorityBadge('no_data')?.bg ?? 'var(--color-no-data)';
 
 	function enrichFeatures(
 		features: GeoFC['features'],
@@ -148,12 +148,12 @@
 
 			if (!row) {
 				flagColor = transparent ? 'transparent' : NO_DATA_COLOR;
-				flagLabel = getPrelimBadge('no_data')?.label ?? 'No Data';
+				flagLabel = getPriorityBadge('no_data')?.label ?? 'No Data';
 			} else if (layer.type === 'prelim') {
-				const flag = String(row.prelim_flag ?? '');
-				const badge = flag ? getPrelimBadge(flag) : undefined;
+				const flag = String(row.priority_flag ?? '');
+				const badge = flag ? getPriorityBadge(flag) : undefined;
 				flagColor = badge?.bg ?? NO_DATA_COLOR;
-				flagLabel = badge?.label ?? getPrelimBadge('no_data')?.label ?? 'No Data';
+				flagLabel = badge?.label ?? getPriorityBadge('no_data')?.label ?? 'No Data';
 			} else {
 				const status = String(row[layer.field] ?? 'no_data');
 				const badge = getFlagBadge(status);
@@ -374,7 +374,7 @@
 {/if}
 
 {#if layer.type === 'prelim'}
-	<LegendBadge keys={[]} prelimKeys={PRELIM_FLAG_KEYS} />
+	<LegendBadge keys={[]} prelimKeys={PRIORITY_FLAG_KEYS} />
 {:else}
 	<LegendBadge keys={legendStatusKeys} />
 {/if}

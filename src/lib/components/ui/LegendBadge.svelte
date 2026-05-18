@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { getFlagBadge, getPrelimBadge } from '$lib/utils/colors';
+	import { getFlagBadge, getPriorityBadge } from '$lib/utils/colors';
 
 	interface Props {
 		/** FLAG_BADGE keys to display. Default: the four main statuses. */
@@ -66,7 +66,7 @@
 		<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
 			<span class="font-semibold">Preliminary flag:</span>
 			{#each prelimKeys as pk (pk)}
-				{@const pb = getPrelimBadge(pk)}
+				{@const pb = getPriorityBadge(pk)}
 				{#if pb}
 					<span class="flex items-center gap-1">
 						{#if btnCircle}

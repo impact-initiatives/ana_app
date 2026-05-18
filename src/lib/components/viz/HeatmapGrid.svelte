@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { tileCssClass, tileStyle, getPrelimBadge } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { tileCssClass, tileStyle, getPriorityBadge } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS, PRIORITY_ORDER } from '$lib/types/flags';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import SortIcon from '$lib/components/ui/SortIcon.svelte';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
@@ -102,7 +102,7 @@
 		}
 	}
 
-	const PRELIM_ORDER = Object.fromEntries(PRELIM_FLAG_KEYS.map((k, i) => [k, i]));
+	const PRELIM_ORDER = PRIORITY_ORDER;
 
 	const sortedRows = $derived.by(() => {
 		if (sortKey === null) return rows;
@@ -111,8 +111,8 @@
 			if (sortKey === 'uoa') {
 				cmp = String(a.uoa).localeCompare(String(b.uoa));
 			} else if (sortKey === 'prelim') {
-				const ao = PRELIM_ORDER[a.prelim_flag] ?? 99;
-				const bo = PRELIM_ORDER[b.prelim_flag] ?? 99;
+				const ao = (PRELIM_ORDER as Record<string, number>)[String(a.priority_flag)] ?? 99;
+				const bo = (PRELIM_ORDER as Record<string, number>)[String(b.priority_flag)] ?? 99;
 				cmp = ao - bo;
 			} else {
 				const codes = systemCodes.get(sortKey!) ?? [];
@@ -227,8 +227,8 @@
 							</td>
 						{/each}
 						<td class="p-0.5 text-center whitespace-nowrap">
-							{#if getPrelimBadge(row.prelim_flag)}
-								<PrelimBadge value={row.prelim_flag} />
+							{#if getPriorityBadge(row.priority_flag)}
+								<PrelimBadge value={row.priority_flag} />
 							{:else}
 								<span class="text-base-content/40 text-xs">–</span>
 							{/if}
@@ -241,6 +241,6 @@
 
 	<!-- Legend -->
 	<LegendBadge
-		prelimKeys={PRELIM_FLAG_KEYS}
+		prelimKeys={PRIORITY_FLAG_KEYS}
 	></LegendBadge>
 </Card>
