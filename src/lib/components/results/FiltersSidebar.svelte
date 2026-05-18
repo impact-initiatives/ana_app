@@ -67,6 +67,7 @@
 		options={uoaOptions}
 		selected={selectedUoas ?? uoaOptions.map((o) => o.value)}
 		placeholder="All UOAs"
+		unitLabel="UoAs"
 		onchange={onuoaschange}
 	/>
 
@@ -77,6 +78,7 @@
 		options={prelimOptions}
 		selected={selectedPrelimKeys ?? prelimOptions.map((o) => o.value)}
 		placeholder="All flags"
+		unitLabel="flags"
 		onchange={onprelimkeyschange}
 	/>
 

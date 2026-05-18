@@ -34,9 +34,11 @@
 		dropdownClass?: string;
 		/** Extra classes applied to the root container div (e.g. `"w-60"` to constrain trigger + dropdown width). */
 		class?: string;
+		/** Unit label used in the "all selected" display, e.g. "UoAs" → "All UoAs (5)". Omit for plain "All (5)". */
+		unitLabel?: string;
 	}
 
-	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72', class: className = '' }: Props = $props();
+	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72', class: className = '', unitLabel = '' }: Props = $props();
 
 	// Mode derived from the shape of selected — no separate prop needed.
 	const isMultiple = $derived(Array.isArray(selected));
@@ -111,16 +113,13 @@
 		onchange?.(next);
 	}
 
-	function selectAll() {
+	function resetToAll() {
 		onchange?.(flatOptions.map((o) => o.value));
 	}
 
-	function clearAll() {
-		onchange?.([]);
-	}
-
 	function removeChip(v: string) {
-		onchange?.(multiVal.filter((s) => s !== v));
+		const next = multiVal.filter((s) => s !== v);
+		onchange?.(next.length === 0 ? flatOptions.map((o) => o.value) : next);
 	}
 
 	function onSearchEnter() {
@@ -165,9 +164,9 @@
 				{/if}
 			{:else}
 				{#if multiVal.length === 0}
-					<span class="text-base-content/85">{placeholder}</span>
+					<span class="text-base-content/50 italic">None selected</span>
 				{:else if multiVal.length === flatOptions.length}
-					<span class="text-base-content/85">All ({flatOptions.length})</span>
+					<span class="text-base-content/85">All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000 ? '1000+' : flatOptions.length})</span>
 				{:else}
 					{#each multiVal.slice(0, 3) as v (v)}
 						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
@@ -239,22 +238,13 @@
 			{/if}
 
 			<!-- Multiple mode toolbar -->
-			{#if isMultiple}
+			{#if isMultiple && !allSelected}
 				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
 					<button
 						type="button"
-						class="btn btn-soft btn-xs text-primary disabled:text-base-content/75 text-xs"
-						disabled={searchQuery ? filtered.length === 0 : allSelected}
-						onclick={searchQuery ? onSearchEnter : selectAll}
-					>{searchQuery ? 'Select' : 'Select all'}</button
-					>
-					<span class="text-primary">|</span>
-					<button
-						type="button"
-						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/75 text-xs"
-						disabled={noneSelected}
-						onclick={clearAll}>Clear</button
-					>
+						class="btn btn-soft btn-xs text-primary text-xs"
+						onclick={resetToAll}
+					>Reset to all</button>
 					<span class="text-base-content/75 ml-auto text-xs">
 						{multiVal.length}/{flatOptions.length}
 					</span>
