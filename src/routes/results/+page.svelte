@@ -195,23 +195,7 @@
 		selectedGroupValues = arr.length === groupByOptions.length ? null : arr;
 	}
 
-	const uoaOptions = $derived.by(() => {
-		const rows =
-			groupByCol !== null && selectedGroupValues !== null
-				? flagged.filter((r) => selectedGroupValues!.includes(String(r[groupByCol!] ?? '')))
-				: flagged;
-		return [...new Set(rows.map((r) => String(r.uoa)))]
-			.sort()
-			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
-	});
-
 	let selectedUoas = $state<string[] | null>(null);
-
-	function onUoasChange(next: string | string[]) {
-		const arr = Array.isArray(next) ? next : [next];
-		selectedUoas = arr.length === uoaOptions.length ? null : arr;
-	}
-
 	let selectedPrelimKeys = $state<string[] | null>(null);
 
 	// Stage 1: group filter only
@@ -220,18 +204,31 @@
 		return flagged.filter((r) => selectedGroupValues!.includes(String(r[groupByCol!] ?? '')));
 	});
 
-	// Auxiliary: group + UoA, no prelim — drives dynamic prelim options only
-	const filteredForPrelimOpts = $derived.by<Row[]>(() => {
-		if (selectedUoas === null) return filteredByGroup;
-		return filteredByGroup.filter((r) => selectedUoas!.includes(String(r.uoa)));
+	// Cross-filter: UoA options reflect group + prelim (excludes UoA filter itself)
+	const uoaOptions = $derived.by(() => {
+		let rows: Row[] = filteredByGroup;
+		if (selectedPrelimKeys !== null)
+			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
+		return [...new Set(rows.map((r) => String(r.uoa)))]
+			.sort()
+			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
 	});
 
-	// Dynamic prelim options: only flags present in the current group + UoA selection.
-	const prelimOptions = $derived(
-		PRELIM_FLAG_KEYS.filter((key) =>
-			filteredForPrelimOpts.some((r) => String(r.prelim_flag ?? '') === key)
-		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }))
-	);
+	function onUoasChange(next: string | string[]) {
+		const arr = Array.isArray(next) ? next : [next];
+		selectedUoas = arr.length === uoaOptions.length ? null : arr;
+	}
+
+	// Cross-filter: prelim options reflect group + UoA (excludes prelim filter itself)
+	const prelimOptions = $derived.by(() => {
+		const rows =
+			selectedUoas === null
+				? filteredByGroup
+				: filteredByGroup.filter((r) => selectedUoas!.includes(String(r.uoa)));
+		return PRELIM_FLAG_KEYS.filter((key) =>
+			rows.some((r) => String(r.prelim_flag ?? '') === key)
+		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }));
+	});
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
@@ -247,22 +244,37 @@
 		}
 	}
 
-	// Stage 2: group + prelim, no UoA — map always colours all areas
+	// Effective selections: clamp raw state to currently available options (drops stale chips)
+	const effectiveSelectedUoas = $derived.by(() => {
+		if (selectedUoas === null) return null;
+		const available = new Set(uoaOptions.map((o) => o.value));
+		const valid = selectedUoas.filter((v) => available.has(v));
+		return valid.length === 0 || valid.length === uoaOptions.length ? null : valid;
+	});
+
+	const effectiveSelectedPrelimKeys = $derived.by(() => {
+		if (selectedPrelimKeys === null) return null;
+		const available = new Set<string>(prelimOptions.map((o) => o.value));
+		const valid = selectedPrelimKeys.filter((v) => available.has(v));
+		return valid.length === 0 || valid.length === prelimOptions.length ? null : valid;
+	});
+
+	// Stage 2: group + effective prelim, no UoA — map always colours all areas
 	const filteredForMap = $derived.by<Row[]>(() => {
-		if (selectedPrelimKeys === null) return filteredByGroup;
+		if (effectiveSelectedPrelimKeys === null) return filteredByGroup;
 		return filteredByGroup.filter((r) =>
-			selectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
+			effectiveSelectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
 		);
 	});
 
 	// Stage 3: full filter (group + prelim + UoA) — all non-map components
 	const filteredFlagged = $derived.by<Row[]>(() => {
-		if (selectedUoas === null) return filteredForMap;
-		return filteredForMap.filter((r) => selectedUoas!.includes(String(r.uoa)));
+		if (effectiveSelectedUoas === null) return filteredForMap;
+		return filteredForMap.filter((r) => effectiveSelectedUoas!.includes(String(r.uoa)));
 	});
 
 	const isFiltered = $derived(
-		selectedUoas !== null || selectedPrelimKeys !== null || groupByCol !== null
+		effectiveSelectedUoas !== null || effectiveSelectedPrelimKeys !== null || groupByCol !== null
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -542,8 +554,8 @@
 				filteredTotal={filteredFlagged.length}
 				{isFiltered}
 				{uoaOptions}
-				{selectedUoas}
-				{selectedPrelimKeys}
+				selectedUoas={effectiveSelectedUoas}
+				selectedPrelimKeys={effectiveSelectedPrelimKeys}
 				{prelimOptions}
 				{metadataCols}
 				{groupByCol}
