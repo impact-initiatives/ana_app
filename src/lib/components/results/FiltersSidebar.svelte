@@ -65,7 +65,8 @@
 		class={selectClass}
 		label="Units of analysis"
 		options={uoaOptions}
-		selected={selectedUoas ?? uoaOptions.map((o) => o.value)}
+		selected={selectedUoas}
+		multiple={true}
 		placeholder="All UOAs"
 		unitLabel="UoAs"
 		onchange={onuoaschange}
@@ -76,7 +77,8 @@
 		class={selectClass}
 		label="Preliminary flag"
 		options={prelimOptions}
-		selected={selectedPrelimKeys ?? prelimOptions.map((o) => o.value)}
+		selected={selectedPrelimKeys}
+		multiple={true}
 		placeholder="All flags"
 		unitLabel="flags"
 		onchange={onprelimkeyschange}
@@ -99,7 +101,8 @@
 				class={selectClass}
 				label="Filter values"
 				options={groupByOptions}
-				selected={selectedGroupValues ?? groupByOptions.map((o) => o.value)}
+				selected={selectedGroupValues}
+				multiple={true}
 				placeholder="Select values…"
 				onchange={ongroupvalueschange}
 			/>

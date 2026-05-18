@@ -171,29 +171,28 @@
 
 	let groupByCol = $state<string | null>(null);
 
-	const groupByOptions = $derived<{ value: string; label: string }[]>(
-		groupByCol === null
-			? []
-			: [
-					...new Set(
-						flagged
-							.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
-							.map((r) => String(r[groupByCol!]))
-					)
-				]
-					.sort()
-					.map((v) => {
-						const name = adminFeaturesStore.pcodeLabelMap?.[v];
-						return { value: v, label: name ? `${name} (${v})` : v };
-					})
-	);
+	const groupByOptions = $derived.by<{ value: string; label: string }[]>(() => {
+		if (groupByCol === null) return [];
+		// Cross-filter: only show values present in rows matching current UoA + prelim selection
+		let rows: Row[] = flagged;
+		if (selectedPrelimKeys !== null)
+			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
+		if (selectedUoas !== null) rows = rows.filter((r) => selectedUoas!.includes(String(r.uoa)));
+		return [
+			...new Set(
+				rows
+					.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
+					.map((r) => String(r[groupByCol!]))
+			)
+		]
+			.sort()
+			.map((v) => {
+				const name = adminFeaturesStore.pcodeLabelMap?.[v];
+				return { value: v, label: name ? `${name} (${v})` : v };
+			});
+	});
 
 	let selectedGroupValues = $state<string[] | null>(null);
-
-	function onGroupValuesChange(next: string | string[]) {
-		const arr = Array.isArray(next) ? next : [next];
-		selectedGroupValues = arr.length === groupByOptions.length ? null : arr;
-	}
 
 	let selectedUoas = $state<string[] | null>(null);
 	let selectedPrelimKeys = $state<string[] | null>(null);
@@ -214,11 +213,6 @@
 			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
 	});
 
-	function onUoasChange(next: string | string[]) {
-		const arr = Array.isArray(next) ? next : [next];
-		selectedUoas = arr.length === uoaOptions.length ? null : arr;
-	}
-
 	// Cross-filter: prelim options reflect group + UoA (excludes prelim filter itself)
 	const prelimOptions = $derived.by(() => {
 		const rows =
@@ -230,51 +224,156 @@
 		).map((key) => ({ value: key, label: PRELIM_BADGE_MAP[key].label }));
 	});
 
+	// ── Cascade helpers ───────────────────────────────────────────────────────
+
+	function computeMatchingUoas(keys: string[] | null): string[] | null {
+		if (keys === null) return null;
+		const allInScope = [...new Set(filteredByGroup.map((r) => String(r.uoa)))];
+		const matching = allInScope.filter((uoa) =>
+			filteredByGroup.some(
+				(r) => String(r.uoa) === uoa && keys.includes(String(r.prelim_flag ?? ''))
+			)
+		);
+		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
+	}
+
+	function computeMatchingPrelimKeys(uoas: string[] | null): string[] | null {
+		if (uoas === null) return null;
+		const allInScope = [
+			...new Set(
+				filteredByGroup.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== '')
+			)
+		];
+		const matching = allInScope.filter((flag) =>
+			filteredByGroup.some(
+				(r) => uoas.includes(String(r.uoa)) && String(r.prelim_flag ?? '') === flag
+			)
+		);
+		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
+	}
+
+	function computeMatchingGroupValues(uoas: string[] | null, keys: string[] | null): string[] | null {
+		if (groupByCol === null) return null;
+		let rows: Row[] = flagged;
+		if (keys !== null) rows = rows.filter((r) => keys.includes(String(r.prelim_flag ?? '')));
+		if (uoas !== null) rows = rows.filter((r) => uoas.includes(String(r.uoa)));
+		const allGroupVals = [
+			...new Set(
+				flagged
+					.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
+					.map((r) => String(r[groupByCol!]))
+			)
+		];
+		const matching = allGroupVals.filter((v) =>
+			rows.some((r) => r[groupByCol!] != null && String(r[groupByCol!]) === v)
+		);
+		return matching.length === 0 || matching.length === allGroupVals.length ? null : matching;
+	}
+
+	// ── Centralized setters — each cascades to the other filters ─────────────
+
+	function applyUoas(uoas: string[] | null) {
+		selectedUoas = uoas;
+		selectedPrelimKeys = computeMatchingPrelimKeys(uoas);
+		selectedGroupValues = computeMatchingGroupValues(uoas, selectedPrelimKeys);
+	}
+
+	function applyPrelimKeys(keys: string[] | null) {
+		selectedPrelimKeys = keys;
+		selectedUoas = computeMatchingUoas(keys);
+		selectedGroupValues = computeMatchingGroupValues(selectedUoas, keys);
+	}
+
+	function applyGroupValues(vals: string[] | null) {
+		selectedGroupValues = vals;
+		if (vals === null) {
+			// Group filter cleared — reset everything
+			selectedUoas = null;
+			selectedPrelimKeys = null;
+			return;
+		}
+		// Compute group-filtered rows inline (derived filteredByGroup hasn't updated yet)
+		const groupRows: Row[] =
+			groupByCol === null
+				? flagged
+				: flagged.filter((r) => vals.includes(String(r[groupByCol!] ?? '')));
+		// Cascade to prelim: show chips for prelim keys present in group rows
+		const allPrelimsInFlagged = [
+			...new Set(flagged.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== ''))
+		];
+		const prelimsInGroup = [
+			...new Set(groupRows.map((r) => String(r.prelim_flag ?? '')).filter((f) => f !== ''))
+		];
+		selectedPrelimKeys =
+			prelimsInGroup.length === 0 || prelimsInGroup.length === allPrelimsInFlagged.length
+				? null
+				: prelimsInGroup;
+		// Cascade to UoA: show chips for UoAs present in group rows
+		const allUoasInFlagged = [...new Set(flagged.map((r) => String(r.uoa)))];
+		const uoasInGroup = [...new Set(groupRows.map((r) => String(r.uoa)))];
+		selectedUoas =
+			uoasInGroup.length === 0 || uoasInGroup.length === allUoasInFlagged.length
+				? null
+				: uoasInGroup;
+	}
+
+	function applyGroupCol(col: string | null) {
+		groupByCol = col;
+		selectedGroupValues = null;
+		selectedUoas = null;
+		selectedPrelimKeys = null;
+	}
+
+	function clearAllFilters() {
+		selectedUoas = null;
+		selectedPrelimKeys = null;
+		selectedGroupValues = null;
+		groupByCol = null;
+	}
+
+	// ── Event handlers ────────────────────────────────────────────────────────
+
+	function onUoasChange(next: string | string[]) {
+		const arr = Array.isArray(next) ? next : [next];
+		applyUoas(arr.length === uoaOptions.length ? null : arr);
+	}
+
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		selectedPrelimKeys = arr.length === prelimOptions.length ? null : arr;
+		applyPrelimKeys(arr.length === prelimOptions.length ? null : arr);
+	}
+
+	function onGroupValuesChange(next: string | string[]) {
+		const arr = Array.isArray(next) ? next : [next];
+		applyGroupValues(arr.length === groupByOptions.length ? null : arr);
 	}
 
 	function handleDonutSliceClick(key: string | null) {
 		if (key === null) {
-			selectedPrelimKeys = null;
+			applyPrelimKeys(null);
 		} else {
-			selectedPrelimKeys =
+			const newKeys =
 				selectedPrelimKeys?.includes(key) && selectedPrelimKeys.length === 1 ? null : [key];
+			applyPrelimKeys(newKeys);
 		}
 	}
 
-	// Effective selections: clamp raw state to currently available options (drops stale chips)
-	const effectiveSelectedUoas = $derived.by(() => {
-		if (selectedUoas === null) return null;
-		const available = new Set(uoaOptions.map((o) => o.value));
-		const valid = selectedUoas.filter((v) => available.has(v));
-		return valid.length === 0 || valid.length === uoaOptions.length ? null : valid;
-	});
-
-	const effectiveSelectedPrelimKeys = $derived.by(() => {
-		if (selectedPrelimKeys === null) return null;
-		const available = new Set<string>(prelimOptions.map((o) => o.value));
-		const valid = selectedPrelimKeys.filter((v) => available.has(v));
-		return valid.length === 0 || valid.length === prelimOptions.length ? null : valid;
-	});
-
-	// Stage 2: group + effective prelim, no UoA — map always colours all areas
+	// Stage 2: group + prelim, no UoA — map always colours all areas
 	const filteredForMap = $derived.by<Row[]>(() => {
-		if (effectiveSelectedPrelimKeys === null) return filteredByGroup;
+		if (selectedPrelimKeys === null) return filteredByGroup;
 		return filteredByGroup.filter((r) =>
-			effectiveSelectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
+			selectedPrelimKeys!.includes(String(r.prelim_flag ?? ''))
 		);
 	});
 
 	// Stage 3: full filter (group + prelim + UoA) — all non-map components
 	const filteredFlagged = $derived.by<Row[]>(() => {
-		if (effectiveSelectedUoas === null) return filteredForMap;
-		return filteredForMap.filter((r) => effectiveSelectedUoas!.includes(String(r.uoa)));
+		if (selectedUoas === null) return filteredForMap;
+		return filteredForMap.filter((r) => selectedUoas!.includes(String(r.uoa)));
 	});
 
 	const isFiltered = $derived(
-		effectiveSelectedUoas !== null || effectiveSelectedPrelimKeys !== null || groupByCol !== null
+		selectedUoas !== null || selectedPrelimKeys !== null || groupByCol !== null
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -554,8 +653,8 @@
 				filteredTotal={filteredFlagged.length}
 				{isFiltered}
 				{uoaOptions}
-				selectedUoas={effectiveSelectedUoas}
-				selectedPrelimKeys={effectiveSelectedPrelimKeys}
+				{selectedUoas}
+				{selectedPrelimKeys}
 				{prelimOptions}
 				{metadataCols}
 				{groupByCol}
@@ -563,14 +662,9 @@
 				{selectedGroupValues}
 				onuoaschange={onUoasChange}
 				onprelimkeyschange={onPrelimKeysChange}
-				ongroupbycol={(v) => { groupByCol = v; selectedGroupValues = null; }}
+				ongroupbycol={applyGroupCol}
 				ongroupvalueschange={onGroupValuesChange}
-				onclearfilters={() => {
-					selectedUoas = null;
-					selectedPrelimKeys = null;
-					groupByCol = null;
-					selectedGroupValues = null;
-				}}
+				onclearfilters={clearAllFilters}
 			/>
 		</aside>
 
@@ -599,14 +693,9 @@
 						selectClass="w-60"
 						onuoaschange={onUoasChange}
 						onprelimkeyschange={onPrelimKeysChange}
-						ongroupbycol={(v) => { groupByCol = v; selectedGroupValues = null; }}
+						ongroupbycol={applyGroupCol}
 						ongroupvalueschange={onGroupValuesChange}
-						onclearfilters={() => {
-							selectedUoas = null;
-							selectedPrelimKeys = null;
-							groupByCol = null;
-							selectedGroupValues = null;
-						}}
+						onclearfilters={clearAllFilters}
 					/>
 				</div>
 
@@ -627,9 +716,7 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							onmapuoaschange={(uoas) => {
-								selectedUoas = uoas.length > 0 ? uoas : null;
-							}}
+							onmapuoaschange={(uoas) => applyUoas(uoas.length > 0 ? uoas : null)}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {

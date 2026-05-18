@@ -19,9 +19,9 @@
 		 * Current selection.
 		 * - Pass a string for simple (single-choice) mode.
 		 * - Pass a string[] for multiple (multi-choice) mode.
-		 * Mode is inferred automatically from the type — no extra prop needed.
+		 * - Pass null (with multiple=true) to mean "all selected" — shows "All (N)" label.
 		 */
-		selected: string | string[];
+		selected: string | string[] | null;
 		/** Placeholder text shown when nothing is selected. */
 		placeholder?: string;
 		/** Optional label rendered above the trigger button. */
@@ -36,14 +36,28 @@
 		class?: string;
 		/** Unit label used in the "all selected" display, e.g. "UoAs" → "All UoAs (5)". Omit for plain "All (5)". */
 		unitLabel?: string;
+		/** Explicitly enable multi-select mode — required when passing selected=null (all) so mode can be inferred. */
+		multiple?: boolean;
 	}
 
-	let { options, selected, placeholder = 'Select…', label, onchange, autoSelectFirst = false, dropdownClass = 'w-72', class: className = '', unitLabel = '' }: Props = $props();
+	let {
+		options,
+		selected,
+		placeholder = 'Select…',
+		label,
+		onchange,
+		autoSelectFirst = false,
+		dropdownClass = 'w-72',
+		class: className = '',
+		unitLabel = '',
+		multiple
+	}: Props = $props();
 
-	// Mode derived from the shape of selected — no separate prop needed.
-	const isMultiple = $derived(Array.isArray(selected));
-	const singleVal = $derived(isMultiple ? '' : (selected as string));
-	const multiVal = $derived(isMultiple ? (selected as string[]) : []);
+	// isMultiple: explicit prop OR inferred from array type. isNullAll: null passed in multi-mode = "all selected".
+	const isMultiple = $derived(multiple === true || Array.isArray(selected));
+	const isNullAll = $derived(selected === null && isMultiple);
+	const singleVal = $derived(isMultiple ? '' : ((selected as string) ?? ''));
+	const multiVal = $derived(!isMultiple ? [] : selected === null ? [] : (selected as string[]));
 
 	// ── Local UI state ────────────────────────────────────────────────────────
 	let open = $state(false);
@@ -79,9 +93,7 @@
 		groups
 			.map((g) => ({
 				...g,
-				options: g.options.filter((o) =>
-					o.label.toLowerCase().includes(searchQuery.toLowerCase())
-				)
+				options: g.options.filter((o) => o.label.toLowerCase().includes(searchQuery.toLowerCase()))
 			}))
 			.filter((g) => g.options.length > 0)
 	);
@@ -89,8 +101,8 @@
 	const filtered = $derived(filteredGroups.flatMap((g) => g.options));
 
 	const selectedLabel = $derived(flatOptions.find((o) => o.value === singleVal)?.label ?? null);
-	const allSelected = $derived(multiVal.length === flatOptions.length);
-	const noneSelected = $derived(multiVal.length === 0);
+	const allSelected = $derived(isNullAll || multiVal.length === flatOptions.length);
+	const noneSelected = $derived(!isNullAll && multiVal.length === 0);
 
 	function labelFor(v: string): string {
 		return flatOptions.find((o) => o.value === v)?.label ?? v;
@@ -166,29 +178,31 @@
 				{:else}
 					<span class="text-base-content">{selectedLabel}</span>
 				{/if}
+			{:else if isNullAll}
+				<span class="text-base-content/85"
+					>All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000
+						? '1000+'
+						: flatOptions.length})</span
+				>
+			{:else if multiVal.length === 0}
+				<span class="text-base-content/50 italic">None selected</span>
 			{:else}
-				{#if multiVal.length === 0}
-					<span class="text-base-content/50 italic">None selected</span>
-				{:else if multiVal.length === flatOptions.length}
-					<span class="text-base-content/85">All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000 ? '1000+' : flatOptions.length})</span>
-				{:else}
-					{#each multiVal.slice(0, 3) as v (v)}
-						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
-							{labelFor(v)}
-							<!-- svelte-ignore a11y_click_events_have_key_events -->
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<span
-								class="text-base-content/60 hover:text-base-content cursor-pointer"
-								onclick={(e) => {
-									e.stopPropagation();
-									removeChip(v);
-								}}>×</span
-							>
-						</span>
-					{/each}
-					{#if multiVal.length > 3}
-						<span class="badge badge-ghost badge-xs">+{multiVal.length - 3} more</span>
-					{/if}
+				{#each multiVal.slice(0, 3) as v (v)}
+					<span class="badge badge-xs badge-primary badge-soft gap-0.5">
+						{labelFor(v)}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<span
+							class="text-base-content/60 hover:text-base-content cursor-pointer"
+							onclick={(e) => {
+								e.stopPropagation();
+								removeChip(v);
+							}}>×</span
+						>
+					</span>
+				{/each}
+				{#if multiVal.length > 3}
+					<span class="badge badge-ghost badge-xs">+{multiVal.length - 3} more</span>
 				{/if}
 			{/if}
 		</span>
@@ -206,7 +220,12 @@
 
 	<!-- Dropdown -->
 	{#if open}
-		<div class={['menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 border p-0', dropdownClass]}>
+		<div
+			class={[
+				'menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 border p-0',
+				dropdownClass
+			]}
+		>
 			<!-- Search (shared) -->
 			<div class="border-base-200 border-b p-2">
 				<Search
@@ -248,15 +267,15 @@
 						type="button"
 						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
 						disabled={allSelected}
-						onclick={selectAll}
-					>Select all</button>
+						onclick={selectAll}>Select all</button
+					>
 					<span class="text-base-content/30">|</span>
 					<button
 						type="button"
 						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
 						disabled={noneSelected}
-						onclick={deselectAll}
-					>Deselect all</button>
+						onclick={deselectAll}>Deselect all</button
+					>
 					<span class="text-base-content/75 ml-auto text-xs">
 						{multiVal.length}/{flatOptions.length}
 					</span>
@@ -268,7 +287,7 @@
 				{#each filteredGroups as grp, i (grp.group || i)}
 					{#if grp.group}
 						<li
-							class="text-base-content/50 px-3 pb-0.5 pt-1 text-[10px] font-semibold tracking-wider uppercase {i >
+							class="text-base-content/50 px-3 pt-1 pb-0.5 text-[10px] font-semibold tracking-wider uppercase {i >
 							0
 								? 'border-base-200 mt-1 border-t'
 								: ''}"
@@ -279,7 +298,7 @@
 					{/if}
 					{#each grp.options as option (option.value)}
 						{@const isSelected = isMultiple
-							? multiVal.includes(option.value)
+							? isNullAll || multiVal.includes(option.value)
 							: option.value === singleVal}
 						<li role="option" aria-selected={isSelected}>
 							<button
