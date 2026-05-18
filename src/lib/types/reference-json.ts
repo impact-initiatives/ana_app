@@ -132,32 +132,21 @@ export const MetricSchema = z
 		risk_concept: z.string().nullable().optional()
 	})
 	.superRefine((m, ctx) => {
-		const { thresholds, evidence_type } = m;
+		const { thresholds } = m;
 
 		// ── Rule: van requires an ─────────────────────────────────────────────
 		// This is a structural constraint on the JSON itself.
 		// Type-bound checks (int/num, lb, ub) are performed at the CSV
 		// validation stage in src/lib/engine/validator.js, not here.
+		//
+		// The semantic rule "non-supporting-evidence metrics must have van" is
+		// enforced separately in scripts/validate-reference-json.ts Pass 8,
+		// which produces a richer diagnostic table.
 		if (thresholds.van != null && thresholds.an == null) {
 			ctx.addIssue({
 				path: ['thresholds', 'van'],
 				code: z.ZodIssueCode.custom,
 				message: 'thresholds.van cannot be set without thresholds.an'
-			});
-		}
-
-		// ── Rule: flaggable metrics must have a VAN threshold ─────────────────
-		// Supporting evidence metrics are excluded from the rollup; all others
-		// participate in the priority flag decision tree and require van.
-		if (
-			evidence_type !== null &&
-			evidence_type !== EvidenceTypeEnum.SupportingEvidence &&
-			(thresholds.van == null)
-		) {
-			ctx.addIssue({
-				path: ['thresholds', 'van'],
-				code: z.ZodIssueCode.custom,
-				message: `thresholds.van is required for evidence_type "${evidence_type}" (non-supporting-evidence metrics must have a VAN threshold)`
 			});
 		}
 	})
