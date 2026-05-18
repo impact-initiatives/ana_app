@@ -99,6 +99,7 @@ function rowToMetric(row: RefRow): Metric {
 		label: nullIfEmpty(row['Metric'] ?? ''),
 		level: nullIfEmpty(row['Level'] ?? ''),
 		preference: parseInteger(row['Preference'] ?? ''),
+		evidence_type: nullIfEmpty(row['Evidence type'] ?? ''),
 		type: rawType === '' ? null : rawType,
 		msna_module: nullIfEmpty(row['MSNA module'] ?? ''),
 		msna_indicator: nullIfEmpty(row['MSNA indicator'] ?? ''),

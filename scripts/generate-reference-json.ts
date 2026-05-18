@@ -212,6 +212,7 @@ function build(rows: RefRow[]): {
 			label: nullIfEmpty(row['Metric'] ?? ''),
 			level: nullIfEmpty(row['Level'] ?? ''),
 			preference: parseInteger(row['Preference'] ?? ''),
+			evidence_type: nullIfEmpty(row['Evidence type'] ?? ''),
 			type,
 			msna_module: nullIfEmpty(row['MSNA module'] ?? ''),
 			msna_indicator: nullIfEmpty(row['MSNA indicator'] ?? ''),
