@@ -41,6 +41,7 @@ interface RefRow {
 	'Sub-Factor': string;
 	Indicator: string;
 	Preference: string;
+	'Evidence type': string;
 	Type: string;
 	Metric: string;
 	'MSNA module': string;
