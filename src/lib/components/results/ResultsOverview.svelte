@@ -41,6 +41,7 @@
 		onmapclear: () => void;
 		ondonutsliceclick: (key: string | null) => void;
 		onmapuoaschange?: (uoas: string[]) => void;
+		onmapselectreset?: () => void;
 	}
 
 	let {
@@ -58,7 +59,8 @@
 		onmapselect,
 		onmapclear,
 		ondonutsliceclick,
-		onmapuoaschange
+		onmapuoaschange,
+		onmapselectreset
 	}: Props = $props();
 
 	// ── Map download ──────────────────────────────────────────────────────────────
@@ -138,7 +140,7 @@
 	function toggleMultiSelect() {
 		multiSelectMode = !multiSelectMode;
 		selectedUoas.clear();
-		onmapuoaschange?.([]);
+		onmapselectreset?.();
 		if (!multiSelectMode) onmapclear();
 	}
 
@@ -507,7 +509,7 @@
 							{systems}
 							{systemCodes}
 							ondrilldown={onselectinheatmap}
-							onclear={() => { selectedUoas.clear(); onmapuoaschange?.([]); }}
+							onclear={() => { selectedUoas.clear(); onmapselectreset?.(); }}
 						/>
 					</div>
 				{:else if selectedMapUoa}

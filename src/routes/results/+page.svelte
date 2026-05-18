@@ -717,6 +717,7 @@
 							{selectedMapAdminName}
 							{selectedMapRow}
 							onmapuoaschange={(uoas) => applyUoas(uoas.length > 0 ? uoas : null)}
+							onmapselectreset={clearAllFilters}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
