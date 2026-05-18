@@ -113,8 +113,12 @@
 		onchange?.(next);
 	}
 
-	function resetToAll() {
+	function selectAll() {
 		onchange?.(flatOptions.map((o) => o.value));
+	}
+
+	function deselectAll() {
+		onchange?.([]);
 	}
 
 	function removeChip(v: string) {
@@ -238,13 +242,21 @@
 			{/if}
 
 			<!-- Multiple mode toolbar -->
-			{#if isMultiple && !allSelected}
+			{#if isMultiple}
 				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
 					<button
 						type="button"
-						class="btn btn-soft btn-xs text-primary text-xs"
-						onclick={resetToAll}
-					>Reset to all</button>
+						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
+						disabled={allSelected}
+						onclick={selectAll}
+					>Select all</button>
+					<span class="text-base-content/30">|</span>
+					<button
+						type="button"
+						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
+						disabled={noneSelected}
+						onclick={deselectAll}
+					>Deselect all</button>
 					<span class="text-base-content/75 ml-auto text-xs">
 						{multiVal.length}/{flatOptions.length}
 					</span>
