@@ -23,6 +23,7 @@
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
 	import ResultsMetrics from '$lib/components/results/ResultsMetrics.svelte';
 	import ResultsCoverage from '$lib/components/results/ResultsCoverage.svelte';
+	import ResultsSpotlight from '$lib/components/results/ResultsSpotlight.svelte';
 	import ResultsExport from '$lib/components/results/ResultsExport.svelte';
 	import FiltersSidebar from '$lib/components/results/FiltersSidebar.svelte';
 
@@ -606,7 +607,7 @@
 			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
-		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'export']) {
+		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'spotlight', 'export']) {
 			const el = document.getElementById(id);
 			if (el) spyObs.observe(el);
 		}
@@ -786,6 +787,19 @@
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}
+						/>
+					</div>
+				</div>
+
+				<!-- Spotlight -->
+				<div id="spotlight" class="border-base-300 scroll-mt-28 border-b py-16">
+					<div
+						class="mx-auto max-w-5xl px-6"
+						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+					>
+						<ResultsSpotlight
+							filteredRows={filteredFlagged}
+							{referenceJson}
 						/>
 					</div>
 				</div>
