@@ -30,7 +30,7 @@
 	}: Props = $props();
 
 	// Tab: 'coverage' | 'health-outcomes'
-	let coverageTab = $state<'coverage' | 'health-outcomes'>('coverage');
+	let coverageTab = $state(false); // false = Coverage (default), true = Health outcomes coverage
 
 	// false = Overall (default), true = Per UoA
 	let isPerUoa = $state(false);
@@ -118,7 +118,7 @@
 	<div class="space-y-4">
 		<!-- Tab + controls -->
 		<Card>
-			<div class="flex flex-wrap items-end gap-6">
+			<div class="flex flex-wrap items-center gap-6">
 				<RadioToggle
 					bind:value={coverageTab}
 					label="Scope"
@@ -135,12 +135,14 @@
 					name="coverageLevel"
 				/>
 				{#if isPerUoa}
-					<div class="max-w-72 min-w-60 flex-1" transition:fade={{ duration: 150 }}>
+					<div transition:fade={{ duration: 150 }}>
 						<Select
 							label="Unit of analysis"
+							class="w-80"
 							options={coverageUoaOptions.map((uoa) => ({ value: uoa, label: uoaLabel(uoa) }))}
 							selected={coverageUoa}
 							placeholder="Select UOA…"
+							labelPosition="left"
 							onchange={(val) => oncoverageUoaChange(Array.isArray(val) ? (val[0] ?? '') : val)}
 						/>
 					</div>
