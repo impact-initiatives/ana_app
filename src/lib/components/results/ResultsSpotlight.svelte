@@ -260,9 +260,10 @@
 								{#if m}
 									<span class="text-xs font-medium">{m.label}</span>
 									<div class="mt-1 flex flex-wrap items-center gap-1">
-										<span class="text-base-content/75 block text-[11px]">{m.id}</span>
+										<span class="badge badge-outline badge-xs font-medium">{m.id}</span>
 										{#if m.evidence_type}
-											<span class="badge badge-ghost badge-xs">{m.evidence_type}</span>
+											<span class="badge badge-outline badge-xs font-medium">{m.evidence_type}</span
+											>
 										{/if}
 									</div>
 								{/if}
