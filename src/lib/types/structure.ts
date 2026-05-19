@@ -31,10 +31,10 @@ export enum MetricDirectionEnum {
 }
 
 export enum EvidenceTypeEnum {
-	SupportingEvidence = 'Supporting evidence',
+		Outcome = 'Outcome',
+			Predictor = 'Predictor',
 	ANSignal = 'AN signal',
-	Outcome = 'Outcome',
-	Predictor = 'Predictor'
+	SupportingEvidence = 'Supporting evidence'
 }
 
 // ── Type-string parsing ───────────────────────────────────────────────────────
