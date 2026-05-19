@@ -183,10 +183,8 @@
 >
 	{#if label}
 		<span
-			class={[
-				'text-xs font-semibold tracking-wide uppercase',
-				isLeftLabel ? 'shrink-0' : 'mt-2'
-			]}>{label}</span
+			class={['text-xs font-semibold tracking-wide uppercase', isLeftLabel ? 'shrink-0' : 'mt-2']}
+			>{label}</span
 		>
 	{/if}
 	<!-- Inner wrapper: relative anchor for dropdown, flex-1 when left-label so trigger fills space -->
@@ -203,7 +201,7 @@
 			<span class="flex flex-wrap gap-1">
 				{#if !isMultiple}
 					{#if selectedLabel === null || singleVal === ''}
-						<span class="text-base-content/70">{placeholder}</span>
+						<span class="text-base-content/75">{placeholder}</span>
 					{:else}
 						<span class="text-base-content">{selectedLabel}</span>
 					{/if}
@@ -211,9 +209,13 @@
 					{#if isNullAll}
 						<span>All{compactPrefix ? ` ${compactPrefix}` : ''}</span>
 					{:else if multiVal.length === 0}
-						<span class="italic opacity-50">{placeholder}</span>
+						<span class="text-base-content/75 italic">{placeholder}</span>
 					{:else}
-						<span>{compactPrefix ? `${compactPrefix} ×${multiVal.length}` : `×${multiVal.length}`}</span>
+						<span
+							>{compactPrefix
+								? `${compactPrefix} ×${multiVal.length}`
+								: `×${multiVal.length}`}</span
+						>
 					{/if}
 				{:else if isNullAll}
 					<span class="text-base-content/85"
@@ -222,7 +224,7 @@
 							: flatOptions.length})</span
 					>
 				{:else if multiVal.length === 0}
-					<span class="text-base-content/50 italic">None selected</span>
+					<span class="text-base-content/75 italic">None selected</span>
 				{:else}
 					{#each multiVal.slice(0, 3) as v (v)}
 						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
@@ -230,7 +232,7 @@
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<span
-								class="text-base-content/60 hover:text-base-content cursor-pointer"
+								class="text-base-content/75 hover:text-base-content cursor-pointer"
 								onclick={(e) => {
 									e.stopPropagation();
 									removeChip(v);
@@ -255,12 +257,7 @@
 				viewBox="0 0 24 24"
 				stroke="currentColor"
 			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M19 9l-7 7-7-7"
-				/>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
 		</button>
 
@@ -272,94 +269,94 @@
 					dropdownClass
 				]}
 			>
-			<!-- Search (shared) -->
-			<div class="border-base-200 border-b p-2">
-				<Search
-					bind:value={searchQuery}
-					bind:inputEl={searchInputEl}
-					extraClass="w-full text-xs"
-					onkeydown={(e) => {
-						if (e.key === 'Enter') {
-							e.preventDefault();
-							onSearchEnter();
-						}
-					}}
-				/>
-			</div>
-
-			<!-- Multiple mode toolbar -->
-			{#if isMultiple}
-				<div class="border-base-200 flex flex-wrap items-center gap-2 border-b px-3 py-1.5">
-					<button
-						type="button"
-						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
-						disabled={allSelected}
-						onclick={selectAll}>Select all</button
-					>
-					<span class="text-base-content/30">|</span>
-					<button
-						type="button"
-						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
-						disabled={noneSelected}
-						onclick={deselectAll}>Deselect all</button
-					>
-					<span class="text-base-content/75 ml-auto shrink-0 text-xs">
-						{multiVal.length}/{flatOptions.length}
-					</span>
+				<!-- Search (shared) -->
+				<div class="border-base-200 border-b p-2">
+					<Search
+						bind:value={searchQuery}
+						bind:inputEl={searchInputEl}
+						extraClass="w-full text-xs"
+						onkeydown={(e) => {
+							if (e.key === 'Enter') {
+								e.preventDefault();
+								onSearchEnter();
+							}
+						}}
+					/>
 				</div>
-			{/if}
 
-			<!-- Options list -->
-			<ul class="max-h-56 overflow-y-auto py-1" role="listbox" aria-multiselectable={isMultiple}>
-				{#each filteredGroups as grp, i (grp.group || i)}
-					{#if grp.group}
-						<li
-							class="text-base-content/50 px-3 pt-1 pb-0.5 text-[10px] font-semibold tracking-wider uppercase {i >
-							0
-								? 'border-base-200 mt-1 border-t'
-								: ''}"
-							role="presentation"
+				<!-- Multiple mode toolbar -->
+				{#if isMultiple}
+					<div class="border-base-200 flex flex-wrap items-center gap-2 border-b px-3 py-1.5">
+						<button
+							type="button"
+							class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
+							disabled={allSelected}
+							onclick={selectAll}>Select all</button
 						>
-							{grp.group}
-						</li>
-					{/if}
-					{#each grp.options as option (option.value)}
-						{@const isSelected = isMultiple
-							? isNullAll || multiVal.includes(option.value)
-							: option.value === singleVal}
-						<li role="option" aria-selected={isSelected}>
-							<button
-								type="button"
-								class="flex w-full items-center gap-2 px-3 py-1.5 text-xs
-									{isSelected ? 'text-primary font-medium' : 'text-base-content'} hover:bg-base-200"
-								onclick={() => (isMultiple ? toggle(option.value) : selectOne(option.value))}
+						<span class="text-base-content/30">|</span>
+						<button
+							type="button"
+							class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
+							disabled={noneSelected}
+							onclick={deselectAll}>Deselect all</button
+						>
+						<span class="text-base-content/75 ml-auto shrink-0 text-xs">
+							{multiVal.length}/{flatOptions.length}
+						</span>
+					</div>
+				{/if}
+
+				<!-- Options list -->
+				<ul class="max-h-56 overflow-y-auto py-1" role="listbox" aria-multiselectable={isMultiple}>
+					{#each filteredGroups as grp, i (grp.group || i)}
+						{#if grp.group}
+							<li
+								class="text-base-content/75 px-3 pt-1 pb-0.5 text-[11px] font-semibold tracking-wider uppercase {i >
+								0
+									? 'border-base-200 mt-1 border-t'
+									: ''}"
+								role="presentation"
 							>
-								{#if isMultiple}
-									<input
-										type="checkbox"
-										class="checkbox checkbox-primary checkbox-xs pointer-events-none shrink-0"
-										checked={isSelected}
-										tabindex="-1"
-										readonly
-									/>
-								{:else}
-									<input
-										type="radio"
-										class="radio radio-primary radio-xs pointer-events-none shrink-0"
-										checked={isSelected}
-										tabindex="-1"
-										readonly
-									/>
-								{/if}
-								{option.label}
-							</button>
-						</li>
+								{grp.group}
+							</li>
+						{/if}
+						{#each grp.options as option (option.value)}
+							{@const isSelected = isMultiple
+								? isNullAll || multiVal.includes(option.value)
+								: option.value === singleVal}
+							<li role="option" aria-selected={isSelected}>
+								<button
+									type="button"
+									class="flex w-full items-center gap-2 px-3 py-1.5 text-xs
+									{isSelected ? 'text-primary font-medium' : 'text-base-content'} hover:bg-base-200"
+									onclick={() => (isMultiple ? toggle(option.value) : selectOne(option.value))}
+								>
+									{#if isMultiple}
+										<input
+											type="checkbox"
+											class="checkbox checkbox-primary checkbox-xs pointer-events-none shrink-0"
+											checked={isSelected}
+											tabindex="-1"
+											readonly
+										/>
+									{:else}
+										<input
+											type="radio"
+											class="radio radio-primary radio-xs pointer-events-none shrink-0"
+											checked={isSelected}
+											tabindex="-1"
+											readonly
+										/>
+									{/if}
+									{option.label}
+								</button>
+							</li>
+						{/each}
+					{:else}
+						<li class="text-base-content/75 px-3 py-2 text-xs">No matches</li>
 					{/each}
-				{:else}
-					<li class="text-base-content/70 px-3 py-2 text-xs">No matches</li>
-				{/each}
-			</ul>
-		</div>
+				</ul>
+			</div>
 		{/if}
 	</div>
 </div>
