@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { SvelteSet } from 'svelte/reactivity';
 	import { getAllMetricIds, getMetricMetadata } from '$lib/engine/metricMetadata';
 	import { getFlagBadge } from '$lib/utils/colors';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 
 	type Row = Record<string, any>;
 	interface MetricMeta {
@@ -63,23 +63,43 @@
 	const tooManyUoas = $derived(allUoas.length > 10);
 	const tableUoas = $derived(allUoas.slice(0, 10));
 
-	// ── Metric selection ──────────────────────────────────────────────────────
-	let selectedMetricIds = $state<SvelteSet<string>>(new SvelteSet());
-
-	function toggleMetric(id: string) {
-		if (selectedMetricIds.has(id)) selectedMetricIds.delete(id);
-		else selectedMetricIds.add(id);
+	// ── Metric selection — default to Health Outcomes metrics ─────────────────
+	function hoMetricIds(): string[] {
+		return (referenceJson as any)?.systems
+			?.find((s: any) => s.id === 'health_outcomes')
+			?.factors?.flatMap((f: any) =>
+				f.sub_factors?.flatMap((sf: any) =>
+					sf.indicators?.flatMap((ind: any) =>
+						(ind.metrics ?? []).filter((m: any) => m.preference !== 3).map((m: any) => m.metric)
+					) ?? []
+				) ?? []
+			) ?? [];
 	}
 
-	function clearSystem(sysId: string) {
-		for (const m of metaBySystem.get(sysId)?.metrics ?? []) selectedMetricIds.delete(m.id);
+	let selectedMetricIds = $state<string[]>(hoMetricIds());
+
+	// Per-system helpers for individual Select components
+	function systemOptions(sysId: string) {
+		return metaBySystem.get(sysId)?.metrics.map((m) => ({ value: m.id, label: `${m.label} (${m.id})` })) ?? [];
+	}
+
+	function systemSelected(sysId: string): string[] | null {
+		const opts = systemOptions(sysId);
+		const sel = selectedMetricIds.filter((id) => opts.some((o) => o.value === id));
+		return sel.length === opts.length ? null : sel;
+	}
+
+	function onSystemChange(sysId: string, v: string | string[]) {
+		const arr = Array.isArray(v) ? v : [v];
+		const otherIds = selectedMetricIds.filter((id) => !systemOptions(sysId).some((o) => o.value === id));
+		selectedMetricIds = [...otherIds, ...arr];
 	}
 
 	const selectedMetaList = $derived(
-		[...selectedMetricIds].map((id) => allMeta.find((m) => m.id === id)).filter(Boolean) as MetricMeta[]
+		selectedMetricIds.map((id) => allMeta.find((m) => m.id === id)).filter(Boolean) as MetricMeta[]
 	);
 
-	const metricCount = $derived(selectedMetricIds.size);
+	const metricCount = $derived(selectedMetricIds.length);
 	const warnMetrics = $derived(metricCount > 20);
 
 	// ── Cross-tab rows ────────────────────────────────────────────────────────
@@ -108,9 +128,7 @@
 		return et.slice(0, 4);
 	}
 
-	function sysSelectedCount(sysId: string): number {
-		return metaBySystem.get(sysId)?.metrics.filter((m) => selectedMetricIds.has(m.id)).length ?? 0;
-	}
+
 </script>
 
 <section>
@@ -128,54 +146,22 @@
 	{:else}
 		<!-- ── Metric selectors ── -->
 		<Card>
-			<div class="mb-1 flex items-center justify-between gap-2">
-				<span class="text-sm font-medium">Select metrics</span>
-				{#if metricCount > 0}
-					<button
-						class="btn btn-ghost btn-xs text-base-content/50"
-						onclick={() => selectedMetricIds.clear()}
-					>Clear all ({metricCount})</button>
-				{/if}
-			</div>
 			{#if warnMetrics}
 				<p class="text-warning mb-2 text-xs">More than 20 metrics selected — the table may be slow to render.</p>
 			{/if}
-			<div class="flex flex-wrap gap-2">
+			<div class="flex flex-wrap items-end gap-2">
 				{#each [...metaBySystem.entries()] as [sysId, sys] (sysId)}
-					{@const selCount = sysSelectedCount(sysId)}
-					<div class="dropdown dropdown-bottom">
-						<button
-							tabindex="0"
-							class="btn btn-sm {selCount > 0 ? 'btn-primary' : 'btn-ghost border-base-300 border'}"
-						>
-							{sys.label}
-							{#if selCount > 0}<span class="badge badge-xs ml-1">{selCount}</span>{/if}
-							<svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3 opacity-60" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-						</button>
-						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-						<div tabindex="0" class="dropdown-content bg-base-100 rounded-box z-30 mt-1 max-h-72 w-64 overflow-y-auto p-2 shadow-lg">
-							<div class="mb-1 flex items-center justify-between px-1">
-								<span class="text-base-content/60 text-xs font-semibold uppercase tracking-wide">{sys.label}</span>
-								{#if selCount > 0}
-									<button class="btn btn-ghost btn-xs text-xs" onclick={() => clearSystem(sysId)}>Clear</button>
-								{/if}
-							</div>
-							{#each sys.metrics as m (m.id)}
-								<label class="hover:bg-base-200 flex cursor-pointer items-start gap-2 rounded px-1 py-1 text-xs">
-									<input
-										type="checkbox"
-										class="checkbox checkbox-xs mt-0.5 shrink-0"
-										checked={selectedMetricIds.has(m.id)}
-										onchange={() => toggleMetric(m.id)}
-									/>
-									<span class="leading-snug">
-										{m.label}
-										<span class="text-base-content/40 ml-0.5">({m.id})</span>
-									</span>
-								</label>
-							{/each}
-						</div>
-					</div>
+					<Select
+						class="w-44"
+						dropdownClass="w-72"
+						label={sys.label}
+						placeholder="None"
+						options={systemOptions(sysId)}
+						selected={systemSelected(sysId)}
+						multiple={true}
+						unitLabel="metrics"
+						onchange={(v) => onSystemChange(sysId, v)}
+					/>
 				{/each}
 			</div>
 			{#if allUoas.length === 0}
@@ -189,7 +175,7 @@
 
 		<!-- ── Cross-tab table ── -->
 		<div class="mt-4">
-			{#if selectedMetricIds.size === 0}
+			{#if selectedMetricIds.length === 0}
 				<Card>
 					<p class="text-base-content/60 py-8 text-center text-sm">
 						Select one or more metrics above to build the cross-tab.
