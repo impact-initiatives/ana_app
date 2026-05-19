@@ -23,6 +23,7 @@
                       "evidence_type": "AN signal",
                       "type": "numeric",
                       "thresholds": { "an": 0.5, "van": 1.0 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -34,6 +35,7 @@
                       "evidence_type": "AN signal",
                       "type": "numeric",
                       "thresholds": { "an": 2, "van": 4 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -69,6 +71,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.2, "van": 0.35 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1
@@ -80,6 +83,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.3, "van": 0.5 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1
@@ -91,6 +95,7 @@
                       "evidence_type": "Supporting evidence",
                       "type": "numeric",
                       "thresholds": { "an": 0.3 },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -126,6 +131,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.15, "van": 0.3 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -137,6 +143,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.1, "van": 0.25 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -148,6 +155,19 @@
                       "evidence_type": "Predictor",
                       "type": "numeric",
                       "thresholds": { "an": 0.3, "van": 0.6 },
+                      "van_is_strict": true,
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1
+                    },
+                    {
+                      "metric": "MET014",
+                      "label": "Oedema Rate",
+                      "preference": 1,
+                      "evidence_type": "AN signal",
+                      "type": "numeric",
+                      "thresholds": { "an": 0.3, "van": 0.3 },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -183,6 +203,7 @@
                       "evidence_type": "AN signal",
                       "type": "numeric",
                       "thresholds": { "an": 0.4, "van": 0.7 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -194,6 +215,7 @@
                       "evidence_type": "AN signal",
                       "type": "numeric",
                       "thresholds": { "an": 0.3, "van": 0.1 },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -217,6 +239,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.4, "van": 0.6 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -252,6 +275,7 @@
                       "evidence_type": "Outcome",
                       "type": "numeric",
                       "thresholds": { "an": 0.4, "van": 0.7 },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1
@@ -287,6 +311,7 @@
                       "evidence_type": "Supporting evidence",
                       "type": "numeric",
                       "thresholds": { "an": 0.5, "van": 0.7 },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1

@@ -106,6 +106,7 @@ export interface Metric {
 	remarks_limitations?: string | null;
 	thresholds: Thresholds;
 	above_or_below: string;
+	van_is_strict?: boolean | null;
 	evidence_threshold?: number | null;
 	factor_threshold: number;
 	risk_concept?: string | null;

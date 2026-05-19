@@ -208,6 +208,21 @@ describe('flagData — VAN flag columns', () => {
 		expect(out[0]!['MET001_van_flag']).toBe(false);
 		expect(out[0]!['MET001_flag']).toBe(true);
 	});
+
+	// MET014: Above, an=0.3, van=0.3 (van_is_strict=false — identical thresholds)
+	it('MET014_van_flag is still computed at metric level even when van === an', () => {
+		// van_is_strict=false means the flag is excluded from ho_secondary/an_primary VAN branches
+		// but the metric-level _van_flag column is still written
+		const out = flagData([row('A', { MET014: 0.35 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(true);
+		expect(out[0]!['MET014_flag']).toBe(true); // same threshold → both fire together
+	});
+
+	it('MET014_van_flag is false when value is below the (identical) VAN threshold', () => {
+		const out = flagData([row('A', { MET014: 0.2 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(false);
+		expect(out[0]!['MET014_flag']).toBe(false);
+	});
 });
 
 describe('flagData — subfactor/factor/system rollup', () => {
@@ -338,11 +353,22 @@ describe('flagData — priority_flag classification', () => {
 	});
 
 	it('returns ho_secondary when any HO metric has VAN flag but proportion rule not met', () => {
-		// MET011=0.3 → flag=true (≥0.1) AND van_flag=true (≥0.25)
-		// MET005=0.1 → flag=false (0.1 < 0.15); MET012=0.1 → flag=false
-		// 1/3 flagged < 0.5 → ho_primary NOT triggered; HO VAN flag → ho_secondary
+		// MET011=0.3 → flag=true (≥0.1) AND van_flag=true (≥0.25); van_is_strict=true
+		// MET005=0.1 → flag=false (0.1 < 0.15); MET012=0.1 → flag=false; MET014=null
+		// 1/3 flagged < 0.5 → ho_primary NOT triggered; HO VAN flag (strict) → ho_secondary
 		const out = flagData([row('A', { MET005: 0.1, MET011: 0.3, MET012: 0.1 })], refJson);
 		expect(out[0]!['priority_flag']).toBe('ho_secondary');
+	});
+
+	it('does NOT return ho_secondary when only van_is_strict=false HO metrics have VAN flags', () => {
+		// MET014=0.35: van=an=0.3 → van_is_strict=false → excluded from hoVanEligibleIds
+		// MET014_van_flag=true at metric level, but the branch check skips it
+		// MET005=0.1, MET011=0, MET012=0.1 → no VAN flags among strict metrics
+		// MET014_flag=true (0.35 ≥ an=0.3) → anyHoAnFlag=true → an_primary (not ho_secondary)
+		const out = flagData([row('A', { MET014: 0.35, MET005: 0.1, MET011: 0, MET012: 0.1 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(true); // metric-level still fires
+		expect(out[0]!['priority_flag']).not.toBe('ho_secondary');
+		expect(out[0]!['priority_flag']).toBe('an_primary'); // AN flag triggers this instead
 	});
 
 	it('returns an_primary when any HO metric has AN flag (proportion not met, no VAN)', () => {

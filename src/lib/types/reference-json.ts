@@ -128,6 +128,7 @@ export const MetricSchema = z
 		above_or_below: z.enum(MetricDirectionEnum, {
 			message: 'above_or_below must be "Above" or "Below"'
 		}),
+		van_is_strict: z.boolean().nullable().optional().default(false),
 		evidence_threshold: z.number().nullable().optional(),
 		risk_concept: z.string().nullable().optional()
 	})

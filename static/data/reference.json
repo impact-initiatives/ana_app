@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T13:58:16.817Z",
+  "generatedAt": "2026-05-19T09:09:50.772Z",
   "systems": [
     {
       "id": "food_system",
@@ -32,6 +32,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 3,
@@ -58,6 +59,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 3,
@@ -84,6 +86,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 3,
@@ -110,6 +113,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -136,6 +140,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -168,6 +173,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -194,6 +200,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -220,6 +227,7 @@
                         "an": 1,
                         "van": 2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -246,6 +254,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -272,6 +281,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -298,6 +308,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -324,6 +335,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -356,6 +368,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -382,6 +395,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -408,6 +422,7 @@
                         "an": 100,
                         "van": 200
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -434,6 +449,7 @@
                         "an": 100,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -454,6 +470,7 @@
                         "an": null,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -480,6 +497,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -506,6 +524,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -532,6 +551,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -558,6 +578,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -584,6 +605,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -622,6 +644,7 @@
                         "an": 4,
                         "van": 5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -648,6 +671,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -674,6 +698,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -694,6 +719,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -720,6 +746,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -746,6 +773,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -772,6 +800,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -798,6 +827,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -824,6 +854,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -850,6 +881,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 2,
@@ -882,6 +914,7 @@
                         "an": 0.25,
                         "van": 0.1
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -920,6 +953,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -940,6 +974,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -960,6 +995,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -986,6 +1022,7 @@
                         "an": null,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1012,6 +1049,7 @@
                         "an": null,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1038,6 +1076,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -1064,6 +1103,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 3,
@@ -1108,6 +1148,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1134,6 +1175,7 @@
                         "an": 50,
                         "van": 100
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1154,6 +1196,7 @@
                         "an": 50,
                         "van": 100
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1174,6 +1217,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1194,6 +1238,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1220,6 +1265,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1246,6 +1292,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1278,6 +1325,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1310,6 +1358,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1342,6 +1391,7 @@
                         "an": 0.5,
                         "van": 0.8
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1368,6 +1418,7 @@
                         "an": 4,
                         "van": 3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1388,6 +1439,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1414,6 +1466,7 @@
                         "an": 0.3,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1434,6 +1487,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1454,6 +1508,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1480,6 +1535,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1512,6 +1568,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1538,6 +1595,7 @@
                         "an": 0.4,
                         "van": 0.6
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1564,6 +1622,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1584,6 +1643,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1610,6 +1670,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1636,6 +1697,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1662,6 +1724,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -1700,6 +1763,7 @@
                         "an": 7.5,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1726,6 +1790,7 @@
                         "an": 3,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1752,6 +1817,7 @@
                         "an": 5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1784,6 +1850,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1810,6 +1877,7 @@
                         "an": 0.5,
                         "van": 0.8
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1830,6 +1898,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1868,6 +1937,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1900,6 +1970,7 @@
                         "an": 500,
                         "van": 1000
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1920,6 +1991,7 @@
                         "an": 1000,
                         "van": 2000
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1940,6 +2012,7 @@
                         "an": 1,
                         "van": 2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1966,6 +2039,7 @@
                         "an": 0.3,
                         "van": 0.5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -1998,6 +2072,7 @@
                         "an": 100,
                         "van": 200
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2018,6 +2093,7 @@
                         "an": 0.3,
                         "van": 0.5
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2044,6 +2120,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2064,6 +2141,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2090,6 +2168,7 @@
                         "an": 0.3,
                         "van": 0.5
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2134,6 +2213,7 @@
                         "an": 0.5,
                         "van": 0.8
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2154,6 +2234,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2174,6 +2255,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2200,6 +2282,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2226,6 +2309,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2252,6 +2336,7 @@
                         "an": 0.4,
                         "van": 0.2
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2284,6 +2369,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2310,6 +2396,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2336,6 +2423,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2374,6 +2462,7 @@
                         "an": 0.3,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2400,6 +2489,7 @@
                         "an": 0.5,
                         "van": 1
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2420,6 +2510,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2446,6 +2537,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2472,6 +2564,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2504,6 +2597,7 @@
                         "an": 3.5,
                         "van": 2.5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2524,6 +2618,7 @@
                         "an": 0.7,
                         "van": 0.5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2556,6 +2651,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2582,6 +2678,7 @@
                         "an": 50,
                         "van": 100
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2602,6 +2699,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2628,6 +2726,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -2672,6 +2771,7 @@
                         "an": 0.75,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2692,6 +2792,7 @@
                         "an": 0.1,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2712,6 +2813,7 @@
                         "an": 0.15,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2738,6 +2840,7 @@
                         "an": 0.75,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2758,6 +2861,7 @@
                         "an": 0.03,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2778,6 +2882,7 @@
                         "an": 0.15,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2804,6 +2909,7 @@
                         "an": 0.3,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2824,6 +2930,7 @@
                         "an": 0.3,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2844,6 +2951,7 @@
                         "an": 0.2,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2876,6 +2984,7 @@
                         "an": 0.5,
                         "van": 0.7
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -2902,6 +3011,7 @@
                         "an": 0.5,
                         "van": 0.7
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -2928,6 +3038,7 @@
                         "an": 0.5,
                         "van": 0.3
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 3,
                       "factor_threshold": 2,
@@ -2966,6 +3077,7 @@
                         "an": 0.05,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -2986,6 +3098,7 @@
                         "an": 0.01,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3006,6 +3119,7 @@
                         "an": 0.7,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3032,6 +3146,7 @@
                         "an": 0.6,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3052,6 +3167,7 @@
                         "an": 0.5,
                         "van": 0.2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3072,6 +3188,7 @@
                         "an": 0.6,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3092,6 +3209,7 @@
                         "an": 0.5,
                         "van": 0.2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3124,6 +3242,7 @@
                         "an": 15000,
                         "van": 20000
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3144,6 +3263,7 @@
                         "an": 250000,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3164,6 +3284,7 @@
                         "an": 10,
                         "van": 5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3190,6 +3311,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3210,6 +3332,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3236,6 +3359,7 @@
                         "an": 5,
                         "van": 10
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3256,6 +3380,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3282,6 +3407,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3308,6 +3434,7 @@
                         "an": 5,
                         "van": 2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3328,6 +3455,7 @@
                         "an": 20,
                         "van": 10
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3354,6 +3482,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3386,6 +3515,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3406,6 +3536,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3432,6 +3563,7 @@
                         "an": 0.25,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3452,6 +3584,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3478,6 +3611,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3498,6 +3632,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3542,6 +3677,7 @@
                         "an": 150,
                         "van": 200
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3568,6 +3704,7 @@
                         "an": 0.3,
                         "van": 0.4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3600,6 +3737,7 @@
                         "an": 10,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3620,6 +3758,7 @@
                         "an": 1,
                         "van": 2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3646,6 +3785,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3672,6 +3812,7 @@
                         "an": 10,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3692,6 +3833,7 @@
                         "an": 0.5,
                         "van": 1
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3718,6 +3860,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3744,6 +3887,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3770,6 +3914,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3796,6 +3941,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3822,6 +3968,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3854,6 +4001,7 @@
                         "an": 200,
                         "van": 300
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3874,6 +4022,7 @@
                         "an": 100,
                         "van": 140
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3894,6 +4043,7 @@
                         "an": 50,
                         "van": 100
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3920,6 +4070,7 @@
                         "an": 0.4,
                         "van": 0.5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3940,6 +4091,7 @@
                         "an": 0.3,
                         "van": 0.4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3960,6 +4112,7 @@
                         "an": 0.2,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -3998,6 +4151,7 @@
                         "an": 0.15,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4018,6 +4172,7 @@
                         "an": 0.1,
                         "van": 0.15
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4038,6 +4193,7 @@
                         "an": 0.15,
                         "van": 0.3
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4064,6 +4220,7 @@
                         "an": 0.3,
                         "van": 0.45
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4084,6 +4241,7 @@
                         "an": 0.45,
                         "van": 0.7
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4104,6 +4262,7 @@
                         "an": 0.3,
                         "van": 0.5
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4130,6 +4289,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4156,6 +4316,7 @@
                         "an": 0.5,
                         "van": 0.7
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4182,6 +4343,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4226,6 +4388,7 @@
                         "an": 1,
                         "van": 2
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4252,6 +4415,7 @@
                         "an": 2,
                         "van": 4
                       },
+                      "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4296,6 +4460,7 @@
                         "an": 0.5,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4316,6 +4481,7 @@
                         "an": 0.25,
                         "van": 0.5
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4336,6 +4502,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4362,6 +4529,7 @@
                         "an": null,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4394,6 +4562,7 @@
                         "an": 1,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4420,6 +4589,7 @@
                         "an": 0.2,
                         "van": 0.4
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4440,6 +4610,7 @@
                         "an": 0.4,
                         "van": null
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
@@ -4472,6 +4643,7 @@
                         "an": 0.25,
                         "van": 0.5
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4498,6 +4670,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4524,6 +4697,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4550,6 +4724,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4570,6 +4745,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4596,6 +4772,7 @@
                         "an": 0.25,
                         "van": 0.5
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,
@@ -4622,6 +4799,7 @@
                         "an": 0.5,
                         "van": 0.75
                       },
+                      "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
                       "factor_threshold": 1,

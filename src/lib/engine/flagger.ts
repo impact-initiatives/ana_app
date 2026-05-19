@@ -330,6 +330,16 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 			metadata[id]?.raw?.evidence_type !== 'Supporting evidence'
 	);
 
+	// Metrics where van adds genuine signal beyond an (van !== an and van is set).
+	// Metrics with van === an are excluded from ho_secondary and an_primary VAN branches
+	// since crossing VAN provides no information beyond crossing AN.
+	const hoVanEligibleIds = hoMetricIds.filter(
+		(id) => metadata[id]?.raw?.van_is_strict === true
+	);
+	const allVanEligibleIds = allClassificationMetricIds.filter(
+		(id) => metadata[id]?.raw?.van_is_strict === true
+	);
+
 	const priorityFlagFn = (d: Row): string => {
 		const status = (key: string): Status => ((d[`${key}.status`] as Status) ?? 'no_data');
 		const isFlagged = (key: string) => status(key) === 'flag';
@@ -346,12 +356,12 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		if (hoAvail > 5 && hoFlagged / hoAvail >= 2 / 3) return 'ho_primary';
 		if (hoAvail > 0 && hoAvail <= 5 && hoFlagged / hoAvail >= 0.5) return 'ho_primary';
 
-		// 3. Any HO metric has VAN flag
-		if (hoMetricIds.some((id) => d[`${id}_van_flag`] === true)) return 'ho_secondary';
+		// 3. Any HO metric has VAN flag (only strict-VAN metrics: van ≠ an)
+		if (hoVanEligibleIds.some((id) => d[`${id}_van_flag`] === true)) return 'ho_secondary';
 
 		// 4. AN depth & breadth
 		const anyHoAnFlag = hoMetricIds.some((id) => d[`${id}_flag`] === true);
-		const anyVanFlag = allClassificationMetricIds.some((id) => d[`${id}_van_flag`] === true);
+		const anyVanFlag = allVanEligibleIds.some((id) => d[`${id}_van_flag`] === true);
 		const nSystemsFlagged = classificationSystems.filter((s) => isFlagged(s)).length;
 		if (anyHoAnFlag || anyVanFlag || nSystemsFlagged >= 3) return 'an_primary';
 

@@ -207,21 +207,33 @@ function build(rows: RefRow[]): {
 		const type: string | null = rawType === '' ? null : rawType;
 		if (type === null) emptyTypeIds.push(id);
 
+		const pref = parseInteger(row['Preference'] ?? '');
+		const et = nullIfEmpty(row['Evidence type'] ?? '');
+		const anVal = roundThreshold(row['Acute needs threshold (4)'] ?? '');
+		const vanVal = roundThreshold(row['Very acute needs threshold (5)'] ?? '');
+		// van_is_strict: null for supporting evidence or reference-only metrics
+		// (VAN not applicable); true/false based on whether van adds signal beyond an.
+		const vanIsStrict: boolean | null =
+			pref === 3 || et === 'Supporting evidence'
+				? null
+				: vanVal !== null && vanVal !== anVal;
+
 		metricMap.get(indKey)!.push({
 			metric: id,
 			label: nullIfEmpty(row['Metric'] ?? ''),
 			level: nullIfEmpty(row['Level'] ?? ''),
-			preference: parseInteger(row['Preference'] ?? ''),
-			evidence_type: nullIfEmpty(row['Evidence type'] ?? ''),
+			preference: pref,
+			evidence_type: et,
 			type,
 			msna_module: nullIfEmpty(row['MSNA module'] ?? ''),
 			msna_indicator: nullIfEmpty(row['MSNA indicator'] ?? ''),
 			question_kobo_code: nullIfEmpty(row['Question KOBO Code'] ?? ''),
 			remarks_limitations: nullIfEmpty(row['Remarks/Limitations'] ?? ''),
 			thresholds: {
-				an: roundThreshold(row['Acute needs threshold (4)'] ?? ''),
-				van: roundThreshold(row['Very acute needs threshold (5)'] ?? '')
+				an: anVal,
+				van: vanVal
 			},
+			van_is_strict: vanIsStrict,
 			above_or_below: (row['Above or below'] ?? '').trim(),
 			evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
 			factor_threshold: parseInteger(row['Factor threshold'] ?? ''),

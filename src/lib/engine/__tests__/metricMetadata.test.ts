@@ -16,7 +16,7 @@ import refJson from './fixtures/reference-mini.json';
 describe('getAllMetricIds', () => {
 	it('returns all metric ids in encounter order', () => {
 		const ids = getAllMetricIds(refJson);
-		expect(ids).toEqual(['MET001', 'MET002', 'MET003', 'MET004', 'MET013', 'MET005', 'MET011', 'MET012', 'MET007', 'MET009', 'MET010', 'MET008', 'MET006']);
+		expect(ids).toEqual(['MET001', 'MET002', 'MET003', 'MET004', 'MET013', 'MET005', 'MET011', 'MET012', 'MET014', 'MET007', 'MET009', 'MET010', 'MET008', 'MET006']);
 	});
 
 	it('returns empty array for null or missing systems', () => {
@@ -177,8 +177,8 @@ describe('getIndicatorMetadata', () => {
 describe('buildReferenceRows', () => {
 	it('returns one row per metric leaf', () => {
 		const rows = buildReferenceRows(refJson);
-		// 13 metrics total in fixture: MET001–MET013 (MET006 preference-3 reference-only, still emitted)
-		expect(rows).toHaveLength(13);
+		// 14 metrics total in fixture: MET001–MET014 (MET006 preference-3 reference-only, still emitted)
+		expect(rows).toHaveLength(14);
 	});
 
 	it('each row has all REFERENCE_TABLE_COLUMNS keys', () => {
