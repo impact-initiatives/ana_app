@@ -119,24 +119,20 @@
 		<!-- Tab + controls -->
 		<Card>
 			<div class="flex flex-wrap items-end gap-6">
-				<!-- Tab toggle -->
-				<div class="join">
-					<button
-						class="join-item btn btn-sm {coverageTab === 'coverage' ? 'btn-primary' : 'btn-ghost'}"
-						onclick={() => (coverageTab = 'coverage')}
-					>Overall coverage</button>
-					<button
-						class="join-item btn btn-sm {coverageTab === 'health-outcomes' ? 'btn-primary' : 'btn-ghost'}"
-						onclick={() => (coverageTab = 'health-outcomes')}
-					>Health Outcomes</button>
-				</div>
+				<RadioToggle
+					bind:value={coverageTab}
+					label="Scope"
+					labelFalse="Overall"
+					labelTrue="Health Outcomes"
+					name="coverageScope"
+				/>
 
 				<RadioToggle
 					bind:value={isPerUoa}
-					label="Scope"
+					label="Level"
 					labelFalse="Overall"
 					labelTrue="Per UoA"
-					name="coverageScope"
+					name="coverageLevel"
 				/>
 				{#if isPerUoa}
 					<div class="max-w-72 min-w-60 flex-1" transition:fade={{ duration: 150 }}>
@@ -152,7 +148,7 @@
 			</div>
 		</Card>
 
-		{#if coverageTab === 'coverage' && activeRow !== null}
+		{#if !coverageTab && activeRow !== null}
 			<div transition:fade={{ duration: 150 }}>
 				<CoverageDetailCards
 					row={activeRow}
@@ -162,7 +158,7 @@
 					totalUoas={filteredRows.length}
 				/>
 			</div>
-		{:else if coverageTab === 'health-outcomes'}
+		{:else if coverageTab}
 			<div transition:fade={{ duration: 150 }}>
 				<HealthOutcomesCoverage
 					rows={filteredRows}
