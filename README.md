@@ -48,46 +48,73 @@ System  →  Factor  →  Sub-Factor  →  Indicator  →  Metric
 
 Each row in the CSV is one metric. The columns that drive the app's behaviour are:
 
-| Column                                   | What it controls                                                                                                                                                                                                                                                                                          |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Metric ID                                | Unique code (e.g. `MET001`); must match the column header in the uploaded results CSV                                                                                                                                                                                                                     |
-| System / Factor / Sub-Factor / Indicator | Placement in the hierarchy                                                                                                                                                                                                                                                                                |
-| Label                                    | Human-readable name shown in the dashboard                                                                                                                                                                                                                                                                |
-| Preference                               | 1 = primary, 2 = secondary, 3 = reference-only (never triggers a flag)                                                                                                                                                                                                                                    |
-| Type                                     | Accepted value format for the uploaded results CSV — used to validate each cell before flagging. Examples: `num[0:1]` (proportion between 0 and 1), `int[0+]` (non-negative integer). If a submitted value falls outside this range the app flags it as invalid. Leave empty to accept any finite number. |
-| Threshold AN / VAN                       | Numeric cut-offs for Acute Needs and Very Acute Needs                                                                                                                                                                                                                                                     |
-| Above or below                           | Whether a value **above** or **below** the threshold signals acute needs                                                                                                                                                                                                                                  |
-| Evidence threshold                       | Minimum number of metrics with data needed to reach a conclusion in a sub-factor group                                                                                                                                                                                                                    |
-| Factor threshold                         | Minimum number of flagged metrics needed to flag a sub-factor group                                                                                                                                                                                                                                       |
-| Level / Risk concept                     | Metadata used for display and filtering in the reference list                                                                                                                                                                                                                                             |
-| Kobo code                                | Links the metric to the survey instrument                                                                                                                                                                                                                                                                 |
+| Column                                   | What it controls                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metric ID                                | Unique code (e.g. `MET001`); must match the column header in the uploaded results CSV                                                                                                                                                                                                                      |
+| System / Factor / Sub-Factor / Indicator | Placement in the hierarchy                                                                                                                                                                                                                                                                                 |
+| Label                                    | Human-readable name shown in the dashboard                                                                                                                                                                                                                                                                 |
+| Preference                               | Indicator of methodological robustness: 1 = strong evidence base, 2 = supplementary, 3 = reference-only (shown in reference list and deep-dive export only; excluded from the flagging pipeline entirely). Does **not** control rollup — see Evidence type below.                                          |
+| Evidence type                            | `AN signal`, `Outcome`, `Predictor`, or `Supporting evidence`. Controls rollup participation: `Supporting evidence` metrics receive metric-level flags but are **excluded from subfactor/factor/system rollup** and the priority flag decision tree. All non-supporting metrics must have a VAN threshold. |
+| Type                                     | Accepted value format for the uploaded results CSV — used to validate each cell before flagging. Examples: `num[0:1]` (proportion between 0 and 1), `int[0+]` (non-negative integer). If a submitted value falls outside this range the app flags it as invalid. Leave empty to accept any finite number.  |
+| Threshold AN / VAN                       | Numeric cut-offs for Acute Needs (AN) and Very Acute Needs (VAN). VAN represents a more severe level. Required for all non-supporting-evidence metrics; validated by `bun run validate:reference-json`.                                                                                                    |
+| Above or below                           | Whether a value **above** or **below** the threshold signals acute needs                                                                                                                                                                                                                                   |
+| Evidence threshold                       | Minimum number of metrics with data needed to reach a conclusion in a sub-factor group                                                                                                                                                                                                                     |
+| Factor threshold                         | Minimum number of flagged metrics needed to flag a sub-factor group                                                                                                                                                                                                                                        |
+| Level / Risk concept                     | Metadata used for display and filtering in the reference list                                                                                                                                                                                                                                              |
+| Kobo code                                | Links the metric to the MSNA kobo code                                                                                                                                                                                                                                                                     |
 
-### Preference levels
+### Evidence type
 
-| Value              | Meaning                                                                      |
-| ------------------ | ---------------------------------------------------------------------------- |
-| 1 — Primary        | Used in flagging; the core evidence                                          |
-| 2 — Secondary      | Used in flagging; supplementary evidence                                     |
-| 3 — Reference-only | Shown in the reference list and deep-dive export only; never triggers a flag |
+The `Evidence type` column is the primary driver of how a metric behaves in the flagging pipeline:
+
+| Value                 | Rollup behaviour                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| `AN signal`           | Included in subfactor/factor/system rollup; contributes to the priority flag decision tree         |
+| `Outcome`             | Same as AN signal                                                                                  |
+| `Predictor`           | Same as AN signal                                                                                  |
+| `Supporting evidence` | Metric-level flag computed and shown in the drill-down; **excluded** from rollup and priority flag |
+
+All non-supporting-evidence metrics must have both AN and VAN thresholds set. The validation script (`bun run validate:reference-json`, Pass 8) enforces this.
 
 ### How flagging works
 
-When a user uploads a results CSV, each metric value are compared to its AN and VAN thresholds.
+When a user uploads a results CSV, each metric value is compared to its AN and VAN thresholds. Results roll up from metric → sub-factor → factor → system, and then a single **priority flag** is assigned to each unit of analysis.
 
-The final **priority flag** for a geographic area is one of:
+#### Sub-factor rollup
 
-| Label                 | Meaning                                                                                                                                        |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| EM                    | Excess Mortality — mortality data crosses its threshold                                                                                        |
-| HO - Primary          | Health outcomes - Primary — A high proportion of health outcomes metrics flag                                                                  |
-| HO - Secondary        | Health outcomes - Secondary — At least one health outcomes metric flags across the very acute needs threshold                                  |
-| AN - Primary          | Acute needs - Primary — Priority concerns for acute needs (health outcomes flagged, 3 systems flagged, or very acute needs thresholds crossed) |
-| AN - Secondary        | Acute needs - Secondary — Any system flags for acute needs                                                                                     |
-| No Acute Needs        | Sufficient evidence to conclude no acute needs                                                                                                 |
-| Insufficient Evidence | Some data present but not enough to reach a conclusion                                                                                         |
-| No Data               | No usable data for this area                                                                                                                   |
+Metrics are grouped within each sub-factor by their `(factor_threshold, evidence_threshold)` pair. Within each group:
 
-Metrics are grouped within each sub-factor by their `(factor_threshold, evidence_threshold)` pair. A group is flagged if the number of flagged metrics in that group meets the factor threshold. A group concludes "no flag" if enough metrics have data to meet the evidence threshold. Sub-factor, factor, and system statuses are then determined by the worst outcome across their children.
+- **Flag** if flagged metrics ≥ `factor_threshold`
+- **No flag** if metrics with data ≥ `evidence_threshold` (and flag rule not met)
+- **Insufficient evidence** if some data is present but below the evidence threshold
+- **No data** if no metrics have data
+
+Sub-factor → Factor → System statuses propagate upward: `flag` beats `no_flag` beats `insufficient_evidence` beats `no_data`.
+
+Only non-supporting-evidence metrics participate in this rollup.
+
+#### Priority flag decision tree
+
+The priority flag is assigned by evaluating system-level statuses in order:
+
+| Step | Condition                                                                                                                 | Flag                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| 0    | Mortality system flagged                                                                                                  | `em`                    |
+| 1    | All classification systems have no data                                                                                   | `no_data`               |
+| 2    | HO proportion rule: n > 5 and ≥ 2/3 HO metrics flagged, **or** 1 ≤ n ≤ 5 and ≥ 1/2 flagged                                | `ho_primary`            |
+| 3    | Any HO metric crosses its VAN threshold (strict)                                                                          | `ho_secondary`          |
+| 4    | Health outcomes flagged, **or** any classification metric crosses VAN (strict), **or** ≥ 3 classification systems flagged | `an_primary`            |
+| 5    | Any classification system flagged                                                                                         | `an_secondary`          |
+| 6    | No flags but some systems have no data or insufficient evidence                                                           | `insufficient_evidence` |
+| 7    | All classification systems have data, nothing flagged                                                                     | `no_acute_needs`        |
+
+**Classification metric**: all metrics which evidence type is either Outcome, Predictor, AN signal but not Supporting evidence. Those last are to be used for deep dives.
+
+**Classification systems**: all systems except Mortality and Market Functionality (those two have dedicated rules at steps 0 and 5). The current classification systems are: Food Security, Health Outcomes, Livelihoods, WASH, and Health/Nutrition Services.
+
+**HO**: Health Outcomes system only (steps 2–3 apply exclusively to HO metrics).
+
+**VAN strict**: a VAN threshold is "strict" (`van_is_strict: true` in reference.json) when it differs from the AN threshold. Metrics where VAN = AN cannot add signal beyond the AN flag and are excluded from steps 3 and 4's VAN checks.
 
 ### What to do after updating the reference CSV
 
@@ -134,7 +161,7 @@ System
                     └── Metric   (leaf — one row in the input CSV, carries thresholds + type)
 ```
 
-**Key distinction:** an _Indicator_ is a named concept (e.g. "Two-week prevalence of childhood illness") that groups one or more _Metrics_. Each _Metric_ has its own ID (`MET001`), type constraint, threshold, and preference level. The input CSV has one column per metric (`MET001`, `MET002`, …).
+**Key distinction:** an _Indicator_ is a named concept (e.g. "Two-week prevalence of childhood illness") that groups one or more _Metrics_. Each _Metric_ has its own ID (`MET001`), type constraint, AN/VAN thresholds, and evidence type. The input CSV has one column per metric (`MET001`, `MET002`, …).
 
 ### Data flow
 
@@ -257,27 +284,29 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 
 #### `results/`
 
-| Component                | Purpose                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `ResultsOverview.svelte` | Overview tab — priority-flag donut, UoA ranking table, choropleth map with layer filters |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                          |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                         |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                                                      |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                      |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                               |
+| Component                 | Purpose                                                                                                                       |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ResultsOverview.svelte`  | Overview — priority-flag donut, UoA ranking table, choropleth map with cascade layer filters                                  |
+| `ResultsSystems.svelte`   | System-level heatmap; clicks open the metric drilldown (filterable by evidence type)                                          |
+| `ResultsMetrics.svelte`   | Factor → Subfactor → Metric card grid per system                                                                              |
+| `ResultsCoverage.svelte`  | Coverage summary — two tabs: overall system coverage and Health Outcomes metric-level AN/VAN breakdown                        |
+| `ResultsSpotlight.svelte` | Custom metric × UoA cross-tab: per-system dropdown selectors above a sticky table; capped to the current filtered UoAs (≤ 10) |
+| `ResultsExport.svelte`    | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                                                           |
+| `FiltersSidebar.svelte`   | Filter panel (UoA, system, factor, priority flag status)                                                                      |
 
 #### `viz/`
 
-| Component                    | Purpose                                                                                 |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| `HeatmapGrid.svelte`         | Systems × subfactors colour grid; cell = flag count / availability                      |
-| `SystemMatrix.svelte`        | Expanded per-system metric matrix                                                       |
-| `MetricDrilldown.svelte`     | Metric-level detail panel (value, status, threshold)                                    |
-| `CirclePacking.svelte`       | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay |
-| `CoverageDetailCards.svelte` | Per-factor coverage bars                                                                |
-| `UoaRankingTable.svelte`     | Ranked UoA table by priority flag                                                       |
-| `UoaDetailPanel.svelte`      | Single-UoA detail view                                                                  |
-| `ChoroplethMap.svelte`       | Choropleth map (p-codes + admin boundaries); exports composite SVG via `exportMap.ts`   |
+| Component                       | Purpose                                                                                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HeatmapGrid.svelte`            | Systems × subfactors colour grid; cell = flag count / availability; sortable by priority flag                                                                                                           |
+| `SystemMatrix.svelte`           | Expanded per-system metric matrix                                                                                                                                                                       |
+| `MetricDrilldown.svelte`        | Metric-level detail: value, AN/VAN status and thresholds, evidence type; filter toggles by evidence type                                                                                                |
+| `HealthOutcomesCoverage.svelte` | Per-metric AN/VAN flag counts for Health Outcomes; proportion rule thresholds (1/2, 2/3) shown visually                                                                                                 |
+| `CirclePacking.svelte`          | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay                                                                                                                 |
+| `CoverageDetailCards.svelte`    | Per-factor coverage bars                                                                                                                                                                                |
+| `UoaRankingTable.svelte`        | Ranked UoA table by priority flag                                                                                                                                                                       |
+| `UoaDetailPanel.svelte`         | Single-UoA detail view                                                                                                                                                                                  |
+| `ChoroplethMap.svelte`          | Choropleth map with three rendering modes: `ADM1` (admin-1 polygons only), `ADM2` (admin-2 polygons only), `MIXED` (ADM1 polygons as base with ADM2 overlaid where data exists). Exports composite SVG. |
 
 #### `ui/`
 
@@ -312,7 +341,7 @@ Ramp levels correspond to hierarchy depth:
 
 For non-browser contexts that need actual hex (e.g. ExcelJS in `deepdive.ts`), `deepdive.ts` reads CSS vars at runtime via `getComputedStyle(document.documentElement).getPropertyValue('--color-sys-X')`.
 
-Flag and status colours are defined as CSS custom properties in the DaisyUI theme blocks in `app.css`. Accessed via `FLAG_BADGE` and `prelimBadge` records in `colors.ts`.
+Priority flag and status colours are CSS custom properties in the DaisyUI theme blocks in `app.css`. The priority flag palette uses a purple ramp for the three HO tiers (em/ho_primary/ho_secondary) and reuses the existing red, orange, and neutral tokens for the remaining flags. Accessed via `PRIORITY_BADGE_MAP` / `getPriorityBadge` and `FLAG_BADGE_MAP` / `getFlagBadge` in `colors.ts`.
 
 ### Type system (`src/lib/types/`)
 
@@ -423,7 +452,7 @@ Run everything in sequence: `bun run data:refresh`
 
 **Adding a new system/factor/subfactor:** update the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`) first, then add the rows to `reference.csv`, then run `data:refresh`. The validator will reject the reference JSON if the hierarchy ID is not in the lookup file.
 
-**Renaming or removing a system/factor/subfactor ID:** update the lookup CSV and `reference.csv`, run `data:refresh` + `generate:enums`, then search the codebase for the old ID — it may appear in `src/lib/engine/flagger.ts` (the prelim-flag decision tree references `SystemIDEnum` values).
+**Renaming or removing a system/factor/subfactor ID:** update the lookup CSV and `reference.csv`, run `data:refresh` + `generate:enums`, then search the codebase for the old ID — it may appear in `src/lib/engine/flagger.ts` (the priority-flag decision tree references `SystemIDEnum` values for mortality, health outcomes, and market functionality).
 
 ### CI/CD — `.github/workflows/deploy.yml`
 
@@ -438,13 +467,13 @@ Entry point: `flagData(rows, referenceJson)`.
 
 The pipeline runs in five stages:
 
-1. **Metric level** (`makeMetricSpec`) — for each metric computes `{id}_flag` (boolean), `{id}_status` (`flag | no_flag | no_data`), and `{id}_within_10perc`. Preference-3 metrics are skipped entirely.
-2. **Sub-factor groups** — metrics are pooled into threshold groups defined by their `(factor_threshold, evidence_threshold)` pair (sourced from `buildSubfactorList` in `metricMetadata.ts`). A group flags if flagged metrics ≥ `factor_threshold`; it concludes `no_flag` if metrics with data ≥ `evidence_threshold`.
+1. **Metric level** (`makeMetricSpec`) — for each non-preference-3 metric computes `{id}_flag`, `{id}_status`, `{id}_van_flag`, `{id}_van_status`, and `{id}_within_10perc_change`. Supporting-evidence metrics are included here (their flags appear in the drill-down).
+2. **Sub-factor groups** — non-supporting-evidence metrics only (`rollupIds`). Grouped by `(factor_threshold, evidence_threshold)` pair (via `buildSubfactorList` in `metricMetadata.ts`). A group flags if flagged metrics ≥ `factor_threshold`; concludes `no_flag` if metrics with data ≥ `evidence_threshold`.
 3. **Sub-factor status** — worst outcome across all its threshold groups.
-4. **Factor / System rollup** — `rollupStatuses` aggregates child statuses: any `flag` → `flag`; otherwise `no_flag` if any child is `no_flag`; otherwise `insufficient_evidence`; otherwise `no_data`.
-5. **`priority_flag`** — decision tree over system-level statuses: EM → ROEM → ACUTE_NEEDS → NO_ACUTE_NEEDS → INSUFFICIENT_EVIDENCE → NO_DATA. This tree is hardcoded in `flagger.ts`; threshold values come from the CSV.
+4. **Factor / System rollup** — `rollupStatuses` aggregates child statuses: any `flag` → `flag`; otherwise `no_flag` if any `no_flag`; otherwise `insufficient_evidence`; otherwise `no_data`.
+5. **`priority_flag`** — 8-step decision tree over system-level statuses and metric-level VAN flags (see [How flagging works](#how-flagging-works)). Hardcoded in `flagger.ts`; threshold values come from the CSV.
 
-**Touch `flagger.ts` when:** the decision-tree logic changes, new prelim-flag categories are introduced, or the rollup rules change. Threshold values themselves live in the CSV — only the structural logic is here.
+**Touch `flagger.ts` when:** the decision-tree logic changes, new priority-flag categories are added, or the rollup rules change. Threshold values themselves live in the CSV — only the structural logic is here.
 
 ### Deep-dive export — `src/lib/engine/deepdive.ts`
 
