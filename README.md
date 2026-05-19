@@ -21,16 +21,16 @@
 The ANA app processes humanitarian data in three steps:
 
 1. **Upload your data** — Prepare a CSV where each row is a unit of analysis (a geographic area, a partner zone, or any other unit) and columns are metric IDs (`MET001`, `MET002`, …). A `uoa` column uniquely identifies each row. Metadata columns (e.g. `region`, `partner`) are carried through automatically as filters.
-2. **Automatic flagging** — Each metric value is validated against per-metric type rules, then compared to its acute-needs threshold. Results roll up from metric → sub-factor → factor → system, giving each unit a preliminary flag: _EM · RoEM · Acute Needs · No Acute Needs · Insufficient Evidence · No Data_.
+2. **Automatic flagging** — Each metric value is validated against per-metric type rules, then compared to its acute-needs threshold. Results roll up from metric → sub-factor → factor → system, giving each unit a priority flag: _EM · HO - Primary · HO - Secondary · AN - Primary · AN - Secondary · No Acute Needs · Insufficient Evidence · No Data_.
 3. **Explore and export** — Visualize flagged results and data coverage. Results can be exported as CSV, XLSX, or per-unit deep-dive workbooks.
 
 Most framework changes — adding or editing metrics, adjusting thresholds, updating labels — only require editing `static/data/reference.csv` and running `bun run data:refresh`.
 
-Adding or renaming a system, factor, or sub-factor also requires updating the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`). The **flagging** rollup logic and the preliminary-flag decision tree are hardcoded in `src/lib/engine/flagger.ts` and are not controlled by the CSV. The validator logic is hardcoded too in `src/lib/engine/validator.ts` and deep-dive XLSX pre-populating and formatting in `src/lib/engine/deepdive.ts`
+Adding or renaming a system, factor, or sub-factor also requires updating the relevant lookup CSV (`system.csv`, `factor.csv`, or `subfactor.csv`). The **flagging** rollup logic and the priority-flag decision tree are hardcoded in `src/lib/engine/flagger.ts` and are not controlled by the CSV. The validator logic is hardcoded too in `src/lib/engine/validator.ts` and deep-dive XLSX pre-populating and formatting in `src/lib/engine/deepdive.ts`
 
 See the [Maintenance guide](#maintenance-guide--data-pipeline-and-export-logic) for step-by-step instructions on all of the above.
 
-> **Note:** The preliminary flag is a data-driven pre-screening result, not a conclusion. Each unit of analysis requires a full deep-dive before drawing final conclusions.
+> **Note:** The priority flag is a data-driven pre-screening result, not a conclusion. Its purpose is to draw a list of priorities for deep-dives. Each unit of analysis requires a full deep-dive before drawing final conclusions.
 
 ### The reference framework
 
@@ -72,18 +72,22 @@ Each row in the CSV is one metric. The columns that drive the app's behaviour ar
 
 ### How flagging works
 
-When a user uploads a results CSV, each metric value is compared to its AN threshold. Metrics are grouped within each sub-factor by their `(factor_threshold, evidence_threshold)` pair. A group is flagged if the number of flagged metrics in that group meets the factor threshold. A group concludes "no flag" if enough metrics have data to meet the evidence threshold. Sub-factor, factor, and system statuses are then determined by the worst outcome across their children.
+When a user uploads a results CSV, each metric value are compared to its AN and VAN thresholds.
 
-The final **preliminary flag** for a geographic area is one of:
+The final **priority flag** for a geographic area is one of:
 
-| Label                 | Meaning                                                                      |
-| --------------------- | ---------------------------------------------------------------------------- |
-| EM                    | Excess Mortality — mortality data crosses its threshold                      |
-| ROEM                  | Risk of Excess Mortality — enough cross-system evidence without confirmed EM |
-| Acute Needs           | At least one system flagged                                                  |
-| No Acute Needs        | Sufficient evidence to conclude no acute needs                               |
-| Insufficient Evidence | Some data present but not enough to reach a conclusion                       |
-| No Data               | No usable data for this area                                                 |
+| Label                 | Meaning                                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| EM                    | Excess Mortality — mortality data crosses its threshold                                                                                        |
+| HO - Primary          | Health outcomes - Primary — A high proportion of health outcomes metrics flag                                                                  |
+| HO - Secondary        | Health outcomes - Secondary — At least one health outcomes metric flags across the very acute needs threshold                                  |
+| AN - Primary          | Acute needs - Primary — Priority concerns for acute needs (health outcomes flagged, 3 systems flagged, or very acute needs thresholds crossed) |
+| AN - Secondary        | Acute needs - Secondary — Any system flags for acute needs                                                                                     |
+| No Acute Needs        | Sufficient evidence to conclude no acute needs                                                                                                 |
+| Insufficient Evidence | Some data present but not enough to reach a conclusion                                                                                         |
+| No Data               | No usable data for this area                                                                                                                   |
+
+Metrics are grouped within each sub-factor by their `(factor_threshold, evidence_threshold)` pair. A group is flagged if the number of flagged metrics in that group meets the factor threshold. A group concludes "no flag" if enough metrics have data to meet the evidence threshold. Sub-factor, factor, and system statuses are then determined by the worst outcome across their children.
 
 ### What to do after updating the reference CSV
 
@@ -138,7 +142,7 @@ System
 CSV Upload  (src/routes/+page.svelte)
   → parser.ts          PapaParse wrapper — returns headers + raw rows
   → validator.ts       Checks headers against reference.json, UOA uniqueness, type constraints
-  → flagger.ts         Applies thresholds; rolls up metric → subfactor → factor → system → prelim_flag
+  → flagger.ts         Applies thresholds; rolls up metric → subfactor → factor → system → priority_flag
   → fetchAdmin.ts      If p-codes detected, fetches ADM1/ADM2 GeoJSON from external API (fire-and-forget)
   → Stores             flagStore, adminFeaturesStore
   → Results routes     /results  (heatmap, drilldown, coverage)
@@ -168,9 +172,13 @@ ReferenceRoot {
           metrics: Metric[] {
             metric: "MET001",   // leaf ID — matches CSV column header
             label,
-            preference,         // 1 (primary) | 2 (secondary) | 3 (reference-only, excluded from flagging)
+            preference,
             type,               // e.g. "num[0:1]", "int[0+]"
-            thresholds: { an, van },
+            evidence_type,      // "Outcome" | "Predictor" | "AN signal" | "Supporting evidence"
+                                // Supporting evidence: metric-level flags computed, excluded from rollup aggregation
+            thresholds: { an, van },  // VAN = Very Acute Needs (more extreme cut-off)
+            van_is_strict,      // true if van != null && van != an; null for supporting-evidence/pref-3 metrics
+                                // Only true metrics contribute to ho_secondary and an_primary VAN branches
             above_or_below,
             evidence_threshold,
             factor_threshold,
@@ -188,7 +196,7 @@ ReferenceRoot {
 ```
 uoa | MET001 | MET001_flag | MET001_status | MET001_within_10perc
     | subfactor_X_Y_status | factor_X_status | system_X_status
-    | prelim_flag
+    | priority_flag
 ```
 
 Status vocabulary (applies at every rollup level):
@@ -200,7 +208,9 @@ Status vocabulary (applies at every rollup level):
 | `insufficient_evidence` | Some data but below evidence threshold |
 | `no_data`               | No data at all for this level          |
 
-`prelim_flag` values: `EM` · `ROEM` · `ACUTE` · `ACUTE_NEEDS` · `INSUFFICIENT_EVIDENCE` · `NO_DATA`
+`priority_flag` values (severity order): `em` · `ho_primary` · `ho_secondary` · `an_primary` · `an_secondary` · `insufficient_evidence` · `no_data` · `no_acute_needs`
+
+Per-metric VAN columns are also emitted: `MET001_van_flag` (boolean | null) and `MET001_van_status` (`'flag' | 'no_flag' | 'no_data'`). These are computed for every non-preference-3 metric even when `van_is_strict` is `false`.
 
 ---
 
@@ -208,18 +218,18 @@ Status vocabulary (applies at every rollup level):
 
 ### Engine (`src/lib/engine/`)
 
-| File                | Role                                                                                                                                                                                                 |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pipeline.ts`       | Orchestrates validate → flag → admin fetch. Entry point for the full processing run.                                                                                                                 |
-| `validator.ts`      | Validates CSV structure: headers present in `MetricMap`, UOA uniqueness, type constraints per metric. Produces `ValidationResult` with per-column missingness entries.                               |
-| `flagger.ts`        | Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics are excluded from the flagging pipeline (reference display only). Rolls up metric → subfactor → factor → system → `prelim_flag`. |
-| `metricMetadata.ts` | Traverses `reference.json`: `getAllMetricIds()`, `getMetricMetadata()`, `getIndicatorMetadata()`, `buildSubfactorList()`, `buildReferenceRows()` (for the reference table).                          |
-| `fetchAdmin.ts`     | Detects p-codes in the UOA column; fetches ADM1/ADM2 GeoJSON boundaries from an external API.                                                                                                        |
-| `download.ts`       | Exports results as CSV / JSON / XLSX.                                                                                                                                                                |
-| `deepdive.ts`       | Generates ZIP packages (one XLSX per UoA) with full metric-level detail. Reads system colours from CSS custom properties via `getComputedStyle`.                                                     |
-| `mergeDeepDives.ts` | Merges multiple deep-dive ZIP packages into a single consolidated XLSX (used by the `/merge` route).                                                                                                 |
-| `exportMap.ts`      | Builds a self-contained composite SVG for map export (title, choropleth, legend, logos) with inlined light-theme styles.                                                                             |
-| `parser.ts`         | Thin PapaParse wrapper; returns `{ headers, rows }`.                                                                                                                                                 |
+| File                | Role                                                                                                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pipeline.ts`       | Orchestrates validate → flag → admin fetch. Entry point for the full processing run.                                                                                                                   |
+| `validator.ts`      | Validates CSV structure: headers present in `MetricMap`, UOA uniqueness, type constraints per metric. Produces `ValidationResult` with per-column missingness entries.                                 |
+| `flagger.ts`        | Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics are excluded from the flagging pipeline (reference display only). Rolls up metric → subfactor → factor → system → `priority_flag`. |
+| `metricMetadata.ts` | Traverses `reference.json`: `getAllMetricIds()`, `getMetricMetadata()`, `getIndicatorMetadata()`, `buildSubfactorList()`, `buildReferenceRows()` (for the reference table).                            |
+| `fetchAdmin.ts`     | Detects p-codes in the UOA column; fetches ADM1/ADM2 GeoJSON boundaries from an external API.                                                                                                          |
+| `download.ts`       | Exports results as CSV / JSON / XLSX.                                                                                                                                                                  |
+| `deepdive.ts`       | Generates ZIP packages (one XLSX per UoA) with full metric-level detail. Reads system colours from CSS custom properties via `getComputedStyle`.                                                       |
+| `mergeDeepDives.ts` | Merges multiple deep-dive ZIP packages into a single consolidated XLSX (used by the `/merge` route).                                                                                                   |
+| `exportMap.ts`      | Builds a self-contained composite SVG for map export (title, choropleth, legend, logos) with inlined light-theme styles.                                                                               |
+| `parser.ts`         | Thin PapaParse wrapper; returns `{ headers, rows }`.                                                                                                                                                   |
 
 ### Stores (`src/lib/stores/`)
 
@@ -247,14 +257,14 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 
 #### `results/`
 
-| Component                | Purpose                                                                                |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| `ResultsOverview.svelte` | Overview tab — prelim-flag donut, UoA ranking table, choropleth map with layer filters |
-| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                        |
-| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                       |
-| `ResultsCoverage.svelte` | Coverage summary across all systems                                                    |
-| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                    |
-| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                             |
+| Component                | Purpose                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `ResultsOverview.svelte` | Overview tab — priority-flag donut, UoA ranking table, choropleth map with layer filters |
+| `ResultsSystems.svelte`  | System-level heatmap overview; clicks open the metric drilldown                          |
+| `ResultsMetrics.svelte`  | Factor → Subfactor → Metric card grid per system                                         |
+| `ResultsCoverage.svelte` | Coverage summary across all systems                                                      |
+| `ResultsExport.svelte`   | Export controls (CSV / JSON / XLSX / deep-dive ZIP)                                      |
+| `FiltersSidebar.svelte`  | Filter panel (UoA, system, factor, status)                                               |
 
 #### `viz/`
 
@@ -265,7 +275,7 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 | `MetricDrilldown.svelte`     | Metric-level detail panel (value, status, threshold)                                    |
 | `CirclePacking.svelte`       | Zoomable D3 circle-packing tree (5 depths: system → metric); supports `flagRow` overlay |
 | `CoverageDetailCards.svelte` | Per-factor coverage bars                                                                |
-| `UoaRankingTable.svelte`     | Ranked UoA table by prelim flag                                                         |
+| `UoaRankingTable.svelte`     | Ranked UoA table by priority flag                                                       |
 | `UoaDetailPanel.svelte`      | Single-UoA detail view                                                                  |
 | `ChoroplethMap.svelte`       | Choropleth map (p-codes + admin boundaries); exports composite SVG via `exportMap.ts`   |
 
@@ -432,7 +442,7 @@ The pipeline runs in five stages:
 2. **Sub-factor groups** — metrics are pooled into threshold groups defined by their `(factor_threshold, evidence_threshold)` pair (sourced from `buildSubfactorList` in `metricMetadata.ts`). A group flags if flagged metrics ≥ `factor_threshold`; it concludes `no_flag` if metrics with data ≥ `evidence_threshold`.
 3. **Sub-factor status** — worst outcome across all its threshold groups.
 4. **Factor / System rollup** — `rollupStatuses` aggregates child statuses: any `flag` → `flag`; otherwise `no_flag` if any child is `no_flag`; otherwise `insufficient_evidence`; otherwise `no_data`.
-5. **`prelim_flag`** — decision tree over system-level statuses: EM → ROEM → ACUTE_NEEDS → NO_ACUTE_NEEDS → INSUFFICIENT_EVIDENCE → NO_DATA. This tree is hardcoded in `flagger.ts`; threshold values come from the CSV.
+5. **`priority_flag`** — decision tree over system-level statuses: EM → ROEM → ACUTE_NEEDS → NO_ACUTE_NEEDS → INSUFFICIENT_EVIDENCE → NO_DATA. This tree is hardcoded in `flagger.ts`; threshold values come from the CSV.
 
 **Touch `flagger.ts` when:** the decision-tree logic changes, new prelim-flag categories are introduced, or the rollup rules change. Threshold values themselves live in the CSV — only the structural logic is here.
 

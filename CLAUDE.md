@@ -47,7 +47,7 @@ System
 CSV Upload (src/routes/+page.svelte)
   → parser.ts         (PapaParse wrapper, returns headers + raw rows)
   → validator.ts      (check headers against reference.json, UOA uniqueness, type constraints)
-  → flagger.ts        (apply thresholds, roll up metric → subfactor → factor → system → prelim_flag)
+  → flagger.ts        (apply thresholds, roll up metric → subfactor → factor → system → priority_flag)
   → fetch_admin.ts    (if p-codes detected, fetch GeoJSON admin boundaries from external API)
   → Stores            (flagStore, adminFeaturesStore)
   → Results routes    (/results — heatmap, drilldown, coverage)
@@ -70,7 +70,7 @@ All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores
 
 - **pipeline.ts** — Orchestrates validate → flag → admin fetch (admin fetch is fire-and-forget)
 - **validator.ts** — Validates CSV structure, metric presence in `MetricMap`, UOA uniqueness, type constraints. Produces `ValidationResult` with per-column missingness entries.
-- **flagger.ts** — Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics excluded from flagging pipeline. Rolls up metric → subfactor → factor → system → `prelim_flag`. Status values: `'flag' | 'no_flag' | 'insufficient_evidence' | 'no_data'`
+- **flagger.ts** — Threshold-based flagging using `@tidyjs/tidy`. Preference-3 metrics excluded from flagging pipeline. Rolls up metric → subfactor → factor → system → `priority_flag`. Supporting-evidence metrics get metric-level flags but are excluded from subfactor/system rollup. Status values: `'flag' | 'no_flag' | 'insufficient_evidence' | 'no_data'`
 - **metricMetadata.ts** — Traverses `reference.json`; provides `getAllMetricIds()`, `getMetricMetadata()`, `getIndicatorMetadata()`, `buildSubfactorList()`, `buildReferenceRows()`
 - **fetch_admin.ts** — Detects p-codes in UOA column, fetches ADM1/ADM2 GeoJSON from external API
 - **download.ts** — Exports results as CSV / JSON / XLSX
@@ -86,14 +86,15 @@ All stores in `src/lib/stores/` use Svelte 5 `$state` runes (not writable stores
 systems[] → factors[] → sub_factors[] → indicators[] → metrics[]
 ```
 
-Each metric has: `metric` (ID, e.g. `MET001`), `label`, `preference` (1 primary / 2 secondary / 3 reference-only), `type`, `thresholds: { an, van }`, `above_or_below`, `evidence_threshold`, `factor_threshold`.
+Each metric has: `metric` (ID, e.g. `MET001`), `label`, `preference` (1 primary / 2 secondary / 3 reference-only), `evidence_type` (`"AN signal" | "Outcome" | "Predictor" | "Supporting evidence"`), `type`, `thresholds: { an, van }`, `van_is_strict` (true when van ≠ an and van is set; null for supporting-evidence/pref-3), `above_or_below`, `evidence_threshold`, `factor_threshold`.
 
 **Flagged row** (output of pipeline, stored in flagStore):
 
 ```
 uoa | MET001 | MET001_flag | MET001_status | MET001_within_10perc
+    | MET001_van_flag | MET001_van_status
     | subfactor_X_Y_status | factor_X_status | system_X_status
-    | prelim_flag
+    | priority_flag
 ```
 
 Status vocabulary (applies at every rollup level):
@@ -105,7 +106,7 @@ Status vocabulary (applies at every rollup level):
 | `insufficient_evidence` | Some data but below evidence threshold |
 | `no_data`               | No data at all for this level          |
 
-`prelim_flag` values: `EM · ROEM · ACUTE · ACUTE_NEEDS · INSUFFICIENT_EVIDENCE · NO_DATA`
+`priority_flag` values (severity order): `em` · `ho_primary` · `ho_secondary` · `an_primary` · `an_secondary` · `insufficient_evidence` · `no_data` · `no_acute_needs`
 
 **TypeScript enums** in `src/lib/types/generated/` are auto-generated — do not edit them directly. Run `bun run generate:enums` to regenerate.
 
