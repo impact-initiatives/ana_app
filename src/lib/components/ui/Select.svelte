@@ -262,7 +262,7 @@
 
 			<!-- Multiple mode toolbar -->
 			{#if isMultiple}
-				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
+				<div class="border-base-200 flex flex-wrap items-center gap-2 border-b px-3 py-1.5">
 					<button
 						type="button"
 						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/40 text-xs"
@@ -276,7 +276,7 @@
 						disabled={noneSelected}
 						onclick={deselectAll}>Deselect all</button
 					>
-					<span class="text-base-content/75 ml-auto text-xs">
+					<span class="text-base-content/75 ml-auto shrink-0 text-xs">
 						{multiVal.length}/{flatOptions.length}
 					</span>
 				</div>
