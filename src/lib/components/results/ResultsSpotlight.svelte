@@ -38,14 +38,16 @@
 		return ids.flatMap((id) => {
 			const md = getMetricMetadata(referenceJson, id);
 			if (!md) return [];
-			return [{
-				id,
-				label: md.raw?.label ?? id,
-				systemId: md.systemId,
-				systemLabel: sysLabels.get(md.systemId) ?? md.systemId,
-				evidence_type: md.evidence_type ?? null,
-				threshold_van: md.raw?.thresholds?.van ?? null
-			}];
+			return [
+				{
+					id,
+					label: md.raw?.label ?? id,
+					systemId: md.systemId,
+					systemLabel: sysLabels.get(md.systemId) ?? md.systemId,
+					evidence_type: md.evidence_type ?? null,
+					threshold_van: md.raw?.thresholds?.van ?? null
+				}
+			];
 		});
 	});
 
@@ -66,22 +68,32 @@
 
 	// ── Metric selection — default to Health Outcomes metrics ─────────────────
 	function hoMetricIds(): string[] {
-		return (referenceJson as any)?.systems
-			?.find((s: any) => s.id === 'health_outcomes')
-			?.factors?.flatMap((f: any) =>
-				f.sub_factors?.flatMap((sf: any) =>
-					sf.indicators?.flatMap((ind: any) =>
-						(ind.metrics ?? []).filter((m: any) => m.preference !== 3).map((m: any) => m.metric)
-					) ?? []
+		return (
+			(referenceJson as any)?.systems
+				?.find((s: any) => s.id === 'health_outcomes')
+				?.factors?.flatMap(
+					(f: any) =>
+						f.sub_factors?.flatMap(
+							(sf: any) =>
+								sf.indicators?.flatMap((ind: any) =>
+									(ind.metrics ?? [])
+										.filter((m: any) => m.preference !== 3)
+										.map((m: any) => m.metric)
+								) ?? []
+						) ?? []
 				) ?? []
-			) ?? [];
+		);
 	}
 
 	let selectedMetricIds = $state<string[]>(hoMetricIds());
 
 	// Per-system helpers for individual Select components
 	function systemOptions(sysId: string) {
-		return metaBySystem.get(sysId)?.metrics.map((m) => ({ value: m.id, label: `${m.label} (${m.id})` })) ?? [];
+		return (
+			metaBySystem
+				.get(sysId)
+				?.metrics.map((m) => ({ value: m.id, label: `${m.label} (${m.id})` })) ?? []
+		);
 	}
 
 	function systemSelected(sysId: string): string[] | null {
@@ -92,7 +104,9 @@
 
 	function onSystemChange(sysId: string, v: string | string[]) {
 		const arr = Array.isArray(v) ? v : [v];
-		const otherIds = selectedMetricIds.filter((id) => !systemOptions(sysId).some((o) => o.value === id));
+		const otherIds = selectedMetricIds.filter(
+			(id) => !systemOptions(sysId).some((o) => o.value === id)
+		);
 		selectedMetricIds = [...otherIds, ...arr];
 	}
 
@@ -128,8 +142,6 @@
 		if (et === 'Predictor') return 'Pred.';
 		return et.slice(0, 4);
 	}
-
-
 </script>
 
 <section>
@@ -148,7 +160,9 @@
 		<!-- ── Metric selectors ── -->
 		<Card>
 			{#if warnMetrics}
-				<p class="text-warning mb-2 text-xs">More than 20 metrics selected — the table may be slow to render.</p>
+				<p class="text-warning mb-2 text-xs">
+					More than 20 metrics selected — the table may be slow to render.
+				</p>
 			{/if}
 			<div class="flex flex-wrap items-end gap-2">
 				{#each [...metaBySystem.entries()].sort(([a], [b]) => SYSTEM_DISPLAY_ORDER.indexOf(a as any) - SYSTEM_DISPLAY_ORDER.indexOf(b as any)) as [sysId, sys] (sysId)}
@@ -160,7 +174,8 @@
 						options={systemOptions(sysId)}
 						selected={systemSelected(sysId)}
 						multiple={true}
-						unitLabel="metrics"
+						unitLabel="Metrics"
+						displayMode="compact"
 						onchange={(v) => onSystemChange(sysId, v)}
 					/>
 				{/each}
@@ -185,15 +200,17 @@
 			{:else}
 				<Card
 					title="Metric × UoA cross-tab"
-					subtitle="{tableUoas.length} UoA{tableUoas.length !== 1 ? 's' : ''} × {metricCount} metric{metricCount !== 1 ? 's' : ''}"
+					subtitle="{tableUoas.length} UoA{tableUoas.length !== 1
+						? 's'
+						: ''} × {metricCount} metric{metricCount !== 1 ? 's' : ''}"
 				>
 					<div class="overflow-x-auto">
-						<table class="table table-xs w-full">
+						<table class="table-xs table w-full">
 							<thead>
 								<tr class="bg-base-200 text-xs">
-									<th class="sticky left-0 z-10 bg-base-200 min-w-28">UoA</th>
+									<th class="bg-base-200 sticky left-0 z-10 min-w-28">UoA</th>
 									{#each selectedMetaList as m (m.id)}
-										<th class="text-center min-w-24 max-w-32 whitespace-normal">
+										<th class="max-w-32 min-w-24 text-center whitespace-normal">
 											<span class="block font-medium">{m.label}</span>
 											<span class="text-base-content/50 block text-xs">{m.id}</span>
 											<div class="mt-0.5 flex flex-wrap justify-center gap-1">
@@ -201,7 +218,11 @@
 													<span class="badge badge-ghost badge-xs">{etShort(m.evidence_type)}</span>
 												{/if}
 												{#if m.threshold_van != null}
-													<span class="badge badge-xs" style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)">VAN</span>
+													<span
+														class="badge badge-xs"
+														style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)"
+														>VAN</span
+													>
 												{/if}
 											</div>
 										</th>
@@ -211,7 +232,9 @@
 							<tbody>
 								{#each tableRows as { uoa, row } (uoa)}
 									<tr>
-										<td class="sticky left-0 z-10 bg-base-100 text-xs font-medium">{uoaLabel(uoa)}</td>
+										<td class="bg-base-100 sticky left-0 z-10 text-xs font-medium"
+											>{uoaLabel(uoa)}</td
+										>
 										{#each selectedMetaList as m (m.id)}
 											{@const fk = cellFlagKey(row, m.id)}
 											{@const badge = getFlagBadge(fk)}
@@ -222,7 +245,9 @@
 											>
 												<span class="block">{val}</span>
 												{#if badge}
-													<span class="badge badge-xs border-0" style={badge.badgeStyle}>{badge.label}</span>
+													<span class="badge badge-xs border-0" style={badge.badgeStyle}
+														>{badge.label}</span
+													>
 												{/if}
 											</td>
 										{/each}
