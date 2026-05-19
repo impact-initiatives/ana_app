@@ -5,6 +5,7 @@
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Select, { type SelectGroup } from '$lib/components/ui/Select.svelte';
+	import DataTable from '$lib/components/ui/DataTable.svelte';
 
 	type Row = Record<string, any>;
 	interface MetricMeta {
@@ -14,6 +15,7 @@
 		systemLabel: string;
 		evidence_type: string | null;
 		threshold_van: number | null;
+		above_or_below: string | null;
 	}
 
 	interface Props {
@@ -45,7 +47,8 @@
 					systemId: md.systemId,
 					systemLabel: sysLabels.get(md.systemId) ?? md.systemId,
 					evidence_type: md.evidence_type ?? null,
-					threshold_van: md.raw?.thresholds?.van ?? null
+					threshold_van: md.raw?.thresholds?.van ?? null,
+					above_or_below: md.raw?.above_or_below ?? null
 				}
 			];
 		});
@@ -102,11 +105,16 @@
 		}
 		return [...groups.entries()]
 			.sort(([a], [b]) => {
-				const ai = ET_ORDER.indexOf(a);
-				const bi = ET_ORDER.indexOf(b);
+				const ai = ET_ORDER.indexOf(a as EvidenceTypeEnum);
+				const bi = ET_ORDER.indexOf(b as EvidenceTypeEnum);
 				return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
 			})
-			.map(([group, options]) => ({ group, options }));
+			.map(([group, options]) => ({
+				group,
+				options: options.sort((a, b) =>
+					a.value.localeCompare(b.value, undefined, { numeric: true })
+				)
+			}));
 	}
 
 	function systemFlatOptions(sysId: string) {
@@ -133,12 +141,34 @@
 	const metricCount = $derived(selectedMetricIds.length);
 	const warnMetrics = $derived(metricCount > 20);
 
-	// ── Cross-tab rows ────────────────────────────────────────────────────────
-	const tableRows = $derived(
-		tableUoas.map((uoa) => ({
-			uoa,
-			row: filteredRows.find((r) => String(r.uoa) === uoa)
-		}))
+	// ── Cross-tab lookups ─────────────────────────────────────────────────────
+	const metaById = $derived(new Map(selectedMetaList.map((m) => [m.id, m])));
+	const rowByUoa = $derived(
+		new Map(tableUoas.map((uoa) => [uoa, filteredRows.find((r) => String(r.uoa) === uoa)]))
+	);
+	const uoaByLabel = $derived(new Map(tableUoas.map((uoa) => [uoaLabel(uoa), uoa])));
+
+	const dtColOptions = $derived.by(() => {
+		const opts: Record<string, { wrap?: boolean; extraClass?: string }> = {
+			Metric: { wrap: true, extraClass: 'min-w-48 text-xs' }
+		};
+		for (const uoa of tableUoas) {
+			opts[uoaLabel(uoa)] = { wrap: true, extraClass: 'text-center min-w-20 max-w-28 text-xs' };
+		}
+		return opts;
+	});
+
+	const dtRows = $derived.by(() =>
+		[...selectedMetaList]
+			.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))
+			.map((m) => {
+				const obj: Record<string, string> = { Metric: m.id };
+				for (const uoa of tableUoas) {
+					const row = rowByUoa.get(uoa);
+					obj[uoaLabel(uoa)] = row ? fmt(row[m.id]) : '–';
+				}
+				return obj;
+			})
 	);
 
 	function cellFlagKey(row: Row | undefined, id: string): string {
@@ -193,8 +223,8 @@
 			<div class="flex flex-wrap items-end gap-2">
 				{#each [...metaBySystem.entries()].sort(([a], [b]) => SYSTEM_DISPLAY_ORDER.indexOf(a as any) - SYSTEM_DISPLAY_ORDER.indexOf(b as any)) as [sysId, sys] (sysId)}
 					<Select
-						class="w-44"
-						dropdownClass="w-72"
+						class="w-50"
+						dropdownClass="w-64"
 						label={sys.label}
 						placeholder="None"
 						options={systemOptions(sysId)}
@@ -230,58 +260,76 @@
 						? 's'
 						: ''} × {metricCount} metric{metricCount !== 1 ? 's' : ''}"
 				>
-					<div class="overflow-x-auto">
-						<table class="table-xs table w-full">
-							<thead>
-								<tr class="bg-base-200 text-xs">
-									<th class="bg-base-200 sticky left-0 z-10 min-w-28">UoA</th>
-									{#each selectedMetaList as m (m.id)}
-										<th class="max-w-32 min-w-24 text-center whitespace-normal">
-											<span class="block font-medium">{m.label}</span>
-											<span class="text-base-content/50 block text-xs">{m.id}</span>
-											<div class="mt-0.5 flex flex-wrap justify-center gap-1">
-												{#if m.evidence_type}
-													<span class="badge badge-ghost badge-xs">{etShort(m.evidence_type)}</span>
-												{/if}
-												{#if m.threshold_van != null}
-													<span
-														class="badge badge-xs"
-														style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)"
-														>VAN</span
-													>
-												{/if}
-											</div>
-										</th>
-									{/each}
-								</tr>
-							</thead>
-							<tbody>
-								{#each tableRows as { uoa, row } (uoa)}
-									<tr>
-										<td class="bg-base-100 sticky left-0 z-10 text-xs font-medium"
-											>{uoaLabel(uoa)}</td
+					<DataTable
+						rows={dtRows}
+						tableClass="table-xs"
+						headerRowClass="bg-base-200 text-xs"
+						headerThClass="bg-base-200"
+						overflow="scroll"
+						scrollHeight="480px"
+						humanizeHeaders={false}
+						colOptions={dtColOptions}
+						stickyFirstColumn={true}
+						sortable={false}
+					>
+						{#snippet renderCell({ col, value, rowObj })}
+							{#if col === 'Metric'}
+								{@const m = metaById.get(rowObj['Metric'] ?? '')}
+								{#if m}
+									<span class="block text-xs font-medium">{m.label}</span>
+									<span class="text-base-content/50 block text-[10px]">{m.id}</span>
+									<div class="mt-0.5 flex flex-wrap gap-1">
+										{#if m.evidence_type}
+											<span class="badge badge-ghost badge-xs">{etShort(m.evidence_type)}</span>
+										{/if}
+									</div>
+								{/if}
+							{:else}
+								{@const uoa = uoaByLabel.get(col)}
+								{@const row = uoa ? rowByUoa.get(uoa) : undefined}
+								{@const metricId = rowObj['Metric'] ?? ''}
+								{@const m = metaById.get(metricId)}
+								{@const fk = cellFlagKey(row, metricId)}
+								{@const badge = getFlagBadge(fk)}
+								{@const vanFlagged = row?.[`${metricId}_van_flag`] === true}
+								{@const nearAn = row?.[`${metricId}_within_10perc_change`] === true}
+								{@const nearVan = (() => {
+									if (!row || !m || m.threshold_van === null || m.threshold_van === undefined)
+										return false;
+									if (vanFlagged) return false;
+									const rawVal = row[metricId];
+									if (rawVal == null || typeof rawVal !== 'number') return false;
+									const van = m.threshold_van;
+									if (van === 0) return rawVal === 0;
+									return Math.abs((rawVal - van) / van) <= 0.1;
+								})()}
+								<span class="block text-center text-xs">{value}</span>
+								<div class="flex flex-wrap justify-center gap-0.5">
+									{#if badge}
+										<span class="badge badge-xs border-0" style={badge.badgeStyle}
+											>{badge.label}</span
 										>
-										{#each selectedMetaList as m (m.id)}
-											{@const fk = cellFlagKey(row, m.id)}
-											{@const badge = getFlagBadge(fk)}
-											{@const val = row ? fmt(row[m.id]) : '–'}
-											<td
-												class="text-center text-xs"
-												style={fk === 'flag' ? 'background-color: var(--color-flag-tint)' : ''}
-											>
-												<span class="block">{val}</span>
-												{#if badge}
-													<span class="badge badge-xs border-0" style={badge.badgeStyle}
-														>{badge.label}</span
-													>
-												{/if}
-											</td>
-										{/each}
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
+									{/if}
+									{#if vanFlagged}
+										<span
+											class="badge badge-xs border-0"
+											style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)"
+											>VAN</span
+										>
+									{:else if nearVan}
+										<span
+											class="badge badge-xs"
+											style="border-color: var(--color-priority-ho-secondary); color: var(--color-priority-ho-secondary)"
+											>~VAN</span
+										>
+									{/if}
+									{#if nearAn}
+										<span class="badge badge-xs badge-outline badge-warning">~AN</span>
+									{/if}
+								</div>
+							{/if}
+						{/snippet}
+					</DataTable>
 				</Card>
 			{/if}
 		</div>
