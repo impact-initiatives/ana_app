@@ -377,7 +377,7 @@
 	const cardSubtitle = $derived(
 		activeLabel
 			? `Showing: ${activeLabel}`
-			: 'Showing: Preliminary flag. Click an area to view its report. Filter to view flags for systems, factors, subfactors or metrics.'
+			: 'Showing: Priority flag. Click an area to view its report. Filter to view flags for systems, factors, subfactors or metrics.'
 	);
 </script>
 

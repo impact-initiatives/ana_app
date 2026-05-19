@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { FLAG_BADGE_MAP, getFlagBadge, getPriorityBadge, systemBaseColor } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 
@@ -18,8 +19,8 @@
 
 	const selectedRows = $derived(rows.filter((r) => uoas.includes(String(r.uoa))));
 
-	// Prelim flag distribution across selected rows
-	const prelimCounts = $derived.by(() => {
+	// Priority flag distribution across selected rows
+	const priorityCounts = $derived.by(() => {
 		const counts = new Map<string, number>();
 		for (const row of selectedRows) {
 			const key = String(row.priority_flag ?? 'no_data');
@@ -28,15 +29,7 @@
 		return counts;
 	});
 
-	const PRELIM_DISPLAY_ORDER = [
-		'em',
-		'roem',
-		'acute',
-		'acute_needs',
-		'insufficient_evidence',
-		'no_data'
-	];
-	const prelimKeys = $derived(PRELIM_DISPLAY_ORDER.filter((k) => (prelimCounts.get(k) ?? 0) > 0));
+	const priorityKeys = $derived(PRIORITY_FLAG_KEYS.filter((k) => (priorityCounts.get(k) ?? 0) > 0));
 
 	// Per-system summed stats across all selected rows
 	interface SystemStat {
@@ -112,12 +105,12 @@
 
 		<!-- Prelim flag distribution -->
 		<div class="mt-1 mb-2 flex flex-wrap items-center gap-2">
-			<span class="text-sm">Preliminary flags:</span>
-			{#if prelimKeys.length > 0}
-				{#each prelimKeys as key (key)}
+			<span class="text-sm">Priority flags:</span>
+			{#if priorityKeys.length > 0}
+				{#each priorityKeys as key (key)}
 					<span class="flex items-center gap-1">
 						<PrelimBadge value={key} />
-						<span class="text-base-content/70 text-xs">×{prelimCounts.get(key)}</span>
+						<span class="text-base-content/70 text-xs">×{priorityCounts.get(key)}</span>
 					</span>
 				{/each}
 			{:else}

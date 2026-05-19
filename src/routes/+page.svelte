@@ -302,7 +302,7 @@
 							<!-- Mini header -->
 							<div class="flex items-center justify-between">
 								<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
-									>Preliminary flagging</span
+									>Priority flag</span
 								>
 								<span
 									class=" border-success/30 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
@@ -516,8 +516,8 @@
 			></path>
 		</svg>
 		<p>
-			The preliminary flag is a data-driven pre-screening result, not a conclusion. Each unit of
-			analysis requires a full deep-dive before drawing final conclusions.
+			The priority flag is a tool to prioritise which areas to review first — it is not a final
+			analytical conclusion. All UoAs should receive a deep dive if time allows.
 		</p>
 	</div>
 

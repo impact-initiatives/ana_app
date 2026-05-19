@@ -149,7 +149,7 @@
 			>
 				<div>
 					<p class="text-base-content/85 text-sm">
-						One workbook per selected UoA, pre-filled with metric values and preliminary flags.
+						One workbook per selected UoA, pre-filled with metric values and priority flags.
 						Delivered as a single ZIP archive.
 					</p>
 				</div>

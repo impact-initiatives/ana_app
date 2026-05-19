@@ -374,7 +374,7 @@
 {/if}
 
 {#if layer.type === 'prelim'}
-	<LegendBadge keys={[]} prelimKeys={PRIORITY_FLAG_KEYS} />
+	<LegendBadge keys={[]} priorityKeys={PRIORITY_FLAG_KEYS} />
 {:else}
 	<LegendBadge keys={legendStatusKeys} />
 {/if}

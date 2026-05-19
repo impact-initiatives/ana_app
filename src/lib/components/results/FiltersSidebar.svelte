@@ -50,10 +50,10 @@
 <div class="card-body gap-4">
 	<div class="mb-2">
 		<h2 class="card-title text-sm font-semibold uppercase">
-			Focus on specific UoAs or preliminary flags
+			Focus on specific UoAs or priority flags
 		</h2>
 		<p class="text-base-content/75 mt-1 text-sm">
-			Use these filters to subset UoAs or preliminary flags (or additional filter columns).
+			Use these filters to subset UoAs or priority flags (or additional filter columns).
 		</p>
 		<p class="text-base-content/75 text-sm">
 			Filters apply to charts and other dropdowns across all sections.
@@ -75,7 +75,7 @@
 	<Select
 		{dropdownClass}
 		class={selectClass}
-		label="Preliminary flag"
+		label="Priority flag"
 		options={prelimOptions}
 		selected={selectedPrelimKeys}
 		multiple={true}

@@ -78,13 +78,13 @@
 				<button class="btn btn-sm btn-circle" onclick={onclose} aria-label="Close panel">✕</button>
 			{/if}
 		{/snippet}
-		<!-- Preliminary flag -->
+		<!-- Priority flag -->
 		<div class="mt-1 mb-2 flex items-center gap-2">
-			<span>This UoA received the following preliminary flag:</span>
+			<span>Priority flag for this area:</span>
 			{#if row && getPriorityBadge(row.priority_flag)}
 				<PrelimBadge value={row.priority_flag} />
 			{:else}
-				<PrelimBadge value="NO_DATA" />
+				<PrelimBadge value="no_data" />
 			{/if}
 		</div>
 

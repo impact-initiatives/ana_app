@@ -145,7 +145,7 @@
 	/>
 {/if}
 
-<Card title="# of UOAs per preliminary flag" subtitle="Click a slice to filter.">
+<Card title="# of UOAs per priority flag" subtitle="Click a slice to filter.">
 	<div bind:offsetWidth={containerWidth}>
 		{#if rows.length === 0}
 			<p class="text-base-content/70 py-8 text-center text-sm">No data matches current filters.</p>

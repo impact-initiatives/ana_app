@@ -85,7 +85,7 @@
 	}
 </script>
 
-<Card title="UoAs ranked by preliminary flag" subtitle="Click a row to filter preliminary flags.">
+<Card title="UoAs ranked by priority flag" subtitle="Click a row to filter by priority flag.">
 	{#if rows.length === 0}
 		<span class="text-base-content/70 py-8 text-center text-sm"
 			>No data matches current filters.</span
@@ -99,7 +99,7 @@
 			</span>
 			<span class="badge badge-soft badge-error">
 				<strong class="tabular-nums">{Math.round(tweenedSummary.current.flagged)}</strong>
-				<span>EM / ROEM / Acute</span>
+				<span>acute flags</span>
 			</span>
 			<span
 				class="badge badge-soft"
@@ -114,7 +114,7 @@
 			</span>
 		</div>
 		<p class="text-base-content/85 mt-1 mb-1 text-sm">
-			Within each preliminary flag category, UoAs are ranked by number of systems with flags, number
+			Within each priority flag category, UoAs are ranked by number of systems with flags, number
 			of metrics with flags, and then number of metrics near threshold.
 		</p>
 

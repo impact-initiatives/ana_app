@@ -45,7 +45,7 @@ export const steps: Step[] = [
 	},
 	{
 		title: 'Automatic flagging',
-		desc: 'Values are validated and flagged against thresholds. Results roll up from metrics → subfactors → factors → systems → preliminary flag.',
+		desc: 'Values are validated and flagged against thresholds. Results roll up from metrics → subfactors → factors → systems → priority flag.',
 		detail: {
 			sections: [
 				{

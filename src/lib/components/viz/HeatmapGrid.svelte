@@ -181,9 +181,9 @@
 						<button
 							class="hover:text-base-content/70 flex items-center gap-1 font-semibold"
 							onclick={() => toggleSort('prelim')}
-							aria-label="Sort by preliminary flag"
+							aria-label="Sort by priority flag"
 						>
-							Preliminary Flag
+							Priority Flag
 							<SortIcon active={sortKey === 'prelim'} asc={sortAsc} />
 						</button>
 					</th>
@@ -241,6 +241,6 @@
 
 	<!-- Legend -->
 	<LegendBadge
-		prelimKeys={PRIORITY_FLAG_KEYS}
+		priorityKeys={PRIORITY_FLAG_KEYS}
 	></LegendBadge>
 </Card>

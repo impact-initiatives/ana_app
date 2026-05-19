@@ -93,6 +93,7 @@
 		label: { wrap: true, extraClass: 'max-w-52' },
 		type: { wrap: true, extraClass: 'max-w-20' },
 		preference: { wrap: true, extraClass: 'max-w-20' },
+		evidence_type: { wrap: true, extraClass: 'max-w-36' },
 		evidence_threshold: { wrap: true, extraClass: 'max-w-20' },
 		factor_threshold: { wrap: true, extraClass: 'max-w-20' },
 		above_or_below: { wrap: true, extraClass: 'max-w-18' },

@@ -88,11 +88,17 @@
 	--color-insufficient-tint: color-mix(in srgb, var(--color-insufficient) 35%, white);
 	--color-no-flag-hover: color-mix(in srgb, var(--color-secondary) 60%, white);
 
-	/* ── Classification colour tokens (light) ───────────────────────────────*/
-	--color-em: #ee5859;
-	--color-roem: oklch(78% 0.13 15);
-	--color-acute: oklch(87% 0.07 14);
-	--color-no-acute: oklch(84% 0.143 164.978);
+	/* ── Priority flag colour tokens (light) ────────────────────────────────*/
+	--color-priority-em:          oklch(35% 0.20 290);
+	--color-priority-ho-primary:  oklch(50% 0.22 290);
+	--color-priority-ho-secondary: oklch(65% 0.18 290);
+	--color-priority-an-secondary: oklch(80% 0.09 240);
+	--color-no-acute:             oklch(84% 0.143 164.978);
+	--color-priority-em-tint:           color-mix(in srgb, var(--color-priority-em) 30%, white);
+	--color-priority-ho-primary-tint:   color-mix(in srgb, var(--color-priority-ho-primary) 28%, white);
+	--color-priority-ho-secondary-tint: color-mix(in srgb, var(--color-priority-ho-secondary) 35%, white);
+	--color-priority-an-secondary-tint: color-mix(in srgb, var(--color-priority-an-secondary) 40%, white);
+	--color-no-acute-tint:              color-mix(in srgb, var(--color-no-acute) 35%, white);
 }
 
 /* ── Dark theme ──────────────────────────────────────────────────────────────
@@ -164,11 +170,17 @@
 	);
 	--color-no-flag-hover: color-mix(in srgb, var(--color-secondary) 64%, var(--color-base-200));
 
-	/* ── Classification colour tokens (dark) ────────────────────────────────*/
-	--color-em: #ee5859;
-	--color-roem: oklch(72% 0.14 20);
-	--color-acute: oklch(85% 0.08 14);
-	--color-no-acute: oklch(84% 0.143 164.978);
+	/* ── Priority flag colour tokens (dark) ─────────────────────────────── */
+	--color-priority-em:                oklch(48% 0.22 290);
+	--color-priority-ho-primary:        oklch(60% 0.22 290);
+	--color-priority-ho-secondary:      oklch(82% 0.18 290);
+	--color-priority-an-secondary:      oklch(88% 0.10 240);
+	--color-no-acute:                   oklch(72% 0.143 164.978);
+	--color-priority-em-tint:           color-mix(in srgb, var(--color-priority-em) 46%, var(--color-base-200));
+	--color-priority-ho-primary-tint:   color-mix(in srgb, var(--color-priority-ho-primary) 46%, var(--color-base-200));
+	--color-priority-ho-secondary-tint: color-mix(in srgb, var(--color-priority-ho-secondary) 42%, var(--color-base-200));
+	--color-priority-an-secondary-tint: color-mix(in srgb, var(--color-priority-an-secondary) 46%, var(--color-base-200));
+	--color-no-acute-tint:              color-mix(in srgb, var(--color-no-acute) 40%, var(--color-base-200));
 }
 
 /* Global base size — 18px so text-sm ≈ 15.75px, text-base = 18px */
