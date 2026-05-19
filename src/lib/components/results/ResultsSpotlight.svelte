@@ -96,7 +96,7 @@
 		for (const m of metrics) {
 			const key = m.evidence_type ?? 'Other';
 			if (!groups.has(key)) groups.set(key, []);
-			groups.get(key)!.push({ value: m.id, label: `${m.label} (${m.id})` });
+			groups.get(key)!.push({ value: m.id, label: `${m.id} – ${m.label}` });
 		}
 		return [...groups.entries()]
 			.sort(([a], [b]) => {
