@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getAllMetricIds, getMetricMetadata } from '$lib/engine/metricMetadata';
-	import { SYSTEM_DISPLAY_ORDER } from '$lib/types/structure';
+	import { SYSTEM_DISPLAY_ORDER, EvidenceTypeEnum } from '$lib/types/structure';
 	import { getFlagBadge } from '$lib/utils/colors';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
+	import Select, { type SelectGroup } from '$lib/components/ui/Select.svelte';
 
 	type Row = Record<string, any>;
 	interface MetricMeta {
@@ -87,26 +87,40 @@
 
 	let selectedMetricIds = $state<string[]>(hoMetricIds());
 
+	const ET_ORDER = Object.values(EvidenceTypeEnum);
+
 	// Per-system helpers for individual Select components
-	function systemOptions(sysId: string) {
-		return (
-			metaBySystem
-				.get(sysId)
-				?.metrics.map((m) => ({ value: m.id, label: `${m.label} (${m.id})` })) ?? []
-		);
+	function systemOptions(sysId: string): SelectGroup[] {
+		const metrics = metaBySystem.get(sysId)?.metrics ?? [];
+		const groups = new Map<string, { value: string; label: string }[]>();
+		for (const m of metrics) {
+			const key = m.evidence_type ?? 'Other';
+			if (!groups.has(key)) groups.set(key, []);
+			groups.get(key)!.push({ value: m.id, label: `${m.label} (${m.id})` });
+		}
+		return [...groups.entries()]
+			.sort(([a], [b]) => {
+				const ai = ET_ORDER.indexOf(a);
+				const bi = ET_ORDER.indexOf(b);
+				return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+			})
+			.map(([group, options]) => ({ group, options }));
+	}
+
+	function systemFlatOptions(sysId: string) {
+		return systemOptions(sysId).flatMap((g) => g.options);
 	}
 
 	function systemSelected(sysId: string): string[] | null {
-		const opts = systemOptions(sysId);
-		const sel = selectedMetricIds.filter((id) => opts.some((o) => o.value === id));
-		return sel.length === opts.length ? null : sel;
+		const flat = systemFlatOptions(sysId);
+		const sel = selectedMetricIds.filter((id) => flat.some((o) => o.value === id));
+		return sel.length === flat.length ? null : sel;
 	}
 
 	function onSystemChange(sysId: string, v: string | string[]) {
 		const arr = Array.isArray(v) ? v : [v];
-		const otherIds = selectedMetricIds.filter(
-			(id) => !systemOptions(sysId).some((o) => o.value === id)
-		);
+		const flat = systemFlatOptions(sysId);
+		const otherIds = selectedMetricIds.filter((id) => !flat.some((o) => o.value === id));
 		selectedMetricIds = [...otherIds, ...arr];
 	}
 
