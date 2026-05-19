@@ -18,6 +18,7 @@
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
 	import { PRIORITY_BADGE_MAP } from '$lib/utils/colors';
 	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
+	import { sortSystemsByOrder } from '$lib/types/structure';
 
 	import ResultsOverview from '$lib/components/results/ResultsOverview.svelte';
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
@@ -101,7 +102,9 @@
 
 	const systems = $derived<System[]>(
 		Array.isArray(referenceJson?.systems)
-			? (referenceJson.systems as any[]).map((s) => ({ id: s.id, label: s.label ?? s.id }))
+			? sortSystemsByOrder(
+					(referenceJson.systems as any[]).map((s) => ({ id: s.id, label: s.label ?? s.id }))
+				)
 			: []
 	);
 
@@ -385,7 +388,7 @@
 			if (factors.length > 0)
 				result.push({ systemId: sys.id, systemLabel: sys.label ?? sys.id, factors });
 		}
-		return result;
+		return sortSystemsByOrder(result.map((s) => ({ ...s, id: s.systemId }))).map(({ id: _, ...s }) => s);
 	}
 
 	// Step 2: one pass through rows → Map<metricId, DotData[]>. Runs on filter change.

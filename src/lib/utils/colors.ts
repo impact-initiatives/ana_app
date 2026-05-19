@@ -1,6 +1,6 @@
 import type { Metric } from '$lib/types/structure';
 import type { FlagStatus, PriorityFlag } from '$lib/types/flags';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
 

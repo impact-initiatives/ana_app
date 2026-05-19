@@ -36,7 +36,7 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { safeValidateReferenceRoot } from '$lib/types/reference-json';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 

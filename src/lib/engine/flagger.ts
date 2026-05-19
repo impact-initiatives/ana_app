@@ -4,7 +4,7 @@ import {
 	getMetricMetadata,
 	getAllMetricIds
 } from '$lib/engine/metricMetadata';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import { SystemIDEnum } from '$lib/types/structure';
 import type { ReferenceRoot } from '$lib/types/structure';
 import type { FlagStatus } from '$lib/types/flags';
 

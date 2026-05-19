@@ -36,7 +36,7 @@
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import { SystemIDEnum, SystemIDs } from '../src/lib/types/generated/system-enum';
+import { SystemIDEnum, SystemIDs } from '../src/lib/types/structure';
 import { MetricSchema } from '../src/lib/types/reference-json';
 import { METRIC_ID_REGEX } from '../src/lib/types/structure';
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getAllMetricIds, getMetricMetadata } from '$lib/engine/metricMetadata';
+	import { SYSTEM_DISPLAY_ORDER } from '$lib/types/structure';
 	import { getFlagBadge } from '$lib/utils/colors';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -150,7 +151,7 @@
 				<p class="text-warning mb-2 text-xs">More than 20 metrics selected — the table may be slow to render.</p>
 			{/if}
 			<div class="flex flex-wrap items-end gap-2">
-				{#each [...metaBySystem.entries()] as [sysId, sys] (sysId)}
+				{#each [...metaBySystem.entries()].sort(([a], [b]) => SYSTEM_DISPLAY_ORDER.indexOf(a as any) - SYSTEM_DISPLAY_ORDER.indexOf(b as any)) as [sysId, sys] (sysId)}
 					<Select
 						class="w-44"
 						dropdownClass="w-72"

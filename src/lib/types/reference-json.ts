@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { SystemIDEnum } from './generated/system-enum';
 import { SubFactorIDEnum } from './generated/subfactor-enum';
 import { FactorIDEnum } from './generated/factor-enum';
 import {
@@ -15,7 +14,8 @@ import {
 	EvidenceTypeEnum,
 	METRIC_TYPE_REGEX,
 	METRIC_ID_REGEX,
-	parseMetricType
+	parseMetricType,
+	SystemIDEnum
 } from './structure';
 export type { Thresholds, Metric, Indicator, SubFactor, Factor, System, ReferenceRoot as IndicatorsRoot };
 export {
