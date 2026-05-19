@@ -111,10 +111,6 @@ export interface Metric {
 	risk_concept?: string | null;
 }
 
-/**
- * An indicator — a thematic grouping of one or more metrics.
- * Corresponds to the "Indicator" column in the reference CSV.
- */
 export interface Indicator {
 	id: string;
 	label?: string | null;
