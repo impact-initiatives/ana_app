@@ -150,7 +150,7 @@
 
 	const dtColOptions = $derived.by(() => {
 		const opts: Record<string, { wrap?: boolean; extraClass?: string }> = {
-			Metric: { wrap: true, extraClass: 'min-w-48 text-xs' }
+			Metric: { wrap: true, extraClass: 'min-w-52 max-w-80 text-xs' }
 		};
 		for (const uoa of tableUoas) {
 			opts[uoaLabel(uoa)] = { wrap: true, extraClass: 'text-center min-w-20 max-w-28 text-xs' };
@@ -170,24 +170,6 @@
 				return obj;
 			})
 	);
-
-	function cellFlagKey(row: Row | undefined, id: string): string {
-		if (!row) return 'no_data';
-		const s = row[`${id}_status`];
-		if (s === 'flag') return 'flag';
-		if (s === 'no_flag') return 'no_flag';
-		if (s === 'insufficient_evidence') return 'insufficient_evidence';
-		return 'no_data';
-	}
-
-	function etShort(et: string | null): string {
-		if (!et) return '';
-		if (et === 'Supporting evidence') return 'Supp.';
-		if (et === 'AN signal') return 'AN';
-		if (et === 'Outcome') return 'Out.';
-		if (et === 'Predictor') return 'Pred.';
-		return et.slice(0, 4);
-	}
 </script>
 
 <section>
@@ -237,9 +219,9 @@
 				{/each}
 			</div>
 			{#if allUoas.length === 0}
-				<p class="text-base-content/50 mt-2 text-xs">No data loaded.</p>
+				<p class="text-base-content/75 mt-2 text-xs">No data loaded.</p>
 			{:else}
-				<p class="text-base-content/50 mt-2 text-xs">
+				<p class="text-base-content/75 mt-2 text-xs">
 					Showing {tableUoas.length} UoA{tableUoas.length !== 1 ? 's' : ''} from current filters.
 				</p>
 			{/if}
@@ -249,7 +231,7 @@
 		<div class="mt-4">
 			{#if selectedMetricIds.length === 0}
 				<Card>
-					<p class="text-base-content/60 py-8 text-center text-sm">
+					<p class="text-base-content/75 py-8 text-center text-sm">
 						Select one or more metrics above to build the cross-tab.
 					</p>
 				</Card>
@@ -263,7 +245,7 @@
 					<DataTable
 						rows={dtRows}
 						tableClass="table-xs"
-						headerRowClass="bg-base-200 text-xs"
+						headerRowClass="bg-base-200 text-xs text-base-content/85"
 						headerThClass="bg-base-200"
 						overflow="scroll"
 						scrollHeight="480px"
@@ -276,11 +258,11 @@
 							{#if col === 'Metric'}
 								{@const m = metaById.get(rowObj['Metric'] ?? '')}
 								{#if m}
-									<span class="block text-xs font-medium">{m.label}</span>
-									<span class="text-base-content/50 block text-[10px]">{m.id}</span>
-									<div class="mt-0.5 flex flex-wrap gap-1">
+									<span class="text-xs font-medium">{m.label}</span>
+									<div class="mt-1 flex flex-wrap items-center gap-1">
+										<span class="text-base-content/75 block text-[11px]">{m.id}</span>
 										{#if m.evidence_type}
-											<span class="badge badge-ghost badge-xs">{etShort(m.evidence_type)}</span>
+											<span class="badge badge-ghost badge-xs">{m.evidence_type}</span>
 										{/if}
 									</div>
 								{/if}
@@ -289,8 +271,7 @@
 								{@const row = uoa ? rowByUoa.get(uoa) : undefined}
 								{@const metricId = rowObj['Metric'] ?? ''}
 								{@const m = metaById.get(metricId)}
-								{@const fk = cellFlagKey(row, metricId)}
-								{@const badge = getFlagBadge(fk)}
+								{@const badge = getFlagBadge(String(row?.[`${metricId}_status`] ?? 'no_data'))}
 								{@const vanFlagged = row?.[`${metricId}_van_flag`] === true}
 								{@const nearAn = row?.[`${metricId}_within_10perc_change`] === true}
 								{@const nearVan = (() => {
