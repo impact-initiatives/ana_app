@@ -61,6 +61,6 @@ export const PRIORITY_ORDER: Record<PriorityFlag, number> = {
 	an_primary: 3,
 	an_secondary: 4,
 	insufficient_evidence: 5,
-	no_data: 6,
-	no_acute_needs: 7
+	no_acute_needs: 6,
+	no_data: 7
 };
