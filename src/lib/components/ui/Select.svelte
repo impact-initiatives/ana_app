@@ -121,6 +121,10 @@
 	}
 
 	function toggle(v: string) {
+		if (isNullAll) {
+			onchange?.(flatOptions.map((o) => o.value).filter((s) => s !== v));
+			return;
+		}
 		const next = multiVal.includes(v) ? multiVal.filter((s) => s !== v) : [...multiVal, v];
 		onchange?.(next);
 	}
