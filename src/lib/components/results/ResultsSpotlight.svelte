@@ -63,7 +63,9 @@
 
 	// ── UoAs — derived from filtered rows, cap at 10 ─────────────────────────
 	const allUoas = $derived([...new Set(filteredRows.map((r) => String(r.uoa ?? '')))].sort());
-	const tooManyUoas = $derived(allUoas.length > 10);
+	const tooManyUoasNumber = 10;
+	const tooManyUoas = $derived(allUoas.length > tooManyUoasNumber);
+	const noUoas = $derived(allUoas.length === 0);
 	const tableUoas = $derived(allUoas.slice(0, 10));
 
 	// ── Metric selection — default to Health Outcomes metrics ─────────────────
@@ -165,9 +167,16 @@
 
 	{#if tooManyUoas}
 		<Card>
-			<p class="text-base-content/70 py-6 text-center text-sm">
-				<span class="font-semibold">{allUoas.length} UoAs</span> are currently selected — the Spotlight
-				table works best with 10 or fewer. Use the filters to narrow down your selection.
+			<p class="text-base-content/85 py-6 text-center">
+				<span class="font-semibold">{allUoas.length} UoAs</span> are currently selected — the
+				Spotlight table works best with {tooManyUoasNumber} or fewer. Use the filters to narrow down your
+				selection.
+			</p>
+		</Card>
+	{:else if noUoas}
+		<Card>
+			<p class="text-base-content/85 py-6 text-center">
+				No UoAs match the current filters. Adjust your filters to see data in the Spotlight.
 			</p>
 		</Card>
 	{:else}
