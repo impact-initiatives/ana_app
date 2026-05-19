@@ -364,18 +364,19 @@ describe('flagData — priority_flag classification', () => {
 		// MET014=0.35: van=an=0.3 → van_is_strict=false → excluded from hoVanEligibleIds
 		// MET014_van_flag=true at metric level, but the branch check skips it
 		// MET005=0.1, MET011=0, MET012=0.1 → no VAN flags among strict metrics
-		// MET014_flag=true (0.35 ≥ an=0.3) → anyHoAnFlag=true → an_primary (not ho_secondary)
+		// MET014_flag=true (0.35 ≥ an=0.3) → HO system flagged → an_primary (not ho_secondary)
 		const out = flagData([row('A', { MET014: 0.35, MET005: 0.1, MET011: 0, MET012: 0.1 })], refJson);
 		expect(out[0]!['MET014_van_flag']).toBe(true); // metric-level still fires
 		expect(out[0]!['priority_flag']).not.toBe('ho_secondary');
-		expect(out[0]!['priority_flag']).toBe('an_primary'); // AN flag triggers this instead
+		expect(out[0]!['priority_flag']).toBe('an_primary'); // HO system flag triggers this
 	});
 
-	it('returns an_primary when any HO metric has AN flag (proportion not met, no VAN)', () => {
+	it('returns an_primary when health_outcomes system is flagged (proportion not met, no VAN)', () => {
 		// MET005=0.2 → flag=true (0.2 ≥ 0.15), van=false (0.2 < 0.3)
-		// MET011=0, MET012=0 → no_flag
-		// 1/3 flagged < 0.5 → ho_primary NOT triggered; no HO VAN → not ho_secondary
-		// anyHoAnFlag=true → an_primary
+		// MET011=0, MET012=0, MET014=null → no_flag / no_data
+		// gam group: flag_n=1 ≥ factor_threshold=1 → gam subfactor=flag → HO system=flag
+		// 1/4 flagged < 0.5 → ho_primary NOT triggered; no HO VAN → not ho_secondary
+		// isFlagged(healthOutcomesId)=true → an_primary
 		const out = flagData([row('A', { MET005: 0.2, MET011: 0, MET012: 0 })], refJson);
 		expect(out[0]!['priority_flag']).toBe('an_primary');
 	});

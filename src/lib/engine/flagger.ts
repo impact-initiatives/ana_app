@@ -37,7 +37,7 @@ import type { FlagStatus } from '$lib/types/flags';
  *   'em'                    — excess mortality (mortality system flagged)
  *   'ho_primary'            — HO proportion rule met
  *   'ho_secondary'          — any HO metric has VAN flag
- *   'an_primary'            — any HO AN flag, or any VAN flag, or ≥3 systems flagged
+ *   'an_primary'            — HO system flagged, or any VAN flag, or ≥3 systems flagged
  *   'an_secondary'          — 1–2 non-HO classification systems flagged
  *   'insufficient_evidence' — some systems have gaps, none flagged
  *   'no_data'               — all classification systems no_data
@@ -359,11 +359,10 @@ export function flagData(items: Row[], referenceJson: unknown): Row[] {
 		// 3. Any HO metric has VAN flag (only strict-VAN metrics: van ≠ an)
 		if (hoVanEligibleIds.some((id) => d[`${id}_van_flag`] === true)) return 'ho_secondary';
 
-		// 4. AN depth & breadth
-		const anyHoAnFlag = hoMetricIds.some((id) => d[`${id}_flag`] === true);
+		// 4. AN depth & breadth — HO uses system-level rollup (same rule as other systems)
 		const anyVanFlag = allVanEligibleIds.some((id) => d[`${id}_van_flag`] === true);
 		const nSystemsFlagged = classificationSystems.filter((s) => isFlagged(s)).length;
-		if (anyHoAnFlag || anyVanFlag || nSystemsFlagged >= 3) return 'an_primary';
+		if (isFlagged(healthOutcomesId) || anyVanFlag || nSystemsFlagged >= 3) return 'an_primary';
 
 		// 5. Any classification system flagged
 		if (classificationSystems.some(isFlagged)) return 'an_secondary';
