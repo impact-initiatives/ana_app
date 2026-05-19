@@ -284,6 +284,16 @@
 					/>
 				</div>
 
+				<!-- Single mode clear -->
+				{#if !isMultiple && singleVal !== ''}
+					<div class="border-base-200 border-b px-3 py-1.5">
+						<button
+							type="button"
+							class="btn btn-ghost btn-xs text-base-content/85 text-xs"
+							onclick={() => { onchange?.(''); closeDropdown(); }}>Clear</button>
+					</div>
+				{/if}
+
 				<!-- Multiple mode toolbar -->
 				{#if isMultiple}
 					<div class="border-base-200 flex flex-wrap items-center gap-2 border-b px-3 py-1.5">
