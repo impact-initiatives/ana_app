@@ -160,8 +160,11 @@
 		<!-- ── Metric selectors ── -->
 		<Card>
 			{#if warnMetrics}
-				<p class="text-warning mb-2 text-xs">
-					More than 20 metrics selected — the table may be slow to render.
+				<p class="text-info text-xs">
+					More than 20 metrics selected — are you sure you want to display all of those columns?
+				</p>
+				<p class="text-info text-xs">
+					Consider narrowing down your selection for better readability and performance.
 				</p>
 			{/if}
 			<div class="flex flex-wrap items-end gap-2">
