@@ -24,8 +24,10 @@
 		selected: string | string[] | null;
 		/** Placeholder text shown when nothing is selected. */
 		placeholder?: string;
-		/** Optional label rendered above the trigger button. */
+		/** Optional label rendered above or to the left of the trigger button. */
 		label?: string;
+		/** Where to render the label relative to the trigger. @default 'top' */
+		labelPosition?: 'top' | 'left';
 		/** Called with the new string (simple) or string[] (multiple) when the selection changes. */
 		onchange?: (selected: string | string[]) => void;
 		/** Single mode only: auto-select the first option when nothing is selected. */
@@ -34,10 +36,12 @@
 		dropdownClass?: string;
 		/** Extra classes applied to the root container div (e.g. `"w-60"` to constrain trigger + dropdown width). */
 		class?: string;
-		/** Unit label used in the "all selected" display, e.g. "UoAs" → "All UoAs (5)". Omit for plain "All (5)". */
+		/** Unit label used in the "all selected" / compact display, e.g. "UoAs" → "All UoAs (5)" / "UoAs ×3". Omit to fall back to label prop or bare count. */
 		unitLabel?: string;
 		/** Explicitly enable multi-select mode — required when passing selected=null (all) so mode can be inferred. */
 		multiple?: boolean;
+		/** How selected items are shown in the trigger. 'chips' shows individual removable chips; 'compact' shows a filled button with a count summary. @default 'chips' */
+		displayMode?: 'chips' | 'compact';
 	}
 
 	let {
@@ -45,13 +49,18 @@
 		selected,
 		placeholder = 'Select…',
 		label,
+		labelPosition = 'top',
 		onchange,
 		autoSelectFirst = false,
 		dropdownClass = 'w-72',
 		class: className = '',
 		unitLabel = '',
-		multiple
+		multiple,
+		displayMode = 'chips'
 	}: Props = $props();
+
+	const isCompact = $derived(displayMode === 'compact');
+	const isLeftLabel = $derived(labelPosition === 'left');
 
 	// isMultiple: explicit prop OR inferred from array type. isNullAll: null passed in multi-mode = "all selected".
 	const isMultiple = $derived(multiple === true || Array.isArray(selected));
@@ -103,6 +112,9 @@
 	const selectedLabel = $derived(flatOptions.find((o) => o.value === singleVal)?.label ?? null);
 	const allSelected = $derived(isNullAll || multiVal.length === flatOptions.length);
 	const noneSelected = $derived(!isNullAll && multiVal.length === 0);
+	// hasActiveSelection: true for a *partial* selection — drives compact fill. isNullAll (all) treated as unfiltered/neutral.
+	const hasActiveSelection = $derived(isMultiple ? multiVal.length > 0 : singleVal !== '');
+	const compactPrefix = $derived(unitLabel || label || '');
 
 	function labelFor(v: string): string {
 		return flatOptions.find((o) => o.value === v)?.label ?? v;
@@ -165,71 +177,101 @@
 
 <svelte:window onclick={onWindowClick} />
 
-<div class={['relative flex flex-col gap-1', className]} bind:this={containerEl}>
+<div
+	class={[isLeftLabel ? 'flex flex-row items-center gap-2' : 'flex flex-col gap-1', className]}
+	bind:this={containerEl}
+>
 	{#if label}
-		<span class="mt-2 text-xs font-semibold tracking-wide uppercase">{label}</span>
-	{/if}
-	<!-- Trigger -->
-	<button
-		type="button"
-		class="btn btn-outline border-base-content/50 btn-sm h-auto min-h-8 justify-between border py-1.5"
-		onclick={() => (open = !open)}
-	>
-		<span class="flex flex-wrap gap-1">
-			{#if !isMultiple}
-				{#if selectedLabel === null || singleVal === ''}
-					<span class="text-base-content/70">{placeholder}</span>
-				{:else}
-					<span class="text-base-content">{selectedLabel}</span>
-				{/if}
-			{:else if isNullAll}
-				<span class="text-base-content/85"
-					>All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000
-						? '1000+'
-						: flatOptions.length})</span
-				>
-			{:else if multiVal.length === 0}
-				<span class="text-base-content/50 italic">None selected</span>
-			{:else}
-				{#each multiVal.slice(0, 3) as v (v)}
-					<span class="badge badge-xs badge-primary badge-soft gap-0.5">
-						{labelFor(v)}
-						<!-- svelte-ignore a11y_click_events_have_key_events -->
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<span
-							class="text-base-content/60 hover:text-base-content cursor-pointer"
-							onclick={(e) => {
-								e.stopPropagation();
-								removeChip(v);
-							}}>×</span
-						>
-					</span>
-				{/each}
-				{#if multiVal.length > 3}
-					<span class="badge badge-ghost badge-xs">+{multiVal.length - 3} more</span>
-				{/if}
-			{/if}
-		</span>
-
-		<!-- Caret -->
-		<svg
-			class="text-base-content/85 h-4 w-4 shrink-0 transition-transform {open ? 'rotate-180' : ''}"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke="currentColor"
-		>
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
-	</button>
-
-	<!-- Dropdown -->
-	{#if open}
-		<div
+		<span
 			class={[
-				'menu rounded-box border-base-300 bg-base-100 absolute z-50 mt-10 border p-0',
-				dropdownClass
-			]}
+				'text-xs font-semibold tracking-wide uppercase',
+				isLeftLabel ? 'shrink-0' : 'mt-2'
+			]}>{label}</span
 		>
+	{/if}
+	<!-- Inner wrapper: relative anchor for dropdown, flex-1 when left-label so trigger fills space -->
+	<div class={['relative', isLeftLabel ? 'flex-1' : '']}>
+		<!-- Trigger -->
+		<button
+			type="button"
+			class={[
+				'btn btn-sm h-auto min-h-8 w-full justify-between border py-1.5',
+				isCompact && hasActiveSelection ? 'btn-primary' : 'btn-outline border-base-content/50'
+			]}
+			onclick={() => (open = !open)}
+		>
+			<span class="flex flex-wrap gap-1">
+				{#if !isMultiple}
+					{#if selectedLabel === null || singleVal === ''}
+						<span class="text-base-content/70">{placeholder}</span>
+					{:else}
+						<span class="text-base-content">{selectedLabel}</span>
+					{/if}
+				{:else if isCompact}
+					{#if isNullAll}
+						<span>All{compactPrefix ? ` ${compactPrefix}` : ''}</span>
+					{:else if multiVal.length === 0}
+						<span class="italic opacity-50">{placeholder}</span>
+					{:else}
+						<span>{compactPrefix ? `${compactPrefix} ×${multiVal.length}` : `×${multiVal.length}`}</span>
+					{/if}
+				{:else if isNullAll}
+					<span class="text-base-content/85"
+						>All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000
+							? '1000+'
+							: flatOptions.length})</span
+					>
+				{:else if multiVal.length === 0}
+					<span class="text-base-content/50 italic">None selected</span>
+				{:else}
+					{#each multiVal.slice(0, 3) as v (v)}
+						<span class="badge badge-xs badge-primary badge-soft gap-0.5">
+							{labelFor(v)}
+							<!-- svelte-ignore a11y_click_events_have_key_events -->
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<span
+								class="text-base-content/60 hover:text-base-content cursor-pointer"
+								onclick={(e) => {
+									e.stopPropagation();
+									removeChip(v);
+								}}>×</span
+							>
+						</span>
+					{/each}
+					{#if multiVal.length > 3}
+						<span class="badge badge-ghost badge-xs">+{multiVal.length - 3} more</span>
+					{/if}
+				{/if}
+			</span>
+
+			<!-- Caret -->
+			<svg
+				class={[
+					'h-4 w-4 shrink-0 transition-transform',
+					open ? 'rotate-180' : '',
+					isCompact && hasActiveSelection ? '' : 'text-base-content/85'
+				]}
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M19 9l-7 7-7-7"
+				/>
+			</svg>
+		</button>
+
+		<!-- Dropdown -->
+		{#if open}
+			<div
+				class={[
+					'menu rounded-box border-base-300 bg-base-100 absolute top-full z-50 mt-1 border p-0',
+					dropdownClass
+				]}
+			>
 			<!-- Search (shared) -->
 			<div class="border-base-200 border-b p-2">
 				<Search
@@ -318,5 +360,6 @@
 				{/each}
 			</ul>
 		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
