@@ -241,25 +241,6 @@
 				/>
 			</div>
 
-			<!-- Single mode toolbar -->
-			{#if !isMultiple}
-				<div class="border-base-200 flex items-center gap-2 border-b px-3 py-1.5">
-					<button
-						type="button"
-						class="btn btn-soft btn-xs text-primary disabled:text-base-content/75 text-xs"
-						disabled={!searchQuery || filtered.length === 0}
-						onclick={onSearchEnter}>Select</button
-					>
-					<span class="text-primary">|</span>
-					<button
-						type="button"
-						class="btn btn-ghost btn-xs text-base-content/85 disabled:text-base-content/75 text-xs"
-						disabled={singleVal === ''}
-						onclick={() => onchange?.('')}>Clear</button
-					>
-				</div>
-			{/if}
-
 			<!-- Multiple mode toolbar -->
 			{#if isMultiple}
 				<div class="border-base-200 flex flex-wrap items-center gap-2 border-b px-3 py-1.5">

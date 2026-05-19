@@ -204,54 +204,22 @@
 		return flagged.filter((r) => selectedGroupValues!.includes(String(r[groupByCol!] ?? '')));
 	});
 
-	// Cross-filter: UoA options reflect group + prelim (excludes UoA filter itself)
+	// UoA options: all UoAs in the dataset (group filter only — independent of priority flag selection)
 	const uoaOptions = $derived.by(() => {
-		let rows: Row[] = filteredByGroup;
-		if (selectedPrelimKeys !== null)
-			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.priority_flag ?? '')));
-		return [...new Set(rows.map((r) => String(r.uoa)))]
+		return [...new Set(filteredByGroup.map((r) => String(r.uoa)))]
 			.sort()
 			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
 	});
 
-	// Cross-filter: prelim options reflect group + UoA (excludes prelim filter itself)
+	// Prelim options: all flags present in the dataset (group filter only, not UoA-filtered)
+	// UoA and priority flag are independent filters — narrowing UoAs must not collapse flag options.
 	const prelimOptions = $derived.by(() => {
-		const rows =
-			selectedUoas === null
-				? filteredByGroup
-				: filteredByGroup.filter((r) => selectedUoas!.includes(String(r.uoa)));
 		return PRIORITY_FLAG_KEYS.filter((key) =>
-			rows.some((r) => String(r.priority_flag ?? '') === key)
+			filteredByGroup.some((r) => String(r.priority_flag ?? '') === key)
 		).map((key) => ({ value: key, label: PRIORITY_BADGE_MAP[key].label }));
 	});
 
 	// ── Cascade helpers ───────────────────────────────────────────────────────
-
-	function computeMatchingUoas(keys: string[] | null): string[] | null {
-		if (keys === null) return null;
-		const allInScope = [...new Set(filteredByGroup.map((r) => String(r.uoa)))];
-		const matching = allInScope.filter((uoa) =>
-			filteredByGroup.some(
-				(r) => String(r.uoa) === uoa && keys.includes(String(r.priority_flag ?? ''))
-			)
-		);
-		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
-	}
-
-	function computeMatchingPrelimKeys(uoas: string[] | null): string[] | null {
-		if (uoas === null) return null;
-		const allInScope = [
-			...new Set(
-				filteredByGroup.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== '')
-			)
-		];
-		const matching = allInScope.filter((flag) =>
-			filteredByGroup.some(
-				(r) => uoas.includes(String(r.uoa)) && String(r.priority_flag ?? '') === flag
-			)
-		);
-		return matching.length === 0 || matching.length === allInScope.length ? null : matching;
-	}
 
 	function computeMatchingGroupValues(uoas: string[] | null, keys: string[] | null): string[] | null {
 		if (groupByCol === null) return null;
@@ -271,19 +239,7 @@
 		return matching.length === 0 || matching.length === allGroupVals.length ? null : matching;
 	}
 
-	// ── Centralized setters — each cascades to the other filters ─────────────
-
-	function applyUoas(uoas: string[] | null) {
-		selectedUoas = uoas;
-		selectedPrelimKeys = computeMatchingPrelimKeys(uoas);
-		selectedGroupValues = computeMatchingGroupValues(uoas, selectedPrelimKeys);
-	}
-
-	function applyPrelimKeys(keys: string[] | null) {
-		selectedPrelimKeys = keys;
-		selectedUoas = computeMatchingUoas(keys);
-		selectedGroupValues = computeMatchingGroupValues(selectedUoas, keys);
-	}
+	// ── Setters ───────────────────────────────────────────────────────────────
 
 	function applyGroupValues(vals: string[] | null) {
 		selectedGroupValues = vals;
@@ -334,12 +290,12 @@
 
 	function onUoasChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		applyUoas(arr.length === uoaOptions.length ? null : arr);
+		selectedUoas = arr.length === uoaOptions.length ? null : arr;
 	}
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		applyPrelimKeys(arr.length === prelimOptions.length ? null : arr);
+		selectedPrelimKeys = arr.length === prelimOptions.length ? null : arr;
 	}
 
 	function onGroupValuesChange(next: string | string[]) {
@@ -348,13 +304,10 @@
 	}
 
 	function handleDonutSliceClick(key: string | null) {
-		if (key === null) {
-			applyPrelimKeys(null);
-		} else {
-			const newKeys =
-				selectedPrelimKeys?.includes(key) && selectedPrelimKeys.length === 1 ? null : [key];
-			applyPrelimKeys(newKeys);
-		}
+		selectedPrelimKeys =
+			key === null ? null
+			: selectedPrelimKeys?.includes(key) && selectedPrelimKeys.length === 1 ? null
+			: [key];
 	}
 
 	// Stage 2: group + prelim, no UoA — map always colours all areas
@@ -715,7 +668,7 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							onmapuoaschange={(uoas) => applyUoas(uoas.length > 0 ? uoas : null)}
+							onmapuoaschange={(uoas) => (selectedUoas = uoas.length > 0 ? uoas : null)}
 							onmapselectreset={clearAllFilters}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
