@@ -61,8 +61,8 @@ export const steps: Step[] = [
 					body: 'Flags aggregate up: metrics → subfactors → factors → systems. A minimum evidence rule applies at each level — too few valid metrics yields \'Insufficient evidence\' rather than a flag.'
 				},
 				{
-					label: 'Preliminary flag',
-					body: 'Each UoA receives one of: EM · RoEM · Acute Needs · No Acute Needs · Insufficient Evidence · No Data — based on the system-level roll-up.'
+					label: 'Priority flag',
+					body: 'Each UoA receives one of: EM · HO — Primary · HO — Secondary · AN — Primary · AN — Secondary · No acute needs · Insufficient Evidence · No Data — based on the system-level roll-up.'
 				}
 			],
 			tip: null
@@ -75,7 +75,7 @@ export const steps: Step[] = [
 			sections: [
 				{
 					label: 'Overview',
-					body: 'Preliminary classifications per UoA — donut breakdown and ranked table. Filterable by classification, UoA, or any metadata column.',
+					body: 'Priority flags per UoA — donut breakdown and ranked table. Filterable by flag, UoA, or any metadata column.',
 					route: '/results#overview'
 				},
 				{
