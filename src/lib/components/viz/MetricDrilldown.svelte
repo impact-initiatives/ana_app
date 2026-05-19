@@ -11,7 +11,7 @@
 		threshold_an: any;
 		threshold_van: any;
 		above_or_below: string | null;
-		preference: number | null;
+		evidence_type: string | null;
 	} | null;
 
 	interface Props {
@@ -32,13 +32,8 @@
 	});
 
 	// ── Filters ───────────────────────────────────────────────────────────────
-	let prefFilter = new SvelteSet<number>([1, 2]);
+	let showSupportingEvidence = $state(false);
 	let flagFilter = new SvelteSet<string>(['flag', 'no_flag']);
-
-	function togglePref(p: number) {
-		if (prefFilter.has(p)) prefFilter.delete(p);
-		else prefFilter.add(p);
-	}
 
 	function toggleFlag(f: string) {
 		if (flagFilter.has(f)) flagFilter.delete(f);
@@ -53,10 +48,9 @@
 	}
 
 	function isVisible(ind: string): boolean {
-		if (prefFilter.size === 0 || flagFilter.size === 0) return false;
+		if (flagFilter.size === 0) return false;
 		const info = cachedMetricInfo(ind);
-		const pref = info?.preference ?? null;
-		if (pref === null || !prefFilter.has(pref)) return false;
+		if (info?.evidence_type === 'Supporting evidence' && !showSupportingEvidence) return false;
 		const fk = flagKey(row[`${ind}_status`]);
 		if (!flagFilter.has(fk)) return false;
 		return true;
@@ -90,33 +84,49 @@
 		return metricIds.filter(isVisible).map((ind) => {
 			const info = cachedMetricInfo(ind);
 			const fk = flagKey(row[`${ind}_status`]);
+			const vanFk = flagKey(row[`${ind}_van_status`]);
 			return {
 				metric: info?.label ?? ind,
-				pref: String(info?.preference ?? '–'),
+				evidence_type: info?.evidence_type ?? '–',
 				value: fmt(row[ind]),
 				an_threshold: fmt(info?.threshold_an),
+				van_threshold: info?.threshold_van != null ? fmt(info.threshold_van) : '–',
 				direction: info?.above_or_below ?? '–',
 				within_10: boolSym(row[`${ind}_within_10perc`]),
 				near_no_flag: boolSym(row[`${ind}_within_10perc_change`]),
-				status: getFlagBadge(fk)?.label ?? '–'
+				status: getFlagBadge(fk)?.label ?? '–',
+				van_status: info?.threshold_van != null ? (getFlagBadge(vanFk)?.label ?? '–') : '–'
 			};
 		});
 	}
 
-	// ── DataTable config (stable objects — defined once) ──────────────────────
+	// ── DataTable config ──────────────────────────────────────────────────────
 	const dtColOptions = {
 		metric: { wrap: true, extraClass: 'max-w-48' },
-		pref: { extraClass: 'text-center' },
+		evidence_type: { wrap: true, extraClass: 'max-w-32' },
 		value: { extraClass: 'text-center' },
 		an_threshold: { extraClass: 'text-center' },
+		van_threshold: { extraClass: 'text-center' },
 		direction: { extraClass: 'text-center' },
 		within_10: { extraClass: 'text-center' },
 		near_no_flag: { extraClass: 'text-center' },
-		status: { extraClass: 'text-center' }
+		status: { extraClass: 'text-center' },
+		van_status: { extraClass: 'text-center' }
 	};
 
 	const dtCellBadges = {
 		status: {
+			[FLAG_BADGE_MAP.flag.label]: { style: FLAG_BADGE_MAP.flag.badgeStyle, class: 'border-0' },
+			[FLAG_BADGE_MAP.no_flag.label]: {
+				style: FLAG_BADGE_MAP.no_flag.badgeStyle,
+				class: 'border-0'
+			},
+			[FLAG_BADGE_MAP.no_data.label]: {
+				style: FLAG_BADGE_MAP.no_data.badgeStyle,
+				class: 'border-0'
+			}
+		},
+		van_status: {
 			[FLAG_BADGE_MAP.flag.label]: { style: FLAG_BADGE_MAP.flag.badgeStyle, class: 'border-0' },
 			[FLAG_BADGE_MAP.no_flag.label]: {
 				style: FLAG_BADGE_MAP.no_flag.badgeStyle,
@@ -142,19 +152,16 @@
 	<div class="bg-base-200 mt-1 mb-3 flex flex-wrap items-center gap-8 rounded-lg px-4 py-3">
 		<div class="flex items-center gap-3">
 			<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
-				>Preference</span
+				>Evidence type</span
 			>
-			{#each [1, 2] as p (p)}
-				<label class="flex cursor-pointer items-center gap-1.5">
-					<input
-						type="checkbox"
-						class="checkbox checkbox-xs checkbox-neutral"
-						checked={prefFilter.has(p)}
-						onchange={() => togglePref(p)}
-					/>
-					<span class="text-xs">{p}</span>
-				</label>
-			{/each}
+			<label class="flex cursor-pointer items-center gap-1.5">
+				<input
+					type="checkbox"
+					class="checkbox checkbox-xs checkbox-neutral"
+					bind:checked={showSupportingEvidence}
+				/>
+				<span class="text-xs">Show supporting evidence</span>
+			</label>
 		</div>
 		<div class="flex items-center gap-3">
 			<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase">Status</span>
@@ -174,7 +181,7 @@
 
 	{#if totalVisible === 0}
 		<p class="text-base-content/75 py-4 text-center text-sm">
-			No metrics match the current filters. Try adjusting your preference or status selection, or
+			No metrics match the current filters. Try adjusting the evidence type or status filters, or
 			change the selected UoA or system.
 		</p>
 	{/if}
