@@ -14,10 +14,12 @@ import {
 	formatMetricTooltip,
 	FLAG_BADGE_MAP,
 	PRIORITY_BADGE_MAP,
+	SYSTEM_CSS_VAR_MAP,
 	getFlagBadge,
 	getPriorityBadge
 } from '$lib/utils/colors';
 import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
+import { SystemIDEnum } from '$lib/types/structure';
 
 describe('dotFill', () => {
 	it('returns flag color for flag status', () => {
@@ -207,5 +209,13 @@ describe('getPriorityBadge', () => {
 	it('returns undefined for unknown keys', () => {
 		expect(getPriorityBadge('EM')).toBeUndefined();
 		expect(getPriorityBadge('unknown')).toBeUndefined();
+	});
+});
+
+describe('SYSTEM_CSS_VAR_MAP', () => {
+	it('has an entry for every SystemIDEnum value', () => {
+		for (const id of Object.values(SystemIDEnum)) {
+			expect(SYSTEM_CSS_VAR_MAP[id]).toBeDefined();
+		}
 	});
 });
