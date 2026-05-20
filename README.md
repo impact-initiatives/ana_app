@@ -18,11 +18,12 @@
 
 ### What the app does
 
-The ANA app processes humanitarian data in three steps:
+The ANA app has two core outputs:
 
-1. **Upload your data** — Prepare a CSV where each row is a unit of analysis (a geographic area, a partner zone, or any other unit) and columns are metric IDs (`MET001`, `MET002`, …). A `uoa` column uniquely identifies each row. Metadata columns (e.g. `region`, `partner`) are carried through automatically as filters.
-2. **Automatic flagging** — Each metric value is validated against per-metric type rules, then compared to its acute-needs threshold. Results roll up from metric → sub-factor → factor → system, giving each unit a priority flag: _EM · HO - Primary · HO - Secondary · AN - Primary · AN - Secondary · No Acute Needs · Insufficient Evidence · No Data_.
-3. **Explore and export** — Visualize flagged results and data coverage. Results can be exported as CSV, XLSX, or per-unit deep-dive workbooks.
+1. **Automatic flagging** — Upload a CSV (one row per unit of analysis, columns are metric IDs `MET001`, `MET002`, …). Each value is validated against per-metric type rules and compared to its acute-needs threshold. Results roll up metric → sub-factor → factor → system, giving each unit a priority flag: _EM · HO - Primary · HO - Secondary · AN - Primary · AN - Secondary · No Acute Needs · Insufficient Evidence · No Data_.
+2. **Pre-populated deep-dive workbooks** — Export a ZIP of per-unit XLSX files. Each workbook has one sheet per system, pre-filled with metric values, flag results, AN/VAN thresholds, and direction. Hypothesis (H1–H5) and comment columns are left editable. Analysts open the file and write the narrative — the data entry is already done.
+
+Everything else in the app (heatmaps, choropleth map, coverage charts, reference browser, spotlight cross-tab) is designed to help analysts interpret flagging results and decide which units warrant a deep dive. It does not change the two outputs above.
 
 Most framework changes — adding or editing metrics, adjusting thresholds, updating labels — only require editing `static/data/reference.csv` and running `bun run data:refresh`.
 
@@ -267,7 +268,7 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 | `metricStore`        | `ana_metric_store_v2`      | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
 | `flagStore`          | `ana_flag_store_v2`        | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                                                                      |
 | `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON boundaries; fetch state `'idle' \| 'loading' \| 'done' \| 'error'`.                                                               |
-| `resultsFilterStore` | `ana_results_filters_v1`   | Persists `/results` sidebar filter state (UoA, priority flag, group-by, metrics section filters). Survives SPA navigation and page reloads.       |
+| `resultsFilterStore` | `ana_results_filters_v1`   | Persists `/results` sidebar filter state (UoA, priority flag, group-by, metrics section filters). Survives SPA navigation and page reloads.      |
 | `validatorStore`     | —                          | Transient validation state; cleared after flagging completes.                                                                                    |
 | `circlePackingStore` | —                          | Tree data for the circle-packing reference visualisation.                                                                                        |
 
@@ -478,20 +479,24 @@ The pipeline runs in five stages:
 
 ### Deep-dive export — `src/lib/engine/deepdive.ts`
 
-Generates a ZIP archive containing one `.xlsx` per Unit of Analysis. Each workbook has one worksheet per system.
+This is one of the two core outputs of the app. It generates a ZIP archive containing one pre-populated `.xlsx` per Unit of Analysis. The goal is that an analyst can open the file and immediately start writing the narrative — all data entry is already done by the app.
 
-Worksheet layout per system:
+Each workbook has one worksheet per system. Worksheet layout:
 
-- System header (full-width, dark background)
-- For each factor: factor row → for each sub-factor: sub-factor row → table of indicator/metric rows
-- Metric rows carry: Indicator label, Metric label, Metric ID, Value, Flag, AN threshold, Direction, H1–H5 hypothesis columns, Comment field
+- System header row (full-width, dark background with system colour)
+- For each factor: factor row → for each sub-factor: sub-factor row → table of metric rows
+- Each metric row carries:
+  - **Pre-populated by the app:** Indicator label, Metric label, Metric ID, uploaded value, flag result (`flag` / `no_flag` / `no_data`), AN threshold, direction (above/below)
+  - **Left editable for analysts:** H1–H5 hypothesis columns, Comment field
+
+Only non-preference-3 metrics appear. Preference-3 (reference-only) metrics are excluded from the flagging pipeline and therefore not written to the workbook.
 
 Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tableHeaders`, `colWidths`, `colCount`).
 
 System colours are resolved at runtime via `getComputedStyle(document.documentElement)` because ExcelJS runs in a browser context but outside a Svelte component — the CSS custom properties are available on the document root.
 
-**Touch `deepdive.ts` when:** export layout, cell styling, or hypothesis column logic changes.  
-**Touch `deepdives.ts` when:** adding or removing columns from the exported table.
+**Touch `deepdive.ts` when:** export layout, cell styling, column order, or pre-population logic changes.  
+**Touch `deepdives.ts` when:** adding or removing columns from the exported table (update `tableHeaders`, `colWidths`, and `colCount` together).
 
 ### Validation and type safety
 
