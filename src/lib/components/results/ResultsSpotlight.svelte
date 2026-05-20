@@ -82,7 +82,10 @@
 						f.sub_factors?.flatMap(
 							(sf: any) =>
 								sf.indicators?.flatMap((ind: any) =>
-									(ind.metrics ?? []).map((m: any) => m.metric)
+									(ind.metrics ?? [])
+											.filter((m: any) => m.evidence_type !== 'Supporting evidence' && m.preference !== 3)
+											// eslint-disable-next-line @typescript-eslint/no-explicit-any
+											.map((m: any) => m.metric)
 								) ?? []
 						) ?? []
 				) ?? []
@@ -226,8 +229,8 @@
 		</div>
 
 		<!-- Metric selectors (right) -->
-		<div class="lg:col-span-3">
-			<Card>
+		<div class="lg:col-span-3 lg:h-full">
+			<Card class="h-full">
 				{#if warnMetrics}
 					<p class="text-info text-xs">
 						More than 25 metrics selected — are you sure you want to display all of those columns?
