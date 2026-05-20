@@ -87,6 +87,8 @@
 		cellBadges?: Record<string, Record<string, { label?: string; style?: string; class?: string }>>;
 		/** Disable column sorting (removes arrows and click handlers). Default true. */
 		sortable?: boolean;
+		/** Pre-populate the global search input with this value on mount. */
+		initialSearch?: string;
 	}
 	let {
 		rows = [],
@@ -115,7 +117,8 @@
 		cellBadges,
 		getCellStyle,
 		stickyFirstColumn = false,
-		sortable = true
+		sortable = true,
+		initialSearch = ''
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
@@ -157,7 +160,7 @@
 	}
 
 	// ── Search ────────────────────────────────────────────────────────────────
-	let searchQuery = $state('');
+	let searchQuery = $state<string>(initialSearch);
 	let columnQueries = $state<Record<number, string>>({});
 
 	const filteredData = $derived.by(() => {

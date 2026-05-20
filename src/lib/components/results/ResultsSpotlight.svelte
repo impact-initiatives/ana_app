@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getAllMetricIds, getMetricMetadata } from '$lib/engine/metricMetadata';
 	import { SYSTEM_DISPLAY_ORDER, EvidenceTypeEnum } from '$lib/types/structure';
+	import { resolve } from '$app/paths';
 	import { getFlagBadge } from '$lib/utils/colors';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -312,7 +313,10 @@
 							{#if m}
 								<span class="text-xs font-medium">{m.label}</span>
 								<div class="mt-1 flex flex-wrap items-center gap-1">
-									<span class="badge badge-outline badge-xs font-medium">{m.id}</span>
+									<a
+									href="{resolve('/reference')}?q={m.id}"
+									class="badge badge-outline badge-xs font-medium hover:badge-primary"
+								>{m.id}</a>
 									{#if m.evidence_type}
 										<span class="badge badge-outline badge-xs font-medium">{m.evidence_type}</span>
 									{/if}
