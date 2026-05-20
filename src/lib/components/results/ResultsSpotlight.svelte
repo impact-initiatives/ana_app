@@ -14,8 +14,8 @@
 		systemId: string;
 		systemLabel: string;
 		evidence_type: string | null;
+		threshold_an: number | null;
 		threshold_van: number | null;
-		above_or_below: string | null;
 	}
 
 	interface Props {
@@ -47,8 +47,8 @@
 					systemId: md.systemId,
 					systemLabel: sysLabels.get(md.systemId) ?? md.systemId,
 					evidence_type: md.evidence_type ?? null,
-					threshold_van: md.raw?.thresholds?.van ?? null,
-					above_or_below: md.raw?.above_or_below ?? null
+					threshold_an: md.raw?.thresholds?.an ?? null,
+					threshold_van: md.raw?.thresholds?.van ?? null
 				}
 			];
 		});
@@ -150,7 +150,7 @@
 
 	const dtColOptions = $derived.by(() => {
 		const opts: Record<string, { wrap?: boolean; extraClass?: string }> = {
-			Metric: { wrap: true, extraClass: 'min-w-52 max-w-80 text-xs' }
+			Metric: { wrap: true, extraClass: 'min-w-65 max-w-80 text-xs' }
 		};
 		for (const uoa of tableUoas) {
 			opts[uoaLabel(uoa)] = { wrap: true, extraClass: 'text-center min-w-20 max-w-28 text-xs' };
@@ -177,143 +177,184 @@
 		Spotlight
 	</h1>
 
-	{#if tooManyUoas}
-		<Card>
-			<p class="text-base-content/85 py-6 text-center">
-				<span class="font-semibold">{allUoas.length} UoAs</span> are currently selected — the
-				Spotlight table works best with {tooManyUoasNumber} or fewer. Use the filters to narrow down your
-				selection.
+	<!-- ── How to read + Metric selectors ── -->
+	<div class="mb-4 grid grid-cols-1 gap-6 lg:grid-cols-5">
+		<!-- How to read (left) -->
+		<div
+			class="card border-base-300 bg-base-200/60 space-y-6 rounded-xl border p-4 shadow-lg lg:col-span-2"
+		>
+			<p class="text-base-content/85 text-xs font-semibold tracking-widest uppercase">
+				How to read
 			</p>
-		</Card>
-	{:else if noUoas}
-		<Card>
-			<p class="text-base-content/85 py-6 text-center">
-				No UoAs match the current filters. Adjust your filters to see data in the Spotlight.
-			</p>
-		</Card>
-	{:else}
-		<!-- ── Metric selectors ── -->
-		<Card>
-			{#if warnMetrics}
-				<p class="text-info text-xs">
-					More than 20 metrics selected — are you sure you want to display all of those columns?
-				</p>
-				<p class="text-info text-xs">
-					Consider narrowing down your selection for better readability and performance.
-				</p>
-			{/if}
-			<div class="flex flex-wrap items-end gap-2">
-				{#each [...metaBySystem.entries()].sort(([a], [b]) => SYSTEM_DISPLAY_ORDER.indexOf(a as any) - SYSTEM_DISPLAY_ORDER.indexOf(b as any)) as [sysId, sys] (sysId)}
-					<Select
-						class="w-50"
-						dropdownClass="w-64"
-						label={sys.label}
-						placeholder="None"
-						options={systemOptions(sysId)}
-						selected={systemSelected(sysId)}
-						multiple={true}
-						unitLabel="Metrics"
-						displayMode="compact"
-						onchange={(v) => onSystemChange(sysId, v)}
-					/>
-				{/each}
-			</div>
-			{#if allUoas.length === 0}
-				<p class="text-base-content/75 mt-2 text-xs">No data loaded.</p>
-			{:else}
-				<p class="text-base-content/75 mt-2 text-xs">
-					Showing {tableUoas.length} UoA{tableUoas.length !== 1 ? 's' : ''} from current filters.
-				</p>
-			{/if}
-		</Card>
-
-		<!-- ── Cross-tab table ── -->
-		<div class="mt-4">
-			{#if selectedMetricIds.length === 0}
-				<Card>
-					<p class="text-base-content/75 py-8 text-center text-sm">
-						Select one or more metrics above to build the cross-tab.
-					</p>
-				</Card>
-			{:else}
-				<Card
-					title="Metric × UoA cross-tab"
-					subtitle="{tableUoas.length} UoA{tableUoas.length !== 1
-						? 's'
-						: ''} × {metricCount} metric{metricCount !== 1 ? 's' : ''}"
+			<div class="flex items-start gap-3 text-sm">
+				<span
+					class="bg-primary/15 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+					>1</span
 				>
-					<DataTable
-						rows={dtRows}
-						tableClass="table-xs"
-						headerRowClass="bg-base-200 text-xs text-base-content/85"
-						headerThClass="bg-base-200"
-						overflow="scroll"
-						scrollHeight="480px"
-						humanizeHeaders={false}
-						colOptions={dtColOptions}
-						stickyFirstColumn={true}
-						sortable={false}
-					>
-						{#snippet renderCell({ col, value, rowObj })}
-							{#if col === 'Metric'}
-								{@const m = metaById.get(rowObj['Metric'] ?? '')}
-								{#if m}
-									<span class="text-xs font-medium">{m.label}</span>
-									<div class="mt-1 flex flex-wrap items-center gap-1">
-										<span class="badge badge-outline badge-xs font-medium">{m.id}</span>
-										{#if m.evidence_type}
-											<span class="badge badge-outline badge-xs font-medium">{m.evidence_type}</span
-											>
-										{/if}
-									</div>
-								{/if}
-							{:else}
-								{@const uoa = uoaByLabel.get(col)}
-								{@const row = uoa ? rowByUoa.get(uoa) : undefined}
-								{@const metricId = rowObj['Metric'] ?? ''}
-								{@const m = metaById.get(metricId)}
-								{@const badge = getFlagBadge(String(row?.[`${metricId}_status`] ?? 'no_data'))}
-								{@const vanFlagged = row?.[`${metricId}_van_flag`] === true}
-								{@const nearAn = row?.[`${metricId}_within_10perc_change`] === true}
-								{@const nearVan = (() => {
-									if (!row || !m || m.threshold_van === null || m.threshold_van === undefined)
-										return false;
-									if (vanFlagged) return false;
-									const rawVal = row[metricId];
-									if (rawVal == null || typeof rawVal !== 'number') return false;
-									const van = m.threshold_van;
-									if (van === 0) return rawVal === 0;
-									return Math.abs((rawVal - van) / van) <= 0.1;
-								})()}
-								<span class="block text-center text-xs">{value}</span>
-								<div class="flex flex-wrap justify-center gap-0.5">
-									{#if badge}
-										<span class="badge badge-xs border-0" style={badge.badgeStyle}
-											>{badge.label}</span
+				<p class="text-base-content/80">
+					<strong class="text-base-content font-semibold">Rows = metrics, columns = UoAs.</strong>
+					Each cell shows the metric value for that area. Use the dropdowns to pick which metrics appear.
+				</p>
+			</div>
+			<div class="flex items-start gap-3 text-sm">
+				<span
+					class="bg-primary/15 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+					>2</span
+				>
+				<p class="text-base-content/80">
+					<strong class="text-base-content font-semibold">Flag badge</strong> — shows whether the Acute
+					Needs (AN) threshold was crossed for that metric × area combination.
+				</p>
+			</div>
+			<div class="flex items-start gap-3 text-sm">
+				<span
+					class="bg-primary/15 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+					>3</span
+				>
+				<p class="text-base-content/80">
+					<strong class="text-base-content font-semibold">VAN badge</strong> — a purple badge
+					alongside the flag means the <em>Very Acute Needs</em> threshold was also crossed, indicating
+					a higher severity level than AN alone.
+				</p>
+			</div>
+		</div>
+
+		<!-- Metric selectors (right) -->
+		<div class="lg:col-span-3">
+			<Card>
+				{#if warnMetrics}
+					<p class="text-info text-xs">
+						More than 20 metrics selected — are you sure you want to display all of those columns?
+					</p>
+					<p class="text-info text-xs">
+						Consider narrowing down your selection for better readability and performance.
+					</p>
+				{/if}
+				<div class="flex flex-wrap items-end gap-2">
+					{#each [...metaBySystem.entries()].sort(([a], [b]) => SYSTEM_DISPLAY_ORDER.indexOf(a as any) - SYSTEM_DISPLAY_ORDER.indexOf(b as any)) as [sysId, sys] (sysId)}
+						<Select
+							class="w-50"
+							dropdownClass="w-64"
+							label={sys.label}
+							placeholder="None"
+							options={systemOptions(sysId)}
+							selected={systemSelected(sysId)}
+							multiple={true}
+							unitLabel="Metrics"
+							displayMode="compact"
+							onchange={(v) => onSystemChange(sysId, v)}
+						/>
+					{/each}
+				</div>
+				{#if tooManyUoas}
+					<p class="text-warning mt-2 text-xs">
+						{allUoas.length} UoAs selected — showing first {tooManyUoasNumber}. Narrow filters to
+						see more.
+					</p>
+				{:else if noUoas}
+					<p class="text-base-content/50 mt-2 text-xs">No UoAs match the current filters.</p>
+				{:else}
+					<p class="text-base-content/75 mt-2 text-xs">
+						Showing {tableUoas.length} UoA{tableUoas.length !== 1 ? 's' : ''} from current filters.
+					</p>
+				{/if}
+			</Card>
+		</div>
+		<!-- /lg:col-span-3 -->
+	</div>
+	<!-- /grid -->
+
+	<!-- ── Cross-tab table ── -->
+	<div class="mt-4">
+		{#if tooManyUoas}
+			<Card>
+				<p class="text-base-content/85 py-6 text-center">
+					<span class="font-semibold">{allUoas.length} UoAs</span> are currently selected — the
+					Spotlight table works best with {tooManyUoasNumber} or fewer. Use the filters to narrow down
+					your selection.
+				</p>
+			</Card>
+		{:else if noUoas}
+			<Card>
+				<p class="text-base-content/85 py-6 text-center">
+					No UoAs match the current filters. Adjust your filters to see data in the Spotlight.
+				</p>
+			</Card>
+		{:else if selectedMetricIds.length === 0}
+			<Card>
+				<p class="text-base-content/60 py-8 text-center text-sm">
+					Select one or more metrics above to build the cross-tab.
+				</p>
+			</Card>
+		{:else}
+			<Card
+				title="Metric × UoA cross-tab"
+				subtitle="{tableUoas.length} UoA{tableUoas.length !== 1
+					? 's'
+					: ''} × {metricCount} metric{metricCount !== 1 ? 's' : ''}"
+			>
+				<DataTable
+					rows={dtRows}
+					tableClass="table-xs"
+					headerRowClass="bg-base-200 text-xs text-base-content/85"
+					headerThClass="bg-base-200"
+					overflow="scroll"
+					scrollHeight="480px"
+					humanizeHeaders={false}
+					colOptions={dtColOptions}
+					stickyFirstColumn={true}
+					sortable={false}
+				>
+					{#snippet renderCell({ col, value, rowObj })}
+						{#if col === 'Metric'}
+							{@const m = metaById.get(rowObj['Metric'] ?? '')}
+							{#if m}
+								<span class="text-xs font-medium">{m.label}</span>
+								<div class="mt-1 flex flex-wrap items-center gap-1">
+									<span class="badge badge-outline badge-xs font-medium">{m.id}</span>
+									{#if m.evidence_type}
+										<span class="badge badge-outline badge-xs font-medium">{m.evidence_type}</span>
+									{/if}
+									{#if m.threshold_an !== null}
+										<span
+											class="badge badge-xs"
+											style="border-color: var(--color-flag); color: var(--color-flag)"
+											>AN {fmt(m.threshold_an)}</span
 										>
 									{/if}
-									{#if vanFlagged}
-										<span
-											class="badge badge-xs border-0"
-											style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)"
-											>VAN</span
-										>
-									{:else if nearVan}
+									{#if m.threshold_van !== null}
 										<span
 											class="badge badge-xs"
 											style="border-color: var(--color-priority-ho-secondary); color: var(--color-priority-ho-secondary)"
-											>~VAN</span
+											>VAN {fmt(m.threshold_van)}</span
 										>
-									{/if}
-									{#if nearAn}
-										<span class="badge badge-xs badge-outline badge-warning">~AN</span>
 									{/if}
 								</div>
 							{/if}
-						{/snippet}
-					</DataTable>
-				</Card>
-			{/if}
-		</div>
-	{/if}
+						{:else}
+							{@const uoa = uoaByLabel.get(col)}
+							{@const row = uoa ? rowByUoa.get(uoa) : undefined}
+							{@const metricId = rowObj['Metric'] ?? ''}
+							{@const badge = getFlagBadge(String(row?.[`${metricId}_status`] ?? 'no_data'))}
+							{@const vanFlagged = row?.[`${metricId}_van_flag`] === true}
+							<span class="block text-center text-xs">{value}</span>
+							<div class="flex flex-wrap justify-center gap-0.5">
+								{#if badge}
+									<span class="badge badge-xs border-0" style={badge.badgeStyle}>{badge.label}</span
+									>
+								{/if}
+								{#if vanFlagged}
+									<span
+										class="badge badge-xs border-0"
+										style="background-color: var(--color-priority-ho-secondary); color: var(--color-base-100)"
+										>VAN</span
+									>
+								{/if}
+							</div>
+						{/if}
+					{/snippet}
+				</DataTable>
+			</Card>
+		{/if}
+	</div>
 </section>
