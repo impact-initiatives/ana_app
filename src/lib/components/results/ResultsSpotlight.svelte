@@ -82,9 +82,7 @@
 						f.sub_factors?.flatMap(
 							(sf: any) =>
 								sf.indicators?.flatMap((ind: any) =>
-									(ind.metrics ?? [])
-										.filter((m: any) => m.preference !== 3)
-										.map((m: any) => m.metric)
+									(ind.metrics ?? []).map((m: any) => m.metric)
 								) ?? []
 						) ?? []
 				) ?? []
