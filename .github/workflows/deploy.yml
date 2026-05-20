@@ -24,12 +24,22 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: fedora:42
     steps:
+      - name: Install system dependencies
+        run: dnf install -y git curl unzip
+
+      - name: Install Bun
+        run: curl -fsSL https://bun.com/install | bash
+
+      - name: Add Bun to PATH
+        run: |
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+          echo "BUN_INSTALL=$HOME/.bun" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install bun
-        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
