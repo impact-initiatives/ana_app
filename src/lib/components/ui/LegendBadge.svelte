@@ -5,7 +5,7 @@
 	interface Props {
 		/** FLAG_BADGE keys to display. Default: the four main statuses. */
 		keys?: readonly string[];
-		/** priorityBadge keys to display after a | separator. Default: none. */
+		/** priorityBadge keys to display after FLAG_BADGE keys. Default: none. */
 		priorityKeys?: readonly string[];
 		/** Use solid colours for FLAG_BADGE swatches instead of tinted. Default true = tinted. */
 		tinted?: boolean;

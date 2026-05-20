@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { FLAG_BADGE_MAP, getFlagBadge, getPriorityBadge, systemBaseColor } from '$lib/utils/colors';
 	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
-	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
+	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 
 	type Row = Record<string, any>;
@@ -109,12 +109,12 @@
 			{#if priorityKeys.length > 0}
 				{#each priorityKeys as key (key)}
 					<span class="flex items-center gap-1">
-						<PrelimBadge value={key} />
+						<PriorityBadge value={key} />
 						<span class="text-base-content/70 text-xs">×{priorityCounts.get(key)}</span>
 					</span>
 				{/each}
 			{:else}
-				<PrelimBadge value="no_data" />
+				<PriorityBadge value="no_data" />
 			{/if}
 		</div>
 

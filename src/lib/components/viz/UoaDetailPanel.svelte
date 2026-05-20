@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { FLAG_BADGE_MAP, getFlagBadge, getPriorityBadge, systemBaseColor } from '$lib/utils/colors';
-	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
+	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 
@@ -82,9 +82,9 @@
 		<div class="mt-1 mb-2 flex items-center gap-2">
 			<span>Priority flag for this area:</span>
 			{#if row && getPriorityBadge(row.priority_flag)}
-				<PrelimBadge value={row.priority_flag} />
+				<PriorityBadge value={row.priority_flag} />
 			{:else}
-				<PrelimBadge value="no_data" />
+				<PriorityBadge value="no_data" />
 			{/if}
 		</div>
 

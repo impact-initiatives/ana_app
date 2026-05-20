@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
+	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import { PRIORITY_ORDER, ACUTE_PRIORITY_FLAGS, type PriorityFlag } from '$lib/types/flags';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -136,7 +136,7 @@
 		>
 			{#snippet renderCell({ col, value })}
 				{#if col === 'Flag'}
-					<PrelimBadge {value} />
+					<PriorityBadge {value} />
 				{:else if col === 'Systems'}
 					<span class={Number(value) > 0 ? 'font-semibold' : 'text-base-content/85'}>
 						{value}

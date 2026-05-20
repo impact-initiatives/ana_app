@@ -15,7 +15,8 @@
 
 {#if badge}
 	<span
-		class="text-base-content inline-block rounded px-2 py-0.5 text-xs leading-snug font-medium {cls}"
-		style:background-color={badge.bg}>{badge.label}</span
+		class="inline-block rounded px-2 py-0.5 text-xs leading-snug font-medium {cls}"
+		style:background-color={badge.bg}
+		style:color={badge.textColor ?? 'var(--color-base-content)'}>{badge.label}</span
 	>
 {/if}
