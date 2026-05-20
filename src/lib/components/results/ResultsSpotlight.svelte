@@ -65,12 +65,12 @@
 		return map;
 	});
 
-	// ── UoAs — derived from filtered rows, cap at 10 ─────────────────────────
+	// ── UoAs — derived from filtered rows, cap at 12 ─────────────────────────
 	const allUoas = $derived([...new Set(filteredRows.map((r) => String(r.uoa ?? '')))].sort());
-	const tooManyUoasNumber = 10;
+	const tooManyUoasNumber = 12;
 	const tooManyUoas = $derived(allUoas.length > tooManyUoasNumber);
 	const noUoas = $derived(allUoas.length === 0);
-	const tableUoas = $derived(allUoas.slice(0, 10));
+	const tableUoas = $derived(allUoas.slice(0, tooManyUoasNumber));
 
 	// ── Metric selection — default to Health Outcomes metrics ─────────────────
 	function hoMetricIds(): string[] {
@@ -83,9 +83,11 @@
 							(sf: any) =>
 								sf.indicators?.flatMap((ind: any) =>
 									(ind.metrics ?? [])
-											.filter((m: any) => m.evidence_type !== 'Supporting evidence' && m.preference !== 3)
-											// eslint-disable-next-line @typescript-eslint/no-explicit-any
-											.map((m: any) => m.metric)
+										.filter(
+											(m: any) => m.evidence_type !== 'Supporting evidence' && m.preference !== 3
+										)
+										// eslint-disable-next-line @typescript-eslint/no-explicit-any
+										.map((m: any) => m.metric)
 								) ?? []
 						) ?? []
 				) ?? []
