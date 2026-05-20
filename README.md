@@ -267,6 +267,7 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`. Access fie
 | `metricStore`        | `ana_metric_store_v2`      | Loads `reference.json` on boot; exposes `referenceJson` (full tree) and `metricMap` (flat `MetricMap` keyed by `MET001`). Cached with timestamp. |
 | `flagStore`          | `ana_flag_store_v2`        | Stores `flaggedResult[]` rows from the pipeline. Keyed by `MET001` columns.                                                                      |
 | `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON boundaries; fetch state `'idle' \| 'loading' \| 'done' \| 'error'`.                                                               |
+| `resultsFilterStore` | `ana_results_filters_v1`   | Persists `/results` sidebar filter state (UoA, priority flag, group-by, metrics section filters). Survives SPA navigation and page reloads.       |
 | `validatorStore`     | —                          | Transient validation state; cleared after flagging completes.                                                                                    |
 | `circlePackingStore` | —                          | Tree data for the circle-packing reference visualisation.                                                                                        |
 
