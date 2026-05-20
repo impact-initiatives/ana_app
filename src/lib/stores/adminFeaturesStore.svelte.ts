@@ -77,9 +77,9 @@ function buildPcodeLabelMap(adm2: any, adm1: any): Record<string, string> {
     const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
     if (code && name) map[code] = name;
   }
-  // ADM1 features — polygons in ADM1/MIXED mode (carry gis_name); lines in ADM2 mode (no gis_name, skipped harmlessly)
+  // ADM1 features — polygons in ADM1/MIXED mode, lines in ADM2 mode (all carry adm1_source_code + gis_name)
   for (const f of (adm1?.features ?? [])) {
-    const code: string | undefined = f.properties?.adm1_source_code ?? f.properties?.pcode;
+    const code: string | undefined = f.properties?.adm1_source_code ?? f.properties?.adm1_pcode ?? f.properties?.pcode;
     const name: string | undefined = f.properties?.gis_name ?? f.properties?.name;
     if (code && name) map[code] = name;
   }
