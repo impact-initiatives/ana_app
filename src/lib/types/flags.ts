@@ -2,7 +2,7 @@
  * Canonical flag vocabularies for the ANA pipeline.
  *
  * FlagStatus — used at every rollup level (metric → subfactor → factor → system).
- * PrelimFlag — the final per-UoA classification produced by the ANA decision tree.
+ * PriorityFlag — the final per-UoA classification produced by the ANA decision tree.
  *
  * Both share the two lowest-severity values ('no_data', 'insufficient_evidence')
  * as identical strings so status comparisons work across both types.
@@ -20,25 +20,47 @@ export const FLAG_STATUS_KEYS = [
 	'no_data'
 ] as const satisfies readonly FlagStatus[];
 
-// ── Preliminary classification (per-UoA) ─────────────────────────────────────
+// ── Priority classification (per-UoA) ────────────────────────────────────────
 
-export type PrelimFlag =
+export type PriorityFlag =
 	| 'em'
-	| 'roem'
-	| 'acute'
-	| 'acute_needs'
+	| 'ho_primary'
+	| 'ho_secondary'
+	| 'an_primary'
+	| 'an_secondary'
 	| 'insufficient_evidence'
-	| 'no_data';
+	| 'no_data'
+	| 'no_acute_needs';
 
-/** Canonical iteration order for PrelimFlag — severity descending. */
-export const PRELIM_FLAG_KEYS = [
+/** Canonical iteration order for PriorityFlag — severity descending. */
+export const PRIORITY_FLAG_KEYS = [
 	'em',
-	'roem',
-	'acute',
-	'acute_needs',
+	'ho_primary',
+	'ho_secondary',
+	'an_primary',
+	'an_secondary',
 	'insufficient_evidence',
-	'no_data'
-] as const satisfies readonly PrelimFlag[];
+	'no_data',
+	'no_acute_needs'
+] as const satisfies readonly PriorityFlag[];
 
-/** PrelimFlag values that represent confirmed acute needs. */
-export const ACUTE_PRELIM_FLAGS = new Set<PrelimFlag>(['em', 'roem', 'acute']);
+/** PriorityFlag values that represent confirmed acute needs requiring prioritisation. */
+export const ACUTE_PRIORITY_FLAGS = new Set<PriorityFlag>([
+	'em',
+	'ho_primary',
+	'ho_secondary',
+	'an_primary',
+	'an_secondary'
+]);
+
+/** Severity order for sorting — lower number = higher severity. */
+export const PRIORITY_ORDER: Record<PriorityFlag, number> = {
+	em: 0,
+	ho_primary: 1,
+	ho_secondary: 2,
+	an_primary: 3,
+	an_secondary: 4,
+	insufficient_evidence: 5,
+	no_acute_needs: 6,
+	no_data: 7
+};

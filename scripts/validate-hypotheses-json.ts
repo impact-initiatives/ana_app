@@ -28,7 +28,7 @@
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import { SystemIDEnum, SystemIDs } from '../src/lib/types/generated/system-enum';
+import { SystemIDEnum, SystemIDs } from '../src/lib/types/structure';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 

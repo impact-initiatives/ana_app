@@ -207,6 +207,31 @@
 					</svg>
 					Export
 				</a>
+
+				<!-- Reupload shortcut — only when results are loaded -->
+				{#if flagStore.flaggedResult}
+					<a
+						href="{resolve('/')}#upload"
+						class="relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150 text-base-content/85 hover:text-base-content"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-4"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+							/>
+						</svg>
+						Reupload
+					</a>
+				{/if}
 			</div>
 
 			<!-- Divider -->
@@ -298,6 +323,26 @@
 						</a>
 					</li>
 					{#if flagStore.flaggedResult}
+						<li>
+							<a href="{resolve('/')}#upload">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="size-4"
+									aria-hidden="true"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+									/>
+								</svg>
+								Reupload
+							</a>
+						</li>
 						<li><hr class="border-base-300 my-1" /></li>
 						<li>
 							<button class="text-error w-full text-left" onclick={clearAll}>Clear all data</button>

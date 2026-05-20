@@ -234,6 +234,7 @@ export const REFERENCE_TABLE_COLUMNS = [
 	'label',
 	'level',
 	'risk_concept',
+	'evidence_type',
 	'type',
 	'preference',
 	'evidence_threshold',
@@ -284,6 +285,7 @@ export function buildReferenceRows(json: unknown): Record<string, string>[] {
 							label: str(m.label),
 							level: str(m.level),
 							risk_concept: str(m.risk_concept),
+							evidence_type: str(m.evidence_type),
 							type: str(m.type),
 							preference: str(m.preference),
 							evidence_threshold: str(m.evidence_threshold),
@@ -330,6 +332,7 @@ export function getMetricMetadata(json: unknown, metricId: string): Record<strin
 							return {
 								metric: m.metric,
 								label: m.label ?? null,
+								evidence_type: m.evidence_type ?? null,
 								raw: m,
 								systemId,
 								factorId,

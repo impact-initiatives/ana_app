@@ -7,6 +7,7 @@
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
 	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
+	import { page } from '$app/state';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { colourForHierarchy } from '$lib/utils/colors';
@@ -23,15 +24,6 @@
 	let selectedLevels = $state<string[]>([]);
 	let selectedConcepts = $state<string[]>([]);
 	let activeView = $state<View>('table');
-	let showAdvancedCols = $state(false);
-
-	const ADVANCED_COLS = new Set([
-		'threshold_van',
-		'msna_module',
-		'question_kobo_code',
-		'remarks_limitations'
-	]);
-
 	onMount(async () => {
 		loadMetrics();
 		try {
@@ -93,6 +85,7 @@
 		label: { wrap: true, extraClass: 'max-w-52' },
 		type: { wrap: true, extraClass: 'max-w-20' },
 		preference: { wrap: true, extraClass: 'max-w-20' },
+		evidence_type: { wrap: true, extraClass: 'max-w-36' },
 		evidence_threshold: { wrap: true, extraClass: 'max-w-20' },
 		factor_threshold: { wrap: true, extraClass: 'max-w-20' },
 		above_or_below: { wrap: true, extraClass: 'max-w-18' },
@@ -147,12 +140,7 @@
 	);
 
 	const tableRows = $derived(
-		(showAdvancedCols
-			? referenceObjects
-			: referenceObjects.map((row) =>
-					Object.fromEntries(Object.entries(row).filter(([k]) => !ADVANCED_COLS.has(k)))
-				)
-		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
+		referenceObjects.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
@@ -220,19 +208,6 @@
 				{#if filtersActive}
 					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button>
 				{/if}
-			</div>
-		{:else if activeView === 'table'}
-			<div
-				class="border-base-200 bg-base-200/40 rounded-b-box mb-4 flex items-center border border-t-0 px-4 py-2"
-			>
-				<label class="label text-base-content/85 text-xs">
-					<input
-						type="checkbox"
-						class="toggle toggle-primary toggle-sm"
-						bind:checked={showAdvancedCols}
-					/>
-					Additional column: VAN threshold · MSNA module · KoboToolbox question code · Remarks &amp; limitations
-				</label>
 			</div>
 		{/if}
 
@@ -307,6 +282,7 @@
 				downloadable
 				humanizeHeaders
 				overflow="scroll"
+				initialSearch={page.url.searchParams.get('q') ?? ''}
 			/>
 		{/if}
 	{/if}

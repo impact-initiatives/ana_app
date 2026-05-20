@@ -3,6 +3,7 @@
 	import { asset } from '$app/paths';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
+	import { filterStore, persistFilters, clearFilters } from '$lib/stores/resultsFilterStore.svelte';
 	import {
 		adminFeaturesStore,
 		setAdminFeatures,
@@ -16,13 +17,15 @@
 	import { quintOut } from 'svelte/easing';
 	import { appReady } from '$lib/stores/appReady.svelte';
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
-	import { PRELIM_BADGE_MAP } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { PRIORITY_BADGE_MAP } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
+	import { sortSystemsByOrder } from '$lib/types/structure';
 
 	import ResultsOverview from '$lib/components/results/ResultsOverview.svelte';
 	import ResultsSystems from '$lib/components/results/ResultsSystems.svelte';
 	import ResultsMetrics from '$lib/components/results/ResultsMetrics.svelte';
 	import ResultsCoverage from '$lib/components/results/ResultsCoverage.svelte';
+	import ResultsSpotlight from '$lib/components/results/ResultsSpotlight.svelte';
 	import ResultsExport from '$lib/components/results/ResultsExport.svelte';
 	import FiltersSidebar from '$lib/components/results/FiltersSidebar.svelte';
 
@@ -100,7 +103,9 @@
 
 	const systems = $derived<System[]>(
 		Array.isArray(referenceJson?.systems)
-			? (referenceJson.systems as any[]).map((s) => ({ id: s.id, label: s.label ?? s.id }))
+			? sortSystemsByOrder(
+					(referenceJson.systems as any[]).map((s) => ({ id: s.id, label: s.label ?? s.id }))
+				)
 			: []
 	);
 
@@ -169,97 +174,152 @@
 
 	// ── Section 1: Overview filter state ──────────────────────────────────────
 
-	let groupByCol = $state<string | null>(null);
-
-	const groupByOptions = $derived<{ value: string; label: string }[]>(
-		groupByCol === null
-			? []
-			: [
-					...new Set(
-						flagged
-							.filter((r) => r[groupByCol!] != null && String(r[groupByCol!]) !== '')
-							.map((r) => String(r[groupByCol!]))
-					)
-				]
-					.sort()
-					.map((v) => ({ value: v, label: v }))
-	);
-
-	let deselectedGroupValues = $state<{ col: string; values: Set<string> }>({
-		col: '',
-		values: new Set()
+	const groupByOptions = $derived.by<{ value: string; label: string }[]>(() => {
+		if (filterStore.groupByCol === null) return [];
+		// Cross-filter from prelim only — UoA is excluded to avoid circular collapse
+		// (group selection cascades to UoA, which would narrow options back to one)
+		let rows: Row[] = flagged;
+		if (filterStore.selectedPrelimKeys !== null)
+			rows = rows.filter((r) => filterStore.selectedPrelimKeys!.includes(String(r.priority_flag ?? '')));
+		return [
+			...new Set(
+				rows
+					.filter((r) => r[filterStore.groupByCol!] != null && String(r[filterStore.groupByCol!]) !== '')
+					.map((r) => String(r[filterStore.groupByCol!]))
+			)
+		]
+			.sort()
+			.map((v) => {
+				const name = adminFeaturesStore.pcodeLabelMap?.[v];
+				return { value: v, label: name ? `${name} (${v})` : v };
+			});
 	});
 
-	const selectedGroupValues = $derived<string[]>(
-		groupByOptions
-			.map((o) => o.value)
-			.filter(
-				(v) => deselectedGroupValues.col !== groupByCol || !deselectedGroupValues.values.has(v)
-			)
-	);
+	// Stage 1: group filter only
+	const filteredByGroup = $derived.by<Row[]>(() => {
+		if (filterStore.groupByCol === null || filterStore.selectedGroupValues === null) return flagged;
+		return flagged.filter((r) => filterStore.selectedGroupValues!.includes(String(r[filterStore.groupByCol!] ?? '')));
+	});
 
-	function onGroupValuesChange(next: string | string[]) {
-		const nextSet = new Set(Array.isArray(next) ? next : [next]);
-		deselectedGroupValues = {
-			col: groupByCol ?? '',
-			values: new Set(groupByOptions.map((o) => o.value).filter((v) => !nextSet.has(v)))
-		};
-	}
-
-	const overviewUoaOptions = $derived.by(() => {
-		const rows =
-			groupByCol !== null
-				? flagged.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')))
-				: flagged;
-		return [...new Set(rows.map((r) => String(r.uoa)))]
+	// UoA options: all UoAs in the dataset (group filter only — independent of priority flag selection)
+	const uoaOptions = $derived.by(() => {
+		return [...new Set(filteredByGroup.map((r) => String(r.uoa)))]
 			.sort()
 			.map((pcode) => ({ value: pcode, label: uoaLabel(pcode) }));
 	});
 
-	let overviewSelectedUoas = $state<string[] | null>(null);
+	// Prelim options: all flags present in the dataset (group filter only, not UoA-filtered)
+	// UoA and priority flag are independent filters — narrowing UoAs must not collapse flag options.
+	const prelimOptions = $derived.by(() => {
+		return PRIORITY_FLAG_KEYS.filter((key) =>
+			filteredByGroup.some((r) => String(r.priority_flag ?? '') === key)
+		).map((key) => ({ value: key, label: PRIORITY_BADGE_MAP[key].label }));
+	});
 
-	function onOverviewUoasChange(next: string | string[]) {
-		const arr = Array.isArray(next) ? next : [next];
-		overviewSelectedUoas = arr.length === overviewUoaOptions.length ? null : arr;
+	// ── Cascade helpers ───────────────────────────────────────────────────────
+
+	function computeMatchingGroupValues(uoas: string[] | null, keys: string[] | null): string[] | null {
+		if (filterStore.groupByCol === null) return null;
+		let rows: Row[] = flagged;
+		if (keys !== null) rows = rows.filter((r) => keys.includes(String(r.priority_flag ?? '')));
+		if (uoas !== null) rows = rows.filter((r) => uoas.includes(String(r.uoa)));
+		const allGroupVals = [
+			...new Set(
+				flagged
+					.filter((r) => r[filterStore.groupByCol!] != null && String(r[filterStore.groupByCol!]) !== '')
+					.map((r) => String(r[filterStore.groupByCol!]))
+			)
+		];
+		const matching = allGroupVals.filter((v) =>
+			rows.some((r) => r[filterStore.groupByCol!] != null && String(r[filterStore.groupByCol!]) === v)
+		);
+		return matching.length === 0 || matching.length === allGroupVals.length ? null : matching;
 	}
 
-	let selectedPrelimKeys = $state<string[] | null>(null);
-	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
-	const prelimOptions = PRELIM_FLAG_KEYS.map((key) => ({
-		value: key,
-		label: PRELIM_BADGE_MAP[key].label
-	}));
+	// ── Setters ───────────────────────────────────────────────────────────────
+
+	function applyGroupValues(vals: string[] | null) {
+		filterStore.selectedGroupValues = vals;
+		if (vals === null) {
+			// Group filter cleared — reset everything
+			filterStore.selectedUoas = null;
+			filterStore.selectedPrelimKeys = null;
+			return;
+		}
+		// Compute group-filtered rows inline (derived filteredByGroup hasn't updated yet)
+		const groupRows: Row[] =
+			filterStore.groupByCol === null
+				? flagged
+				: flagged.filter((r) => vals.includes(String(r[filterStore.groupByCol!] ?? '')));
+		// Cascade to prelim: show chips for prelim keys present in group rows
+		const allPrelimsInFlagged = [
+			...new Set(flagged.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== ''))
+		];
+		const prelimsInGroup = [
+			...new Set(groupRows.map((r) => String(r.priority_flag ?? '')).filter((f) => f !== ''))
+		];
+		filterStore.selectedPrelimKeys =
+			prelimsInGroup.length === 0 || prelimsInGroup.length === allPrelimsInFlagged.length
+				? null
+				: prelimsInGroup;
+		// Cascade to UoA: show chips for UoAs present in group rows
+		const allUoasInFlagged = [...new Set(flagged.map((r) => String(r.uoa)))];
+		const uoasInGroup = [...new Set(groupRows.map((r) => String(r.uoa)))];
+		filterStore.selectedUoas =
+			uoasInGroup.length === 0 || uoasInGroup.length === allUoasInFlagged.length
+				? null
+				: uoasInGroup;
+	}
+
+	function applyGroupCol(col: string | null) {
+		filterStore.groupByCol = col;
+		filterStore.selectedGroupValues = null;
+	}
+
+	function clearAllFilters() {
+		clearFilters();
+	}
+
+	// ── Event handlers ────────────────────────────────────────────────────────
+
+	function onUoasChange(next: string | string[]) {
+		const arr = Array.isArray(next) ? next : [next];
+		filterStore.selectedUoas = arr.length === uoaOptions.length ? null : arr;
+	}
 
 	function onPrelimKeysChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		selectedPrelimKeys = arr.length === PRELIM_KEYS.length ? null : arr;
+		filterStore.selectedPrelimKeys = arr.length === prelimOptions.length ? null : arr;
+	}
+
+	function onGroupValuesChange(next: string | string[]) {
+		const arr = Array.isArray(next) ? next : [next];
+		applyGroupValues(arr.length === groupByOptions.length ? null : arr);
 	}
 
 	function handleDonutSliceClick(key: string | null) {
-		if (key === null) {
-			selectedPrelimKeys = null;
-		} else {
-			selectedPrelimKeys =
-				selectedPrelimKeys?.includes(key) && selectedPrelimKeys.length === 1 ? null : [key];
-		}
+		filterStore.selectedPrelimKeys =
+			key === null ? null
+			: filterStore.selectedPrelimKeys?.includes(key) && filterStore.selectedPrelimKeys.length === 1 ? null
+			: [key];
 	}
 
+	// Stage 2: group + prelim, no UoA — map always colours all areas
+	const filteredForMap = $derived.by<Row[]>(() => {
+		if (filterStore.selectedPrelimKeys === null) return filteredByGroup;
+		return filteredByGroup.filter((r) =>
+			filterStore.selectedPrelimKeys!.includes(String(r.priority_flag ?? ''))
+		);
+	});
+
+	// Stage 3: full filter (group + prelim + UoA) — all non-map components
 	const filteredFlagged = $derived.by<Row[]>(() => {
-		let rows = flagged;
-		if (groupByCol !== null && selectedGroupValues.length < groupByOptions.length) {
-			rows = rows.filter((r) => selectedGroupValues.includes(String(r[groupByCol!] ?? '')));
-		}
-		if (overviewSelectedUoas !== null) {
-			rows = rows.filter((r) => overviewSelectedUoas!.includes(String(r.uoa)));
-		}
-		if (selectedPrelimKeys !== null) {
-			rows = rows.filter((r) => selectedPrelimKeys!.includes(String(r.prelim_flag ?? '')));
-		}
-		return rows;
+		if (filterStore.selectedUoas === null) return filteredForMap;
+		return filteredForMap.filter((r) => filterStore.selectedUoas!.includes(String(r.uoa)));
 	});
 
 	const isFiltered = $derived(
-		overviewSelectedUoas !== null || selectedPrelimKeys !== null || groupByCol !== null
+		filterStore.selectedUoas !== null || filterStore.selectedPrelimKeys !== null || filterStore.groupByCol !== null
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -269,7 +329,7 @@
 
 	const selectedMapRow = $derived(
 		selectedMapUoa !== null
-			? (filteredFlagged.find((r) => String(r.uoa) === selectedMapUoa) ?? null)
+			? (filteredForMap.find((r) => String(r.uoa) === selectedMapUoa) ?? null)
 			: null
 	);
 
@@ -319,7 +379,7 @@
 			if (factors.length > 0)
 				result.push({ systemId: sys.id, systemLabel: sys.label ?? sys.id, factors });
 		}
-		return result;
+		return sortSystemsByOrder(result.map((s) => ({ ...s, id: s.systemId }))).map(({ id: _, ...s }) => s);
 	}
 
 	// Step 2: one pass through rows → Map<metricId, DotData[]>. Runs on filter change.
@@ -394,25 +454,22 @@
 	const indFactorOptions = $derived(
 		allBlocks.flatMap((s) => s.factors.map((f) => ({ value: f.factorId, label: f.factorLabel })))
 	);
-	let indSelectedSystems = $state<string[] | null>(null);
-	let indSelectedFactors = $state<string[] | null>(null);
-
 	function onIndSystemsChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		indSelectedSystems = arr.length === indSystemOptions.length ? null : arr;
+		filterStore.indSelectedSystems = arr.length === indSystemOptions.length ? null : arr;
 	}
 	function onIndFactorsChange(next: string | string[]) {
 		const arr = Array.isArray(next) ? next : [next];
-		indSelectedFactors = arr.length === indFactorOptions.length ? null : arr;
+		filterStore.indSelectedFactors = arr.length === indFactorOptions.length ? null : arr;
 	}
 
 	const filteredBlocks = $derived(
 		allBlocks
-			.filter((s) => indSelectedSystems === null || indSelectedSystems.includes(s.systemId))
+			.filter((s) => filterStore.indSelectedSystems === null || filterStore.indSelectedSystems.includes(s.systemId))
 			.map((s) => ({
 				...s,
 				factors: s.factors.filter(
-					(f) => indSelectedFactors === null || indSelectedFactors.includes(f.factorId)
+					(f) => filterStore.indSelectedFactors === null || filterStore.indSelectedFactors.includes(f.factorId)
 				)
 			}))
 			.filter((s) => s.factors.length > 0)
@@ -453,14 +510,6 @@
 
 	// ── Section 5: Export ─────────────────────────────────────────────────────
 
-	const allUoas = $derived(filteredUoaList);
-	let exportUoaOverride = $state<string[] | null>(null);
-	// Intersect manual override with current filtered list so stale selections are dropped.
-	const exportSelectedUoas = $derived(
-		exportUoaOverride
-			? exportUoaOverride.filter((u) => filteredUoaList.includes(u))
-			: filteredUoaList
-	);
 	const timestamp = $derived(new Date().toISOString().split('T')[0]);
 
 	function handleJSON() {
@@ -476,17 +525,25 @@
 		downloadXLSX(flagStore.flaggedResult, `flagged_data_${timestamp}.xlsx`);
 	}
 	async function handleDeepDive() {
-		if (!flagStore.flaggedResult || exportSelectedUoas.length === 0) return;
+		if (filteredFlagged.length === 0) return;
 		const json = metricStore.referenceJson;
 		if (!json) return;
-		const rows = flagStore.flaggedResult.filter((r) =>
-			exportSelectedUoas.includes(String(r['uoa'] ?? ''))
-		);
-		if (rows.length === 0) return;
 		const hypothesesResp = await fetch(asset('/data/hypotheses.json'));
 		const hypothesesData = await hypothesesResp.json();
-		await downloadDeepDiveZip(rows, json, hypothesesData, `deepdives_${timestamp}.zip`);
+		await downloadDeepDiveZip(filteredFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`);
 	}
+
+	// ── Persist filters to localStorage ──────────────────────────────────────
+
+	$effect(() => {
+		filterStore.selectedUoas;
+		filterStore.selectedPrelimKeys;
+		filterStore.groupByCol;
+		filterStore.selectedGroupValues;
+		filterStore.indSelectedSystems;
+		filterStore.indSelectedFactors;
+		persistFilters();
+	});
 
 	// ── Observers: scroll spy ────────────────────────────────────────────────
 	let mounted = $state(false);
@@ -506,7 +563,7 @@
 			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
-		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'export']) {
+		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'spotlight', 'export']) {
 			const el = document.getElementById(id);
 			if (el) spyObs.observe(el);
 		}
@@ -550,25 +607,19 @@
 				flaggedTotal={flagged.length}
 				filteredTotal={filteredFlagged.length}
 				{isFiltered}
-				{overviewUoaOptions}
-				{overviewSelectedUoas}
-				{selectedPrelimKeys}
-				{PRELIM_KEYS}
+				{uoaOptions}
+				selectedUoas={filterStore.selectedUoas}
+				selectedPrelimKeys={filterStore.selectedPrelimKeys}
 				{prelimOptions}
 				{metadataCols}
-				{groupByCol}
+				groupByCol={filterStore.groupByCol}
 				{groupByOptions}
-				{selectedGroupValues}
-				onoverviewuoaschange={onOverviewUoasChange}
+				selectedGroupValues={filterStore.selectedGroupValues}
+				onuoaschange={onUoasChange}
 				onprelimkeyschange={onPrelimKeysChange}
-				ongroupbycol={(v) => (groupByCol = v)}
+				ongroupbycol={applyGroupCol}
 				ongroupvalueschange={onGroupValuesChange}
-				onclearfilters={() => {
-					overviewSelectedUoas = null;
-					selectedPrelimKeys = null;
-					groupByCol = null;
-					deselectedGroupValues = { col: '', values: new Set() };
-				}}
+				onclearfilters={clearAllFilters}
 			/>
 		</aside>
 
@@ -586,26 +637,20 @@
 						flaggedTotal={flagged.length}
 						filteredTotal={filteredFlagged.length}
 						{isFiltered}
-						{overviewUoaOptions}
-						{overviewSelectedUoas}
-						{selectedPrelimKeys}
-						{PRELIM_KEYS}
+						{uoaOptions}
+						selectedUoas={filterStore.selectedUoas}
+						selectedPrelimKeys={filterStore.selectedPrelimKeys}
 						{prelimOptions}
 						{metadataCols}
-						{groupByCol}
+						groupByCol={filterStore.groupByCol}
 						{groupByOptions}
-						{selectedGroupValues}
+						selectedGroupValues={filterStore.selectedGroupValues}
 						selectClass="w-60"
-						onoverviewuoaschange={onOverviewUoasChange}
+						onuoaschange={onUoasChange}
 						onprelimkeyschange={onPrelimKeysChange}
-						ongroupbycol={(v) => (groupByCol = v)}
+						ongroupbycol={applyGroupCol}
 						ongroupvalueschange={onGroupValuesChange}
-						onclearfilters={() => {
-							overviewSelectedUoas = null;
-							selectedPrelimKeys = null;
-							groupByCol = null;
-							deselectedGroupValues = { col: '', values: new Set() };
-						}}
+						onclearfilters={clearAllFilters}
 					/>
 				</div>
 
@@ -616,15 +661,18 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsOverview
-							{filteredFlagged}
+							filteredFlagged={filteredFlagged}
+							mapRows={filteredForMap}
 							{systems}
 							{systemCodes}
 							{hasPcodes}
 							{pcodeLevel}
-							{selectedPrelimKeys}
+							selectedPrelimKeys={filterStore.selectedPrelimKeys}
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
+							onmapuoaschange={(uoas) => (filterStore.selectedUoas = uoas.length > 0 ? uoas : null)}
+							onmapselectreset={clearAllFilters}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -651,7 +699,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							{filteredFlagged}
+							filteredFlagged={filteredFlagged}
 							{systems}
 							{systemCodes}
 							{subList}
@@ -672,8 +720,8 @@
 							{filteredBlocks}
 							{indSystemOptions}
 							{indFactorOptions}
-							{indSelectedSystems}
-							{indSelectedFactors}
+							indSelectedSystems={filterStore.indSelectedSystems}
+							indSelectedFactors={filterStore.indSelectedFactors}
 							{totalMetrics}
 							onindsystemschange={onIndSystemsChange}
 							onindfactorschange={onIndFactorsChange}
@@ -699,6 +747,19 @@
 					</div>
 				</div>
 
+				<!-- Spotlight -->
+				<div id="spotlight" class="border-base-300 scroll-mt-28 border-b py-16">
+					<div
+						class="mx-auto max-w-5xl px-6"
+						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+					>
+						<ResultsSpotlight
+							filteredRows={filteredFlagged}
+							{referenceJson}
+						/>
+					</div>
+				</div>
+
 				<!-- Export -->
 				<div id="export" class="bg-base-200/30 scroll-mt-28 py-16">
 					<div
@@ -706,14 +767,11 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsExport
-							{flagged}
-							{allUoas}
-							{exportSelectedUoas}
+							rows={filteredFlagged}
 							{handleJSON}
 							{handleCSV}
 							{handleXLSX}
 							{handleDeepDive}
-							onexportUoasChange={(v) => (exportUoaOverride = Array.isArray(v) ? v : [v])}
 						/>
 					</div>
 				</div>

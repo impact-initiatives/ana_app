@@ -16,8 +16,12 @@
 		rowClass?: string;
 		/** Alternate row background (zebra stripe). Default false = no stripe. */
 		stripe?: boolean;
-		/** Optional custom cell renderer. Receives col name, string value, and indices. */
-		renderCell?: Snippet<[{ col: string; value: string; colIndex: number; rowIndex: number }]>;
+		/** Optional custom cell renderer. Receives col name, string value, indices, and the full row as a string map. */
+		renderCell?: Snippet<[{ col: string; value: string; colIndex: number; rowIndex: number; rowObj: Record<string, string> }]>;
+		/** Per-cell style callback. Return a CSS style string (e.g. 'background-color: red') or undefined. */
+		getCellStyle?: (col: string, rowObj: Record<string, string>) => string | undefined;
+		/** Stick the first column to the left edge during horizontal scroll. */
+		stickyFirstColumn?: boolean;
 		/**
 		 * Per-column display options keyed by column name.
 		 * - wrap: true  → text wraps (white-space: normal), column is fixed by maxWidth
@@ -81,6 +85,10 @@
 		 * renderCell takes precedence when both are set.
 		 */
 		cellBadges?: Record<string, Record<string, { label?: string; style?: string; class?: string }>>;
+		/** Disable column sorting (removes arrows and click handlers). Default true. */
+		sortable?: boolean;
+		/** Pre-populate the global search input with this value on mount. */
+		initialSearch?: string;
 	}
 	let {
 		rows = [],
@@ -106,7 +114,11 @@
 		rowColor,
 		rowDividerClass = 'border-base-300',
 		headerThClass = 'bg-primary/20',
-		cellBadges
+		cellBadges,
+		getCellStyle,
+		stickyFirstColumn = false,
+		sortable = true,
+		initialSearch = ''
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
@@ -148,7 +160,7 @@
 	}
 
 	// ── Search ────────────────────────────────────────────────────────────────
-	let searchQuery = $state('');
+	let searchQuery = $state<string>(initialSearch);
 	let columnQueries = $state<Record<number, string>>({});
 
 	const filteredData = $derived.by(() => {
@@ -255,26 +267,31 @@
 	{#snippet theadMarkup()}
 		<tr class={headerRowClass}>
 			{#each columns as col, j (col)}
-				<th
+				<svelte:element
+					this={!stickyFirstColumn || j === 0 ? 'th' : 'td'}
 					class="{colClass(col)} select-none{rowDividerClass
 						? ' ' + rowDividerClass
 						: ''}{headerThClass ? ' ' + headerThClass : ''}"
 				>
-					<button
-						class={headerBtnClass(col)}
-						onclick={() => toggleSort(j)}
-						aria-label="Sort by {col}"
-					>
-						{humanizeHeaders ? humanizeCol(col) : col}
-						<SortIcon active={sortCol === j} asc={sortAsc} />
-					</button>
-				</th>
+					{#if sortable}
+						<button
+							class={headerBtnClass(col)}
+							onclick={() => toggleSort(j)}
+							aria-label="Sort by {col}"
+						>
+							{humanizeHeaders ? humanizeCol(col) : col}
+							<SortIcon active={sortCol === j} asc={sortAsc} />
+						</button>
+					{:else}
+						<span class={headerBtnClass(col)}>{humanizeHeaders ? humanizeCol(col) : col}</span>
+					{/if}
+				</svelte:element>
 			{/each}
 		</tr>
 		{#if columnSearchable}
 			<tr class={headerRowClass}>
 				{#each columns as col, j (col)}
-					<th class="py-1">
+					<svelte:element this={!stickyFirstColumn || j === 0 ? 'th' : 'td'} class="py-1">
 						<input
 							type="search"
 							class="input input-xs w-full"
@@ -288,7 +305,7 @@
 								page = 0;
 							}}
 						/>
-					</th>
+					</svelte:element>
 				{/each}
 			</tr>
 		{/if}
@@ -308,16 +325,16 @@
 					{@const colName = columns[j] ?? ''}
 					{@const bg = colOptions?.[colName]?.bg ?? rc?.bg}
 					{@const txt = colOptions?.[colName]?.text ?? rc?.text}
-					<td
-						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg
-							? ' group-hover:brightness-90'
-							: ''}"
-						style={[bg && `background-color:${bg}`, txt && `color:${txt}`]
+					{@const cellStyle = getCellStyle?.(colName, rowObj)}
+					<svelte:element
+						this={stickyFirstColumn && j === 0 ? 'th' : 'td'}
+						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{(bg || cellStyle) ? ' group-hover:brightness-90' : ''}{stickyFirstColumn && j === 0 ? ' group-hover:bg-base-200' : ''}"
+						style={[bg && `background-color:${bg}`, txt && `color:${txt}`, cellStyle]
 							.filter(Boolean)
 							.join(';') || undefined}
 					>
 						{#if renderCell}
-							{@render renderCell({ col: colName, value: String(cell), colIndex: j, rowIndex: i })}
+							{@render renderCell({ col: colName, value: String(cell), colIndex: j, rowIndex: i, rowObj })}
 						{:else if cellBadges?.[colName]}
 							{@const badgeMap = cellBadges[colName]}
 							{@const cfg = badgeMap[String(cell)] ?? badgeMap['*']}
@@ -332,7 +349,7 @@
 						{:else}
 							{cell}
 						{/if}
-					</td>
+					</svelte:element>
 				{/each}
 			</tr>
 		{:else}
@@ -351,7 +368,7 @@
 		class:overflow-y-auto={overflow === 'scroll'}
 		style={overflow === 'scroll' ? `max-height: ${scrollHeight}` : undefined}
 	>
-		<table class="table {tableClass}" class:table-pin-rows={overflow === 'scroll'}>
+		<table class="table {tableClass}" class:table-pin-rows={overflow === 'scroll'} class:table-pin-cols={stickyFirstColumn}>
 			<thead>{@render theadMarkup()}</thead>
 			<tbody>{@render tbodyMarkup()}</tbody>
 		</table>

@@ -487,7 +487,7 @@ function addLandingPage(ws: Worksheet, uoaRow: Record<string, any>, sheetMeta: S
 			valueCell.dataValidation = {
 				type: 'list',
 				allowBlank: true,
-				formulae: ['"EM,ROEM,ACUTE,ACUTE_NEEDS,INSUFFICIENT_EVIDENCE,NO_DATA"'],
+				formulae: ['"em,ho_primary,ho_secondary,an_primary,an_secondary,insufficient_evidence,no_data,no_acute_needs"'],
 				showErrorMessage: false
 			};
 		} else {
@@ -499,7 +499,7 @@ function addLandingPage(ws: Worksheet, uoaRow: Record<string, any>, sheetMeta: S
 		r.height = 20;
 	};
 
-	addOutcomeRow('Prelim flag', String(uoaRow['prelim_flag'] ?? ''), false);
+	addOutcomeRow('Priority flag', String(uoaRow['priority_flag'] ?? ''), false);
 	addOutcomeRow('Final flag', '', true);
 }
 

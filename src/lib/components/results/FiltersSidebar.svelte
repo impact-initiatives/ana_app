@@ -8,18 +8,17 @@
 		flaggedTotal: number;
 		filteredTotal: number;
 		isFiltered: boolean;
-		overviewUoaOptions: Option[];
-		overviewSelectedUoas: string[] | null;
+		uoaOptions: Option[];
+		selectedUoas: string[] | null;
 		selectedPrelimKeys: string[] | null;
-		PRELIM_KEYS: readonly string[];
 		prelimOptions: Option[];
 		metadataCols: string[];
 		groupByCol: string | null;
 		groupByOptions: Option[];
-		selectedGroupValues: string[];
+		selectedGroupValues: string[] | null;
 		dropdownClass?: string;
 		selectClass?: string;
-		onoverviewuoaschange: (v: string | string[]) => void;
+		onuoaschange: (v: string | string[]) => void;
 		onprelimkeyschange: (v: string | string[]) => void;
 		ongroupbycol: (v: string | null) => void;
 		ongroupvalueschange: (v: string | string[]) => void;
@@ -30,10 +29,9 @@
 		flaggedTotal,
 		filteredTotal,
 		isFiltered,
-		overviewUoaOptions,
-		overviewSelectedUoas,
+		uoaOptions,
+		selectedUoas,
 		selectedPrelimKeys,
-		PRELIM_KEYS,
 		prelimOptions,
 		metadataCols,
 		groupByCol,
@@ -41,7 +39,7 @@
 		selectedGroupValues,
 		dropdownClass = 'w-full',
 		selectClass = '',
-		onoverviewuoaschange,
+		onuoaschange,
 		onprelimkeyschange,
 		ongroupbycol,
 		ongroupvalueschange,
@@ -52,10 +50,10 @@
 <div class="card-body gap-4">
 	<div class="mb-2">
 		<h2 class="card-title text-sm font-semibold uppercase">
-			Focus on specific UoAs or preliminary flags
+			Focus on specific UoAs or priority flags
 		</h2>
 		<p class="text-base-content/75 mt-1 text-sm">
-			Use these filters to subset UoAs or preliminary flags (or additional filter columns).
+			Use these filters to subset UoAs or priority flags (or additional filter columns).
 		</p>
 		<p class="text-base-content/75 text-sm">
 			Filters apply to charts and other dropdowns across all sections.
@@ -66,19 +64,23 @@
 		{dropdownClass}
 		class={selectClass}
 		label="Units of analysis"
-		options={overviewUoaOptions}
-		selected={overviewSelectedUoas ?? overviewUoaOptions.map((o) => o.value)}
+		options={uoaOptions}
+		selected={selectedUoas}
+		multiple={true}
 		placeholder="All UOAs"
-		onchange={onoverviewuoaschange}
+		unitLabel="UoAs"
+		onchange={onuoaschange}
 	/>
 
 	<Select
 		{dropdownClass}
 		class={selectClass}
-		label="Preliminary flag"
+		label="Priority flag"
 		options={prelimOptions}
-		selected={selectedPrelimKeys ?? [...PRELIM_KEYS]}
+		selected={selectedPrelimKeys}
+		multiple={true}
 		placeholder="All flags"
+		unitLabel="flags"
 		onchange={onprelimkeyschange}
 	/>
 
@@ -100,6 +102,7 @@
 				label="Filter values"
 				options={groupByOptions}
 				selected={selectedGroupValues}
+				multiple={true}
 				placeholder="Select values…"
 				onchange={ongroupvalueschange}
 			/>

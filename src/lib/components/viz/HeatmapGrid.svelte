@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { tileCssClass, tileStyle, getPrelimBadge } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { tileCssClass, tileStyle, getPriorityBadge } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS, PRIORITY_ORDER } from '$lib/types/flags';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import SortIcon from '$lib/components/ui/SortIcon.svelte';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
-	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
+	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 
@@ -90,7 +90,7 @@
 	}
 
 	// ── Sort ─────────────────────────────────────────────────────────────────
-	let sortKey = $state<string | null>(null);
+	let sortKey = $state<string | null>('prelim');
 	let sortAsc = $state(true);
 
 	function toggleSort(key: string) {
@@ -102,7 +102,7 @@
 		}
 	}
 
-	const PRELIM_ORDER = Object.fromEntries(PRELIM_FLAG_KEYS.map((k, i) => [k, i]));
+	const PRELIM_ORDER = PRIORITY_ORDER;
 
 	const sortedRows = $derived.by(() => {
 		if (sortKey === null) return rows;
@@ -111,8 +111,8 @@
 			if (sortKey === 'uoa') {
 				cmp = String(a.uoa).localeCompare(String(b.uoa));
 			} else if (sortKey === 'prelim') {
-				const ao = PRELIM_ORDER[a.prelim_flag] ?? 99;
-				const bo = PRELIM_ORDER[b.prelim_flag] ?? 99;
+				const ao = (PRELIM_ORDER as Record<string, number>)[String(a.priority_flag)] ?? 99;
+				const bo = (PRELIM_ORDER as Record<string, number>)[String(b.priority_flag)] ?? 99;
 				cmp = ao - bo;
 			} else {
 				const codes = systemCodes.get(sortKey!) ?? [];
@@ -148,21 +148,31 @@
 		<table class="table-xs table">
 			<colgroup>
 				<col class="w-36" />
+				<col class="w-26" />
 				{#each systems as _sys (_sys.id)}
-					<col class="w-24" />
+					<col class="w-22" />
 				{/each}
-				<col class="w-28" />
 			</colgroup>
 			<thead>
 				<tr class="bg-base-200 text-base-content sticky top-0 z-10 text-xs">
 					<th class="select-none">
 						<button
-							class="hover:text-base-content/70 flex items-center gap-1 font-semibold"
+							class="hover:text-base-content/75 flex items-center gap-1 font-semibold"
 							onclick={() => toggleSort('uoa')}
 							aria-label="Sort by UoA"
 						>
 							UoA
 							<SortIcon active={sortKey === 'uoa'} asc={sortAsc} />
+						</button>
+					</th>
+					<th class="text-center leading-tight whitespace-normal select-none">
+						<button
+							class="hover:text-base-content/70 flex w-full items-center justify-center gap-1 font-semibold"
+							onclick={() => toggleSort('prelim')}
+							aria-label="Sort by priority flag"
+						>
+							Priority Flag
+							<SortIcon active={sortKey === 'prelim'} asc={sortAsc} />
 						</button>
 					</th>
 					{#each systems as sys (sys.id)}
@@ -177,22 +187,19 @@
 							</button>
 						</th>
 					{/each}
-					<th class="text-center leading-tight whitespace-normal select-none">
-						<button
-							class="hover:text-base-content/70 flex items-center gap-1 font-semibold"
-							onclick={() => toggleSort('prelim')}
-							aria-label="Sort by preliminary flag"
-						>
-							Preliminary Flag
-							<SortIcon active={sortKey === 'prelim'} asc={sortAsc} />
-						</button>
-					</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each sortedRows as row (row.uoa)}
 					<tr class="text-xs">
 						<td class="py-0.5 whitespace-nowrap">{uoaLabel(row.uoa)}</td>
+						<td class="p-0.5 text-center whitespace-nowrap">
+							{#if getPriorityBadge(row.priority_flag)}
+								<PriorityBadge value={row.priority_flag} />
+							{:else}
+								<span class="text-base-content/40 text-xs">–</span>
+							{/if}
+						</td>
 						{#each systems as sys (sys.id)}
 							{@const s = cellStatsMap.get(`${String(row.uoa)}:${sys.id}`) ?? EMPTY_STATS}
 							{@const active = activeUoa === String(row.uoa) && activeSystem === sys.id}
@@ -226,13 +233,6 @@
 								</button>
 							</td>
 						{/each}
-						<td class="p-0.5 text-center whitespace-nowrap">
-							{#if getPrelimBadge(row.prelim_flag)}
-								<PrelimBadge value={row.prelim_flag} />
-							{:else}
-								<span class="text-base-content/40 text-xs">–</span>
-							{/if}
-						</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -240,7 +240,5 @@
 	</div>
 
 	<!-- Legend -->
-	<LegendBadge
-		prelimKeys={PRELIM_FLAG_KEYS}
-	></LegendBadge>
+	<LegendBadge priorityKeys={PRIORITY_FLAG_KEYS}></LegendBadge>
 </Card>

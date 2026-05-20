@@ -1,6 +1,6 @@
 import type { Metric } from '$lib/types/structure';
-import type { FlagStatus, PrelimFlag } from '$lib/types/flags';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import type { FlagStatus, PriorityFlag } from '$lib/types/flags';
+import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
 
@@ -39,9 +39,9 @@ export function tileStyle(flagN: number, avail: number): string {
  * DATA MAP: System ID to CSS variable name.
  * Convention: SCREAMING_SNAKE_CASE for constant data maps.
  */
-const SYSTEM_CSS_VAR_MAP: Record<SystemIDEnum | 'default', string> = {
-	[SystemIDEnum.FoodSystems]: '--color-sys-food-systems',
-	[SystemIDEnum.WaterSystems]: '--color-sys-water-systems',
+export const SYSTEM_CSS_VAR_MAP: Record<SystemIDEnum | 'default', string> = {
+	[SystemIDEnum.FoodSystem]: '--color-sys-food-systems',
+	[SystemIDEnum.WaterSystem]: '--color-sys-water-systems',
 	[SystemIDEnum.HealthOutcomes]: '--color-sys-health-outcomes',
 	[SystemIDEnum.Mortality]: '--color-sys-mortality',
 	[SystemIDEnum.LivingConditions]: '--color-sys-living-conditions',
@@ -136,6 +136,8 @@ export function formatMetricTooltip(met: Metric | undefined): string {
 // ── Badge Definitions ────────────────────────────────────────────────────────
 
 export interface FlagBadge {
+	/** Explicit text colour for the non-tinted badge. Defaults to base-content when omitted. */
+	textColor?: string;
 	bg: string;
 	tintBg?: string;
 	label: string;
@@ -201,17 +203,20 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
 };
 
 /**
- * DATA MAP: Preliminary flag to Badge configuration.
- * Convention: SCREAMING_SNAKE_CASE (Renamed from prelimBadge).
+ * DATA MAP: Priority flag to Badge configuration.
+ * Convention: SCREAMING_SNAKE_CASE.
  */
-export const PRELIM_BADGE_MAP: Record<PrelimFlag, FlagBadge> = {
-	em: { bg: 'var(--color-em)', label: 'EM' },
-	roem: { bg: 'var(--color-roem)', label: 'RoEM' },
-	acute: { bg: 'var(--color-acute)', label: 'Acute Needs' },
-	acute_needs: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
-	insufficient_evidence: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
-	no_data: { bg: 'var(--color-no-data)', tintBg: 'var(--color-no-data-tint)', label: 'No Data' }
+export const PRIORITY_BADGE_MAP: Record<PriorityFlag, FlagBadge> = {
+	em:          { bg: 'var(--color-priority-em)',          tintBg: 'var(--color-priority-em-tint)',          label: 'Excess Mortality',        textColor: 'var(--color-base-100)' },
+	ho_primary:  { bg: 'var(--color-priority-ho-primary)',  tintBg: 'var(--color-priority-ho-primary-tint)',  label: 'HO – Primary',             textColor: 'var(--color-base-100)' },
+	ho_secondary:{ bg: 'var(--color-priority-ho-secondary)',tintBg: 'var(--color-priority-ho-secondary-tint)',label: 'HO – Secondary',      textColor: 'var(--color-base-100)' },
+	an_primary:  { bg: 'var(--color-flag)',                 tintBg: 'var(--color-flag-tint)',                 label: 'AN – Primary',             textColor: 'var(--color-base-100)' },
+	an_secondary:{ bg: 'var(--color-priority-an-secondary)',tintBg: 'var(--color-priority-an-secondary-tint)',label: 'AN – Secondary' },
+	insufficient_evidence: { bg: 'var(--color-insufficient)', tintBg: 'var(--color-insufficient-tint)', label: 'Insufficient Evidence' },
+	no_data:     { bg: 'var(--color-no-data)',              tintBg: 'var(--color-no-data-tint)',              label: 'No Data' },
+	no_acute_needs:{ bg: 'var(--color-no-acute)',           tintBg: 'var(--color-no-acute-tint)',             label: 'No Acute Needs' }
 };
+
 
 /**
  * ACCESSOR: Get Flag Badge config.
@@ -221,8 +226,9 @@ export const getFlagBadge = (key: string): FlagStatusBadge | undefined =>
 	FLAG_BADGE_MAP[key as FlagStatus];
 
 /**
- * ACCESSOR: Get Prelim Badge config.
+ * ACCESSOR: Get Priority Badge config.
  * Convention: camelCase with 'get' prefix.
  */
-export const getPrelimBadge = (key: string): FlagBadge | undefined =>
-	PRELIM_BADGE_MAP[key as PrelimFlag];
+export const getPriorityBadge = (key: string): FlagBadge | undefined =>
+	PRIORITY_BADGE_MAP[key as PriorityFlag];
+

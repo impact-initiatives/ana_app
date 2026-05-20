@@ -36,7 +36,7 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { safeValidateReferenceRoot } from '$lib/types/reference-json';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
@@ -135,6 +135,11 @@ Checks performed:
         Below metrics: van < an
       Equal or inverted values mean VAN is easier to reach than AN, inverting
       the intended severity scale.
+
+  Pass 8 — VAN threshold presence
+    · every non-supporting-evidence, non-reference-only metric must have
+      thresholds.van set (AN signal / Outcome / Predictor metrics are used
+      in the ho_secondary and an_primary branches of the priority flag tree)
 `);
 }
 
@@ -951,6 +956,78 @@ function checkDuplicateIDs(data: unknown): DuplicateIDError[] {
 	return errors;
 }
 
+// ── VAN presence check ────────────────────────────────────────────────────────
+
+interface VanPresenceError {
+	location: string;
+	metric: string;
+	evidence_type: string;
+	above_or_below: string;
+	an: number | null;
+}
+
+/**
+ * Checks that every non-supporting-evidence metric has thresholds.van set.
+ *
+ * Supporting evidence metrics are excluded from the subfactor/factor/system
+ * rollup and the priority flag decision tree, so they don't need a VAN
+ * threshold. All other evidence types (AN signal, Outcome, Predictor) drive
+ * the ho_secondary and an_primary branches and therefore require van.
+ *
+ * Preference-3 (reference-only) metrics are skipped entirely.
+ */
+function checkVanPresence(data: unknown): VanPresenceError[] {
+	const SUPPORTING = 'Supporting evidence';
+
+	const root = data as {
+		systems?: Array<{
+			factors?: Array<{
+				sub_factors?: Array<{
+					indicators?: Array<{
+						metrics?: Array<{
+							metric?: string;
+							preference?: number;
+							evidence_type?: string | null;
+							above_or_below?: string;
+							thresholds?: { an?: number | null; van?: number | null };
+						}>;
+					}>;
+				}>;
+			}>;
+		}>;
+	};
+
+	const errors: VanPresenceError[] = [];
+
+	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
+		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
+			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
+				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
+					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
+					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
+						const m = ind.metrics![mi];
+						if (m.preference === 3) continue;
+						const et = m.evidence_type ?? null;
+						if (et === null || et === SUPPORTING) continue;
+						if (m.thresholds?.van == null) {
+							const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
+							errors.push({
+								location: loc,
+								metric: m.metric ?? '?',
+								evidence_type: et,
+								above_or_below: m.above_or_below ?? '?',
+								an: m.thresholds?.an ?? null
+							});
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return errors;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -1007,6 +1084,7 @@ async function main(): Promise<void> {
 	let pass5Ok = false;
 	let pass6Ok = false;
 	let pass7Ok = false;
+	let pass8Ok = false;
 
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
@@ -1218,9 +1296,39 @@ async function main(): Promise<void> {
 		);
 	}
 
+	// ── Pass 8: VAN threshold presence ───────────────────────────────────────
+	console.log('\nPass 8 — VAN threshold presence...');
+	const vanPresenceErrors = checkVanPresence(data);
+
+	if (vanPresenceErrors.length === 0) {
+		console.log('  ✅ Passed');
+		pass8Ok = true;
+	} else {
+		console.error(
+			`  ❌ Failed — ${vanPresenceErrors.length} non-supporting-evidence metric(s) are missing thresholds.van.\n` +
+			'  These metrics feed the ho_secondary and an_primary priority flag branches.\n' +
+			'  Add very-acute-needs thresholds to reference.csv and regenerate reference.json.\n'
+		);
+		printTable(
+			['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Evidence type', 'AN'],
+			vanPresenceErrors.map((e) => {
+				const crumb = resolveLocation(labelMap, e.location);
+				return [
+					trunc(crumb.system),
+					trunc(crumb.factor),
+					trunc(crumb.subfactor),
+					trunc(crumb.indicator),
+					e.metric,
+					e.evidence_type,
+					e.an != null ? String(e.an) : '—'
+				];
+			})
+		);
+	}
+
 	// ── Result ─────────────────────────────────────────────────────────────────
 	console.log('');
-	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok && pass6Ok && pass7Ok) {
+	if (pass1Ok && pass2Ok && pass3Ok && pass4Ok && pass5Ok && pass6Ok && pass7Ok && pass8Ok) {
 		console.log('Validation passed ✅');
 		process.exitCode = 0;
 	} else {

@@ -1,32 +1,23 @@
 <script lang="ts">
-	import Select from '$lib/components/ui/Select.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
-	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
-	import { resolve } from '$app/paths';
 
 	type Row = Record<string, any>;
 
 	interface Props {
-		flagged: Row[];
-		allUoas: string[];
-		exportSelectedUoas: string[];
+		rows: Row[];
 		handleJSON: () => void;
 		handleCSV: () => void;
 		handleXLSX: () => void;
 		handleDeepDive: () => Promise<void>;
-		onexportUoasChange: (v: string | string[]) => void;
 	}
 
 	let {
-		flagged,
-		allUoas,
-		exportSelectedUoas,
+		rows,
 		handleJSON,
 		handleCSV,
 		handleXLSX,
-		handleDeepDive,
-		onexportUoasChange
+		handleDeepDive
 	}: Props = $props();
 </script>
 
@@ -54,8 +45,7 @@
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
 			</svg>
 			<p class="text-sm">
-				<strong>{flagged.length}</strong> unit{flagged.length !== 1 ? 's' : ''} of analysis processed
-				and ready to export.
+				<strong>{rows.length}</strong> unit{rows.length !== 1 ? 's' : ''} of analysis ready to export.
 			</p>
 		</div>
 
@@ -159,25 +149,22 @@
 			>
 				<div>
 					<p class="text-base-content/85 text-sm">
-						One workbook per selected UoA, pre-filled with metric values and preliminary flags.
+						One workbook per selected UoA, pre-filled with metric values and priority flags.
 						Delivered as a single ZIP archive.
 					</p>
 				</div>
-				<div class="flex flex-wrap items-end gap-4">
-					<div class="max-w-72 min-w-60 flex-1">
-						<Select
-							label="Units of analysis"
-							options={allUoas.map((v) => ({ value: v, label: uoaLabel(v) }))}
-							selected={exportSelectedUoas}
-							onchange={onexportUoasChange}
-						/>
-					</div>
+				<div class="flex flex-wrap items-center gap-4">
 					<DownloadButton
 						onclick={handleDeepDive}
-						label="Download ZIP (of selected UoAs)"
+						label="Download ZIP"
 						variant="secondary"
-						disabled={exportSelectedUoas.length === 0}
+						size="md"
+						disabled={rows.length === 0}
 					></DownloadButton>
+					<p class="text-base-content/75 text-sm">
+						Workbooks will be generated for the <strong>{rows.length}</strong>
+						UoA{rows.length !== 1 ? 's' : ''} matching your current filters.
+					</p>
 				</div>
 			</Card>
 		</div>
