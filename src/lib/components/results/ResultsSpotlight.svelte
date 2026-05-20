@@ -205,8 +205,8 @@
 					>2</span
 				>
 				<p class="text-base-content/80">
-					<strong class="text-base-content font-semibold">Flag badge</strong> — shows whether the Acute
-					Needs (AN) threshold was crossed for that metric × UoA combination.
+					<strong class="text-base-content font-semibold">Status badges</strong> — a coloured flag badge
+					shows whether the Acute Needs (AN) threshold was crossed; a purple <strong class="text-base-content font-semibold">VAN</strong> badge appears alongside it when the Very Acute Needs threshold was also crossed.
 				</p>
 			</div>
 			<div class="flex items-start gap-3 text-sm">
@@ -215,8 +215,9 @@
 					>3</span
 				>
 				<p class="text-base-content/80">
-					<strong class="text-base-content font-semibold">VAN badge</strong> — a purple badge alongside
-					the flag means the Very Acute Needs (VAN) threshold was also crossed.
+					<strong class="text-base-content font-semibold">Metric ID badge</strong> — click it to open
+					the Reference table filtered to that metric, where you can find thresholds, evidence type, and
+					methodology notes.
 				</p>
 			</div>
 		</div>
