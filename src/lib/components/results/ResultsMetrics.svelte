@@ -73,17 +73,23 @@
 		<Card>
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<Select
+					class="max-w-80"
 					label="Systems"
 					options={indSystemOptions}
-					selected={indSelectedSystems ?? indSystemOptions.map((o) => o.value)}
-					placeholder="Select systems…"
+					selected={indSelectedSystems}
+					multiple={true}
+					unitLabel="systems"
+					placeholder="All systems"
 					onchange={onindsystemschange}
 				/>
 				<Select
+					class="max-w-80"
 					label="Factors"
 					options={indFactorOptions}
-					selected={indSelectedFactors ?? indFactorOptions.map((o) => o.value)}
-					placeholder="Select factors…"
+					selected={indSelectedFactors}
+					multiple={true}
+					unitLabel="factors"
+					placeholder="All factors"
 					onchange={onindfactorschange}
 				/>
 			</div>
@@ -110,7 +116,7 @@
 		</LegendBadge>
 
 		{#if filteredBlocks.length === 0}
-			<div class="alert alert-warning alert-soft">
+			<div class="alert alert-info alert-outline">
 				<span
 					>No metrics match the current filters. Try selecting more systems, factors, or UOAs.</span
 				>
@@ -161,7 +167,7 @@
 																	height={120}
 																/>
 															{:else}
-																<div class="bg-base-200 h-[120px] animate-pulse rounded"></div>
+																<div class="bg-base-200 h-30 animate-pulse rounded"></div>
 															{/if}
 														</Card>
 													</div>
