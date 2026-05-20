@@ -91,7 +91,10 @@
 		);
 	}
 
-	let selectedMetricIds = $state<string[]>(hoMetricIds());
+	// TODO(#ticket): Review hardcoded MET IDs once final metric IDs are confirmed.
+	const EXTRA_PRESELECTED = ['MET036', 'MET037', 'MET102'];
+
+	let selectedMetricIds = $state<string[]>([...new Set([...hoMetricIds(), ...EXTRA_PRESELECTED])]);
 
 	const ET_ORDER = Object.values(EvidenceTypeEnum);
 
@@ -140,7 +143,7 @@
 	);
 
 	const metricCount = $derived(selectedMetricIds.length);
-	const warnMetrics = $derived(metricCount > 20);
+	const warnMetrics = $derived(metricCount > 25);
 
 	// ── Cross-tab lookups ─────────────────────────────────────────────────────
 	const metaById = $derived(new Map(selectedMetaList.map((m) => [m.id, m])));
@@ -205,8 +208,10 @@
 					>2</span
 				>
 				<p class="text-base-content/80">
-					<strong class="text-base-content font-semibold">Status badges</strong> — a coloured flag badge
-					shows whether the Acute Needs (AN) threshold was crossed; a purple <strong class="text-base-content font-semibold">VAN</strong> badge appears alongside it when the Very Acute Needs threshold was also crossed.
+					<strong class="text-base-content font-semibold">Status badges</strong> — a coloured flag
+					badge shows whether the Acute Needs (AN) threshold was crossed; a purple
+					<strong class="text-base-content font-semibold">VAN</strong> badge appears alongside it when
+					the Very Acute Needs threshold was also crossed.
 				</p>
 			</div>
 			<div class="flex items-start gap-3 text-sm">
@@ -227,7 +232,7 @@
 			<Card>
 				{#if warnMetrics}
 					<p class="text-info text-xs">
-						More than 20 metrics selected — are you sure you want to display all of those columns?
+						More than 25 metrics selected — are you sure you want to display all of those columns?
 					</p>
 					<p class="text-info text-xs">
 						Consider narrowing down your selection for better readability and performance.
@@ -315,9 +320,9 @@
 								<span class="text-xs font-medium">{m.label}</span>
 								<div class="mt-1 flex flex-wrap items-center gap-1">
 									<a
-									href="{resolve('/reference')}?q={m.id}"
-									class="badge badge-outline badge-xs font-medium hover:badge-primary"
-								>{m.id}</a>
+										href="{resolve('/reference')}?q={m.id}"
+										class="badge badge-outline badge-xs hover:badge-primary font-medium">{m.id}</a
+									>
 									{#if m.evidence_type}
 										<span class="badge badge-outline badge-xs font-medium">{m.evidence_type}</span>
 									{/if}
