@@ -11,7 +11,7 @@
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
-import type { Metric, Indicator, IndicatorsRoot } from '$lib/types/structure';
+import type { Metric, Indicator, ReferenceRoot } from '$lib/types/structure';
 
 const DATA_DIR = path.join(process.cwd(), 'static', 'data');
 const CSV_DEFAULT = path.join(DATA_DIR, 'reference.csv');
@@ -140,7 +140,7 @@ type CircleNode = {
 };
 
 function build(rows: RefRow[]): {
-	root: IndicatorsRoot;
+	root: ReferenceRoot;
 	emptyTypeIds: string[];
 	circlePackingRoot: CircleNode;
 } {
@@ -241,7 +241,7 @@ function build(rows: RefRow[]): {
 		});
 	}
 
-	const root: IndicatorsRoot = {
+	const root: ReferenceRoot = {
 		systems: systemOrder.map((sysId) => ({
 			id: sysId,
 			label: systemLabels.get(sysId) ?? sysId,
