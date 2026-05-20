@@ -1,0 +1,6 @@
+FROM fedora:42
+RUN dnf install -y git curl unzip && dnf clean all \
+    && curl -fsSL https://bun.com/install | bash
+ENV BUN_INSTALL="/root/.bun"
+ENV PATH="/root/.bun/bin:$PATH"
+WORKDIR /workspace

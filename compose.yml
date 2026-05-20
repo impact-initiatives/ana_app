@@ -1,0 +1,11 @@
+services:
+  dev:
+    container_name: ana-dev
+    build:
+      context: .
+      dockerfile: .devcontainer/Containerfile
+    volumes:
+      - .:/workspace:Z        # :Z sets SELinux label — required on Fedora/RHEL
+    working_dir: /workspace
+    network_mode: host        # bypasses nftables (unsupported in WSL2 kernel); port 5173 is directly accessible
+    command: sh -c "bun install && bun run dev"

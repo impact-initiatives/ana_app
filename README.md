@@ -131,15 +131,35 @@ This regenerates all the JSON files the app reads from the CSV and validates the
 
 ## Getting started
 
-**Prerequisite:** [Bun](https://bun.sh) ≥ 1.x — install with `curl -fsSL https://bun.sh/install | bash`.
+Requires [Podman](https://podman.io/) and [podman-compose](https://github.com/containers/podman-compose).
+No other tools needed on the host. The container image runs Fedora 42.
 
 ```bash
-bun install          # install dependencies
-bun run dev          # start local dev server at http://localhost:5173
-bun run build        # production build (outputs to build/)
-bun run preview      # preview the production build locally
-bun run check        # Svelte type-checking
-bun run test         # run the test suite (Vitest)
+sudo dnf install podman podman-compose   # Fedora / WSL Fedora
+```
+
+> **Windows / WSL 2** — install WSL 2 first (`wsl --install -d FedoraLinux-42`), then run all commands inside WSL.
+
+### Start the dev server
+
+```bash
+podman-compose up
+```
+
+Open <http://localhost:5173>.
+
+### Devcontainer (VS Code / Podman Desktop / GitHub Codespaces)
+
+Open the repo in a devcontainer-aware editor. `bun install` runs automatically.  
+VS Code: set `"docker.dockerPath": "podman"` in your user settings.
+
+### Other commands (run inside the container)
+
+```bash
+podman exec ana-dev bun run build        # production build
+podman exec ana-dev bun run check        # type-check
+podman exec ana-dev bun run test         # unit tests
+podman exec ana-dev bun run data:refresh # regenerate + validate reference data
 ```
 
 Set `BASE_PATH=/repo-name` when building for GitHub Pages sub-path deploys.
