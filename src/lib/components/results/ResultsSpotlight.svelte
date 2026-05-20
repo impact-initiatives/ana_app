@@ -192,8 +192,10 @@
 					>1</span
 				>
 				<p class="text-base-content/80">
-					<strong class="text-base-content font-semibold">Rows = metrics, columns = UoAs.</strong>
-					Each cell shows the metric value for that area. Use the dropdowns to pick which metrics appear.
+					<strong class="text-base-content font-semibold"
+						>Rows are metrics, columns are UoAs
+					</strong> — Each cell shows the metric value for that UoA. Use the dropdowns on the right to
+					pick which metrics appear.
 				</p>
 			</div>
 			<div class="flex items-start gap-3 text-sm">
@@ -203,7 +205,7 @@
 				>
 				<p class="text-base-content/80">
 					<strong class="text-base-content font-semibold">Flag badge</strong> — shows whether the Acute
-					Needs (AN) threshold was crossed for that metric × area combination.
+					Needs (AN) threshold was crossed for that metric × UoA combination.
 				</p>
 			</div>
 			<div class="flex items-start gap-3 text-sm">
@@ -212,9 +214,8 @@
 					>3</span
 				>
 				<p class="text-base-content/80">
-					<strong class="text-base-content font-semibold">VAN badge</strong> — a purple badge
-					alongside the flag means the <em>Very Acute Needs</em> threshold was also crossed, indicating
-					a higher severity level than AN alone.
+					<strong class="text-base-content font-semibold">VAN badge</strong> — a purple badge alongside
+					the flag means the Very Acute Needs (VAN) threshold was also crossed.
 				</p>
 			</div>
 		</div>
