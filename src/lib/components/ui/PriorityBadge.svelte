@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPriorityBadge } from '$lib/utils/colors';
+	import { getPriorityBadge, priorityBadgeTextColor } from '$lib/utils/colors';
 	import { themeStore } from '$lib/stores/themeStore.svelte';
 
 	interface Props {
@@ -12,13 +12,7 @@
 	let { value, class: cls = '' }: Props = $props();
 
 	const badge = $derived(getPriorityBadge(value));
-	const textColor = $derived(
-		badge
-			? themeStore.isDark
-				? (badge.darkTextColor ?? badge.textColor ?? 'var(--color-base-content)')
-				: (badge.textColor ?? 'var(--color-base-content)')
-			: 'var(--color-base-content)'
-	);
+	const textColor = $derived(badge ? priorityBadgeTextColor(badge, themeStore.isDark) : 'var(--color-base-content)');
 </script>
 
 {#if badge}

@@ -1,10 +1,12 @@
 <script lang="ts">
 	import {
 		FLAG_BADGE_MAP,
+		flagBadgeStyle,
 		getFlagBadge,
 		getPriorityBadge,
 		systemBaseColor
 	} from '$lib/utils/colors';
+	import { themeStore } from '$lib/stores/themeStore.svelte';
 	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
@@ -159,7 +161,7 @@
 							</div>
 
 							<!-- Status badge -->
-							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
+							<span class="badge badge-sm shrink-0" style={flagBadgeStyle(fb, themeStore.isDark)}>{fb.label}</span>
 						</button>
 					{/each}
 				</div>

@@ -149,63 +149,19 @@ export interface FlagStatusBadge {
 	label: string;
 	colorVar: string;
 	tintVar: string;
+	/** Light-mode static style (bg + base-content text). Use flagBadgeStyle() for theme-aware rendering. */
 	badgeStyle: string;
 	badgeTintStyle: string;
+	/** Dark-mode text override. Falls back to base-content when omitted. */
+	darkTextColor?: string;
 	badgeCls: string;
 	checkboxCls: string;
 	buttonCls: string;
 }
 
 /**
- * DATA MAP: Status to Badge configuration.
- * Convention: SCREAMING_SNAKE_CASE.
- */
-export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
-	flag: {
-		label: 'Flag',
-		colorVar: '--color-flag',
-		tintVar: '--color-flag-tint',
-		badgeStyle: 'background-color: var(--color-flag); color: var(--color-base-100)',
-		badgeTintStyle: 'background-color: var(--color-flag-tint); color: var(--color-base-content)',
-		badgeCls: '',
-		checkboxCls: 'checkbox-warning',
-		buttonCls: 'btn-ghost'
-	},
-	no_flag: {
-		label: 'No Flag',
-		colorVar: '--color-no-flag',
-		tintVar: '--color-no-flag-tint',
-		badgeStyle: 'background-color: var(--color-no-flag); color: var(--color-base-100)',
-		badgeTintStyle: 'background-color: var(--color-no-flag-tint); color: var(--color-base-content)',
-		badgeCls: '',
-		checkboxCls: 'checkbox-info',
-		buttonCls: 'btn-ghost'
-	},
-	insufficient_evidence: {
-		label: 'Insufficient Evidence',
-		colorVar: '--color-insufficient',
-		tintVar: '--color-insufficient-tint',
-		badgeStyle: 'background-color: var(--color-insufficient); color: var(--color-base-100)',
-		badgeTintStyle:
-			'background-color: var(--color-insufficient-tint); color: var(--color-base-content)',
-		badgeCls: 'badge-warning',
-		checkboxCls: 'checkbox-warning',
-		buttonCls: 'btn-warning'
-	},
-	no_data: {
-		label: 'No Data',
-		colorVar: '--color-no-data',
-		tintVar: '--color-no-data-tint',
-		badgeStyle: 'background-color: var(--color-no-data); color: var(--color-base-100)',
-		badgeTintStyle: 'background-color: var(--color-no-data-tint); color: var(--color-base-content)',
-		badgeCls: 'badge-ghost',
-		checkboxCls: 'checkbox-neutral',
-		buttonCls: 'btn-neutral'
-	}
-};
-
-/**
  * DATA MAP: Priority flag to Badge configuration.
+ * Defined first so FLAG_BADGE_MAP can reference shared darkTextColor values.
  * Convention: SCREAMING_SNAKE_CASE.
  */
 export const PRIORITY_BADGE_MAP: Record<PriorityFlag, FlagBadge> = {
@@ -219,6 +175,57 @@ export const PRIORITY_BADGE_MAP: Record<PriorityFlag, FlagBadge> = {
 	no_acute_needs:        { bg: 'var(--color-no-acute)',              tintBg: 'var(--color-no-acute-tint)',              label: 'No Acute Needs',                                            darkTextColor: 'black' }
 };
 
+/**
+ * DATA MAP: Status to Badge configuration.
+ * darkTextColor for shared statuses references PRIORITY_BADGE_MAP to avoid duplication.
+ * Convention: SCREAMING_SNAKE_CASE.
+ */
+export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
+	flag: {
+		label: 'Flag',
+		colorVar: '--color-flag',
+		tintVar: '--color-flag-tint',
+		badgeStyle: 'background-color: var(--color-flag); color: var(--color-base-content)',
+		badgeTintStyle: 'background-color: var(--color-flag-tint); color: var(--color-base-content)',
+		darkTextColor: PRIORITY_BADGE_MAP.an_primary.darkTextColor,
+		badgeCls: '',
+		checkboxCls: 'checkbox-warning',
+		buttonCls: 'btn-ghost'
+	},
+	no_flag: {
+		label: 'No Flag',
+		colorVar: '--color-no-flag',
+		tintVar: '--color-no-flag-tint',
+		badgeStyle: 'background-color: var(--color-no-flag); color: var(--color-base-content)',
+		badgeTintStyle: 'background-color: var(--color-no-flag-tint); color: var(--color-base-content)',
+		badgeCls: '',
+		checkboxCls: 'checkbox-info',
+		buttonCls: 'btn-ghost'
+	},
+	insufficient_evidence: {
+		label: 'Insufficient Evidence',
+		colorVar: '--color-insufficient',
+		tintVar: '--color-insufficient-tint',
+		badgeStyle: 'background-color: var(--color-insufficient); color: var(--color-base-content)',
+		badgeTintStyle:
+			'background-color: var(--color-insufficient-tint); color: var(--color-base-content)',
+		darkTextColor: PRIORITY_BADGE_MAP.insufficient_evidence.darkTextColor,
+		badgeCls: 'badge-warning',
+		checkboxCls: 'checkbox-warning',
+		buttonCls: 'btn-warning'
+	},
+	no_data: {
+		label: 'No Data',
+		colorVar: '--color-no-data',
+		tintVar: '--color-no-data-tint',
+		badgeStyle: 'background-color: var(--color-no-data); color: var(--color-base-content)',
+		badgeTintStyle: 'background-color: var(--color-no-data-tint); color: var(--color-base-content)',
+		darkTextColor: PRIORITY_BADGE_MAP.no_data.darkTextColor,
+		badgeCls: 'badge-ghost',
+		checkboxCls: 'checkbox-neutral',
+		buttonCls: 'btn-neutral'
+	}
+};
 
 /**
  * ACCESSOR: Get Flag Badge config.
@@ -233,4 +240,25 @@ export const getFlagBadge = (key: string): FlagStatusBadge | undefined =>
  */
 export const getPriorityBadge = (key: string): FlagBadge | undefined =>
 	PRIORITY_BADGE_MAP[key as PriorityFlag];
+
+/**
+ * Returns theme-aware inline style for a FlagStatusBadge.
+ * Single source of truth for dark-mode text color logic across components.
+ */
+export function flagBadgeStyle(badge: FlagStatusBadge, isDark: boolean): string {
+	const text = isDark
+		? (badge.darkTextColor ?? 'var(--color-base-content)')
+		: 'var(--color-base-content)';
+	return `background-color: var(${badge.colorVar}); color: ${text}`;
+}
+
+/**
+ * Returns theme-aware text color for a FlagBadge (priority flags).
+ * Single source of truth — used by PriorityBadge.svelte.
+ */
+export function priorityBadgeTextColor(badge: FlagBadge, isDark: boolean): string {
+	return isDark
+		? (badge.darkTextColor ?? badge.textColor ?? 'var(--color-base-content)')
+		: (badge.textColor ?? 'var(--color-base-content)');
+}
 
