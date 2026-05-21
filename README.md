@@ -454,6 +454,7 @@ Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tabl
 **Touch `deepdive.ts` when:** export layout, cell styling, column order, or pre-population logic changes.
 **Touch `deepdives.ts` when:** adding or removing columns from the exported table.
 
+
 ### Maintenance quick-reference
 
 | Task                                        | Files to touch                                                                                                            |
@@ -466,4 +467,5 @@ Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tabl
 | Rename / remove a system, factor, subfactor | Update lookup CSV + `reference.csv` → `data:refresh` → `generate:enums` → search codebase for old ID                      |
 | Change rollup or decision-tree logic        | `src/lib/engine/flagger.ts`                                                                                               |
 | Change deep-dive XLSX layout or columns     | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts`                                                               |
+| Add / edit hypotheses or non-system blocks  | `static/data/hypotheses.json` (schema in `src/lib/types/hypotheses.ts`) → `bun run validate:hypotheses-json`               |
 | Add a new required CSV field                | `reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |

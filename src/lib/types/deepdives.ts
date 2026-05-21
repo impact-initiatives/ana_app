@@ -1,51 +1,31 @@
 /**
- * Types for deep dive Excel export configuration.
+ * Layout constants and helpers for deep dive Excel export.
  *
- * - HypothesisEntry  — a single hypothesis label + description
- * - SystemHypotheses — all hypotheses for one system
- * - HypothesesData   — the full hypotheses.json shape
+ * Hypothesis block types live in hypotheses.ts — import from there.
  */
 
-export interface HypothesisEntry {
-	/** Short label, e.g. "H1" */
-	id: string;
-	/** Full hypothesis description text */
-	description: string;
-}
-
-export interface SystemHypotheses {
-	/** Matches system.id in reference.json (e.g. "food_systems") */
-	systemId: string;
-	/** Human-readable system label for the hypothesis table header */
-	systemLabel: string;
-	/** Ordered list of hypotheses — length drives the per-system column count */
-	hypotheses: HypothesisEntry[];
-}
-
-/** Shape of static/data/hypotheses.json */
-export type HypothesesData = SystemHypotheses[];
+export type { HypothesisEntry, HypothesesBlock, HypothesesData } from './hypotheses';
 
 // ── Layout constants ──────────────────────────────────────────────────────────
 
 /**
- * Fixed columns that appear on every system sheet regardless of hypothesis count.
- * Metric ID | Indicator | Metric | Value | Flag | AN Threshold | Direction
- * (Comment is always last, added separately)
+ * Fixed columns per indicator row:
+ * Metric ID | Factor - Sub-factor | Evidence type | Metric | Value | Flag | AN Threshold | VAN Threshold
  */
-export const FIXED_COLS_BEFORE_HYPOTHESES = 7;
+export const FIXED_COLS_BEFORE_HYPOTHESES = 8;
 
 /** Width of each hypothesis column (H1, H2, …) */
-export const HYPOTHESIS_COL_WIDTH = 16;
+export const HYPOTHESIS_COL_WIDTH = 8;
 
-/** Width of the trailing Comment column */
-export const COMMENT_COL_WIDTH = 28;
+/** Width of the trailing Comments column */
+export const COMMENT_COL_WIDTH = 32;
 
-/** Fixed column widths for the first 7 columns */
-export const FIXED_COL_WIDTHS = [10, 36, 22, 10, 14, 16, 12] as const;
+/** Fixed column widths for the first 8 columns */
+export const FIXED_COL_WIDTHS = [46, 20, 10, 64, 10, 16, 10, 10] as const;
 
 /**
  * Compute total column count for a given number of hypotheses.
- * = 7 fixed + N hypothesis columns + 1 comment column
+ * = 8 fixed + N hypothesis columns + 1 comments column
  */
 export function colCount(hypothesesCount: number): number {
 	return FIXED_COLS_BEFORE_HYPOTHESES + hypothesesCount + 1;
@@ -67,14 +47,15 @@ export function colWidths(hypothesesCount: number): number[] {
  */
 export function tableHeaders(hypothesisIds: string[]): string[] {
 	return [
+		'Factor - Sub-factor',
+		'Evidence type',
 		'Metric ID',
-		'Indicator',
 		'Metric',
 		'Value',
 		'Flag',
 		'AN Threshold',
-		'Direction',
+		'VAN Threshold',
 		...hypothesisIds,
-		'Comment'
+		'Comments'
 	];
 }
