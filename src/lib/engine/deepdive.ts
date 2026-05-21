@@ -335,7 +335,8 @@ function addQualitativeEvidenceRows(
 function addPlausibilityJudgementRow(
 	ws: Worksheet,
 	hypothesesCount: number,
-	numCols: number
+	numCols: number,
+	hypArgb?: string
 ): void {
 	const row = ws.addRow(new Array(numCols).fill(''));
 
@@ -356,6 +357,11 @@ function addPlausibilityJudgementRow(
 		c.alignment = { vertical: 'middle' };
 	}
 
+	// Tint for hypothesis dropdown cells: 70% white mix of block color, or default light green
+	const hypFillArgb = hypArgb
+		? hexToArgb(mixWithWhite(blockHexFromArgb(hypArgb), 0.3))
+		: 'FFE8F5E9';
+
 	// Each hypothesis col gets its own dropdown (Fix 7)
 	const hypValidation: DataValidation = {
 		type: 'list',
@@ -365,7 +371,7 @@ function addPlausibilityJudgementRow(
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
 		const c = row.getCell(col);
-		c.fill = solidFill('FFE8F5E9');
+		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
 		c.alignment = { vertical: 'middle', indent: 1 };
 		c.dataValidation = hypValidation;
@@ -788,6 +794,42 @@ function blockHexFromArgb(argb: string): string {
 	return '#' + argb.slice(2).toLowerCase();
 }
 
+/**
+ * Apply block-color styling to the hypothesis column group (Fix 13):
+ * - Header row: block color fill + luminance-aware text
+ * - All rows: medium-weight outer border in block color around the group
+ */
+function applyHypGroupStyling(
+	ws: Worksheet,
+	headerRowNum: number,
+	lastRowNum: number,
+	firstHypCol: number,
+	lastHypCol: number,
+	hypArgb: string
+): void {
+	const textArgb = luminance(blockHexFromArgb(hypArgb)) > 0.45 ? 'FF000000' : 'FFFFFFFF';
+	const outerLine: Border = { style: 'medium', color: { argb: hypArgb } } as Border;
+
+	for (let r = headerRowNum; r <= lastRowNum; r++) {
+		const row = ws.getRow(r);
+		for (let c = firstHypCol; c <= lastHypCol; c++) {
+			const cell = row.getCell(c);
+
+			if (r === headerRowNum) {
+				cell.fill = solidFill(hypArgb);
+				cell.font = { bold: true, size: 10, color: { argb: textArgb } };
+			}
+
+			const b: Partial<Borders> = { ...(cell.border as Partial<Borders> ?? {}) };
+			if (r === headerRowNum) b.top = outerLine;
+			if (r === lastRowNum) b.bottom = outerLine;
+			if (c === firstHypCol) b.left = outerLine;
+			if (c === lastHypCol) b.right = outerLine;
+			cell.border = b;
+		}
+	}
+}
+
 /* --------------------- Main export --------------------- */
 
 export async function buildDeepDiveBuffer(
@@ -862,6 +904,7 @@ export async function buildDeepDiveBuffer(
 
 			ws.addRow([]);
 
+			const headerStartRowUnified = ws.rowCount + 1;
 			addTableHeaderRow(ws, tableHeaders(hypIds));
 
 			for (const system of systems) {
@@ -897,7 +940,10 @@ export async function buildDeepDiveBuffer(
 			}
 
 			addQualitativeEvidenceRows(ws, hypIds.length, numCols);
-			addPlausibilityJudgementRow(ws, hypIds.length, numCols);
+			addPlausibilityJudgementRow(ws, hypIds.length, numCols, tabArgb);
+			if (hypIds.length > 0) {
+				applyHypGroupStyling(ws, headerStartRowUnified, ws.rowCount, 10, 9 + hypIds.length, tabArgb);
+			}
 
 			addSummarySection(ws, tabGroup.tabLabel, numCols);
 			ws.addRow([]);
@@ -920,6 +966,8 @@ export async function buildDeepDiveBuffer(
 
 				ws.addRow([]);
 
+				const hypArgbSys = sysArgb(system.id);
+				const headerStartRowSys = ws.rowCount + 1;
 				addTableHeaderRow(ws, tableHeaders(hypIds));
 
 				for (const factor of Array.isArray(system.factors) ? system.factors : []) {
@@ -953,7 +1001,10 @@ export async function buildDeepDiveBuffer(
 				}
 
 				addQualitativeEvidenceRows(ws, hypIds.length, numCols);
-				addPlausibilityJudgementRow(ws, hypIds.length, numCols);
+				addPlausibilityJudgementRow(ws, hypIds.length, numCols, hypArgbSys);
+				if (hypIds.length > 0) {
+					applyHypGroupStyling(ws, headerStartRowSys, ws.rowCount, 10, 9 + hypIds.length, hypArgbSys);
+				}
 
 				addSummarySection(ws, systemLabel, numCols);
 				ws.addRow([]);
