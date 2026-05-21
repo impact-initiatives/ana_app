@@ -124,28 +124,16 @@ function tabColorArgb(tabGroup: TabGroup, hypsMap: Map<string, HypothesesBlock>)
 	return hexToArgb('#718096');
 }
 
-const PRIORITY_FLAG_CSS_VARS: Record<string, string> = {
-	em:                    '--color-priority-em',
-	ho_primary:            '--color-priority-ho-primary',
-	ho_secondary:          '--color-priority-ho-secondary',
-	an_primary:            '--color-flag',
-	an_secondary:          '--color-priority-an-secondary',
-	insufficient_evidence: '--color-insufficient',
-	no_data:               '--color-no-data',
-	no_acute_needs:        '--color-no-acute'
+const PRIORITY_FLAG_ARGB: Record<string, string> = {
+	em:                    'FF420098',
+	ho_primary:            'FF693AD4',
+	ho_secondary:          'FF9076F3',
+	an_primary:            'FF005B90',
+	an_secondary:          'FF87C6F2',
+	insufficient_evidence: 'FFFFB667',
+	no_data:               'FFFFB667',
+	no_acute_needs:        'FF5CE8B3'
 };
-
-function cssVarToArgb(varName: string, fallback = 'FFAAAAAA'): string {
-	if (typeof document === 'undefined') return fallback;
-	const el = document.createElement('div');
-	el.style.cssText = `position:absolute;visibility:hidden;background-color:var(${varName})`;
-	document.body.appendChild(el);
-	const rgb = getComputedStyle(el).backgroundColor;
-	document.body.removeChild(el);
-	const m = rgb.match(/\d+/g);
-	if (!m || m.length < 3) return fallback;
-	return 'FF' + m.slice(0, 3).map((n) => parseInt(n, 10).toString(16).padStart(2, '0')).join('').toUpperCase();
-}
 
 /* --------------------- Style helpers --------------------- */
 
@@ -628,6 +616,10 @@ function addLandingPage(
 	titleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 	titleRow.height = 26;
 
+
+	const emptyRowTitle = ws.addRow([]);
+	emptyRowTitle.height = 30;
+
 	// Column headers
 	const colHeaders = [
 		'System',
@@ -697,6 +689,7 @@ function addLandingPage(
 
 	// ANALYSIS OUTCOME
 	ws.addRow([]);
+	ws.addRow([]);
 
 	const outcomeHeaderRow = ws.addRow(new Array(n).fill(''));
 	ws.mergeCells(outcomeHeaderRow.number, 1, outcomeHeaderRow.number, n);
@@ -708,34 +701,34 @@ function addLandingPage(
 	outcomeHeaderRow.height = 20;
 
 	const priorityFlag = String(uoaRow['priority_flag'] ?? '');
-	const flagFillArgb = cssVarToArgb(PRIORITY_FLAG_CSS_VARS[priorityFlag] ?? '--color-no-data', 'FFD3D3D3');
+	const pfArgb = PRIORITY_FLAG_ARGB[priorityFlag] ?? 'FFD3D3D3';
+	const pfTextArgb = ['em', 'ho_primary', 'ho_secondary', 'an_primary'].includes(priorityFlag)
+		? 'FFFFFFFF'
+		: 'FF000000';
 
 	const flagRow = ws.addRow(new Array(n).fill(''));
-	ws.mergeCells(flagRow.number, 1, flagRow.number, 2);
-	ws.mergeCells(flagRow.number, 3, flagRow.number, n);
 	const flagLabelCell = flagRow.getCell(1);
 	flagLabelCell.value = 'Priority flag';
 	flagLabelCell.font = { bold: true, size: 10 };
 	flagLabelCell.fill = solidFill('FFF0F0F0');
 	flagLabelCell.alignment = { vertical: 'middle', indent: 1 };
 	flagLabelCell.border = allBorders();
-	const flagValueCell = flagRow.getCell(3);
+	const flagValueCell = flagRow.getCell(2);
 	flagValueCell.value = priorityFlag;
-	flagValueCell.fill = solidFill(flagFillArgb);
+	flagValueCell.fill = solidFill(pfArgb);
+	flagValueCell.font = { bold: true, size: 10, color: { argb: pfTextArgb } };
 	flagValueCell.alignment = { vertical: 'middle', indent: 1 };
 	flagValueCell.border = allBorders();
 	flagRow.height = 20;
 
 	const conclusionRow = ws.addRow(new Array(n).fill(''));
-	ws.mergeCells(conclusionRow.number, 1, conclusionRow.number, 2);
-	ws.mergeCells(conclusionRow.number, 3, conclusionRow.number, n);
 	const conclusionLabelCell = conclusionRow.getCell(1);
 	conclusionLabelCell.value = 'Conclusion';
 	conclusionLabelCell.font = { bold: true, size: 10 };
 	conclusionLabelCell.fill = solidFill('FFF0F0F0');
 	conclusionLabelCell.alignment = { vertical: 'middle', indent: 1 };
 	conclusionLabelCell.border = allBorders();
-	const conclusionValueCell = conclusionRow.getCell(3);
+	const conclusionValueCell = conclusionRow.getCell(2);
 	conclusionValueCell.fill = solidFill('FFFFFFFF');
 	conclusionValueCell.alignment = { vertical: 'middle', indent: 1 };
 	conclusionValueCell.border = allBorders();
@@ -751,7 +744,7 @@ function addLandingPage(
 	ws.addRow([]);
 
 	const clusterHeaderRow = ws.addRow(new Array(n).fill(''));
-	ws.mergeCells(clusterHeaderRow.number, 1, clusterHeaderRow.number, n);
+	ws.mergeCells(clusterHeaderRow.number, 1, clusterHeaderRow.number, 2);
 	const clusterHeaderCell = clusterHeaderRow.getCell(1);
 	clusterHeaderCell.value = 'UoA is clustered with (if relevant):';
 	clusterHeaderCell.font = { bold: true, size: 10 };
@@ -761,7 +754,6 @@ function addLandingPage(
 	clusterHeaderRow.height = 18;
 
 	const uoaLabelRow = ws.addRow(new Array(n).fill(''));
-	ws.mergeCells(uoaLabelRow.number, 1, uoaLabelRow.number, n);
 	const uoaLabelCell = uoaLabelRow.getCell(1);
 	uoaLabelCell.value = uoaId;
 	uoaLabelCell.font = { size: 10 };
