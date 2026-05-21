@@ -209,11 +209,11 @@ function addTabSectionHeader(
 	row.height = 26;
 }
 
-function addTableHeaderRow(ws: Worksheet, headers: string[]): void {
+function addTableHeaderRow(ws: Worksheet, headers: string[], hypothesesCount = 0): void {
 	const row = ws.addRow(headers);
 	// Merge gutter col (1) with Factor-Sub-factor col (2)
 	ws.mergeCells(row.number, 1, row.number, 2);
-	row.eachCell((cell: Cell) => {
+	row.eachCell((cell: Cell, colNum: number) => {
 		cell.font = { bold: true, size: 10 };
 		cell.fill = solidFill('FFF2F2F2');
 		cell.border = {
@@ -222,7 +222,8 @@ function addTableHeaderRow(ws: Worksheet, headers: string[]): void {
 			bottom: { style: 'medium', color: { argb: 'FF666666' } },
 			right: thinLine('FFAAAAAA')
 		};
-		cell.alignment = { vertical: 'middle', wrapText: false };
+		const isHypCol = hypothesesCount > 0 && colNum >= 10 && colNum <= 9 + hypothesesCount;
+		cell.alignment = { vertical: 'middle', horizontal: isHypCol ? 'center' : undefined, wrapText: false };
 	});
 	row.height = 16;
 }
@@ -354,7 +355,7 @@ function addPlausibilityJudgementRow(
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
 		const c = row.getCell(col);
-		labelCell.font = { size: 10 };
+		c.font = { size: 10 };
 		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
 		c.alignment = { vertical: 'middle', indent: 1 };
@@ -916,7 +917,7 @@ export async function buildDeepDiveBuffer(
 			ws.addRow([]);
 
 			const headerStartRowUnified = ws.rowCount + 1;
-			addTableHeaderRow(ws, tableHeaders(hypIds));
+			addTableHeaderRow(ws, tableHeaders(hypIds), hypIds.length);
 
 			for (const system of systems) {
 				for (const factor of Array.isArray(system.factors) ? system.factors : []) {
@@ -979,7 +980,7 @@ export async function buildDeepDiveBuffer(
 
 				const hypArgbSys = sysArgb(system.id);
 				const headerStartRowSys = ws.rowCount + 1;
-				addTableHeaderRow(ws, tableHeaders(hypIds));
+				addTableHeaderRow(ws, tableHeaders(hypIds), hypIds.length);
 
 				for (const factor of Array.isArray(system.factors) ? system.factors : []) {
 					if (!factor) continue;
