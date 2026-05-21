@@ -259,9 +259,14 @@ function addIndicatorRow(
 	row.eachCell((cell: Cell, colNum: number) => {
 		cell.font = { size: 10 };
 		cell.border = allBorders('FFDDDDDD');
-		cell.alignment = { vertical: 'middle' };
+		cell.alignment = { vertical: 'top' };
 		if (isFlagged && colNum <= 9) cell.fill = solidFill('FFFFF0F0');
 	});
+
+	// Wrap long-text cells so row height auto-fits
+	const mergedCell = row.getCell(1);
+	mergedCell.alignment = { vertical: 'top', wrapText: true };
+	row.getCell(5).alignment = { vertical: 'top', wrapText: true };
 
 	const flagCell = row.getCell(7);
 	flagCell.font = { color: { argb: flagArgb(flagLabelStr) }, bold: isFlagged };
@@ -291,8 +296,7 @@ function addIndicatorRow(
 	const commentCell = row.getCell(commentColIdx);
 	commentCell.border = allBorders('FFDDDDDD');
 	commentCell.alignment = { vertical: 'top', wrapText: true };
-
-	row.height = 15;
+	// No fixed row.height — Excel auto-fits based on wrapped content
 }
 
 function addQualitativeEvidenceRows(
@@ -321,14 +325,14 @@ function addQualitativeEvidenceRows(
 
 		row.eachCell((cell: Cell) => {
 			cell.border = allBorders('FFDDDDDD');
-			cell.alignment = { vertical: 'middle' };
+			cell.alignment = { vertical: 'top' };
 		});
 
 		// Fix 8: per-row comment cell
 		const commentColIdx = 9 + hypothesesCount + 1;
 		row.getCell(commentColIdx).border = allBorders('FFDDDDDD');
 		row.getCell(commentColIdx).alignment = { vertical: 'top', wrapText: true };
-		row.height = 15;
+		// No fixed row.height — Excel auto-fits
 	}
 }
 
@@ -509,9 +513,9 @@ function addHypothesisTable(
 		descCell.value = hyp.description;
 		descCell.font = { size: 10 };
 		descCell.fill = solidFill('FFFFFFFF');
-		descCell.alignment = { vertical: 'middle', wrapText: true, indent: 1 };
+		descCell.alignment = { vertical: 'top', wrapText: true, indent: 1 };
 		descCell.border = allBorders('FFCCCCCC');
-		row.height = 30;
+		// No fixed row.height — auto-fits to description text
 	}
 
 	ws.addRow([]);
@@ -576,7 +580,7 @@ function addSynthesisTextRow(
 	valueCell.fill = solidFill('FFFFFFFF');
 	valueCell.alignment = { vertical: 'top', wrapText: true, indent: 1 };
 	valueCell.border = allBorders();
-	row.height = 60;
+	// No fixed row.height — auto-fits to summary text
 }
 
 function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number): void {
