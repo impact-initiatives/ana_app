@@ -305,7 +305,7 @@ function addQualitativeEvidenceRows(
 		ws.mergeCells(row.number, 1, row.number, 2);
 		const factorCell = row.getCell(1); // merged gutter+factor-subfactor cell
 		factorCell.value = 'qualitative evidence';
-		factorCell.font = { italic: true, size: 10, color: { argb: 'FFAAAAAA' } };
+		factorCell.font = { italic: true, size: 10, color: { argb: 'ff6b7075' } };
 
 		if (hypothesesCount > 0) {
 			const hypValidation: DataValidation = {
@@ -455,7 +455,7 @@ function addMortalityPathwaysSection(
 	const exampleCell = exampleRow.getCell(1);
 	exampleCell.value =
 		'e.g. Pathway B (malnutrition–disease) please add brief justification';
-	exampleCell.font = { italic: true, size: 10, color: { argb: 'FFAAAAAA' } };
+	exampleCell.font = { italic: true, size: 10, color: { argb: 'ff6b7075' } };
 	exampleCell.alignment = { vertical: 'middle', indent: 1 };
 	exampleRow.height = 18;
 
@@ -565,7 +565,7 @@ function addSynthesisTextRow(
 
 	const valueCell = row.getCell(3);
 	valueCell.value = 'Please fill in summary';
-	valueCell.font = { italic: true, size: 10, color: { argb: 'FFAAAAAA' } };
+	valueCell.font = { italic: true, size: 10, color: { argb: 'ff6b7075' } };
 	valueCell.fill = solidFill('FFFFFFFF');
 	valueCell.alignment = { vertical: 'top', wrapText: true, indent: 1 };
 	valueCell.border = allBorders();
