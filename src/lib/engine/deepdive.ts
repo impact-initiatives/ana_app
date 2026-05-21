@@ -275,7 +275,9 @@ function addIndicatorRow(
 			showErrorMessage: false
 		};
 		for (let col = 10; col <= 9 + hypothesesCount; col++) {
-			row.getCell(col).dataValidation = hypothesisValidation;
+			const c = row.getCell(col);
+			c.dataValidation = hypothesisValidation;
+			c.alignment = { vertical: 'top', horizontal: 'center' };
 		}
 	}
 
@@ -307,13 +309,15 @@ function addQualitativeEvidenceRows(
 				showErrorMessage: false
 			};
 			for (let col = 10; col <= 9 + hypothesesCount; col++) {
-				row.getCell(col).dataValidation = hypValidation;
+				const c = row.getCell(col);
+				c.dataValidation = hypValidation;
+				c.alignment = { vertical: 'top', horizontal: 'center' };
 			}
 		}
 
 		row.eachCell((cell: Cell) => {
 			cell.border = allBorders('FFDDDDDD');
-			cell.alignment = { vertical: 'top' };
+			cell.alignment = cell.alignment ?? { vertical: 'top' };
 		});
 
 		// Fix 8: per-row comment cell
@@ -358,7 +362,7 @@ function addPlausibilityJudgementRow(
 		c.font = { size: 10 };
 		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
-		c.alignment = { vertical: 'middle', indent: 1 };
+		c.alignment = { vertical: 'middle', horizontal: 'center' };
 		c.dataValidation = hypValidation;
 	}
 
