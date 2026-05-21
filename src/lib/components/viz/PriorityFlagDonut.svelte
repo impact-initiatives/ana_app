@@ -29,8 +29,6 @@
 	// Radius: explicit override or auto-fit to container (max 120px)
 	const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 
-	const PRELIM_KEYS = PRIORITY_FLAG_KEYS; // local alias kept for readability
-
 	// ── Count rows per priority_flag ────────────────────────────────────────────
 	interface Slice {
 		key: string;
@@ -41,12 +39,12 @@
 
 	const slices = $derived.by<Slice[]>(() => {
 		const counts: Record<string, number> = {};
-		for (const k of PRELIM_KEYS) counts[k] = 0;
+		for (const k of PRIORITY_FLAG_KEYS) counts[k] = 0;
 		for (const row of rows) {
 			const k = String(row.priority_flag ?? '');
 			if (k in counts) counts[k]++;
 		}
-		return PRELIM_KEYS.map((k) => ({
+		return PRIORITY_FLAG_KEYS.map((k) => ({
 			key: k,
 			count: counts[k],
 			label: getPriorityBadge(k)?.label ?? k,
@@ -83,7 +81,9 @@
 	// ── Tweened legend numbers (same duration as arc animation) ──────────────
 	// Always includes all keys (0 for absent slices) so the tween shape is stable.
 	const allCounts = $derived(
-		Object.fromEntries(PRELIM_KEYS.map((k) => [k, slices.find((s) => s.key === k)?.count ?? 0]))
+		Object.fromEntries(
+			PRIORITY_FLAG_KEYS.map((k) => [k, slices.find((s) => s.key === k)?.count ?? 0])
+		)
 	);
 	const tweenedCounts = Tween.of(() => allCounts, { duration: 600, easing: cubicOut });
 	const tweenedTotal = Tween.of(() => rows.length, { duration: 600, easing: cubicOut });
@@ -147,7 +147,7 @@
 <Card title="# of UOAs per priority flag" subtitle="Click a slice to filter.">
 	<div bind:offsetWidth={containerWidth}>
 		{#if rows.length === 0}
-			<p class="text-base-content/70 py-8 text-center text-sm">No data matches current filters.</p>
+			<p class="text-base-content/75 py-8 text-center text-sm">No data matches current filters.</p>
 		{:else}
 			<div class="flex flex-col items-center justify-center gap-6">
 				<!-- Donut — Chart wrapper matches Arcs.svelte template pattern -->
@@ -205,7 +205,7 @@
 								<span>{Math.round(tc)}</span>
 								<span> {s.label}</span>
 								<span class="text-base-content">
-									{absent ? '0%' : `${Math.round((tc / rows.length) * 100)}%`}
+									{absent ? '(0%)' : `(${Math.round((tc / rows.length) * 100)}%)`}
 								</span>
 							</button>
 						</div>

@@ -14,8 +14,6 @@ const PAINT_PROPS = [
 ] as const;
 
 const FONT = 'Segoe UI';
-const PRELIM_KEYS = PRIORITY_FLAG_KEYS;
-const FLAGGED_STATUSES = ACUTE_PRIORITY_FLAGS;
 
 let _measureCanvas: HTMLCanvasElement | null = null;
 /** Measure rendered text width using canvas — exact, avoids character-width estimates. */
@@ -151,7 +149,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 
 	// Resolve legend colours while container still alive
 	const resolvedColors: Record<string, string> = {};
-	for (const key of PRELIM_KEYS) {
+	for (const key of PRIORITY_FLAG_KEYS) {
 		const badge = getPriorityBadge(key);
 		if (badge) resolvedColors[key] = resolveVar(badge.bg, container);
 	}
@@ -174,7 +172,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 	const title = layerTitle ?? defaultTitle;
 	
 	const flaggedCount =
-		opts.flaggedCount ?? rows.filter((r) => FLAGGED_STATUSES.has(String(r.priority_flag ?? '') as PriorityFlag)).length;
+		opts.flaggedCount ?? rows.filter((r) => ACUTE_PRIORITY_FLAGS.has(String(r.priority_flag ?? '') as PriorityFlag)).length;
 	
 	const now = new Date();
 	const datePart = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -208,7 +206,7 @@ export function buildExportSvg(liveSvg: SVGSVGElement, opts: ExportMapOpts): str
 
 	const activeLegendEntries: { color: string; label: string }[] =
 		resolvedLegendEntries ??
-		PRELIM_KEYS.map((key) => ({
+		PRIORITY_FLAG_KEYS.map((key) => ({
 			color: resolvedColors[key] ?? '#999',
 			label: getPriorityBadge(key)?.label ?? key
 		}));
