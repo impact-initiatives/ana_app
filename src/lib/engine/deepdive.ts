@@ -90,10 +90,6 @@ function sysArgb(systemId: string): string {
 	return hexToArgb(sysHex(systemId));
 }
 
-function sysArgbLight(systemId: string, weight = 0.25): string {
-	return hexToArgb(mixWithWhite(sysHex(systemId), weight));
-}
-
 function sysTextArgb(systemId: string): string {
 	return luminance(sysHex(systemId)) > 0.45 ? 'FF000000' : 'FFFFFFFF';
 }
@@ -483,7 +479,7 @@ function addHypothesisTable(
 	headerCell.value = `Hypotheses for assessing ${block.hypothesesLabel}`;
 	headerCell.font = { bold: true, size: 11, color: { argb: blockTextArgb(block) } };
 	headerCell.fill = solidFill(blockArgbMid(block, 0.7));
-	headerCell.alignment = { vertical: 'middle', horizontal: 'center', indent: 1 };
+	headerCell.alignment = { vertical: 'middle', indent: 1 };
 	headerCell.border = allBorders('FFCCCCCC');
 	headerRow.height = 20;
 

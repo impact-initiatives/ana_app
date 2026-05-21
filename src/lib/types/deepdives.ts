@@ -55,8 +55,8 @@ export function tableHeaders(hypothesisIds: string[]): string[] {
 		'Metric',
 		'Value',
 		'Flag',
-		'AN Threshold',
-		'VAN Threshold',
+		'AN Th.',
+		'VAN Th.',
 		...hypothesisIds,
 		'Comments'
 	];
