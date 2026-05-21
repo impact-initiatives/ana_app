@@ -541,21 +541,20 @@ function addSynthesisRow(
 	allowBlank = false
 ): void {
 	const row = ws.addRow(new Array(numCols).fill(''));
-	// Label spans gutter + label col (1+2); value in cols 3–4
 	ws.mergeCells(row.number, 1, row.number, 2);
-	ws.mergeCells(row.number, 3, row.number, 4);
+	ws.mergeCells(row.number, 3, row.number, 5);
 
 	const labelCell = row.getCell(1);
 	labelCell.value = compositeLabel;
 	labelCell.font = { bold: true, size: 10 };
 	labelCell.fill = solidFill('FFF0F0F0');
 	labelCell.alignment = { vertical: 'middle', indent: 1 };
-	labelCell.border = allBorders();
+	labelCell.border = allBorders('FF000000');
 
 	const valueCell = row.getCell(3);
 	valueCell.fill = solidFill('FFFFFFFF');
 	valueCell.alignment = { vertical: 'middle', indent: 1 };
-	valueCell.border = allBorders();
+	valueCell.border = allBorders('FF000000');
 	if (csvValues) {
 		valueCell.dataValidation = {
 			type: 'list',
@@ -582,34 +581,38 @@ function addSynthesisTextRow(
 	labelCell.font = { bold: true, size: 10 };
 	labelCell.fill = solidFill('FFF0F0F0');
 	labelCell.alignment = { vertical: 'top', indent: 1 };
-	labelCell.border = allBorders();
+	labelCell.border = allBorders('FF000000');
 
 	const valueCell = row.getCell(3);
 	valueCell.value = 'Please fill in summary';
 	valueCell.font = { italic: true, size: 10, color: { argb: 'ff6b7075' } };
 	valueCell.fill = solidFill('FFFFFFFF');
 	valueCell.alignment = { vertical: 'top', wrapText: true, indent: 1 };
-	valueCell.border = allBorders();
+	valueCell.border = allBorders('FF000000');
 	// No fixed row.height — auto-fits to summary text
 }
 
-function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number): void {
+function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number, argb?: string): void {
 	ws.addRow([]);
+
+	const tintHex = argb ? mixWithWhite(blockHexFromArgb(argb), 0.7) : '#e0e0e0';
+	const tintArgb = hexToArgb(tintHex);
+	const titleTextArgb = luminance(tintHex) > 0.45 ? 'FF000000' : 'FFFFFFFF';
+	const outerLine: Border = { style: 'medium', color: { argb: 'FF000000' } } as Border;
 
 	const headerRow = ws.addRow(new Array(numCols).fill(''));
-	ws.mergeCells(headerRow.number, 1, headerRow.number, numCols);
+	ws.mergeCells(headerRow.number, 1, headerRow.number, 5);
 	const headerCell = headerRow.getCell(1);
-	headerCell.value = 'Conclusion:';
-	headerCell.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-	headerCell.fill = solidFill('FF404040');
+	headerCell.value = 'Conclusion';
+	headerCell.font = { bold: true, size: 12, color: { argb: titleTextArgb } };
+	headerCell.fill = solidFill(tintArgb);
 	headerCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+	headerCell.border = allBorders('FF000000');
 	headerRow.height = 22;
 
-	ws.addRow([]);
-
 	const p = systemLabel;
-	addSynthesisRow(ws, `${p} — Primary H`, 'H1,H2,H3,Inconclusive', numCols);
-	addSynthesisRow(ws, `${p} — Secondary H`, 'H1,H2,H3,Inconclusive', numCols, true);
+	addSynthesisRow(ws, `${p} — Primary Hypothesis`, 'H1,H2,H3,Inconclusive', numCols);
+	addSynthesisRow(ws, `${p} — Secondary Hypothesis`, 'H1,H2,H3,Inconclusive', numCols, true);
 	addSynthesisRow(
 		ws,
 		`${p} — Plausibility`,
@@ -624,6 +627,21 @@ function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number):
 		'EM,RoEM,Acute Needs,No Acute Needs,Insufficient evidence,No data',
 		numCols
 	);
+	const lastSynthRow = ws.rowCount;
+
+	// Outer medium black border around the full conclusion table (cols 1–4)
+	for (let r = headerRow.number; r <= lastSynthRow; r++) {
+		const wsRow = ws.getRow(r);
+		for (let c = 1; c <= 5; c++) {
+			const cell = wsRow.getCell(c);
+			const b: Partial<Borders> = { ...(cell.border as Partial<Borders> ?? {}) };
+			if (r === headerRow.number) b.top = outerLine;
+			if (r === lastSynthRow)     b.bottom = outerLine;
+			if (c === 1)                b.left = outerLine;
+			if (c === 5)                b.right = outerLine;
+			cell.border = b;
+		}
+	}
 }
 
 /* --------------------- Landing / summary page --------------------- */
@@ -963,7 +981,7 @@ export async function buildDeepDiveBuffer(
 				applyHypGroupStyling(ws, headerStartRowUnified, ws.rowCount, 10, 9 + hypIds.length, tabArgb);
 			}
 
-			addSummarySection(ws, tabGroup.tabLabel, numCols);
+			addSummarySection(ws, tabGroup.tabLabel, numCols, tabArgb);
 			ws.addRow([]);
 			ws.addRow([]);
 
@@ -1024,7 +1042,7 @@ export async function buildDeepDiveBuffer(
 					applyHypGroupStyling(ws, headerStartRowSys, ws.rowCount, 10, 9 + hypIds.length, hypArgbSys);
 				}
 
-				addSummarySection(ws, systemLabel, numCols);
+				addSummarySection(ws, systemLabel, numCols, hypArgbSys);
 				ws.addRow([]);
 				ws.addRow([]);
 
