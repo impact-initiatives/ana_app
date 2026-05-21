@@ -166,10 +166,14 @@ function allBorders(argb = 'FFCCCCCC'): Partial<Borders> {
 	return { top: s, left: s, bottom: s, right: s };
 }
 
-function flagArgb(flagLabelStr: string): string {
-	if (flagLabelStr === 'flag') return cssVarToArgb('--color-flag');
-	if (flagLabelStr === 'no_flag') return cssVarToArgb('--color-no-flag');
-	return cssVarToArgb('--color-no-data');
+const FLAG_COLOR_HEX = '#005b90';
+const NO_FLAG_COLOR_HEX = '#009698';
+const NO_DATA_COLOR_HEX = '#a0a5ab';
+
+function flagTextArgb(flagLabelStr: string): string {
+	if (flagLabelStr === 'flag')    return hexToArgb(FLAG_COLOR_HEX);
+	if (flagLabelStr === 'no_flag') return hexToArgb(NO_FLAG_COLOR_HEX);
+	return hexToArgb(NO_DATA_COLOR_HEX);
 }
 
 function flagDisplayText(flagLabelStr: string): string {
@@ -260,7 +264,7 @@ function addIndicatorRow(
 		cell.font = { size: 10 };
 		cell.border = allBorders('FFDDDDDD');
 		cell.alignment = { vertical: 'top' };
-		if (isFlagged && colNum <= 9) cell.fill = solidFill('FFFFF0F0');
+		if (isFlagged && colNum <= 9) cell.fill = solidFill(hexToArgb(mixWithWhite(FLAG_COLOR_HEX, 0.35)));
 	});
 
 	// Wrap long-text cells so row height auto-fits
@@ -269,15 +273,7 @@ function addIndicatorRow(
 	row.getCell(5).alignment = { vertical: 'top', wrapText: true };
 
 	const flagCell = row.getCell(7);
-	flagCell.font = { color: { argb: flagArgb(flagLabelStr) }, bold: isFlagged };
-
-	// Evidence type dropdown (col 3)
-	row.getCell(3).dataValidation = {
-		type: 'list',
-		allowBlank: true,
-		formulae: ['"AN signal,Outcome,Predictor,Supporting evidence"'],
-		showErrorMessage: false
-	} as DataValidation;
+	flagCell.font = { bold: isFlagged, size: 10, color: { argb: flagTextArgb(flagLabelStr) } };
 
 	if (hypothesesCount > 0) {
 		const hypothesisValidation: DataValidation = {
@@ -345,21 +341,13 @@ function addPlausibilityJudgementRow(
 	const row = ws.addRow(new Array(numCols).fill(''));
 
 	// Merge gutter col + label col
-	ws.mergeCells(row.number, 1, row.number, 2);
+	ws.mergeCells(row.number, 1, row.number, 9);
 	const labelCell = row.getCell(1);
 	labelCell.value = 'Plausibility judgement';
 	labelCell.font = { bold: true, size: 10 };
-	labelCell.fill = solidFill('FFF0F0F0');
+	labelCell.fill = solidFill('fff2f2f2');
 	labelCell.border = allBorders();
 	labelCell.alignment = { vertical: 'middle', indent: 1 };
-
-	// Fixed data cols 3–9 (non-hypothesis): light fill + border
-	for (let col = 3; col <= 9; col++) {
-		const c = row.getCell(col);
-		c.fill = solidFill('FFE8F5E9');
-		c.border = allBorders();
-		c.alignment = { vertical: 'middle' };
-	}
 
 	// Tint for hypothesis dropdown cells: 70% white mix of block color, or default light green
 	const hypFillArgb = hypArgb
@@ -375,6 +363,7 @@ function addPlausibilityJudgementRow(
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
 		const c = row.getCell(col);
+		labelCell.font = { size: 10 };
 		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
 		c.alignment = { vertical: 'middle', indent: 1 };

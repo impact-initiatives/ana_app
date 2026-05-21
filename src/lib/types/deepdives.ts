@@ -22,7 +22,7 @@ export const HYPOTHESIS_COL_WIDTH = 8;
 export const COMMENT_COL_WIDTH = 32;
 
 /** Fixed column widths for the first 9 columns (gutter + 8 data cols) */
-export const FIXED_COL_WIDTHS = [9, 32, 16, 10, 64, 10, 16, 10, 10] as const;
+export const FIXED_COL_WIDTHS = [9, 28, 16, 8, 64, 10, 12, 8, 8] as const;
 
 /**
  * Compute total column count for a given number of hypotheses.
