@@ -136,8 +136,10 @@ export function formatMetricTooltip(met: Metric | undefined): string {
 // ── Badge Definitions ────────────────────────────────────────────────────────
 
 export interface FlagBadge {
-	/** Explicit text colour for the non-tinted badge. Defaults to base-content when omitted. */
+	/** Explicit text colour for the non-tinted badge in light mode. Defaults to base-content when omitted. */
 	textColor?: string;
+	/** Override text colour specifically in dark mode. Falls back to textColor, then base-content. */
+	darkTextColor?: string;
 	bg: string;
 	tintBg?: string;
 	label: string;
@@ -207,14 +209,14 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
  * Convention: SCREAMING_SNAKE_CASE.
  */
 export const PRIORITY_BADGE_MAP: Record<PriorityFlag, FlagBadge> = {
-	em:          { bg: 'var(--color-priority-em)',          tintBg: 'var(--color-priority-em-tint)',          label: 'Excess Mortality',        textColor: 'var(--color-base-100)' },
-	ho_primary:  { bg: 'var(--color-priority-ho-primary)',  tintBg: 'var(--color-priority-ho-primary-tint)',  label: 'HO – Primary',             textColor: 'var(--color-base-100)' },
-	ho_secondary:{ bg: 'var(--color-priority-ho-secondary)',tintBg: 'var(--color-priority-ho-secondary-tint)',label: 'HO – Secondary',      textColor: 'var(--color-base-100)' },
-	an_primary:  { bg: 'var(--color-flag)',                 tintBg: 'var(--color-flag-tint)',                 label: 'AN – Primary',             textColor: 'var(--color-base-100)' },
-	an_secondary:{ bg: 'var(--color-priority-an-secondary)',tintBg: 'var(--color-priority-an-secondary-tint)',label: 'AN – Secondary' },
-	insufficient_evidence: { bg: 'var(--color-insufficient)', tintBg: 'var(--color-insufficient-tint)', label: 'Insufficient Evidence' },
-	no_data:     { bg: 'var(--color-no-data)',              tintBg: 'var(--color-no-data-tint)',              label: 'No Data' },
-	no_acute_needs:{ bg: 'var(--color-no-acute)',           tintBg: 'var(--color-no-acute-tint)',             label: 'No Acute Needs' }
+	em:                    { bg: 'var(--color-priority-em)',           tintBg: 'var(--color-priority-em-tint)',           label: 'Excess Mortality',      textColor: 'var(--color-base-100)', darkTextColor: 'white' },
+	ho_primary:            { bg: 'var(--color-priority-ho-primary)',   tintBg: 'var(--color-priority-ho-primary-tint)',   label: 'HO – Primary',          textColor: 'var(--color-base-100)', darkTextColor: 'white' },
+	ho_secondary:          { bg: 'var(--color-priority-ho-secondary)', tintBg: 'var(--color-priority-ho-secondary-tint)', label: 'HO – Secondary',        textColor: 'var(--color-base-100)', darkTextColor: 'black' },
+	an_primary:            { bg: 'var(--color-flag)',                  tintBg: 'var(--color-flag-tint)',                  label: 'AN – Primary',          textColor: 'var(--color-base-100)', darkTextColor: 'black' },
+	an_secondary:          { bg: 'var(--color-priority-an-secondary)', tintBg: 'var(--color-priority-an-secondary-tint)', label: 'AN – Secondary',                                            darkTextColor: 'black' },
+	insufficient_evidence: { bg: 'var(--color-insufficient)',          tintBg: 'var(--color-insufficient-tint)',          label: 'Insufficient Evidence',                                     darkTextColor: 'black' },
+	no_data:               { bg: 'var(--color-no-data)',               tintBg: 'var(--color-no-data-tint)',               label: 'No Data',                                                   darkTextColor: 'white' },
+	no_acute_needs:        { bg: 'var(--color-no-acute)',              tintBg: 'var(--color-no-acute-tint)',              label: 'No Acute Needs',                                            darkTextColor: 'black' }
 };
 
 
