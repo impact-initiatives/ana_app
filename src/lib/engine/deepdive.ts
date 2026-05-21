@@ -276,6 +276,7 @@ function addIndicatorRow(
 		};
 		for (let col = 10; col <= 9 + hypothesesCount; col++) {
 			const c = row.getCell(col);
+			c.numFmt = '@'; // force text — prevents ++ / -- / +/- being evaluated as formulas
 			c.dataValidation = hypothesisValidation;
 			c.alignment = { vertical: 'top', horizontal: 'center' };
 		}
@@ -310,6 +311,7 @@ function addQualitativeEvidenceRows(
 			};
 			for (let col = 10; col <= 9 + hypothesesCount; col++) {
 				const c = row.getCell(col);
+				c.numFmt = '@';
 				c.dataValidation = hypValidation;
 				c.alignment = { vertical: 'top', horizontal: 'center' };
 			}
