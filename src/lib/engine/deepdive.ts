@@ -29,10 +29,9 @@ const TAB_GROUPS: TabGroup[] = [
 	{
 		tabLabel: 'Mitigating services',
 		hypothesesBlockId: 'mitigating_services',
-		colorHex: '#494529',
 		systemIds: ['health_nutrition_services']
 	},
-	{ tabLabel: 'RoEM', hypothesesBlockId: 'roem', colorHex: '#000000', systemIds: ['mortality'] }
+	{ tabLabel: 'RoEM', hypothesesBlockId: 'roem', systemIds: ['mortality'] }
 ];
 
 /* --------------------- Types --------------------- */
@@ -469,6 +468,8 @@ function addHypothesisTable(
 ): void {
 	if (!block.hypotheses.length) return;
 
+	ws.addRow([]);
+	
 	const headerRow = ws.addRow(new Array(numCols).fill(''));
 	ws.mergeCells(headerRow.number, 1, headerRow.number, 5);
 	const headerCell = headerRow.getCell(1);

@@ -7,7 +7,7 @@
   {
     "hypothesesId": "mitigating_services",
     "hypothesesLabel": "Mitigating services",
-    "colorHex": "#b1a0c7",
+    "colorHex": "#494529",
     "hypotheses": [
       {
         "id": "H1",
