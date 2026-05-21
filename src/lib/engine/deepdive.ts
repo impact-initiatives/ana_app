@@ -24,12 +24,12 @@ type TabGroup = {
 };
 
 const TAB_GROUPS: TabGroup[] = [
-	{ tabLabel: 'Exposure', systemIds: ['food_system', 'water_system', 'living_conditions'] },
-	{ tabLabel: 'Outcome', systemIds: ['health_outcomes'] },
+	{ tabLabel: 'Exposure', colorHex: '#c4bd97', systemIds: ['food_system', 'water_system', 'living_conditions'] },
+	{ tabLabel: 'Outcome', colorHex: '#948a54', systemIds: ['health_outcomes'] },
 	{
 		tabLabel: 'Mitigating services',
 		hypothesesBlockId: 'mitigating_services',
-		colorHex: '#b1a0c7',
+		colorHex: '#494529',
 		systemIds: ['health_nutrition_services']
 	},
 	{ tabLabel: 'RoEM', hypothesesBlockId: 'roem', colorHex: '#000000', systemIds: ['mortality'] }
