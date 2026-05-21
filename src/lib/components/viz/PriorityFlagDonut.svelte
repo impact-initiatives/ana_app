@@ -131,16 +131,13 @@
 {#if tooltipVisible && hoveredSlice}
 	<TooltipCard
 		title={hoveredSlice.data.label}
+		titleColor={hoveredSlice.data.color}
 		x={tooltipX}
 		y={tooltipY}
 		rows={[
 			{ key: 'Count', value: String(hoveredSlice.data.count) },
-			{
-				key: 'Share',
-				value: `${Math.round((hoveredSlice.data.count / rows.length) * 100)}%`
-			}
+			{ key: 'Share', value: `${Math.round((hoveredSlice.data.count / rows.length) * 100)}%` }
 		]}
-		swatches={[{ color: hoveredSlice.data.color, label: hoveredSlice.data.label }]}
 	/>
 {/if}
 
@@ -203,7 +200,7 @@
 							>
 								<span class="h-3 w-3 rounded-full" style:background-color={s.color}></span>
 								<span>{Math.round(tc)}</span>
-								<span> {s.label}</span>
+								<span class="tracking-wide uppercase">{s.label}</span>
 								<span class="text-base-content">
 									{absent ? '(0%)' : `(${Math.round((tc / rows.length) * 100)}%)`}
 								</span>
