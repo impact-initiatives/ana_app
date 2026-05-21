@@ -361,7 +361,6 @@ function addPlausibilityJudgementRow(
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
 		const c = row.getCell(col);
-		c.font = { size: 10 };
 		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
 		c.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -370,6 +369,7 @@ function addPlausibilityJudgementRow(
 
 	// Comment col: border only (Fix 8)
 	row.getCell(numCols).border = allBorders();
+	row.font = { size: 10 }; // row-level font — applied to analyst-entered dropdown values
 	row.height = 20;
 }
 
