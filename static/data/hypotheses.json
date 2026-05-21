@@ -7,7 +7,7 @@
   {
     "hypothesesId": "mitigating_services",
     "hypothesesLabel": "Mitigating services",
-    "colorHex": "#7030a0",
+    "colorHex": "#b1a0c7",
     "hypotheses": [
       {
         "id": "H1",
@@ -26,7 +26,7 @@
   {
     "hypothesesId": "roem",
     "hypothesesLabel": "RoEM",
-    "colorHex": "#1f4e79",
+    "colorHex": "#000000",
     "hypotheses": [
       {
         "id": "H1",

@@ -29,9 +29,10 @@ const TAB_GROUPS: TabGroup[] = [
 	{
 		tabLabel: 'Mitigating services',
 		hypothesesBlockId: 'mitigating_services',
+		colorHex: '#b1a0c7',
 		systemIds: ['health_nutrition_services']
 	},
-	{ tabLabel: 'RoEM', hypothesesBlockId: 'roem', systemIds: ['mortality'] }
+	{ tabLabel: 'RoEM', hypothesesBlockId: 'roem', colorHex: '#000000', systemIds: ['mortality'] }
 ];
 
 /* --------------------- Types --------------------- */
@@ -127,16 +128,28 @@ function tabColorArgb(tabGroup: TabGroup, hypsMap: Map<string, HypothesesBlock>)
 	return hexToArgb('#718096');
 }
 
-const PRIORITY_FLAG_ARGB: Record<string, string> = {
-	em: 'FFFF0000',
-	ho_primary: 'FFFF6600',
-	ho_secondary: 'FFFFC000',
-	an_primary: 'FFFFFF00',
-	an_secondary: 'FF92D050',
-	insufficient: 'FFD3D3D3',
-	no_data: 'FFD3D3D3',
-	no_acute: 'FF92D050'
+const PRIORITY_FLAG_CSS_VARS: Record<string, string> = {
+	em:                    '--color-priority-em',
+	ho_primary:            '--color-priority-ho-primary',
+	ho_secondary:          '--color-priority-ho-secondary',
+	an_primary:            '--color-flag',
+	an_secondary:          '--color-priority-an-secondary',
+	insufficient_evidence: '--color-insufficient',
+	no_data:               '--color-no-data',
+	no_acute_needs:        '--color-no-acute'
 };
+
+function cssVarToArgb(varName: string, fallback = 'FFAAAAAA'): string {
+	if (typeof document === 'undefined') return fallback;
+	const el = document.createElement('div');
+	el.style.cssText = `position:absolute;visibility:hidden;background-color:var(${varName})`;
+	document.body.appendChild(el);
+	const rgb = getComputedStyle(el).backgroundColor;
+	document.body.removeChild(el);
+	const m = rgb.match(/\d+/g);
+	if (!m || m.length < 3) return fallback;
+	return 'FF' + m.slice(0, 3).map((n) => parseInt(n, 10).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
 
 /* --------------------- Style helpers --------------------- */
 
@@ -154,9 +167,9 @@ function allBorders(argb = 'FFCCCCCC'): Partial<Borders> {
 }
 
 function flagArgb(flagLabelStr: string): string {
-	if (flagLabelStr === 'flag') return 'FFCC0000';
-	if (flagLabelStr === 'no_flag') return 'FF00703C';
-	return 'FF888888';
+	if (flagLabelStr === 'flag') return cssVarToArgb('--color-flag');
+	if (flagLabelStr === 'no_flag') return cssVarToArgb('--color-no-flag');
+	return cssVarToArgb('--color-no-data');
 }
 
 function flagDisplayText(flagLabelStr: string): string {
@@ -203,6 +216,8 @@ function addTabSectionHeader(
 
 function addTableHeaderRow(ws: Worksheet, headers: string[]): void {
 	const row = ws.addRow(headers);
+	// Merge gutter col (1) with Factor-Sub-factor col (2)
+	ws.mergeCells(row.number, 1, row.number, 2);
 	row.eachCell((cell: Cell) => {
 		cell.font = { bold: true, size: 10 };
 		cell.fill = solidFill('FFF2F2F2');
@@ -222,30 +237,33 @@ function addIndicatorRow(
 	{ factorSubfactor, evidenceType, id, metric, value, flagLabelStr, an, van }: IndicatorRowParams,
 	hypothesesCount: number
 ): void {
+	// Col 1 = gutter (merged with col 2 = Factor-Sub-factor); all data cols shift +1
 	const rowValues = [
-		factorSubfactor ?? '',
-		evidenceType ?? '',
-		id,
-		metric ?? '',
-		value == null ? '' : value,
-		flagDisplayText(flagLabelStr),
-		an == null ? '' : an,
-		van == null ? '' : van,
+		factorSubfactor ?? '', // col 1 — merged cell start (Factor-Sub-factor content)
+		'',                    // col 2 — merged into col 1
+		evidenceType ?? '',    // col 3 — Evidence type
+		id,                    // col 4 — Metric ID
+		metric ?? '',          // col 5 — Metric
+		value == null ? '' : value, // col 6 — Value
+		flagDisplayText(flagLabelStr), // col 7 — Flag
+		an == null ? '' : an,  // col 8 — AN Threshold
+		van == null ? '' : van, // col 9 — VAN Threshold
 		...Array(hypothesesCount).fill(''),
-		'' // Comments column — merged separately after all rows
+		'' // Comments column
 	];
 
 	const row = ws.addRow(rowValues);
+	ws.mergeCells(row.number, 1, row.number, 2);
 	const isFlagged = flagLabelStr === 'flag';
 
 	row.eachCell((cell: Cell, colNum: number) => {
 		cell.font = { size: 10 };
 		cell.border = allBorders('FFDDDDDD');
 		cell.alignment = { vertical: 'middle' };
-		if (isFlagged && colNum <= 8) cell.fill = solidFill('FFFFF0F0');
+		if (isFlagged && colNum <= 9) cell.fill = solidFill('FFFFF0F0');
 	});
 
-	const flagCell = row.getCell(6);
+	const flagCell = row.getCell(7);
 	flagCell.font = { color: { argb: flagArgb(flagLabelStr) }, bold: isFlagged };
 
 	// Evidence type dropdown (col 3)
@@ -263,10 +281,16 @@ function addIndicatorRow(
 			formulae: ['"++,+,+/-,-,--"'],
 			showErrorMessage: false
 		};
-		for (let col = 9; col <= 8 + hypothesesCount; col++) {
+		for (let col = 10; col <= 9 + hypothesesCount; col++) {
 			row.getCell(col).dataValidation = hypothesisValidation;
 		}
 	}
+
+	// Fix 8: per-row comment cell with border (no merged tall cell)
+	const commentColIdx = 9 + hypothesesCount + 1;
+	const commentCell = row.getCell(commentColIdx);
+	commentCell.border = allBorders('FFDDDDDD');
+	commentCell.alignment = { vertical: 'top', wrapText: true };
 
 	row.height = 15;
 }
@@ -278,7 +302,8 @@ function addQualitativeEvidenceRows(
 ): void {
 	for (let i = 0; i < 3; i++) {
 		const row = ws.addRow(new Array(numCols).fill(''));
-		const factorCell = row.getCell(2);
+		ws.mergeCells(row.number, 1, row.number, 2);
+		const factorCell = row.getCell(1); // merged gutter+factor-subfactor cell
 		factorCell.value = 'qualitative evidence';
 		factorCell.font = { italic: true, size: 10, color: { argb: 'FFAAAAAA' } };
 
@@ -289,28 +314,33 @@ function addQualitativeEvidenceRows(
 				formulae: ['"++,+,+/-,-,--"'],
 				showErrorMessage: false
 			};
-			for (let col = 9; col <= 8 + hypothesesCount; col++) {
+			for (let col = 10; col <= 9 + hypothesesCount; col++) {
 				row.getCell(col).dataValidation = hypValidation;
 			}
 		}
 
-		row.eachCell((cell: Cell, colNum: number) => {
+		row.eachCell((cell: Cell) => {
 			cell.border = allBorders('FFDDDDDD');
 			cell.alignment = { vertical: 'middle' };
-			// Comments column will be merged separately
 		});
+
+		// Fix 8: per-row comment cell
+		const commentColIdx = 9 + hypothesesCount + 1;
+		row.getCell(commentColIdx).border = allBorders('FFDDDDDD');
+		row.getCell(commentColIdx).alignment = { vertical: 'top', wrapText: true };
 		row.height = 15;
 	}
 }
 
 function addPlausibilityJudgementRow(
 	ws: Worksheet,
-	_hypothesesCount: number,
+	hypothesesCount: number,
 	numCols: number
 ): void {
 	const row = ws.addRow(new Array(numCols).fill(''));
-	const commentCol = numCols;
 
+	// Merge gutter col + label col
+	ws.mergeCells(row.number, 1, row.number, 2);
 	const labelCell = row.getCell(1);
 	labelCell.value = 'Plausibility judgement';
 	labelCell.font = { bold: true, size: 10 };
@@ -318,21 +348,31 @@ function addPlausibilityJudgementRow(
 	labelCell.border = allBorders();
 	labelCell.alignment = { vertical: 'middle', indent: 1 };
 
-	// Merge cols 2 through last hypothesis col (exclude Comments col)
-	if (numCols > 2) {
-		ws.mergeCells(row.number, 2, row.number, commentCol - 1);
+	// Fixed data cols 3–9 (non-hypothesis): light fill + border
+	for (let col = 3; col <= 9; col++) {
+		const c = row.getCell(col);
+		c.fill = solidFill('FFE8F5E9');
+		c.border = allBorders();
+		c.alignment = { vertical: 'middle' };
 	}
-	const plausCell = row.getCell(2);
-	plausCell.fill = solidFill('FFE8F5E9');
-	plausCell.border = allBorders();
-	plausCell.alignment = { vertical: 'middle', indent: 1 };
-	plausCell.dataValidation = {
+
+	// Each hypothesis col gets its own dropdown (Fix 7)
+	const hypValidation: DataValidation = {
 		type: 'list',
 		allowBlank: true,
 		formulae: ['"Very likely,Likely,Plausible,Unlikely,Very unlikely"'],
 		showErrorMessage: false
 	} as DataValidation;
+	for (let col = 10; col <= 9 + hypothesesCount; col++) {
+		const c = row.getCell(col);
+		c.fill = solidFill('FFE8F5E9');
+		c.border = allBorders();
+		c.alignment = { vertical: 'middle', indent: 1 };
+		c.dataValidation = hypValidation;
+	}
 
+	// Comment col: border only (Fix 8)
+	row.getCell(numCols).border = allBorders();
 	row.height = 20;
 }
 
@@ -439,7 +479,7 @@ function addHypothesisTable(
 	if (!block.hypotheses.length) return;
 
 	const headerRow = ws.addRow(new Array(numCols).fill(''));
-	ws.mergeCells(headerRow.number, 1, headerRow.number, 4);
+	ws.mergeCells(headerRow.number, 1, headerRow.number, 5);
 	const headerCell = headerRow.getCell(1);
 	headerCell.value = `Hypotheses for assessing ${block.hypothesesLabel}`;
 	headerCell.font = { bold: true, size: 11, color: { argb: blockTextArgb(block) } };
@@ -450,12 +490,12 @@ function addHypothesisTable(
 
 	for (const hyp of block.hypotheses) {
 		const row = ws.addRow(new Array(numCols).fill(''));
-		ws.mergeCells(row.number, 2, row.number, 4);
+		ws.mergeCells(row.number, 2, row.number, 5);
 
 		const idCell = row.getCell(1);
 		idCell.value = hyp.id;
-		idCell.font = { bold: true, size: 10 };
-		idCell.fill = solidFill('FFFFF2CC');
+		idCell.font = { bold: true, size: 10, color: { argb: blockTextArgb(block) } };
+		idCell.fill = solidFill(blockArgb(block));
 		idCell.alignment = { vertical: 'middle', horizontal: 'center' };
 		idCell.border = allBorders('FFCCCCCC');
 
@@ -481,6 +521,8 @@ function addSynthesisRow(
 	allowBlank = false
 ): void {
 	const row = ws.addRow(new Array(numCols).fill(''));
+	// Label spans gutter + label col (1+2); value in cols 3–4
+	ws.mergeCells(row.number, 1, row.number, 2);
 	ws.mergeCells(row.number, 3, row.number, 4);
 
 	const labelCell = row.getCell(1);
@@ -511,7 +553,9 @@ function addSynthesisTextRow(
 	numCols: number
 ): void {
 	const row = ws.addRow(new Array(numCols).fill(''));
-	ws.mergeCells(row.number, 3, row.number, 4);
+	// Label spans gutter + label col (1+2); Summary value spans cols 3–5 (one wider)
+	ws.mergeCells(row.number, 1, row.number, 2);
+	ws.mergeCells(row.number, 3, row.number, 5);
 
 	const labelCell = row.getCell(1);
 	labelCell.value = compositeLabel;
@@ -669,7 +713,7 @@ function addLandingPage(
 	outcomeHeaderRow.height = 20;
 
 	const priorityFlag = String(uoaRow['priority_flag'] ?? '');
-	const flagFillArgb = PRIORITY_FLAG_ARGB[priorityFlag] ?? 'FFD3D3D3';
+	const flagFillArgb = cssVarToArgb(PRIORITY_FLAG_CSS_VARS[priorityFlag] ?? '--color-no-data', 'FFD3D3D3');
 
 	const flagRow = ws.addRow(new Array(n).fill(''));
 	ws.mergeCells(flagRow.number, 1, flagRow.number, 2);
@@ -819,7 +863,6 @@ export async function buildDeepDiveBuffer(
 			ws.addRow([]);
 
 			addTableHeaderRow(ws, tableHeaders(hypIds));
-			const firstDataRow = ws.rowCount + 1;
 
 			for (const system of systems) {
 				for (const factor of Array.isArray(system.factors) ? system.factors : []) {
@@ -856,16 +899,6 @@ export async function buildDeepDiveBuffer(
 			addQualitativeEvidenceRows(ws, hypIds.length, numCols);
 			addPlausibilityJudgementRow(ws, hypIds.length, numCols);
 
-			const lastDataRow = ws.rowCount;
-			if (lastDataRow >= firstDataRow) {
-				ws.mergeCells(firstDataRow, numCols, lastDataRow, numCols);
-				const commentCell = ws.getCell(firstDataRow, numCols);
-				commentCell.value = 'Please fill comments on interpretation';
-				commentCell.font = { italic: true, color: { argb: 'FFAAAAAA' }, size: 10 };
-				commentCell.alignment = { vertical: 'top', wrapText: true };
-				commentCell.border = allBorders();
-			}
-
 			addSummarySection(ws, tabGroup.tabLabel, numCols);
 			ws.addRow([]);
 			ws.addRow([]);
@@ -888,7 +921,6 @@ export async function buildDeepDiveBuffer(
 				ws.addRow([]);
 
 				addTableHeaderRow(ws, tableHeaders(hypIds));
-				const firstDataRow = ws.rowCount + 1;
 
 				for (const factor of Array.isArray(system.factors) ? system.factors : []) {
 					if (!factor) continue;
@@ -922,16 +954,6 @@ export async function buildDeepDiveBuffer(
 
 				addQualitativeEvidenceRows(ws, hypIds.length, numCols);
 				addPlausibilityJudgementRow(ws, hypIds.length, numCols);
-
-				const lastDataRow = ws.rowCount;
-				if (lastDataRow >= firstDataRow) {
-					ws.mergeCells(firstDataRow, numCols, lastDataRow, numCols);
-					const commentCell = ws.getCell(firstDataRow, numCols);
-					commentCell.value = 'Please fill comments on interpretation';
-					commentCell.font = { italic: true, color: { argb: 'FFAAAAAA' }, size: 10 };
-					commentCell.alignment = { vertical: 'top', wrapText: true };
-					commentCell.border = allBorders();
-				}
 
 				addSummarySection(ws, systemLabel, numCols);
 				ws.addRow([]);
