@@ -40,8 +40,8 @@ export function tileStyle(flagN: number, avail: number): string {
  * Convention: SCREAMING_SNAKE_CASE for constant data maps.
  */
 export const SYSTEM_CSS_VAR_MAP: Record<SystemIDEnum | 'default', string> = {
-	[SystemIDEnum.FoodSystem]: '--color-sys-food-systems',
-	[SystemIDEnum.WaterSystem]: '--color-sys-water-systems',
+	[SystemIDEnum.FoodSystem]: '--color-sys-food-system',
+	[SystemIDEnum.WaterSystem]: '--color-sys-water-system',
 	[SystemIDEnum.HealthOutcomes]: '--color-sys-health-outcomes',
 	[SystemIDEnum.Mortality]: '--color-sys-mortality',
 	[SystemIDEnum.LivingConditions]: '--color-sys-living-conditions',

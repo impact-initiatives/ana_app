@@ -244,20 +244,20 @@
 	         → d4 (indicator 90%) → d5 (metric 100%)                         */
 
 	/* food_systems */
-	--color-sys-food-systems: #61d095;
-	--color-sys-food-systems-d1: color-mix(in srgb, var(--color-sys-food-systems) 15%, transparent);
-	--color-sys-food-systems-d2: color-mix(in srgb, var(--color-sys-food-systems) 40%, transparent);
-	--color-sys-food-systems-d3: color-mix(in srgb, var(--color-sys-food-systems) 70%, transparent);
-	--color-sys-food-systems-d4: color-mix(in srgb, var(--color-sys-food-systems) 90%, transparent);
-	--color-sys-food-systems-d5: var(--color-sys-food-systems);
+	--color-sys-food-system: #61d095;
+	--color-sys-food-system-d1: color-mix(in srgb, var(--color-sys-food-system) 15%, transparent);
+	--color-sys-food-system-d2: color-mix(in srgb, var(--color-sys-food-system) 40%, transparent);
+	--color-sys-food-system-d3: color-mix(in srgb, var(--color-sys-food-system) 70%, transparent);
+	--color-sys-food-system-d4: color-mix(in srgb, var(--color-sys-food-system) 90%, transparent);
+	--color-sys-food-system-d5: var(--color-sys-food-system);
 
 	/* water_systems */
-	--color-sys-water-systems: #0e79b2;
-	--color-sys-water-systems-d1: color-mix(in srgb, var(--color-sys-water-systems) 15%, transparent);
-	--color-sys-water-systems-d2: color-mix(in srgb, var(--color-sys-water-systems) 40%, transparent);
-	--color-sys-water-systems-d3: color-mix(in srgb, var(--color-sys-water-systems) 70%, transparent);
-	--color-sys-water-systems-d4: color-mix(in srgb, var(--color-sys-water-systems) 90%, transparent);
-	--color-sys-water-systems-d5: var(--color-sys-water-systems);
+	--color-sys-water-system: #0e79b2;
+	--color-sys-water-system-d1: color-mix(in srgb, var(--color-sys-water-system) 15%, transparent);
+	--color-sys-water-system-d2: color-mix(in srgb, var(--color-sys-water-system) 40%, transparent);
+	--color-sys-water-system-d3: color-mix(in srgb, var(--color-sys-water-system) 70%, transparent);
+	--color-sys-water-system-d4: color-mix(in srgb, var(--color-sys-water-system) 90%, transparent);
+	--color-sys-water-system-d5: var(--color-sys-water-system);
 
 	/* health_outcomes */
 	--color-sys-health-outcomes: #a8201a;

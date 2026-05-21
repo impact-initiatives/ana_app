@@ -78,11 +78,19 @@ function luminance(hex: string): number {
 	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+const SYS_CSS_VAR: Record<string, string> = {
+	food_system:               '--color-sys-food-system',
+	water_system:              '--color-sys-water-system',
+	health_outcomes:           '--color-sys-health-outcomes',
+	mortality:                 '--color-sys-mortality',
+	living_conditions:         '--color-sys-living-conditions',
+	market_functionality:      '--color-sys-market-functionality',
+	health_nutrition_services: '--color-sys-health-nutrition-services'
+};
+
 function sysHex(systemId: string): string {
-	const slug = String(systemId).replace(/_/g, '-');
-	const val = getComputedStyle(document.documentElement)
-		.getPropertyValue(`--color-sys-${slug}`)
-		.trim();
+	const cssVar = SYS_CSS_VAR[systemId] ?? `--color-sys-${String(systemId).replace(/_/g, '-')}`;
+	const val = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
 	return val || '#718096';
 }
 
