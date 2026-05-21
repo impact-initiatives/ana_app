@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getPriorityBadge, priorityBadgeTextColor } from '$lib/utils/colors';
-	import { themeStore } from '$lib/stores/themeStore.svelte';
 
 	interface Props {
 		/** Priority flag key — e.g. 'em', 'ho_primary', 'an_primary', 'no_data', 'no_acute_needs' */
@@ -12,7 +11,7 @@
 	let { value, class: cls = '' }: Props = $props();
 
 	const badge = $derived(getPriorityBadge(value));
-	const textColor = $derived(badge ? priorityBadgeTextColor(badge, themeStore.isDark) : 'var(--color-base-content)');
+	const textColor = $derived(badge ? priorityBadgeTextColor(badge) : 'var(--color-base-content)');
 </script>
 
 {#if badge}
