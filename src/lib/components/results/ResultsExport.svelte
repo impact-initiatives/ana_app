@@ -12,13 +12,7 @@
 		handleDeepDive: () => Promise<void>;
 	}
 
-	let {
-		rows,
-		handleJSON,
-		handleCSV,
-		handleXLSX,
-		handleDeepDive
-	}: Props = $props();
+	let { rows, handleJSON, handleCSV, handleXLSX, handleDeepDive }: Props = $props();
 </script>
 
 <section class="min-h-screen">
@@ -29,7 +23,7 @@
 	<div class="space-y-6">
 		<!-- Stat bar -->
 		<div
-			class="bg-base-200/60 border-base-300 rounded-box flex items-center gap-3 border px-5 py-3"
+			class="bg-base-200/60 border-base-300 rounded-box flex items-center gap-3 border px-5 py-3 shadow-sm"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +48,7 @@
 			<p class="text-base-content/85 mb-3 font-semibold uppercase">Export dataset</p>
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 				<button
-					class="group border-base-300 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left transition-colors duration-150"
+					class="group border-base-300 bg-base-100 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left shadow-sm transition-colors duration-150"
 					onclick={handleJSON}
 				>
 					<svg
@@ -82,7 +76,7 @@
 				</button>
 
 				<button
-					class="group border-base-300 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left transition-colors duration-150"
+					class="group border-base-300 bg-base-100 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left shadow-sm transition-colors duration-150"
 					onclick={handleCSV}
 				>
 					<svg
@@ -109,7 +103,7 @@
 				</button>
 
 				<button
-					class="group border-base-300 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left transition-colors duration-150"
+					class="group border-base-300 bg-base-100 hover:border-primary hover:bg-primary/5 rounded-box flex cursor-pointer items-start gap-4 border px-5 py-4 text-left shadow-sm transition-colors duration-150"
 					onclick={handleXLSX}
 				>
 					<svg
@@ -148,7 +142,7 @@
 				titleSize="text-sm"
 			>
 				<div>
-					<p class="text-base-content/85 text-sm">
+					<p class="text-base-content/85 mb-2 text-sm">
 						One workbook per selected UoA, pre-filled with metric values and priority flags.
 						Delivered as a single ZIP archive.
 					</p>
