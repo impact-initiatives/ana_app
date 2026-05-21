@@ -11,10 +11,9 @@
 	import { fade } from 'svelte/transition';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import Footer from '$lib/components/ui/Footer.svelte';
-	import { flagStore, clearFlagResult, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
-	import { clearValidatorState } from '$lib/stores/validatorStore.svelte';
-	import { clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
+	import { flagStore, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
+	import { clearAllStores } from '$lib/utils/clearAll';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
 
@@ -64,9 +63,7 @@
 	let scrollY = $state(0);
 
 	function clearAll() {
-		clearFlagResult();
-		clearValidatorState();
-		clearAdminFeatures();
+		clearAllStores();
 		goto(resolve('/'));
 	}
 </script>
