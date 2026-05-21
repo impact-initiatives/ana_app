@@ -383,6 +383,18 @@ function addLegendSection(
 	headerCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 	headerRow.height = 22;
 
+	// blank spacer
+	ws.addRow([]);
+
+	// "Evidence details:" sub-heading
+	const evidenceHeaderRow = ws.addRow(new Array(numCols).fill(''));
+	ws.mergeCells(evidenceHeaderRow.number, 1, evidenceHeaderRow.number, numCols);
+	const evidenceHeaderCell = evidenceHeaderRow.getCell(1);
+	evidenceHeaderCell.value = 'Evidence details:';
+	evidenceHeaderCell.font = { bold: true, size: 10 };
+	evidenceHeaderCell.alignment = { vertical: 'middle', indent: 1 };
+	evidenceHeaderRow.height = 16;
+
 	const colorEntries = [
 		{ argb: 'ffffffcc', label: 'Critical evidence' },
 		{ argb: 'ffdaeef3', label: 'Evidence relates to specific sub-group only' },
@@ -400,6 +412,15 @@ function addLegendSection(
 		labelCell.alignment = { vertical: 'middle', indent: 1 };
 		row.height = 14;
 	}
+
+	// "Consistency rating:" sub-heading
+	const consistencyHeaderRow = ws.addRow(new Array(numCols).fill(''));
+	ws.mergeCells(consistencyHeaderRow.number, 1, consistencyHeaderRow.number, numCols);
+	const consistencyHeaderCell = consistencyHeaderRow.getCell(1);
+	consistencyHeaderCell.value = 'Consistency rating:';
+	consistencyHeaderCell.font = { bold: true, size: 10 };
+	consistencyHeaderCell.alignment = { vertical: 'middle', indent: 1 };
+	consistencyHeaderRow.height = 16;
 
 	const textEntries = [
 		{ symbol: '++', desc: 'very consistent' },
