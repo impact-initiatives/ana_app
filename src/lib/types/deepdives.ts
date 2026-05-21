@@ -16,7 +16,7 @@ export type { HypothesisEntry, HypothesesBlock, HypothesesData } from './hypothe
 export const FIXED_COLS_BEFORE_HYPOTHESES = 9;
 
 /** Width of each hypothesis column (H1, H2, …) */
-export const HYPOTHESIS_COL_WIDTH = 8;
+export const HYPOTHESIS_COL_WIDTH = 10;
 
 /** Width of the trailing Comments column */
 export const COMMENT_COL_WIDTH = 32;
