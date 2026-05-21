@@ -835,6 +835,29 @@ function blockHexFromArgb(argb: string): string {
  * - Header row: block color fill + luminance-aware text
  * - All rows: medium-weight outer border in block color around the group
  */
+function applyOuterBorder(
+	ws: Worksheet,
+	firstRow: number,
+	lastRow: number,
+	firstCol: number,
+	lastCol: number,
+	argb = 'FF000000'
+): void {
+	const line: Border = { style: 'medium', color: { argb } } as Border;
+	for (let r = firstRow; r <= lastRow; r++) {
+		const row = ws.getRow(r);
+		for (let c = firstCol; c <= lastCol; c++) {
+			const cell = row.getCell(c);
+			const b: Partial<Borders> = { ...(cell.border as Partial<Borders> ?? {}) };
+			if (r === firstRow) b.top = line;
+			if (r === lastRow)  b.bottom = line;
+			if (c === firstCol) b.left = line;
+			if (c === lastCol)  b.right = line;
+			cell.border = b;
+		}
+	}
+}
+
 function applyHypGroupStyling(
 	ws: Worksheet,
 	headerRowNum: number,
@@ -858,9 +881,10 @@ function applyHypGroupStyling(
 
 			const b: Partial<Borders> = { ...(cell.border as Partial<Borders> ?? {}) };
 			if (r === headerRowNum) b.top = outerLine;
-			if (r === lastRowNum) b.bottom = outerLine;
-			if (c === firstHypCol) b.left = outerLine;
-			if (c === lastHypCol) b.right = outerLine;
+			if (r === lastRowNum)   b.top = outerLine; // colored separator above plausibility row
+			if (r === lastRowNum)   b.bottom = outerLine;
+			if (c === firstHypCol)  b.left = outerLine;
+			if (c === lastHypCol)   b.right = outerLine;
 			cell.border = b;
 		}
 	}
@@ -980,6 +1004,7 @@ export async function buildDeepDiveBuffer(
 			if (hypIds.length > 0) {
 				applyHypGroupStyling(ws, headerStartRowUnified, ws.rowCount, 10, 9 + hypIds.length, tabArgb);
 			}
+			applyOuterBorder(ws, headerStartRowUnified, ws.rowCount, 1, numCols);
 
 			addSummarySection(ws, tabGroup.tabLabel, numCols, tabArgb);
 			ws.addRow([]);
@@ -1041,6 +1066,7 @@ export async function buildDeepDiveBuffer(
 				if (hypIds.length > 0) {
 					applyHypGroupStyling(ws, headerStartRowSys, ws.rowCount, 10, 9 + hypIds.length, hypArgbSys);
 				}
+				applyOuterBorder(ws, headerStartRowSys, ws.rowCount, 1, numCols);
 
 				addSummarySection(ws, systemLabel, numCols, hypArgbSys);
 				ws.addRow([]);
