@@ -5,7 +5,6 @@
 	import { getPriorityBadge } from '$lib/utils/colors';
 	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 	import Arc from './primitives/Arc.svelte';
 	import Chart, { type Dimensions } from './primitives/Chart.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
