@@ -117,9 +117,9 @@ export async function loadMetrics(): Promise<{ frameworkUpdated: boolean }> {
 		const json = await loadReference();
 		const incoming = (json as Record<string, any>).generatedAt as string | undefined;
 
-		// Detect framework change: generatedAt differs from the stored value (null counts as different).
+		// Detect framework change: requires a prior stored version to compare against.
 		const storedAt = metricStore.generatedAt;
-		const frameworkUpdated = !!(incoming && incoming !== storedAt);
+		const frameworkUpdated = !!(incoming && storedAt && incoming !== storedAt);
 
 		// Skip custom rows re-merge when the framework has changed — old custom MET_IDs may
 		// no longer exist in the new schema. The caller will wipe the custom rows.
