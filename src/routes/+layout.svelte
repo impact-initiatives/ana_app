@@ -369,9 +369,8 @@
 	<div class="modal-box max-w-md">
 		<h3 class="text-base-content text-lg font-bold">Framework updated</h3>
 		<p class="text-base-content/80 py-3 text-sm">
-			The ANA reference framework has been updated since your last visit. Your uploaded data,
-			stored results, and any custom reference rows have been cleared — please re-upload your
-			CSV to continue your analysis.
+			The ANA reference framework has been updated. Any stored results or custom reference rows
+			have been cleared — please re-upload your CSV to run your analysis.
 		</p>
 		<div class="modal-action">
 			<button class="btn btn-primary btn-sm" onclick={() => (showFrameworkModal = false)}>
