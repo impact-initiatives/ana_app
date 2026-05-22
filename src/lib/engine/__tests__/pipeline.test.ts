@@ -21,7 +21,7 @@ const mockValidateCsv = vi.fn();
 const mockFlagData = vi.fn();
 const mockFetchAdmins = vi.fn();
 
-vi.mock('$lib/engine/validator', () => ({ validateCsv: mockValidateCsv }));
+vi.mock('$lib/engine/dataValidator', () => ({ validateCsv: mockValidateCsv }));
 vi.mock('$lib/engine/flagger', () => ({ flagData: mockFlagData }));
 vi.mock('$lib/engine/fetchAdmin', () => ({ fetchAdminsForCountry: mockFetchAdmins }));
 
