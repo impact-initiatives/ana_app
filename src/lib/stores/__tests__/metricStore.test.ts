@@ -56,10 +56,10 @@ describe('loadMetrics — frameworkUpdated', () => {
 		metricStore.referenceJson = null;
 	});
 
-	it('returns frameworkUpdated: false on first load (no stored generatedAt)', async () => {
+	it('returns frameworkUpdated: true on first load (no stored generatedAt)', async () => {
 		mockFetch('2026-05-22T10:00:00.000Z');
 		const { frameworkUpdated } = await loadMetrics();
-		expect(frameworkUpdated).toBe(false);
+		expect(frameworkUpdated).toBe(true);
 	});
 
 	it('returns frameworkUpdated: false when generatedAt is unchanged', async () => {
