@@ -56,8 +56,8 @@ function flattenMetrics(json: unknown): MetricMap {
 	return map;
 }
 
-export const STORAGE_KEY = 'ana_metric_store_v2';
-export const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
+export const STORAGE_KEY = 'ana_metric_store';
+export const CUSTOM_ROWS_KEY = 'ana_custom_reference';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
@@ -117,9 +117,9 @@ export async function loadMetrics(): Promise<{ frameworkUpdated: boolean }> {
 		const json = await loadReference();
 		const incoming = (json as Record<string, any>).generatedAt as string | undefined;
 
-		// Detect framework change: generatedAt differs from the stored value (null counts as different).
+		// Detect framework change: requires a prior stored version to compare against.
 		const storedAt = metricStore.generatedAt;
-		const frameworkUpdated = !!(incoming && incoming !== storedAt);
+		const frameworkUpdated = !!(incoming && storedAt && incoming !== storedAt);
 
 		// Skip custom rows re-merge when the framework has changed — old custom MET_IDs may
 		// no longer exist in the new schema. The caller will wipe the custom rows.
