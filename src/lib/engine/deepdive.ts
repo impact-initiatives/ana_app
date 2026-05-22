@@ -3,6 +3,8 @@ import type { Worksheet, Cell, Fill, Border, Borders, DataValidation } from '@pr
 import { colCount, colWidths, tableHeaders } from '$lib/types/deepdives.js';
 import type { HypothesesBlock, HypothesesData } from '$lib/types/hypotheses';
 import { SystemIDs } from '$lib/types/structure';
+import { PRIORITY_BADGE_MAP } from '$lib/utils/colors.js';
+import type { PriorityFlag } from '$lib/types/flags';
 
 /**
  * Deep Dive Excel export — one file per unit of analysis.
@@ -277,6 +279,7 @@ function addIndicatorRow(
 		for (let col = 10; col <= 9 + hypothesesCount; col++) {
 			const c = row.getCell(col);
 			c.numFmt = '@'; // force text — prevents ++ / -- / +/- being evaluated as formulas
+			c.value = '—';
 			c.dataValidation = hypothesisValidation;
 			c.alignment = { vertical: 'top', horizontal: 'center' };
 		}
@@ -312,6 +315,7 @@ function addQualitativeEvidenceRows(
 			for (let col = 10; col <= 9 + hypothesesCount; col++) {
 				const c = row.getCell(col);
 				c.numFmt = '@';
+				c.value = '—';
 				c.dataValidation = hypValidation;
 				c.alignment = { vertical: 'top', horizontal: 'center' };
 			}
@@ -361,6 +365,8 @@ function addPlausibilityJudgementRow(
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
 		const c = row.getCell(col);
+		c.numFmt = '@';
+		c.value = '—';
 		c.fill = solidFill(hypFillArgb);
 		c.border = allBorders();
 		c.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -552,6 +558,7 @@ function addSynthesisRow(
 	labelCell.border = allBorders('FF000000');
 
 	const valueCell = row.getCell(3);
+	valueCell.value = '—';
 	valueCell.fill = solidFill('FFFFFFFF');
 	valueCell.alignment = { vertical: 'middle', indent: 1 };
 	valueCell.border = allBorders('FF000000');
@@ -769,7 +776,7 @@ function addLandingPage(
 	flagLabelCell.alignment = { vertical: 'middle', indent: 1 };
 	flagLabelCell.border = allBorders();
 	const flagValueCell = flagRow.getCell(2);
-	flagValueCell.value = priorityFlag;
+	flagValueCell.value = PRIORITY_BADGE_MAP[priorityFlag as PriorityFlag]?.label ?? priorityFlag;
 	flagValueCell.fill = solidFill(pfArgb);
 	flagValueCell.font = { bold: true, size: 10, color: { argb: pfTextArgb } };
 	flagValueCell.alignment = { vertical: 'middle', indent: 1 };
@@ -784,6 +791,7 @@ function addLandingPage(
 	conclusionLabelCell.alignment = { vertical: 'middle', indent: 1 };
 	conclusionLabelCell.border = allBorders();
 	const conclusionValueCell = conclusionRow.getCell(2);
+	conclusionValueCell.value = '—';
 	conclusionValueCell.fill = solidFill('FFFFFFFF');
 	conclusionValueCell.alignment = { vertical: 'middle', indent: 1 };
 	conclusionValueCell.border = allBorders();
