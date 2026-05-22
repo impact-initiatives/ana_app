@@ -241,7 +241,7 @@ export function checkDuplicateIDs(data: unknown): DuplicateIDResult {
 						const metId = m.metric ?? '';
 						const metLoc = `${sfLoc}.indicators[${ii}].metrics[${mi}]`;
 
-						if (metId) {
+						{
 							const list = metricLocs.get(metId) ?? [];
 							list.push(metLoc);
 							metricLocs.set(metId, list);
