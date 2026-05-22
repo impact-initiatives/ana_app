@@ -542,7 +542,7 @@ async function main(): Promise<void> {
 	}
 
 	// ── Pass 5: Duplicate IDs ─────────────────────────────────────────────────
-	console.log('\nPass 5 — Duplicate IDs...');
+	console.log('\nPass 5 — Duplicate or invalid IDs...');
 	const { errors: dupErrors, warnings: dupWarnings } = checkDuplicateIDs(data);
 	if (dupErrors.length === 0 && dupWarnings.length === 0) {
 		console.log('  ✅ Passed');
