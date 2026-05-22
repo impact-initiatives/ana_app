@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { asset } from '$app/paths';
 import type { Metric } from '$lib/types/structure';
-import type { MetricMap } from '$lib/engine/validator';
+import type { MetricMap } from '$lib/engine/dataValidator';
 import type { RefRow } from '$lib/engine/referenceBuilder';
 import type { MergeStats } from '$lib/engine/referenceMerger';
 

@@ -15,9 +15,10 @@
  */
 
 import type { Metric, ReferenceRoot } from '$lib/types/structure';
-import type { MetricMap } from '$lib/engine/validator';
+import type { MetricMap } from '$lib/engine/dataValidator';
 import { toSnakeCase, type RefRow } from '$lib/engine/referenceBuilder';
 import { safeValidateReferenceRoot, formatZodErrors } from '$lib/types/reference-json';
+import { validateMergedJson } from '$lib/engine/referenceValidator';
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -128,7 +129,7 @@ function rowToMetric(row: RefRow): Metric {
 export function mergeCustomRows(
 	baseJson: Record<string, unknown>,
 	customRows: RefRow[]
-): { mergedJson: Record<string, unknown>; mergedMetricMap: MetricMap; stats: MergeStats; zodErrors: string[] } {
+): { mergedJson: Record<string, unknown>; mergedMetricMap: MetricMap; stats: MergeStats; zodErrors: string[]; postMergeErrors: string[]; postMergeWarnings: string[] } {
 	let merged: ReferenceRoot;
 
 	try {
@@ -233,5 +234,8 @@ export function mergeCustomRows(
 	const mergedJson = merged as unknown as Record<string, unknown>;
 	const mergedMetricMap = flattenMetrics(mergedJson);
 
-	return { mergedJson, mergedMetricMap, stats, zodErrors };
+	// Post-merge structural passes (2–8), shared with the CLI validation script
+	const { errors: postMergeErrors, warnings: postMergeWarnings } = validateMergedJson(mergedJson);
+
+	return { mergedJson, mergedMetricMap, stats, zodErrors, postMergeErrors, postMergeWarnings };
 }

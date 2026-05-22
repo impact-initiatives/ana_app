@@ -84,7 +84,7 @@ function main(): void {
 
 	for (const row of result.data) {
 		const id = (row['MET_ID'] ?? '').trim();
-		if (!id.startsWith('MET') || seen.has(id)) continue;
+		if (!id || seen.has(id)) continue;
 		seen.add(id);
 		entries.push({ key: toEnumKey(id), value: id });
 	}

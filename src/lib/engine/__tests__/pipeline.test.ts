@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ValidationResult } from '$lib/engine/validator';
+import type { ValidationResult } from '$lib/engine/dataValidator';
 
 // ── Mocks (hoisted before imports) ───────────────────────────────────────────
 

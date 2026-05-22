@@ -5,7 +5,7 @@
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { validatorStore } from '$lib/stores/validatorStore.svelte';
-	import type { ValidationResult, MissingnessEntry } from '$lib/engine/validator';
+	import type { ValidationResult, MissingnessEntry } from '$lib/engine/dataValidator';
 	import NoDataState from '$lib/components/ui/NoDataState.svelte';
 
 	const result = $derived(validatorStore.validationResult as unknown as ValidationResult | null);

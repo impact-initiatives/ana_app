@@ -12,7 +12,7 @@
 	import { validatorStore, saveValidatorState } from '$lib/stores/validatorStore.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 	import { clearAllStores } from '$lib/utils/clearAll';
-	import { validateCsv } from '$lib/engine/validator';
+	import { validateCsv } from '$lib/engine/dataValidator';
 	import { parseFile } from '$lib/engine/parser';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';

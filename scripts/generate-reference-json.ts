@@ -168,7 +168,7 @@ function build(rows: RefRow[]): {
 
 	for (const row of rows) {
 		const id = row['MET_ID']?.trim();
-		if (!id?.startsWith('MET')) continue;
+		if (!id) continue;
 
 		const sysId = toSnakeCase(row['System'] ?? '');
 		const facId = toSnakeCase(row['Factor'] ?? '');

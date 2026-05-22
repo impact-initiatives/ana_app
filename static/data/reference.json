@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-20T12:55:35.696Z",
+  "generatedAt": "2026-05-22T09:19:38.230Z",
   "systems": [
     {
       "id": "food_system",
@@ -1905,6 +1905,33 @@
                       "risk_concept": "Exposure"
                     }
                   ]
+                },
+                {
+                  "id": "jmp_ladder_for_drinking_water_unimproved_or_surface_water",
+                  "label": "JMP ladder for drinking water unimproved or surface water",
+                  "metrics": [
+                    {
+                      "metric": "NEW",
+                      "label": "% of HHs classified as unimproved or surface water on the JMP ladder for drinking water",
+                      "level": "Contr. fact. individual and HH",
+                      "preference": 1,
+                      "evidence_type": "AN signal",
+                      "type": null,
+                      "msna_module": null,
+                      "msna_indicator": null,
+                      "question_kobo_code": null,
+                      "remarks_limitations": "The JMP ladder is the preferred indicator to be used to inform on this sub-factor",
+                      "thresholds": {
+                        "an": null,
+                        "van": null
+                      },
+                      "van_is_strict": false,
+                      "above_or_below": "Above",
+                      "evidence_threshold": 0,
+                      "factor_threshold": 0,
+                      "risk_concept": "Exposure"
+                    }
+                  ]
                 }
               ]
             }
@@ -2220,6 +2247,27 @@
                       "risk_concept": "Exposure"
                     },
                     {
+                      "metric": "NEW",
+                      "label": "% of HH practicing open defecation",
+                      "level": "Community or system level contributing factors",
+                      "preference": 1,
+                      "evidence_type": null,
+                      "type": "num[0:1]",
+                      "msna_module": "Sanitation facility",
+                      "msna_indicator": "% of households using a sanitation facility, by type of sanitation facility used (S1)",
+                      "question_kobo_code": "wash_sanitation_facility",
+                      "remarks_limitations": "Response option: No facility / Bush / Field",
+                      "thresholds": {
+                        "an": 0.2,
+                        "van": null
+                      },
+                      "van_is_strict": false,
+                      "above_or_below": "",
+                      "evidence_threshold": 0,
+                      "factor_threshold": 0,
+                      "risk_concept": "Exposure"
+                    },
+                    {
                       "metric": "MET161",
                       "label": "% of HHs reporting hygiene related issues with latrines",
                       "level": "Community or system level contributing factors",
@@ -2341,6 +2389,33 @@
                       "evidence_threshold": 1,
                       "factor_threshold": 1,
                       "risk_concept": "Coping"
+                    }
+                  ]
+                },
+                {
+                  "id": "jmp_ladder_for_sanitation",
+                  "label": "JMP ladder for sanitation",
+                  "metrics": [
+                    {
+                      "metric": "NEW",
+                      "label": "% of HHs classified as unimproved or open defecations on the JMP ladder for sanitation",
+                      "level": "Community or system level contributing factors",
+                      "preference": 1,
+                      "evidence_type": "AN signal",
+                      "type": null,
+                      "msna_module": null,
+                      "msna_indicator": null,
+                      "question_kobo_code": null,
+                      "remarks_limitations": "The JMP ladder is the preferred indicator to be used to inform on this sub-factor",
+                      "thresholds": {
+                        "an": null,
+                        "van": null
+                      },
+                      "van_is_strict": false,
+                      "above_or_below": "Above",
+                      "evidence_threshold": 0,
+                      "factor_threshold": 0,
+                      "risk_concept": "Exposure"
                     }
                   ]
                 }
@@ -4192,6 +4267,33 @@
                       "thresholds": {
                         "an": 0.15,
                         "van": 0.3
+                      },
+                      "van_is_strict": true,
+                      "above_or_below": "Above",
+                      "evidence_threshold": 1,
+                      "factor_threshold": 1,
+                      "risk_concept": "Vulnerability"
+                    }
+                  ]
+                },
+                {
+                  "id": "ipc_amn_classification",
+                  "label": "IPC AMN Classification",
+                  "metrics": [
+                    {
+                      "metric": "NEW",
+                      "label": "IPC AMN Phase",
+                      "level": "Health outcomes",
+                      "preference": 1,
+                      "evidence_type": "Predictor",
+                      "type": "num",
+                      "msna_module": null,
+                      "msna_indicator": null,
+                      "question_kobo_code": null,
+                      "remarks_limitations": null,
+                      "thresholds": {
+                        "an": 4,
+                        "van": 5
                       },
                       "van_is_strict": true,
                       "above_or_below": "Above",
