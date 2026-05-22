@@ -1,97 +1,87 @@
 #!/usr/bin/env bun
 /**
- * scripts/validate-indicators-json.ts
+ * scripts/validate-reference-json.ts
  *
- * Validates the generated `static/data/reference.json` in two passes:
+ * Validates the generated `static/data/reference.json`.
  *
- * Pass 1 — Zod schema
- *   Checks structural correctness of the JSON: indicator IDs, type syntax,
- *   threshold bounds, van-requires-an, above_or_below enum, etc.
+ * All check functions (passes 1–8) are imported from the shared browser-safe
+ * module src/lib/engine/referenceValidator.ts — the same code that runs in
+ * the browser when an analyst uploads a custom reference CSV.
  *
- * Pass 2 — Lookup CSV consistency
- *   Checks that every system, factor, and sub-factor id present in the JSON
- *   exists in the canonical lookup CSVs:
- *     static/data/system.csv      — valid system ids
- *     static/data/factor.csv      — valid (factor, system) pairs
- *     static/data/subfactor.csv   — valid (sub_factor, factor, system) triples
- *
- *   This is the authoritative place for these checks. The generator
- *   (generate-indicators-json.ts) only loads the lookup CSVs for label
- *   resolution and never aborts on mismatch.
+ * The CLI runs each pass individually for rich formatted output (tables,
+ * grouped errors). The browser path calls validateMergedJson() which
+ * orchestrates all passes and returns flat error/warning strings.
  *
  * Usage:
- *   bun ./scripts/validate-indicators.ts
- *   bun ./scripts/validate-indicators.ts --json static/data/reference.json
- *   bun ./scripts/validate-indicators.ts --factor static/data/factor.csv
- *   bun ./scripts/validate-indicators.ts --subfactor static/data/subfactor.csv
- *   bun ./scripts/validate-indicators.ts --help
+ *   bun ./scripts/validate-reference-json.ts
+ *   bun ./scripts/validate-reference-json.ts --json static/data/reference.json
+ *   bun ./scripts/validate-reference-json.ts --help
  *
  * Exit codes:
  *   0 — all checks passed
  *   1 — one or more validation errors
- *   2 — I/O or parse error (file not found, invalid JSON/CSV)
+ *   2 — I/O or parse error (file not found, invalid JSON)
  */
 
 import fs from 'fs';
 import path from 'path';
-import Papa from 'papaparse';
 import { safeValidateReferenceRoot } from '$lib/types/reference-json';
-import { SystemIDEnum } from '$lib/types/structure';
+import {
+	checkLookupConsistency,
+	checkRequiredSystems,
+	checkThresholdValues,
+	checkDuplicateIDs,
+	checkThresholdIntegers,
+	checkThresholdPlausibility,
+	checkVanOrdering,
+	checkVanPresence,
+	type LookupError,
+	type ThresholdValueError,
+	type ThresholdValueWarning,
+	type DuplicateIDGroup,
+	type DuplicateLabelGroup,
+	type ThresholdIntegerError,
+	type ThresholdPlausibilityError,
+	type VanOrderError,
+	type VanPresenceError
+} from '$lib/engine/referenceValidator';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
 const DATA_DIR = path.join(process.cwd(), 'static', 'data');
-
-const DEFAULTS = {
-	json: path.join(DATA_DIR, 'reference.json'),
-	factor: path.join(DATA_DIR, 'factor.csv'),
-	subfactor: path.join(DATA_DIR, 'subfactor.csv')
-};
+const DEFAULTS = { json: path.join(DATA_DIR, 'reference.json') };
 
 // ── CLI ───────────────────────────────────────────────────────────────────────
 
 interface Args {
 	jsonPath: string;
-	factorPath: string;
-	subfactorPath: string;
 	help: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
 	let jsonPath = DEFAULTS.json;
-	let factorPath = DEFAULTS.factor;
-	let subfactorPath = DEFAULTS.subfactor;
 	let help = false;
-
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
 		if (arg === '--help' || arg === '-h') {
 			help = true;
 		} else if (arg === '--json' && argv[i + 1]) {
 			jsonPath = path.resolve(argv[++i]);
-		} else if (arg === '--factor' && argv[i + 1]) {
-			factorPath = path.resolve(argv[++i]);
-		} else if (arg === '--subfactor' && argv[i + 1]) {
-			subfactorPath = path.resolve(argv[++i]);
 		}
 	}
-
-	return { jsonPath, factorPath, subfactorPath, help };
+	return { jsonPath, help };
 }
 
 function printHelp(): void {
 	console.log(`
-validate-reference-json.ts — Validate reference.json against Zod schema and lookup CSVs
+validate-reference-json.ts — Validate reference.json
 
 Usage:
   bun ./scripts/validate-indicators.ts [flags]
 
 Flags:
-  --json      <path>   indicators JSON to validate
-                       (default: static/data/reference.json)
-  --factor    <path>   Factor lookup CSV    (default: static/data/factor.csv)
-  --subfactor <path>   Sub-factor lookup CSV (default: static/data/subfactor.csv)
-  --help, -h           Print this help and exit
+  --json  <path>   indicators JSON to validate (default: static/data/reference.json)
+  --help, -h       Print this help and exit
 
 Checks performed:
 
@@ -103,43 +93,32 @@ Checks performed:
     · above_or_below is "Above" or "Below"
     · preference is 1, 2, or 3
 
-  Pass 2 — Lookup CSV consistency
-    · every (factor, system) pair exists in factor.csv
-    · every (sub_factor, factor, system) triple exists in subfactor.csv
-    Note: system ids are already enforced by Pass 1 via z.enum(SystemIDEnum).
+  Pass 2 — Factor/subfactor ID validity
+    · every factor ID must be a known FactorIDEnum value
+    · every subfactor ID must be a known SubFactorIDEnum value
+    (both enums are generated from the canonical lookup CSVs at build time)
 
   Pass 3 — Required system IDs
-    · mortality and health_outcomes must be present in the systems array
-    · their absence disables the EM and ROEM classification paths in flagger.ts
+    · mortality and health_outcomes must be present
 
   Pass 4 — Threshold value sanity
-    · factor_threshold must be ≥ 1 (0 would always flag every group)
-    · evidence_threshold must be ≥ 1 (0 would always conclude no_flag, even with no data)
+    · factor_threshold / evidence_threshold must be ≥ 1 (error if ≤ 0; warning if missing)
 
-  Pass 5 — Duplicate IDs
-    · metric IDs must be globally unique across the full tree
-    · system IDs must be globally unique
-    · factor IDs must be unique within each system
-    · subfactor IDs must be unique within each factor
+  Pass 5 — Duplicate and invalid IDs
+    · metric/system/factor/subfactor IDs must be globally unique (error)
+    · metric IDs must match MET followed by 3+ digits — e.g. NEW, MOVED (error)
+    · metric labels must be globally unique (error)
 
   Pass 6 — Threshold integers and plausibility
-    · factor_threshold and evidence_threshold must be integers (non-integer values
-      produce nonsensical comparisons in evaluateGroup since counts are always whole)
-    · within each (factor_threshold, evidence_threshold) group in a subfactor:
-        factor_threshold ≤ group size  (otherwise the group can never flag)
-        evidence_threshold ≤ group size (otherwise the group can never reach no_flag)
+    · factor_threshold and evidence_threshold must be integers
+    · neither may exceed the group size in its subfactor
 
   Pass 7 — VAN threshold ordering
-    · when both an and van are set: van must be strictly more extreme than an
-        Above metrics: van > an
-        Below metrics: van < an
-      Equal or inverted values mean VAN is easier to reach than AN, inverting
-      the intended severity scale.
+    · Above metrics: van > an
+    · Below metrics: van < an
 
   Pass 8 — VAN threshold presence
-    · every non-supporting-evidence, non-reference-only metric must have
-      thresholds.van set (AN signal / Outcome / Predictor metrics are used
-      in the ho_secondary and an_primary branches of the priority flag tree)
+    · every non-supporting-evidence, non-preference-3 metric must have thresholds.van
 `);
 }
 
@@ -166,7 +145,7 @@ function printTable(headers: string[], rows: string[][]): void {
 	}
 }
 
-// ── Label map ─────────────────────────────────────────────────────────────────
+// ── Label map (for human-readable error output) ───────────────────────────────
 
 interface Crumb {
 	system: string;
@@ -182,17 +161,13 @@ function buildLabelMap(data: unknown): Map<string, Crumb> {
 	const map = new Map<string, Crumb>();
 	const root = data as {
 		systems?: Array<{
-			id?: string;
-			label?: string;
+			id?: string; label?: string;
 			factors?: Array<{
-				id?: string;
-				label?: string;
+				id?: string; label?: string;
 				sub_factors?: Array<{
-					id?: string;
-					label?: string;
+					id?: string; label?: string;
 					indicators?: Array<{
-						id?: string;
-						label?: string;
+						id?: string; label?: string;
 						metrics?: Array<{ metric?: string; label?: string }>;
 					}>;
 				}>;
@@ -241,7 +216,6 @@ function buildLabelMap(data: unknown): Map<string, Crumb> {
 	return map;
 }
 
-/** Look up the most specific crumb available for a location string. */
 function resolveLocation(map: Map<string, Crumb>, location: string): Crumb {
 	const parts = location.split('.');
 	for (let i = parts.length; i >= 1; i--) {
@@ -253,11 +227,8 @@ function resolveLocation(map: Map<string, Crumb>, location: string): Crumb {
 
 // ── Zod issue helpers ─────────────────────────────────────────────────────────
 
-/**
- * Converts a Zod path array to a label-map location key.
- * ['systems', 0, 'factors', 0, 'sub_factors', 0, 'indicators', 0, 'metrics', 0, 'field']
- * → 'systems[0].factors[0].sub_factors[0].indicators[0].metrics[0]'
- */
+type ZodIssue = { path: PropertyKey[]; message: string; code: string };
+
 function zodPathToLocation(path: PropertyKey[]): string {
 	const parts: string[] = [];
 	for (let i = 0; i < path.length; i++) {
@@ -281,8 +252,6 @@ function getValue(data: unknown, path: PropertyKey[]): unknown {
 	}
 	return cur;
 }
-
-type ZodIssue = { path: PropertyKey[]; message: string; code: string };
 
 function printZodIssues(
 	error: { issues: ZodIssue[] },
@@ -319,73 +288,47 @@ function printZodIssues(
 		}
 	}
 
-	if (sysIdErrors.length > 0) {
-		console.error(`\n  Invalid system IDs (${sysIdErrors.length}) — see static/data/system.csv:`);
-		printTable(
-			['System (value)'],
-			sysIdErrors.map((iss) => [String(getValue(data, iss.path) ?? '(missing)')])
-		);
-	}
-
-	if (facIdErrors.length > 0) {
-		console.error(`\n  Invalid factor IDs (${facIdErrors.length}) — see static/data/factor.csv:`);
-		printTable(
-			['System', 'Factor (value)'],
-			facIdErrors.map((iss) => {
-				const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
-				return [trunc(crumb.system), String(getValue(data, iss.path) ?? '(missing)')];
-			})
-		);
-	}
-
-	if (sfIdErrors.length > 0) {
-		console.error(
-			`\n  Invalid subfactor IDs (${sfIdErrors.length}) — see static/data/subfactor.csv:`
-		);
-		printTable(
-			['System', 'Factor', 'Subfactor (value)'],
-			sfIdErrors.map((iss) => {
-				const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
-				return [
-					trunc(crumb.system),
-					trunc(crumb.factor),
-					String(getValue(data, iss.path) ?? '(missing)')
-				];
-			})
-		);
-	}
-
 	const metricHeaders = ['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Value'];
 	const metricRow = (iss: ZodIssue): string[] => {
 		const loc = zodPathToLocation(iss.path);
 		const crumb = labelMap.get(loc) ?? resolveLocation(labelMap, loc);
 		return [
-			trunc(crumb.system),
-			trunc(crumb.factor),
-			trunc(crumb.subfactor),
-			trunc(crumb.indicator),
-			crumb.metric,
+			trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor),
+			trunc(crumb.indicator), crumb.metric,
 			String(getValue(data, iss.path) ?? '(missing)')
 		];
 	};
 
+	if (sysIdErrors.length > 0) {
+		console.error(`\n  Invalid system IDs (${sysIdErrors.length}):`);
+		printTable(['System (value)'], sysIdErrors.map((iss) => [String(getValue(data, iss.path) ?? '(missing)')]));
+	}
+	if (facIdErrors.length > 0) {
+		console.error(`\n  Invalid factor IDs (${facIdErrors.length}):`);
+		printTable(['System', 'Factor (value)'], facIdErrors.map((iss) => {
+			const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
+			return [trunc(crumb.system), String(getValue(data, iss.path) ?? '(missing)')];
+		}));
+	}
+	if (sfIdErrors.length > 0) {
+		console.error(`\n  Invalid subfactor IDs (${sfIdErrors.length}):`);
+		printTable(['System', 'Factor', 'Subfactor (value)'], sfIdErrors.map((iss) => {
+			const crumb = labelMap.get(zodPathToLocation(iss.path)) ?? EMPTY_CRUMB;
+			return [trunc(crumb.system), trunc(crumb.factor), String(getValue(data, iss.path) ?? '(missing)')];
+		}));
+	}
 	if (aboveOrBelowErrors.length > 0) {
-		console.error(
-			`\n  above_or_below — must be "Above" or "Below" (${aboveOrBelowErrors.length}):`
-		);
+		console.error(`\n  above_or_below — must be "Above" or "Below" (${aboveOrBelowErrors.length}):`);
 		printTable(metricHeaders, aboveOrBelowErrors.map(metricRow));
 	}
-
 	if (preferenceErrors.length > 0) {
 		console.error(`\n  preference — must be 1, 2, or 3 (${preferenceErrors.length}):`);
 		printTable(metricHeaders, preferenceErrors.map(metricRow));
 	}
-
 	if (typeErrors.length > 0) {
 		console.error(`\n  type — invalid syntax (${typeErrors.length}):`);
 		printTable(metricHeaders, typeErrors.map(metricRow));
 	}
-
 	if (thresholdErrors.length > 0) {
 		console.error(`\n  threshold errors (${thresholdErrors.length}):`);
 		printTable(
@@ -393,20 +336,15 @@ function printZodIssues(
 			thresholdErrors.map((iss) => {
 				const loc = zodPathToLocation(iss.path);
 				const crumb = labelMap.get(loc) ?? resolveLocation(labelMap, loc);
-				const field = iss.path.slice(-2).map(String).join('.');
 				return [
-					trunc(crumb.system),
-					trunc(crumb.factor),
-					trunc(crumb.subfactor),
-					trunc(crumb.indicator),
-					crumb.metric,
-					field,
+					trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor),
+					trunc(crumb.indicator), crumb.metric,
+					iss.path.slice(-2).map(String).join('.'),
 					String(getValue(data, iss.path) ?? '(missing)')
 				];
 			})
 		);
 	}
-
 	if (otherErrors.length > 0) {
 		console.error(`\n  Other schema errors (${otherErrors.length}):`);
 		for (const iss of otherErrors) {
@@ -415,617 +353,95 @@ function printZodIssues(
 	}
 }
 
-// ── Lookup CSV row shapes ─────────────────────────────────────────────────────
-
-interface FactorRow {
-	factor: string;
-	factor_label: string;
-	system: string;
-}
-interface SubfactorRow {
-	sub_factor: string;
-	sub_factor_label: string;
-	factor: string;
-	system: string;
-}
-
-// ── CSV parsing ───────────────────────────────────────────────────────────────
-
-function parseCsv<T>(filePath: string, label: string): T[] | null {
-	if (!fs.existsSync(filePath)) {
-		console.error(`Error: ${label} not found: ${filePath}`);
-		return null;
-	}
-
-	const raw = fs.readFileSync(filePath, 'utf-8');
-	const content = raw.startsWith('﻿') ? raw.slice(1) : raw; // strip BOM
-
-	const result = Papa.parse<T>(content, { header: true, skipEmptyLines: true });
-
-	if (result.errors.length > 0) {
-		console.warn(`Warnings parsing ${label} (${result.errors.length}):`);
-		for (const e of result.errors.slice(0, 5)) {
-			console.warn(`  row ${e.row ?? '?'}: [${e.code}] ${e.message}`);
-		}
-	}
-
-	return result.data.map((row) => {
-		const trimmed: Record<string, string> = {};
-		for (const [k, v] of Object.entries(row as Record<string, string>)) {
-			trimmed[k.trim()] = (v ?? '').trim();
-		}
-		return trimmed as T;
-	});
-}
-
-// ── Lookup CSV consistency check ──────────────────────────────────────────────
-
-interface LookupError {
-	/** Human-readable JSON path, e.g. "systems[2].factors[0].sub_factors[1]" */
-	location: string;
-	kind: 'factor' | 'subfactor';
-	/** The id that was not found in the lookup CSV. */
-	id: string;
-	/** The composite key that was checked (for factor/subfactor). */
-	key: string;
-}
-
-function checkLookupConsistency(
-	data: unknown,
-	factorRows: FactorRow[],
-	subfactorRows: SubfactorRow[]
-): LookupError[] {
-	const validFactors = new Set(factorRows.map((r) => `${r.factor}::${r.system}`));
-	const validSubfactors = new Set(
-		subfactorRows.map((r) => `${r.sub_factor}::${r.factor}::${r.system}`)
-	);
-
-	const errors: LookupError[] = [];
-
-	// Cast loosely — Zod pass already confirmed shape when it succeeded.
-	const root = data as {
-		systems?: Array<{
-			id?: string;
-			factors?: Array<{
-				id?: string;
-				sub_factors?: Array<{
-					id?: string;
-					indicators?: Array<{ id?: string }>;
-				}>;
-			}>;
-		}>;
-	};
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		const sys = root.systems![si];
-		const sysId = sys.id ?? '';
-		const sysLoc = `systems[${si}]`;
-
-		for (let fi = 0; fi < (sys.factors?.length ?? 0); fi++) {
-			const fac = sys.factors![fi];
-			const facId = fac.id ?? '';
-			const facKey = `${facId}::${sysId}`;
-			const facLoc = `${sysLoc}.factors[${fi}]`;
-
-			if (!validFactors.has(facKey)) {
-				errors.push({ location: facLoc, kind: 'factor', id: facId, key: facKey });
-			}
-
-			for (let sfi = 0; sfi < (fac.sub_factors?.length ?? 0); sfi++) {
-				const sf = fac.sub_factors![sfi];
-				const sfId = sf.id ?? '';
-				const sfKey = `${sfId}::${facId}::${sysId}`;
-				const sfLoc = `${facLoc}.sub_factors[${sfi}]`;
-
-				if (!validSubfactors.has(sfKey)) {
-					errors.push({ location: sfLoc, kind: 'subfactor', id: sfId, key: sfKey });
-				}
-			}
-		}
-	}
-
-	return errors;
-}
+// ── Pass output helpers ───────────────────────────────────────────────────────
 
 function printLookupErrors(errors: LookupError[], labelMap: Map<string, Crumb>): void {
-	const byFactors = errors.filter((e) => e.kind === 'factor');
-	const bySubfactors = errors.filter((e) => e.kind === 'subfactor');
+	const byKind = { factor: errors.filter((e) => e.kind === 'factor'), subfactor: errors.filter((e) => e.kind === 'subfactor') };
+	console.error('\n❌ Pass 2 failed — unknown factor/subfactor IDs (not in the generated enums).\n');
+	if (byKind.factor.length > 0) {
+		console.error(`── Unknown factors (${byKind.factor.length}):`);
+		printTable(['System', 'Factor (value)'], byKind.factor.map((e) => {
+			const crumb = resolveLocation(labelMap, e.location);
+			return [trunc(crumb.system), e.id];
+		}));
+	}
+	if (byKind.subfactor.length > 0) {
+		console.error(`── Unknown subfactors (${byKind.subfactor.length}):`);
+		printTable(['System', 'Factor', 'Subfactor (value)'], byKind.subfactor.map((e) => {
+			const crumb = resolveLocation(labelMap, e.location);
+			return [trunc(crumb.system), trunc(crumb.factor), e.id];
+		}));
+	}
+}
 
-	console.error('\n❌ Pass 2 failed — the JSON contains ids not present in the lookup CSVs.');
-	console.error('   Regenerate reference.json or update the lookup CSVs so the ids match.\n');
-
-	if (byFactors.length > 0) {
-		console.error(
-			`── Unknown factors (${byFactors.length}) — see static/data/factor.csv:`
-		);
-		printTable(
-			['System', 'Factor (value)'],
-			byFactors.map((e) => {
+function printThresholdValueErrors(errors: ThresholdValueError[], warnings: ThresholdValueWarning[], labelMap: Map<string, Crumb>): void {
+	if (errors.length > 0) {
+		console.error(`  ❌ ${errors.length} metric(s) have threshold ≤ 0 (always-flags or always-no_flag):`);
+		printTable(['System', 'Factor', 'Subfactor', 'Metric', 'Field', 'Value'],
+			errors.map((e) => {
 				const crumb = resolveLocation(labelMap, e.location);
-				return [trunc(crumb.system), e.id];
+				return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.metric, e.field, String(e.value)];
 			})
 		);
-		console.error('');
 	}
-
-	if (bySubfactors.length > 0) {
-		console.error(
-			`── Unknown subfactors (${bySubfactors.length}) — see static/data/subfactor.csv:`
-		);
-		printTable(
-			['System', 'Factor', 'Subfactor (value)'],
-			bySubfactors.map((e) => {
-				const crumb = resolveLocation(labelMap, e.location);
-				return [trunc(crumb.system), trunc(crumb.factor), e.id];
+	if (warnings.length > 0) {
+		console.warn(`  ⚠️  ${warnings.length} metric(s) have no threshold set:`);
+		printTable(['System', 'Factor', 'Subfactor', 'Metric', 'Field'],
+			warnings.map((w) => {
+				const crumb = resolveLocation(labelMap, w.location);
+				return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), w.metric, w.field];
 			})
 		);
-		console.error('');
 	}
-
-	console.error(`Total: ${errors.length} unknown id(s).`);
 }
 
-// ── Threshold value sanity check ─────────────────────────────────────────────
-
-interface ThresholdValueError {
-	location: string;
-	metric: string;
-	field: 'factor_threshold' | 'evidence_threshold';
-	value: number;
-}
-
-/**
- * Checks that no metric has factor_threshold ≤ 0 or evidence_threshold ≤ 0.
- *
- * In evaluateGroup:
- *   - factor_threshold=0  → flag_n >= 0 is always true → every group always flags
- *   - evidence_threshold=0 → data_n >= 0 is always true → every group always concludes no_flag
- *     (even with no data, skipping the explicit no_data branch)
- */
-function checkThresholdValues(data: unknown): ThresholdValueError[] {
-	const root = data as {
-		systems?: Array<{
-			factors?: Array<{
-				sub_factors?: Array<{
-					indicators?: Array<{
-						metrics?: Array<{
-							metric?: string;
-							preference?: number;
-							factor_threshold?: number;
-							evidence_threshold?: number;
-						}>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: ThresholdValueError[] = [];
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
-			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
-				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
-					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
-					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
-						const m = ind.metrics![mi];
-						if (m.preference === 3) continue; // excluded from the flagging pipeline
-						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
-						if (typeof m.factor_threshold === 'number' && m.factor_threshold <= 0) {
-							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
-						}
-						if (typeof m.evidence_threshold === 'number' && m.evidence_threshold <= 0) {
-							errors.push({ location: loc, metric: m.metric ?? '?', field: 'evidence_threshold', value: m.evidence_threshold });
-						}
-					}
-				}
-			}
+function printDuplicateErrors(errors: DuplicateIDGroup[], warnings: DuplicateLabelGroup[], labelMap: Map<string, Crumb>): void {
+	if (errors.length > 0) {
+		console.error(`  ❌ ${errors.length} duplicate ID group(s):`);
+		const byKind = new Map<string, DuplicateIDGroup[]>();
+		for (const e of errors) {
+			const list = byKind.get(e.kind) ?? [];
+			list.push(e);
+			byKind.set(e.kind, list);
 		}
-	}
-
-	return errors;
-}
-
-// ── Required system IDs check ─────────────────────────────────────────────────
-
-/**
- * System IDs that must be present in reference.json for the ANA preliminary
- * classification to work correctly.
- *
- * - mortality      → triggers EM (Emergency) when flagged
- * - health_outcomes → triggers ROEM when flagged alongside ≥3 other systems
- *
- * Their absence is not caught by the Zod schema (which only checks that IDs
- * are valid members of SystemIDEnum, not that specific members are present).
- */
-const REQUIRED_SYSTEM_IDS: SystemIDEnum[] = [
-	SystemIDEnum.Mortality,
-	SystemIDEnum.HealthOutcomes
-];
-
-function checkRequiredSystems(data: unknown): SystemIDEnum[] {
-	const root = data as { systems?: Array<{ id?: string }> };
-	const present = new Set((root.systems ?? []).map((s) => s.id).filter(Boolean));
-	return REQUIRED_SYSTEM_IDS.filter((id) => !present.has(id));
-}
-
-// ── Threshold integer + plausibility checks ───────────────────────────────────
-
-interface ThresholdIntegerError {
-	location: string;
-	metric: string;
-	field: 'factor_threshold' | 'evidence_threshold';
-	value: number;
-}
-
-interface ThresholdPlausibilityError {
-	/** Path to the subfactor containing the offending group. */
-	location: string;
-	kind: 'factor_threshold' | 'evidence_threshold';
-	value: number;
-	groupSize: number;
-	/** Composite key identifying the group, e.g. "ft=2,et=3". */
-	groupKey: string;
-}
-
-/**
- * Checks that factor_threshold and evidence_threshold are integers.
- * Non-integer values (e.g. 1.5) produce nonsensical comparisons in evaluateGroup
- * because flag_n and data_n are always whole numbers.
- */
-function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
-	const root = data as {
-		systems?: Array<{
-			factors?: Array<{
-				sub_factors?: Array<{
-					indicators?: Array<{
-						metrics?: Array<{
-							metric?: string;
-							preference?: number;
-							factor_threshold?: number;
-							evidence_threshold?: number;
-						}>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: ThresholdIntegerError[] = [];
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
-			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
-				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
-					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
-					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
-						const m = ind.metrics![mi];
-						if (m.preference === 3) continue; // excluded from the flagging pipeline
-						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
-						if (typeof m.factor_threshold === 'number' && !Number.isInteger(m.factor_threshold)) {
-							errors.push({ location: loc, metric: m.metric ?? '?', field: 'factor_threshold', value: m.factor_threshold });
-						}
-						if (typeof m.evidence_threshold === 'number' && !Number.isInteger(m.evidence_threshold)) {
-							errors.push({ location: loc, metric: m.metric ?? '?', field: 'evidence_threshold', value: m.evidence_threshold });
-						}
+		for (const [kind, groups] of byKind) {
+			const rows: string[][] = [];
+			if (kind === 'invalid_format') {
+				console.error(`  Invalid metric ID format (${groups.length}):`);
+				for (const g of groups) {
+					const crumb = resolveLocation(labelMap, g.locations[0]);
+					rows.push([g.id, trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor)]);
+				}
+				printTable(['Metric ID', 'System', 'Factor', 'Subfactor'], rows);
+			} else if (kind === 'metric') {
+				console.error(`  Duplicate metric IDs (${groups.length} group(s)):`);
+				for (const g of groups) {
+					for (const loc of g.locations) {
+						const crumb = resolveLocation(labelMap, loc);
+						rows.push([g.id, trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor)]);
 					}
 				}
-			}
-		}
-	}
-
-	return errors;
-}
-
-/**
- * Checks that factor_threshold and evidence_threshold do not exceed the number
- * of metrics in their threshold group.
- *
- * Within a subfactor, metrics sharing the same (factor_threshold, evidence_threshold)
- * pair form one group (mirroring buildSubfactorList in metricMetadata.ts).
- * If factor_threshold > group size, the group can never flag.
- * If evidence_threshold > group size, the group can never reach no_flag.
- * Both conditions mean the subfactor is permanently stuck in a degraded state.
- */
-function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[] {
-	const root = data as {
-		systems?: Array<{
-			factors?: Array<{
-				sub_factors?: Array<{
-					indicators?: Array<{
-						metrics?: Array<{
-							preference?: number;
-							factor_threshold?: number;
-							evidence_threshold?: number;
-						}>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: ThresholdPlausibilityError[] = [];
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
-			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
-				const sf = root.systems![si].factors![fi].sub_factors![sfi];
-				const sfLoc = `systems[${si}].factors[${fi}].sub_factors[${sfi}]`;
-
-				// Group metrics by (factor_threshold, evidence_threshold)
-				const groups = new Map<string, { ft: number; et: number; count: number }>();
-				for (const ind of sf.indicators ?? []) {
-					for (const m of ind.metrics ?? []) {
-						if (m.preference === 3) continue; // excluded from the flagging pipeline
-						const ft = m.factor_threshold;
-						const et = m.evidence_threshold;
-						if (typeof ft === 'number' && typeof et === 'number') {
-							const key = `ft=${ft},et=${et}`;
-							const g = groups.get(key);
-							if (g) g.count++;
-							else groups.set(key, { ft, et, count: 1 });
-						}
-					}
-				}
-
-				for (const [key, { ft, et, count }] of groups) {
-					if (ft > count) {
-						errors.push({ location: sfLoc, kind: 'factor_threshold', value: ft, groupSize: count, groupKey: key });
-					}
-					if (et > count) {
-						errors.push({ location: sfLoc, kind: 'evidence_threshold', value: et, groupSize: count, groupKey: key });
-					}
-				}
-			}
-		}
-	}
-
-	return errors;
-}
-
-// ── VAN threshold ordering check ─────────────────────────────────────────────
-
-interface VanOrderError {
-	location: string;
-	metric: string;
-	above_or_below: string;
-	an: number;
-	van: number;
-}
-
-/**
- * Checks that the VAN threshold is strictly more extreme than AN.
- *
- * "More extreme" means harder to reach the VAN level:
- *   - Above: van > an  (a higher value is needed to cross VAN than AN)
- *   - Below: van < an  (a lower value is needed to cross VAN than AN)
- *
- * If this ordering is violated, VAN is trivially easier to reach than AN,
- * which inverts the intended severity scale. Equal values (van === an) are
- * also flagged — a redundant threshold adds no information.
- */
-function checkVanOrdering(data: unknown): VanOrderError[] {
-	const root = data as {
-		systems?: Array<{
-			factors?: Array<{
-				sub_factors?: Array<{
-					indicators?: Array<{
-						metrics?: Array<{
-							metric?: string;
-							above_or_below?: string;
-							thresholds?: { an?: number | null; van?: number | null };
-						}>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: VanOrderError[] = [];
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
-			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
-				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
-					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
-					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
-						const m = ind.metrics![mi];
-						const an = m.thresholds?.an;
-						const van = m.thresholds?.van;
-						const dir = m.above_or_below;
-
-						if (typeof an === 'number' && typeof van === 'number' && dir) {
-							const valid = dir === 'Above' ? van > an : van < an;
-							if (!valid) {
-								const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
-								errors.push({ location: loc, metric: m.metric ?? '?', above_or_below: dir, an, van });
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return errors;
-}
-
-// ── Duplicate ID check ────────────────────────────────────────────────────────
-
-interface DuplicateIDError {
-	location: string;
-	kind: 'metric' | 'system' | 'factor' | 'subfactor';
-	id: string;
-	/** Location where this ID was first seen. */
-	firstSeen: string;
-}
-
-/**
- * Checks that IDs are unique at each scope:
- *   - metric IDs globally across the full tree
- *   - system IDs globally
- *   - factor IDs within each system
- *   - subfactor IDs within each factor
- *
- * Duplicates cause silent path collisions in flagger's mutate spec dictionaries
- * (last writer wins) and corrupt metadata lookups in metricMetadata.ts.
- */
-function checkDuplicateIDs(data: unknown): DuplicateIDError[] {
-	const root = data as {
-		systems?: Array<{
-			id?: string;
-			factors?: Array<{
-				id?: string;
-				sub_factors?: Array<{
-					id?: string;
-					indicators?: Array<{
-						metrics?: Array<{ metric?: string }>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: DuplicateIDError[] = [];
-	const seenMetrics = new Map<string, string>();
-	const seenSystems = new Map<string, string>();
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		const sys = root.systems![si];
-		const sysId = sys.id ?? '';
-		const sysLoc = `systems[${si}]`;
-
-		if (sysId) {
-			if (seenSystems.has(sysId)) {
-				errors.push({ location: sysLoc, kind: 'system', id: sysId, firstSeen: seenSystems.get(sysId)! });
+				printTable(['Metric', 'System', 'Factor', 'Subfactor'], rows);
 			} else {
-				seenSystems.set(sysId, sysLoc);
-			}
-		}
-
-		const seenFactors = new Map<string, string>();
-
-		for (let fi = 0; fi < (sys.factors?.length ?? 0); fi++) {
-			const fac = sys.factors![fi];
-			const facId = fac.id ?? '';
-			const facLoc = `${sysLoc}.factors[${fi}]`;
-
-			if (facId) {
-				if (seenFactors.has(facId)) {
-					errors.push({ location: facLoc, kind: 'factor', id: facId, firstSeen: seenFactors.get(facId)! });
-				} else {
-					seenFactors.set(facId, facLoc);
+				console.error(`  Duplicate ${kind} IDs (${groups.length} group(s)):`);
+				for (const g of groups) {
+					for (const loc of g.locations) rows.push([g.id, loc]);
 				}
-			}
-
-			const seenSubfactors = new Map<string, string>();
-
-			for (let sfi = 0; sfi < (fac.sub_factors?.length ?? 0); sfi++) {
-				const sf = fac.sub_factors![sfi];
-				const sfId = sf.id ?? '';
-				const sfLoc = `${facLoc}.sub_factors[${sfi}]`;
-
-				if (sfId) {
-					if (seenSubfactors.has(sfId)) {
-						errors.push({ location: sfLoc, kind: 'subfactor', id: sfId, firstSeen: seenSubfactors.get(sfId)! });
-					} else {
-						seenSubfactors.set(sfId, sfLoc);
-					}
-				}
-
-				for (let ii = 0; ii < (sf.indicators?.length ?? 0); ii++) {
-					const ind = sf.indicators![ii];
-					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
-						const m = ind.metrics![mi];
-						const metId = m.metric ?? '';
-						const metLoc = `${sfLoc}.indicators[${ii}].metrics[${mi}]`;
-
-						if (metId) {
-							if (seenMetrics.has(metId)) {
-								errors.push({ location: metLoc, kind: 'metric', id: metId, firstSeen: seenMetrics.get(metId)! });
-							} else {
-								seenMetrics.set(metId, metLoc);
-							}
-						}
-					}
-				}
+				printTable([kind.charAt(0).toUpperCase() + kind.slice(1), 'Location'], rows);
 			}
 		}
 	}
-
-	return errors;
-}
-
-// ── VAN presence check ────────────────────────────────────────────────────────
-
-interface VanPresenceError {
-	location: string;
-	metric: string;
-	evidence_type: string;
-	above_or_below: string;
-	an: number | null;
-}
-
-/**
- * Checks that every non-supporting-evidence metric has thresholds.van set.
- *
- * Supporting evidence metrics are excluded from the subfactor/factor/system
- * rollup and the priority flag decision tree, so they don't need a VAN
- * threshold. All other evidence types (AN signal, Outcome, Predictor) drive
- * the ho_secondary and an_primary branches and therefore require van.
- *
- * Preference-3 (reference-only) metrics are skipped entirely.
- */
-function checkVanPresence(data: unknown): VanPresenceError[] {
-	const SUPPORTING = 'Supporting evidence';
-
-	const root = data as {
-		systems?: Array<{
-			factors?: Array<{
-				sub_factors?: Array<{
-					indicators?: Array<{
-						metrics?: Array<{
-							metric?: string;
-							preference?: number;
-							evidence_type?: string | null;
-							above_or_below?: string;
-							thresholds?: { an?: number | null; van?: number | null };
-						}>;
-					}>;
-				}>;
-			}>;
-		}>;
-	};
-
-	const errors: VanPresenceError[] = [];
-
-	for (let si = 0; si < (root.systems?.length ?? 0); si++) {
-		for (let fi = 0; fi < (root.systems![si].factors?.length ?? 0); fi++) {
-			for (let sfi = 0; sfi < (root.systems![si].factors![fi].sub_factors?.length ?? 0); sfi++) {
-				for (let ii = 0; ii < (root.systems![si].factors![fi].sub_factors![sfi].indicators?.length ?? 0); ii++) {
-					const ind = root.systems![si].factors![fi].sub_factors![sfi].indicators![ii];
-					for (let mi = 0; mi < (ind.metrics?.length ?? 0); mi++) {
-						const m = ind.metrics![mi];
-						if (m.preference === 3) continue;
-						const et = m.evidence_type ?? null;
-						if (et === null || et === SUPPORTING) continue;
-						if (m.thresholds?.van == null) {
-							const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
-							errors.push({
-								location: loc,
-								metric: m.metric ?? '?',
-								evidence_type: et,
-								above_or_below: m.above_or_below ?? '?',
-								an: m.thresholds?.an ?? null
-							});
-						}
-					}
-				}
+	if (warnings.length > 0) {
+		console.error(`  ❌ ${warnings.length} duplicate metric label group(s):`);
+		const rows: string[][] = [];
+		for (const w of warnings) {
+			for (const occ of w.occurrences) {
+				const crumb = resolveLocation(labelMap, occ.location);
+				rows.push([trunc(w.label, 40), occ.metricId, trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor)]);
 			}
 		}
+		printTable(['Label', 'Metric', 'System', 'Factor', 'Subfactor'], rows);
 	}
-
-	return errors;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -1039,9 +455,8 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	const { jsonPath, factorPath, subfactorPath } = args;
+	const { jsonPath } = args;
 
-	// ── Load JSON ──────────────────────────────────────────────────────────────
 	if (!fs.existsSync(jsonPath)) {
 		console.error(`File not found: ${jsonPath}`);
 		process.exitCode = 2;
@@ -1068,15 +483,6 @@ async function main(): Promise<void> {
 
 	const labelMap = buildLabelMap(data);
 
-	// ── Load lookup CSVs ───────────────────────────────────────────────────────
-	const factorRows = parseCsv<FactorRow>(factorPath, 'factor CSV');
-	const subfactorRows = parseCsv<SubfactorRow>(subfactorPath, 'subfactor CSV');
-
-	if (!factorRows || !subfactorRows) {
-		process.exitCode = 2;
-		return;
-	}
-
 	let pass1Ok = false;
 	let pass2Ok = false;
 	let pass3Ok = false;
@@ -1089,7 +495,6 @@ async function main(): Promise<void> {
 	// ── Pass 1: Zod schema ─────────────────────────────────────────────────────
 	console.log('Pass 1 — Zod schema...');
 	const zodResult = safeValidateReferenceRoot(data);
-
 	if (zodResult.success) {
 		console.log('  ✅ Passed');
 		pass1Ok = true;
@@ -1098,10 +503,9 @@ async function main(): Promise<void> {
 		printZodIssues(zodResult.error, data, labelMap);
 	}
 
-	// ── Pass 2: Lookup CSV consistency ─────────────────────────────────────────
-	console.log('\nPass 2 — Lookup CSV consistency...');
-	const lookupErrors = checkLookupConsistency(data, factorRows, subfactorRows);
-
+	// ── Pass 2: Factor/subfactor ID validity ───────────────────────────────────
+	console.log('\nPass 2 — Factor/subfactor ID validity...');
+	const lookupErrors = checkLookupConsistency(data);
 	if (lookupErrors.length === 0) {
 		console.log('  ✅ Passed');
 		pass2Ok = true;
@@ -1112,216 +516,105 @@ async function main(): Promise<void> {
 	// ── Pass 3: Required system IDs ───────────────────────────────────────────
 	console.log('\nPass 3 — Required system IDs...');
 	const missingSystems = checkRequiredSystems(data);
-
 	if (missingSystems.length === 0) {
 		console.log('  ✅ Passed');
 		pass3Ok = true;
 	} else {
 		console.error(
-			`  ❌ Failed — missing required system IDs: ${missingSystems.join(', ')}\n` +
-			'  These systems drive the EM and ROEM paths in the preliminary classification.\n' +
-			'  Add them to reference.json or update the classification logic in flagger.ts.'
+			`  ❌ Failed — missing required system IDs: ${missingSystems.map((e) => e.missingId).join(', ')}\n` +
+			'  These systems drive the EM and ROEM paths in the preliminary classification.'
 		);
 	}
 
 	// ── Pass 4: Threshold value sanity ────────────────────────────────────────
 	console.log('\nPass 4 — Threshold value sanity...');
-	const thresholdErrors = checkThresholdValues(data);
-
-	if (thresholdErrors.length === 0) {
+	const { errors: tvErrors, warnings: tvWarnings } = checkThresholdValues(data);
+	if (tvErrors.length === 0 && tvWarnings.length === 0) {
 		console.log('  ✅ Passed');
 		pass4Ok = true;
+	} else if (tvErrors.length === 0) {
+		console.log('  ✅ Passed (with warnings)');
+		pass4Ok = true;
+		printThresholdValueErrors([], tvWarnings, labelMap);
 	} else {
-		console.error(
-			`  ❌ Failed — ${thresholdErrors.length} metric(s) have zero or negative threshold values.\n` +
-			'  factor_threshold=0 always flags; evidence_threshold=0 always concludes no_flag.\n'
-		);
-
-		const byField = new Map<string, ThresholdValueError[]>();
-		for (const e of thresholdErrors) {
-			const list = byField.get(e.field) ?? [];
-			list.push(e);
-			byField.set(e.field, list);
-		}
-
-		for (const [field, errs] of byField) {
-			console.error(`  ${field} ≤ 0 (${errs.length}):`);
-			printTable(
-				['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Value'],
-				errs.map((e) => {
-					const crumb = resolveLocation(labelMap, e.location);
-					return [
-						trunc(crumb.system),
-						trunc(crumb.factor),
-						trunc(crumb.subfactor),
-						trunc(crumb.indicator),
-						e.metric,
-						String(e.value)
-					];
-				})
-			);
-			console.error('');
-		}
+		console.error(`  ❌ Failed`);
+		printThresholdValueErrors(tvErrors, tvWarnings, labelMap);
 	}
 
 	// ── Pass 5: Duplicate IDs ─────────────────────────────────────────────────
-	console.log('\nPass 5 — Duplicate IDs...');
-	const duplicateErrors = checkDuplicateIDs(data);
-
-	if (duplicateErrors.length === 0) {
+	console.log('\nPass 5 — Duplicate or invalid IDs...');
+	const { errors: dupErrors, warnings: dupWarnings } = checkDuplicateIDs(data);
+	if (dupErrors.length === 0 && dupWarnings.length === 0) {
 		console.log('  ✅ Passed');
 		pass5Ok = true;
 	} else {
-		console.error(`  ❌ Failed — ${duplicateErrors.length} duplicate ID(s) found.\n`);
-
-		const byKind = new Map<string, DuplicateIDError[]>();
-		for (const e of duplicateErrors) {
-			const list = byKind.get(e.kind) ?? [];
-			list.push(e);
-			byKind.set(e.kind, list);
-		}
-
-		for (const [kind, errs] of byKind) {
-			console.error(`  Duplicate ${kind} IDs (${errs.length}):`);
-			if (kind === 'metric') {
-				printTable(
-					['Metric', 'System', 'Factor', 'Subfactor', 'First seen'],
-					errs.map((e) => {
-						const crumb = resolveLocation(labelMap, e.location);
-						return [e.id, trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.firstSeen];
-					})
-				);
-			} else if (kind === 'subfactor') {
-				printTable(
-					['Subfactor', 'System', 'Factor', 'First seen'],
-					errs.map((e) => {
-						const crumb = resolveLocation(labelMap, e.location);
-						return [e.id, trunc(crumb.system), trunc(crumb.factor), e.firstSeen];
-					})
-				);
-			} else if (kind === 'factor') {
-				printTable(
-					['Factor', 'System', 'First seen'],
-					errs.map((e) => {
-						const crumb = resolveLocation(labelMap, e.location);
-						return [e.id, trunc(crumb.system), e.firstSeen];
-					})
-				);
-			} else {
-				printTable(
-					['System', 'First seen'],
-					errs.map((e) => [e.id, e.firstSeen])
-				);
-			}
-			console.error('');
-		}
+		console.error(`  ❌ Failed`);
+		printDuplicateErrors(dupErrors, dupWarnings, labelMap);
 	}
 
 	// ── Pass 6: Threshold integers and plausibility ───────────────────────────
 	console.log('\nPass 6 — Threshold integers and plausibility...');
-	const integerErrors = checkThresholdIntegers(data);
-	const plausibilityErrors = checkThresholdPlausibility(data);
-
-	if (integerErrors.length === 0 && plausibilityErrors.length === 0) {
+	const intErrors = checkThresholdIntegers(data);
+	const plausErrors = checkThresholdPlausibility(data);
+	if (intErrors.length === 0 && plausErrors.length === 0) {
 		console.log('  ✅ Passed');
 		pass6Ok = true;
 	} else {
-		if (integerErrors.length > 0) {
-			console.error(`  ❌ Non-integer threshold values (${integerErrors.length}):`);
+		if (intErrors.length > 0) {
+			console.error(`  ❌ Non-integer threshold values (${intErrors.length}):`);
 			printTable(
-				['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Field', 'Value'],
-				integerErrors.map((e) => {
+				['System', 'Factor', 'Subfactor', 'Metric', 'Field', 'Value'],
+				intErrors.map((e: ThresholdIntegerError) => {
 					const crumb = resolveLocation(labelMap, e.location);
-					return [
-						trunc(crumb.system),
-						trunc(crumb.factor),
-						trunc(crumb.subfactor),
-						trunc(crumb.indicator),
-						e.metric,
-						e.field,
-						String(e.value)
-					];
+					return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.metric, e.field, String(e.value)];
 				})
 			);
-			console.error('');
 		}
-		if (plausibilityErrors.length > 0) {
-			console.error(
-				`  ❌ Threshold exceeds group size — group can never reach the state (${plausibilityErrors.length}):`
-			);
+		if (plausErrors.length > 0) {
+			console.error(`  ❌ Threshold exceeds group size (${plausErrors.length}):`);
 			printTable(
 				['System', 'Factor', 'Subfactor', 'Field', 'Value', 'Group size'],
-				plausibilityErrors.map((e) => {
+				plausErrors.map((e: ThresholdPlausibilityError) => {
 					const crumb = resolveLocation(labelMap, e.location);
-					return [
-						trunc(crumb.system),
-						trunc(crumb.factor),
-						trunc(crumb.subfactor),
-						e.kind,
-						String(e.value),
-						String(e.groupSize)
-					];
+					return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.kind, String(e.value), String(e.groupSize)];
 				})
 			);
-			console.error('');
 		}
 	}
 
-	// ── Pass 7: VAN threshold ordering ────────────────────────────────────────
+	// ── Pass 7: VAN ordering ──────────────────────────────────────────────────
 	console.log('\nPass 7 — VAN threshold ordering...');
 	const vanErrors = checkVanOrdering(data);
-
 	if (vanErrors.length === 0) {
 		console.log('  ✅ Passed');
 		pass7Ok = true;
 	} else {
-		console.error(
-			`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).\n`
-		);
+		console.error(`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).`);
 		printTable(
-			['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Dir', 'AN', 'VAN'],
-			vanErrors.map((e) => {
+			['System', 'Factor', 'Subfactor', 'Metric', 'Dir', 'AN', 'VAN'],
+			vanErrors.map((e: VanOrderError) => {
 				const crumb = resolveLocation(labelMap, e.location);
-				return [
-					trunc(crumb.system),
-					trunc(crumb.factor),
-					trunc(crumb.subfactor),
-					trunc(crumb.indicator),
-					e.metric,
-					e.above_or_below,
-					String(e.an),
-					String(e.van)
-				];
+				return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.metric, e.above_or_below, String(e.an), String(e.van)];
 			})
 		);
 	}
 
-	// ── Pass 8: VAN threshold presence ───────────────────────────────────────
+	// ── Pass 8: VAN presence ──────────────────────────────────────────────────
 	console.log('\nPass 8 — VAN threshold presence...');
-	const vanPresenceErrors = checkVanPresence(data);
-
-	if (vanPresenceErrors.length === 0) {
+	const vanPresErrors = checkVanPresence(data);
+	if (vanPresErrors.length === 0) {
 		console.log('  ✅ Passed');
 		pass8Ok = true;
 	} else {
 		console.error(
-			`  ❌ Failed — ${vanPresenceErrors.length} non-supporting-evidence metric(s) are missing thresholds.van.\n` +
-			'  These metrics feed the ho_secondary and an_primary priority flag branches.\n' +
-			'  Add very-acute-needs thresholds to reference.csv and regenerate reference.json.\n'
+			`  ❌ Failed — ${vanPresErrors.length} non-supporting-evidence metric(s) are missing thresholds.van.\n` +
+			'  These metrics feed the ho_secondary and an_primary priority flag branches.'
 		);
 		printTable(
-			['System', 'Factor', 'Subfactor', 'Indicator', 'Metric', 'Evidence type', 'AN'],
-			vanPresenceErrors.map((e) => {
+			['System', 'Factor', 'Subfactor', 'Metric', 'Evidence type', 'AN'],
+			vanPresErrors.map((e: VanPresenceError) => {
 				const crumb = resolveLocation(labelMap, e.location);
-				return [
-					trunc(crumb.system),
-					trunc(crumb.factor),
-					trunc(crumb.subfactor),
-					trunc(crumb.indicator),
-					e.metric,
-					e.evidence_type,
-					e.an != null ? String(e.an) : '—'
-				];
+				return [trunc(crumb.system), trunc(crumb.factor), trunc(crumb.subfactor), e.metric, e.evidence_type, e.an != null ? String(e.an) : '—'];
 			})
 		);
 	}

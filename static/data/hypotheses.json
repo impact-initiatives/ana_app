@@ -1,96 +1,122 @@
 [
   {
-    "systemId": "mortality",
-    "systemLabel": "Mortality",
+    "hypothesesId": "mortality",
+    "hypothesesLabel": "Mortality",
     "hypotheses": []
   },
   {
-    "systemId": "health_outcomes",
-    "systemLabel": "Health Outcomes",
+    "hypothesesId": "mitigating_services",
+    "hypothesesLabel": "Mitigating services",
+    "colorHex": "#494529",
     "hypotheses": [
       {
         "id": "H1",
-        "description": "Health outcomes indicate severe and/or worsening morbidity and/or malnutrition affecting large segments of the population."
+        "description": "Mitigation systems (health & nutrition services, assistance) are broadly insufficient, inaccessible, overwhelmed, or non-functional"
       },
       {
         "id": "H2",
-        "description": "Health outcomes indicate pockets of severe morbidity and/or malnutrition, but outcomes are not widespread. (Serious/alert)"
+        "description": "Mitigating systems are only partially functioning or partially accessible"
       },
       {
         "id": "H3",
-        "description": "Health outcomes are largely contained/stable, with severe outcomes limited or mitigated"
+        "description": "Mitigating systems are generally functioning & accessible"
       }
     ]
   },
   {
-    "systemId": "food_system",
-    "systemLabel": "Food System",
+    "hypothesesId": "roem",
+    "hypothesesLabel": "RoEM",
+    "colorHex": "#000000",
     "hypotheses": [
       {
         "id": "H1",
-        "description": "Most people experience catastrophic food consumption gaps without mitigation capacities (system failure)"
+        "description": "Excess mortality (above the emergency threshold) is likely ongoing or imminent (next 3 months)"
       },
       {
         "id": "H2",
-        "description": "Some people (pockets of the population) experience catastrophic food consumption gaps without mitigation capacities"
+        "description": "Conditions are severe and preventable deaths might be occurring or imminent, but not at a scale likely to lead to emergency levels"
       },
       {
         "id": "H3",
-        "description": "Most people experience severe food consumption gaps with or without mitigation capacities"
-      },
-      {
-        "id": "H4",
-        "description": "Some people experience severe food consumption gaps with or without mitigation capacities"
-      },
-      {
-        "id": "H5",
-        "description": "Food consumption gaps might exist but are not severe for most people of the population, coping strategies or assistance are largely effective in preventing acute food insecurity"
+        "description": "Conditions are not severe, or severe conditions appear sufficiently mitigated to make emergency levels of mortality unlikely now or in the next 3 months"
       }
     ]
   },
   {
-    "systemId": "water_system",
-    "systemLabel": "Water System",
+    "hypothesesId": "health_outcomes",
+    "hypothesesLabel": "Health Outcomes",
     "hypotheses": [
       {
         "id": "H1",
-        "description": "Water services are severely compromised, affecting most of the population (system failure)"
+        "description": "Health outcomes are severe according to global standards and thresholds."
       },
       {
         "id": "H2",
-        "description": "Water services are severely compromised, affecting pockets of the population"
+        "description": "Health outcomes indicate substantial deterioration or elevated morbidity but are not currently at emergency levels according to global standards (e.g. comparable to IPC Phase 3)."
       },
       {
         "id": "H3",
-        "description": "Water system is functioning with only minor or localised issues; most people have sufficient safe water for basic needs"
+        "description": "Health outcomes are not currently severe (e.g., comparable to Phase 1 or 2)."
       }
     ]
   },
   {
-    "systemId": "living_conditions",
-    "systemLabel": "Living Conditions",
+    "hypothesesId": "food_system",
+    "hypothesesLabel": "Food System",
     "hypotheses": [
       {
         "id": "H1",
-        "description": "Most people live in severely overcrowded, unsanitary, or unsafe conditions (system failure)"
+        "description": "Food consumption gaps are severe and widespread (system failure)"
       },
       {
         "id": "H2",
-        "description": "Severely overcrowded, unsanitary, or unsheltered conditions exist for some people, but are not widespread"
+        "description": "Food consumption gaps are severe but localized / affecting pockets."
       },
       {
         "id": "H3",
-        "description": "Conditions are substandard (e.g., poor quality shelter, limited sanitation), but basic protection and hygiene are maintained for most people through coping or assistance"
-      },
-      {
-        "id": "H4",
-        "description": "Conditions are meeting minimum standards for most of the population"
+        "description": "Food consumption gaps are not severe or effectively mitigate."
       }
     ]
   },
   {
-    "systemId": "health_nutrition_services",
-    "systemLabel": "Health Condition",
+    "hypothesesId": "water_system",
+    "hypothesesLabel": "Water System",
+    "hypotheses": [
+      {
+        "id": "H1",
+        "description": "Water services are severely compromised, affecting most of the population (system failure)."
+      },
+      {
+        "id": "H2",
+        "description": "Water services are severely compromised, affecting pockets of the population."
+      },
+      {
+        "id": "H3",
+        "description": "Water services are not severely compromised or effectively mitigated."
+      }
+    ]
+  },
+  {
+    "hypothesesId": "living_conditions",
+    "hypothesesLabel": "Living Conditions",
+    "hypotheses": [
+      {
+        "id": "H1",
+        "description": "Most people live in severely overcrowded, unsanitary, or unsafe conditions (system failure)."
+      },
+      {
+        "id": "H2",
+        "description": "Severely overcrowded, unsanitary, or unsheltered conditions exist for some people, but are not widespread."
+      },
+      {
+        "id": "H3",
+        "description": "Living conditions are not severely inadequate or effectively mitigated."
+      }
+    ]
+  },
+  {
+    "hypothesesId": "health_nutrition_services",
+    "hypothesesLabel": "Health Condition",
     "hypotheses": [
       {
         "id": "H1",

@@ -33,9 +33,9 @@
 
 Upload a CSV (one row per unit of analysis, columns = metric IDs `MET001`, `MET002`, …). ANA validates it, applies threshold-based flagging across 198 metrics and 8 humanitarian systems, and delivers two core outputs:
 
-| Output | Description |
-|--------|-------------|
-| **Priority flag** | Each unit is screened and assigned one of 8 severity levels — from *Excess Mortality* down to *No Acute Needs* |
+| Output                  | Description                                                                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Priority flag**       | Each unit is screened and assigned one of 8 severity levels — from _Excess Mortality_ down to _No Acute Needs_                                                          |
 | **Deep-dive workbooks** | A ZIP of per-unit XLSX files, pre-filled with metric values, flags, and AN/VAN thresholds. H1–H5 hypothesis and comment columns are left blank for analysts to complete |
 
 Everything else in the app — heatmaps, choropleth map, coverage charts, spotlight cross-tab — is designed to help analysts interpret flagging results and decide which units warrant a deep dive.
@@ -102,13 +102,13 @@ Set `BASE_PATH=/repo-name` when building for GitHub Pages sub-path deploys.
 
 ## App views
 
-| Tab | What you see |
-|-----|-------------|
-| **Overview** | Priority-flag donut chart, ranked UoA table, choropleth map with ADM1/ADM2/mixed boundary modes |
-| **Systems** | Flag-count heatmap across all systems; click any cell to open the metric drilldown |
-| **Metrics** | Factor → subfactor → metric card grid per system; filterable by evidence type |
-| **Coverage** | Data availability bars per system; Health Outcomes tab with metric-level AN/VAN breakdown |
-| **Spotlight** | Custom metric × UoA cross-tab with AN/VAN threshold badges and sticky column |
+| Tab           | What you see                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| **Overview**  | Priority-flag donut chart, ranked UoA table, choropleth map with ADM1/ADM2/mixed boundary modes |
+| **Systems**   | Flag-count heatmap across all systems; click any cell to open the metric drilldown              |
+| **Metrics**   | Factor → subfactor → metric card grid per system; filterable by evidence type                   |
+| **Coverage**  | Data availability bars per system; Health Outcomes tab with metric-level AN/VAN breakdown       |
+| **Spotlight** | Custom metric × UoA cross-tab with AN/VAN threshold badges and sticky column                    |
 
 ---
 
@@ -143,18 +143,18 @@ CSV Upload  (src/routes/+page.svelte)
 
 Each row is one metric. The columns that drive the app's behaviour:
 
-| Column | What it controls |
-|--------|-----------------|
-| Metric ID | Unique code (e.g. `MET001`); must match the column header in the uploaded results CSV |
-| System / Factor / Sub-Factor / Indicator | Placement in the hierarchy |
-| Label | Human-readable name shown in the dashboard |
-| Preference | Methodological robustness: 1 = strong evidence base, 2 = supplementary, 3 = reference-only (excluded from flagging pipeline entirely) |
-| Evidence type | `AN signal`, `Outcome`, `Predictor`, or `Supporting evidence`. `Supporting evidence` metrics receive metric-level flags but are **excluded from subfactor/factor/system rollup** |
-| Type | Accepted value format — e.g. `num[0:1]`, `int[0+]`. Values outside this range are flagged as invalid |
-| Threshold AN / VAN | Numeric cut-offs for Acute Needs and Very Acute Needs. Required for all non-supporting-evidence metrics |
-| Above or below | Whether a value above or below the threshold signals acute needs |
-| Evidence threshold | Minimum metrics with data needed to reach a conclusion in a sub-factor group |
-| Factor threshold | Minimum flagged metrics needed to flag a sub-factor group |
+| Column                                   | What it controls                                                                                                                                                                 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metric ID                                | Unique code (e.g. `MET001`); must match the column header in the uploaded results CSV                                                                                            |
+| System / Factor / Sub-Factor / Indicator | Placement in the hierarchy                                                                                                                                                       |
+| Label                                    | Human-readable name shown in the dashboard                                                                                                                                       |
+| Preference                               | Methodological robustness: 1 = strong evidence base, 2 = supplementary, 3 = reference-only (excluded from flagging pipeline entirely)                                            |
+| Evidence type                            | `AN signal`, `Outcome`, `Predictor`, or `Supporting evidence`. `Supporting evidence` metrics receive metric-level flags but are **excluded from subfactor/factor/system rollup** |
+| Type                                     | Accepted value format — e.g. `num[0:1]`, `int[0+]`. Values outside this range are flagged as invalid                                                                             |
+| Threshold AN / VAN                       | Numeric cut-offs for Acute Needs and Very Acute Needs. Required for all non-supporting-evidence metrics                                                                          |
+| Above or below                           | Whether a value above or below the threshold signals acute needs                                                                                                                 |
+| Evidence threshold                       | Minimum metrics with data needed to reach a conclusion in a sub-factor group                                                                                                     |
+| Factor threshold                         | Minimum flagged metrics needed to flag a sub-factor group                                                                                                                        |
 
 ### How flagging works
 
@@ -171,16 +171,16 @@ Sub-factor → Factor → System statuses propagate upward: `flag` beats `no_fla
 
 #### Priority flag decision tree
 
-| Step | Condition | Flag |
-|------|-----------|------|
-| 0 | Mortality system flagged | `em` |
-| 1 | All classification systems have no data | `no_data` |
-| 2 | HO proportion rule: n > 5 and ≥ 2/3 HO metrics flagged, **or** 1 ≤ n ≤ 5 and ≥ 1/2 flagged | `ho_primary` |
-| 3 | Any HO metric crosses its VAN threshold (strict) | `ho_secondary` |
-| 4 | Health outcomes flagged, **or** any classification metric crosses VAN (strict), **or** ≥ 3 classification systems flagged | `an_primary` |
-| 5 | Any classification system flagged | `an_secondary` |
-| 6 | No flags but some systems have no data or insufficient evidence | `insufficient_evidence` |
-| 7 | All classification systems have data, nothing flagged | `no_acute_needs` |
+| Step | Condition                                                                                                                 | Flag                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| 0    | Mortality system flagged                                                                                                  | `em`                    |
+| 1    | All classification systems have no data                                                                                   | `no_data`               |
+| 2    | HO proportion rule: n > 5 and ≥ 2/3 HO metrics flagged, **or** 1 ≤ n ≤ 5 and ≥ 1/2 flagged                                | `ho_primary`            |
+| 3    | Any HO metric crosses its VAN threshold (strict)                                                                          | `ho_secondary`          |
+| 4    | Health outcomes flagged, **or** any classification metric crosses VAN (strict), **or** ≥ 3 classification systems flagged | `an_primary`            |
+| 5    | Any classification system flagged                                                                                         | `an_secondary`          |
+| 6    | No flags but some systems have no data or insufficient evidence                                                           | `insufficient_evidence` |
+| 7    | All classification systems have data, nothing flagged                                                                     | `no_acute_needs`        |
 
 **Classification systems:** Food Security, Health Outcomes, Livelihoods, WASH, Health/Nutrition Services (Mortality and Market Functionality have dedicated rules).
 
@@ -241,12 +241,12 @@ priority_flag
 
 **Status vocabulary** (applies at every rollup level):
 
-| Value | Meaning |
-|-------|---------|
-| `flag` | Threshold crossed — acute needs signal |
-| `no_flag` | Sufficient evidence, nothing flagged |
+| Value                   | Meaning                                |
+| ----------------------- | -------------------------------------- |
+| `flag`                  | Threshold crossed — acute needs signal |
+| `no_flag`               | Sufficient evidence, nothing flagged   |
 | `insufficient_evidence` | Some data but below evidence threshold |
-| `no_data` | No data at all for this level |
+| `no_data`               | No data at all for this level          |
 
 `priority_flag` values (severity order): `em` · `ho_primary` · `ho_secondary` · `an_primary` · `an_secondary` · `insufficient_evidence` · `no_data` · `no_acute_needs`
 
@@ -256,73 +256,73 @@ priority_flag
 
 ### Engine — `src/lib/engine/`
 
-| File | Role |
-|------|------|
-| `pipeline.ts` | Orchestrates validate → flag → admin fetch (admin fetch fire-and-forget) |
-| `validator.ts` | Validates CSV structure, metric presence, UoA uniqueness, type constraints |
-| `flagger.ts` | Threshold flagging with `@tidyjs/tidy`; sub-factor → factor → system → priority_flag rollup |
-| `metricMetadata.ts` | Traverses `reference.json`; provides `getAllMetricIds()`, `buildSubfactorList()`, `buildReferenceRows()` |
-| `fetchAdmin.ts` | Detects p-codes in UoA column, fetches ADM1/ADM2 GeoJSON |
-| `download.ts` | Exports results as CSV / JSON / XLSX |
-| `deepdive.ts` | Generates ZIP of per-UoA XLSX workbooks; reads system colours via `getComputedStyle` |
-| `mergeDeepDives.ts` | Merges analyst-completed deep-dive workbooks back into the app |
-| `exportMap.ts` | Builds self-contained composite SVG (title, map, legend, logos) for map export |
-| `parser.ts` | PapaParse wrapper; returns `{ headers, rows }` |
-| `referenceBuilder.ts` | Constructs `reference.json` hierarchy at runtime from flat metric list |
-| `referenceMerger.ts` | Merges custom reference rows into the base reference |
+| File                  | Role                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| `pipeline.ts`         | Orchestrates validate → flag → admin fetch (admin fetch fire-and-forget)                                 |
+| `validator.ts`        | Validates CSV structure, metric presence, UoA uniqueness, type constraints                               |
+| `flagger.ts`          | Threshold flagging with `@tidyjs/tidy`; sub-factor → factor → system → priority_flag rollup              |
+| `metricMetadata.ts`   | Traverses `reference.json`; provides `getAllMetricIds()`, `buildSubfactorList()`, `buildReferenceRows()` |
+| `fetchAdmin.ts`       | Detects p-codes in UoA column, fetches ADM1/ADM2 GeoJSON                                                 |
+| `download.ts`         | Exports results as CSV / JSON / XLSX                                                                     |
+| `deepdive.ts`         | Generates ZIP of per-UoA XLSX workbooks; reads system colours via `getComputedStyle`                     |
+| `mergeDeepDives.ts`   | Merges analyst-completed deep-dive workbooks back into the app                                           |
+| `exportMap.ts`        | Builds self-contained composite SVG (title, map, legend, logos) for map export                           |
+| `parser.ts`           | PapaParse wrapper; returns `{ headers, rows }`                                                           |
+| `referenceBuilder.ts` | Constructs `reference.json` hierarchy at runtime from flat metric list                                   |
+| `referenceMerger.ts`  | Merges custom reference rows into the base reference                                                     |
 
 ### Stores — `src/lib/stores/`
 
 All stores use Svelte 5 `$state` runes and persist to `localStorage`.
 
-| Store | Key | Purpose |
-|-------|-----|---------|
-| `metricStore` | `ana_metric_store_v2` | Loads `reference.json`; exposes `referenceJson` (full tree) and `metricMap` (flat, keyed by `MET001`) |
-| `flagStore` | `ana_flag_store_v2` | Stores `flaggedResult[]` rows from the pipeline |
-| `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON admin boundaries; fetch state: `idle \| loading \| done \| error` |
-| `resultsFilterStore` | `ana_results_filters_v1` | Active filter selections (UoA, system, flag status) |
-| `validatorStore` | — | Transient validation state; cleared after flagging completes |
-| `circlePackingStore` | — | Tree data for the circle-packing reference visualisation |
+| Store                | Key                        | Purpose                                                                                               |
+| -------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `metricStore`        | `ana_metric_store_v2`      | Loads `reference.json`; exposes `referenceJson` (full tree) and `metricMap` (flat, keyed by `MET001`) |
+| `flagStore`          | `ana_flag_store_v2`        | Stores `flaggedResult[]` rows from the pipeline                                                       |
+| `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON admin boundaries; fetch state: `idle \| loading \| done \| error`                      |
+| `resultsFilterStore` | `ana_results_filters_v1`   | Active filter selections (UoA, system, flag status)                                                   |
+| `validatorStore`     | —                          | Transient validation state; cleared after flagging completes                                          |
+| `circlePackingStore` | —                          | Tree data for the circle-packing reference visualisation                                              |
 
 ### Routes
 
-| Route | Purpose |
-|-------|---------|
-| `/` | Home — CSV upload, step-by-step guidance, pipeline trigger |
-| `/results` | Main results — heatmap, drilldown, coverage, spotlight, export |
-| `/reference` | Full metric framework (table + circle-packing visualisation) |
-| `/validate` | Standalone CSV validator |
-| `/merge` | Merge analyst-completed deep-dive workbooks |
+| Route        | Purpose                                                        |
+| ------------ | -------------------------------------------------------------- |
+| `/`          | Home — CSV upload, step-by-step guidance, pipeline trigger     |
+| `/results`   | Main results — heatmap, drilldown, coverage, spotlight, export |
+| `/reference` | Full metric framework (table + circle-packing visualisation)   |
+| `/validate`  | Standalone CSV validator                                       |
+| `/merge`     | Merge analyst-completed deep-dive workbooks                    |
 
 ### Components
 
 #### `src/lib/components/results/`
 
-| Component | Purpose |
-|-----------|---------|
-| `ResultsOverview.svelte` | Overview tab — donut chart, UoA ranking table, choropleth map |
-| `ResultsSystems.svelte` | System heatmap overview; clicks open the metric drilldown |
-| `ResultsMetrics.svelte` | Factor → subfactor → metric card grid per system |
-| `ResultsCoverage.svelte` | Coverage summary across all systems |
-| `ResultsSpotlight.svelte` | Custom metric × UoA cross-tab with AN/VAN threshold badges |
-| `ResultsExport.svelte` | Export controls (CSV / JSON / XLSX / deep-dive ZIP) |
-| `FiltersSidebar.svelte` | Filter panel (UoA, system, factor, status) |
+| Component                 | Purpose                                                       |
+| ------------------------- | ------------------------------------------------------------- |
+| `ResultsOverview.svelte`  | Overview tab — donut chart, UoA ranking table, choropleth map |
+| `ResultsSystems.svelte`   | System heatmap overview; clicks open the metric drilldown     |
+| `ResultsMetrics.svelte`   | Factor → subfactor → metric card grid per system              |
+| `ResultsCoverage.svelte`  | Coverage summary across all systems                           |
+| `ResultsSpotlight.svelte` | Custom metric × UoA cross-tab with AN/VAN threshold badges    |
+| `ResultsExport.svelte`    | Export controls (CSV / JSON / XLSX / deep-dive ZIP)           |
+| `FiltersSidebar.svelte`   | Filter panel (UoA, system, factor, status)                    |
 
 #### `src/lib/components/viz/`
 
-| Component | Purpose |
-|-----------|---------|
-| `HeatmapGrid.svelte` | Systems × subfactors colour grid |
-| `SystemMatrix.svelte` | Expanded per-system metric matrix |
-| `MetricDrilldown.svelte` | Metric-level detail panel (value, status, threshold) |
-| `CirclePacking.svelte` | Zoomable D3 circle-packing tree (5 depths: system → metric) |
-| `CoverageDetailCards.svelte` | Per-factor coverage bars |
-| `HealthOutcomesCoverage.svelte` | Health outcomes AN/VAN metric breakdown |
-| `PrelimFlagDonut.svelte` | Donut chart of priority-flag distribution |
-| `UoaRankingTable.svelte` | Ranked UoA table by priority flag |
-| `UoaDetailPanel.svelte` | Single-UoA detail view |
-| `UoaClusterPanel.svelte` | Cluster view for UoA grouping |
-| `ChoroplethMap.svelte` | Choropleth map (p-codes + admin boundaries) |
+| Component                       | Purpose                                                     |
+| ------------------------------- | ----------------------------------------------------------- |
+| `HeatmapGrid.svelte`            | Systems × subfactors colour grid                            |
+| `SystemMatrix.svelte`           | Expanded per-system metric matrix                           |
+| `MetricDrilldown.svelte`        | Metric-level detail panel (value, status, threshold)        |
+| `CirclePacking.svelte`          | Zoomable D3 circle-packing tree (5 depths: system → metric) |
+| `CoverageDetailCards.svelte`    | Per-factor coverage bars                                    |
+| `HealthOutcomesCoverage.svelte` | Health outcomes AN/VAN metric breakdown                     |
+| `PriorityFlagDonut.svelte`      | Donut chart of priority-flag distribution                   |
+| `UoaRankingTable.svelte`        | Ranked UoA table by priority flag                           |
+| `UoaDetailPanel.svelte`         | Single-UoA detail view                                      |
+| `UoaClusterPanel.svelte`        | Cluster view for UoA grouping                               |
+| `ChoroplethMap.svelte`          | Choropleth map (p-codes + admin boundaries)                 |
 
 #### `src/lib/components/ui/`
 
@@ -335,9 +335,9 @@ General-purpose primitives: `TooltipCard`, `LegendBadge`, `PriorityBadge`, `Data
 Each system colour is defined as a single base hex in `:root`; five depth variants are derived automatically:
 
 ```css
---color-sys-food-systems: #61d095;
---color-sys-food-systems-d1: color-mix(in srgb, var(--color-sys-food-systems) 10%, transparent);
---color-sys-food-systems-d2: color-mix(in srgb, var(--color-sys-food-systems) 40%, transparent);
+--color-sys-food-system: #61d095;
+--color-sys-food-system-d1: color-mix(in srgb, var(--color-sys-food-system) 10%, transparent);
+--color-sys-food-system-d2: color-mix(in srgb, var(--color-sys-food-system) 40%, transparent);
 /* … d3, d4, d5 */
 ```
 
@@ -345,13 +345,13 @@ Each system colour is defined as a single base hex in `:root`; five depth varian
 
 ### Type system — `src/lib/types/`
 
-| File | What lives here |
-|------|----------------|
-| `structure.ts` | Priority-flag severity order, system/factor/subfactor ID enums |
-| `reference-json.ts` | Zod v4 schema + inferred TypeScript types for `reference.json` |
-| `generated/` | Auto-generated enums from lookup CSVs — do not edit directly |
-| `steps.ts` | Upload wizard step definitions |
-| `deepdives.ts` | Deep-dive XLSX column definitions (`tableHeaders`, `colWidths`, `colCount`) |
+| File                | What lives here                                                             |
+| ------------------- | --------------------------------------------------------------------------- |
+| `structure.ts`      | Priority-flag severity order, system/factor/subfactor ID enums              |
+| `reference-json.ts` | Zod v4 schema + inferred TypeScript types for `reference.json`              |
+| `generated/`        | Auto-generated enums from lookup CSVs — do not edit directly                |
+| `steps.ts`          | Upload wizard step definitions                                              |
+| `deepdives.ts`      | Deep-dive XLSX column definitions (`tableHeaders`, `colWidths`, `colCount`) |
 
 ---
 
@@ -371,20 +371,20 @@ Each system colour is defined as a single base hex in `:root`; five depth varian
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-892CA0?logo=podman&logoColor=white)
 
-| Library | Role |
-|---------|------|
+| Library                        | Role                                                             |
+| ------------------------------ | ---------------------------------------------------------------- |
 | SvelteKit 2 + `adapter-static` | Framework; SPA fallback; deploys to GitHub Pages via `BASE_PATH` |
-| Svelte 5 | Runes-only (`$state`, `$derived`, `$effect`); no legacy stores |
-| Tailwind CSS 4 | Utility classes configured via `@plugin` in `app.css` |
-| DaisyUI 5 | Component classes; two themes: `ana-light`, `ana-dark` |
-| D3 | Visualisation primitives: scales, geo, force, zoom, pack, axis |
-| SveltePlot | Chart components built on Observable Plot |
-| @tidyjs/tidy | Data wrangling in `flagger.ts` |
-| Zod v4 | Schema validation for `reference.json` |
-| PapaParse | CSV parsing |
-| Turf.js | Geospatial operations (buffer, dissolve, union, simplify) |
-| ExcelJS + fflate | XLSX export and ZIP packaging |
-| Vitest | Test runner |
+| Svelte 5                       | Runes-only (`$state`, `$derived`, `$effect`); no legacy stores   |
+| Tailwind CSS 4                 | Utility classes configured via `@plugin` in `app.css`            |
+| DaisyUI 5                      | Component classes; two themes: `ana-light`, `ana-dark`           |
+| D3                             | Visualisation primitives: scales, geo, force, zoom, pack, axis   |
+| SveltePlot                     | Chart components built on Observable Plot                        |
+| @tidyjs/tidy                   | Data wrangling in `flagger.ts`                                   |
+| Zod v4                         | Schema validation for `reference.json`                           |
+| PapaParse                      | CSV parsing                                                      |
+| Turf.js                        | Geospatial operations (buffer, dissolve, union, simplify)        |
+| ExcelJS + fflate               | XLSX export and ZIP packaging                                    |
+| Vitest                         | Test runner                                                      |
 
 ---
 
@@ -392,29 +392,29 @@ Each system colour is defined as a single base hex in `:root`; five depth varian
 
 ### Repository map
 
-| Directory / file | What lives here |
-|-----------------|-----------------|
-| `static/data/reference.csv` | Metric-level source of truth — edit here, then run `data:refresh` |
-| `static/data/system.csv` | Canonical list of valid system IDs + labels |
-| `static/data/factor.csv` | Canonical `(factor, system)` pairs |
-| `static/data/subfactor.csv` | Canonical `(sub_factor, factor, system)` triples |
-| `static/data/reference.json` | Generated — do not edit directly |
-| `static/data/reference-circlepacking.json` | Generated — do not edit directly |
-| `scripts/` | Generation and validation scripts (Bun, not bundled into the app) |
-| `src/lib/engine/` | All data-processing logic: validation, flagging, export |
-| `src/lib/types/` | TypeScript interfaces and Zod schemas |
-| `src/lib/stores/` | Runtime state (`metricStore` loads `reference.json`; `flagStore` holds pipeline output) |
+| Directory / file                           | What lives here                                                                         |
+| ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `static/data/reference.csv`                | Metric-level source of truth — edit here, then run `data:refresh`                       |
+| `static/data/system.csv`                   | Canonical list of valid system IDs + labels                                             |
+| `static/data/factor.csv`                   | Canonical `(factor, system)` pairs                                                      |
+| `static/data/subfactor.csv`                | Canonical `(sub_factor, factor, system)` triples                                        |
+| `static/data/reference.json`               | Generated — do not edit directly                                                        |
+| `static/data/reference-circlepacking.json` | Generated — do not edit directly                                                        |
+| `scripts/`                                 | Generation and validation scripts (Bun, not bundled into the app)                       |
+| `src/lib/engine/`                          | All data-processing logic: validation, flagging, export                                 |
+| `src/lib/types/`                           | TypeScript interfaces and Zod schemas                                                   |
+| `src/lib/stores/`                          | Runtime state (`metricStore` loads `reference.json`; `flagStore` holds pipeline output) |
 
 ### CSV → JSON generation
 
-| Script | Input | Output |
-|--------|-------|--------|
-| `scripts/generate-reference-json.ts` | `reference.csv` | `reference.json` + `reference-circlepacking.json` |
-| `scripts/validate-reference-json.ts` | `reference.json` + `system/factor/subfactor.csv` | — (exits non-zero on error) |
-| `scripts/validate-circlepacking-json.ts` | `reference-circlepacking.json` | — |
-| `scripts/generate-system-enum.ts` | `system.csv` | `src/lib/types/generated/system-enum.ts` |
-| `scripts/generate-factor-enum.ts` | `factor.csv` | `src/lib/types/generated/factor-enum.ts` |
-| `scripts/generate-subfactor-enum.ts` | `subfactor.csv` | `src/lib/types/generated/subfactor-enum.ts` |
+| Script                                   | Input                                            | Output                                            |
+| ---------------------------------------- | ------------------------------------------------ | ------------------------------------------------- |
+| `scripts/generate-reference-json.ts`     | `reference.csv`                                  | `reference.json` + `reference-circlepacking.json` |
+| `scripts/validate-reference-json.ts`     | `reference.json` + `system/factor/subfactor.csv` | — (exits non-zero on error)                       |
+| `scripts/validate-circlepacking-json.ts` | `reference-circlepacking.json`                   | —                                                 |
+| `scripts/generate-system-enum.ts`        | `system.csv`                                     | `src/lib/types/generated/system-enum.ts`          |
+| `scripts/generate-factor-enum.ts`        | `factor.csv`                                     | `src/lib/types/generated/factor-enum.ts`          |
+| `scripts/generate-subfactor-enum.ts`     | `subfactor.csv`                                  | `src/lib/types/generated/subfactor-enum.ts`       |
 
 Run everything: `bun run data:refresh`
 
@@ -456,14 +456,15 @@ Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tabl
 
 ### Maintenance quick-reference
 
-| Task | Files to touch |
-|------|---------------|
-| Add / remove a metric | `reference.csv` → `bun run data:refresh` |
-| Change flagging thresholds | `reference.csv` → `bun run data:refresh` |
-| Add a new system | `system.csv` → `reference.csv` → `bun run data:refresh` |
-| Add a new factor | `factor.csv` → `reference.csv` → `bun run data:refresh` |
-| Add a new sub-factor | `subfactor.csv` → `reference.csv` → `bun run data:refresh` |
-| Rename / remove a system, factor, subfactor | Update lookup CSV + `reference.csv` → `data:refresh` → `generate:enums` → search codebase for old ID |
-| Change rollup or decision-tree logic | `src/lib/engine/flagger.ts` |
-| Change deep-dive XLSX layout or columns | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts` |
-| Add a new required CSV field | `reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |
+| Task                                        | Files to touch                                                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Add / remove a metric                       | `reference.csv` → `bun run data:refresh`                                                                                  |
+| Change flagging thresholds                  | `reference.csv` → `bun run data:refresh`                                                                                  |
+| Add a new system                            | `system.csv` → `reference.csv` → `bun run data:refresh`                                                                   |
+| Add a new factor                            | `factor.csv` → `reference.csv` → `bun run data:refresh`                                                                   |
+| Add a new sub-factor                        | `subfactor.csv` → `reference.csv` → `bun run data:refresh`                                                                |
+| Rename / remove a system, factor, subfactor | Update lookup CSV + `reference.csv` → `data:refresh` → `generate:enums` → search codebase for old ID                      |
+| Change rollup or decision-tree logic        | `src/lib/engine/flagger.ts`                                                                                               |
+| Change deep-dive XLSX layout or columns     | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts`                                                               |
+| Add / edit hypotheses or non-system blocks  | `static/data/hypotheses.json` (schema in `src/lib/types/hypotheses.ts`) → `bun run validate:hypotheses-json`              |
+| Add a new required CSV field                | `reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |

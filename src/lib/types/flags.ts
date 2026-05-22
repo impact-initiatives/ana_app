@@ -40,8 +40,8 @@ export const PRIORITY_FLAG_KEYS = [
 	'an_primary',
 	'an_secondary',
 	'insufficient_evidence',
-	'no_data',
-	'no_acute_needs'
+	'no_acute_needs',
+	'no_data'
 ] as const satisfies readonly PriorityFlag[];
 
 /** PriorityFlag values that represent confirmed acute needs requiring prioritisation. */
@@ -53,14 +53,7 @@ export const ACUTE_PRIORITY_FLAGS = new Set<PriorityFlag>([
 	'an_secondary'
 ]);
 
-/** Severity order for sorting — lower number = higher severity. */
-export const PRIORITY_ORDER: Record<PriorityFlag, number> = {
-	em: 0,
-	ho_primary: 1,
-	ho_secondary: 2,
-	an_primary: 3,
-	an_secondary: 4,
-	insufficient_evidence: 5,
-	no_acute_needs: 6,
-	no_data: 7
-};
+/** Severity order for sorting — lower index = higher severity. Derived from PRIORITY_FLAG_KEYS. */
+export const PRIORITY_ORDER = Object.fromEntries(
+	PRIORITY_FLAG_KEYS.map((k, i) => [k, i])
+) as Record<PriorityFlag, number>;

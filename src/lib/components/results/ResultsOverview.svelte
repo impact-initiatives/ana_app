@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PrelimFlagDonut from '$lib/components/viz/PrelimFlagDonut.svelte';
+	import PriorityFlagDonut from '$lib/components/viz/PriorityFlagDonut.svelte';
 	import UoaRankingTable from '$lib/components/viz/UoaRankingTable.svelte';
 	import ChoroplethMap from '$lib/components/viz/ChoroplethMap.svelte';
 	import type { MapLayer } from '$lib/components/viz/ChoroplethMap.svelte';
@@ -389,7 +389,7 @@
 	<!-- Donut + ranking table -->
 	<div class="mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-5">
 		<div class="lg:col-span-2">
-			<PrelimFlagDonut
+			<PriorityFlagDonut
 				rows={effectiveRows}
 				selectedKeys={selectedPrelimKeys}
 				onsliceclick={ondonutsliceclick}
@@ -509,7 +509,10 @@
 							{systems}
 							{systemCodes}
 							ondrilldown={onselectinheatmap}
-							onclear={() => { selectedUoas.clear(); onmapselectreset?.(); }}
+							onclear={() => {
+								selectedUoas.clear();
+								onmapselectreset?.();
+							}}
 						/>
 					</div>
 				{:else if selectedMapUoa}

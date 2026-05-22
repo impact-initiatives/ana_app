@@ -8,14 +8,11 @@
 	import Uploader, { type ProcessResult } from '$lib/components/data/Uploader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
-	import { flagStore, clearFlagResult } from '$lib/stores/flagStore.svelte';
-	import {
-		validatorStore,
-		saveValidatorState,
-		clearValidatorState
-	} from '$lib/stores/validatorStore.svelte';
-	import { adminFeaturesStore, clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
-	import { validateCsv } from '$lib/engine/validator';
+	import { flagStore } from '$lib/stores/flagStore.svelte';
+	import { validatorStore, saveValidatorState } from '$lib/stores/validatorStore.svelte';
+	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
+	import { clearAllStores } from '$lib/utils/clearAll';
+	import { validateCsv } from '$lib/engine/dataValidator';
 	import { parseFile } from '$lib/engine/parser';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -100,8 +97,7 @@
 	});
 
 	async function processMetricsCsv(file: File): Promise<ProcessResult> {
-		clearFlagResult();
-		if (adminFeaturesStore.fetchState === 'error') clearAdminFeatures();
+		clearAllStores();
 		validationPassed = false;
 
 		const parsed = await parseFile(file);
@@ -191,9 +187,7 @@
 		lastRows = [];
 		filename = null;
 		validationPassed = false;
-		clearValidatorState();
-		clearFlagResult();
-		clearAdminFeatures();
+		clearAllStores();
 	}
 </script>
 

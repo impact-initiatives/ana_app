@@ -52,7 +52,9 @@
 		selectedUoas = []
 	}: Props = $props();
 
-	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(null);
+	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(
+		null
+	);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
 	let containerWidth = $state(0);
@@ -374,7 +376,7 @@
 {/if}
 
 {#if layer.type === 'prelim'}
-	<LegendBadge keys={[]} priorityKeys={PRIORITY_FLAG_KEYS} />
+	<LegendBadge keys={[]} tinted={false} priorityKeys={PRIORITY_FLAG_KEYS} />
 {:else}
-	<LegendBadge keys={legendStatusKeys} />
+	<LegendBadge tinted={false} keys={legendStatusKeys} />
 {/if}

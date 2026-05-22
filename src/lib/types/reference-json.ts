@@ -58,7 +58,7 @@ export type { MetricID, MetricType as IndicatorType } from './structure';
  *   Type-bound checks — i.e. whether a user-supplied CSV cell value satisfies
  *   the constraints implied by the `type` string (int vs num, lb, ub) — are
  *   performed at the CSV validation stage in:
- *     src/lib/engine/validator.js → checkValueAgainstType()
+ *     src/lib/engine/dataValidator.ts → checkValueAgainstType()
  *   They are intentionally NOT enforced here.
  *
  * ─── Threshold fields ────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ export const MetricSchema = z
 		// ── Rule: van requires an ─────────────────────────────────────────────
 		// This is a structural constraint on the JSON itself.
 		// Type-bound checks (int/num, lb, ub) are performed at the CSV
-		// validation stage in src/lib/engine/validator.js, not here.
+		// validation stage in src/lib/engine/dataValidator.ts, not here.
 		//
 		// The semantic rule "non-supporting-evidence metrics must have van" is
 		// enforced separately in scripts/validate-reference-json.ts Pass 8,

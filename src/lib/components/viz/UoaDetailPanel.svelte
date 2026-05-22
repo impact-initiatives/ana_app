@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { FLAG_BADGE_MAP, getFlagBadge, getPriorityBadge, systemBaseColor } from '$lib/utils/colors';
+	import {
+		FLAG_BADGE_MAP,
+		getFlagBadge,
+		getPriorityBadge,
+		systemBaseColor
+	} from '$lib/utils/colors';
 	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
@@ -88,8 +93,8 @@
 			{/if}
 		</div>
 
-		{#if !row}
-			<p class="text-base-content/75 text-sm">No data is available for this area.</p>
+		{#if !row || row.priority_flag === 'no_data'}
+			<p class="text-base-content/85 text-sm">No data is available for this area.</p>
 		{:else}
 			<p class="">Systems have been flagged as follows:</p>
 			<div class="flex flex-wrap gap-3 text-sm">
@@ -154,7 +159,7 @@
 							</div>
 
 							<!-- Status badge -->
-							<span class="badge badge-sm shrink-0" style={fb.badgeTintStyle}>{fb.label}</span>
+							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
 						</button>
 					{/each}
 				</div>

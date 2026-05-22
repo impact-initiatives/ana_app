@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { asset } from '$app/paths';
 import type { Metric } from '$lib/types/structure';
-import type { MetricMap } from '$lib/engine/validator';
+import type { MetricMap } from '$lib/engine/dataValidator';
 import type { RefRow } from '$lib/engine/referenceBuilder';
 import type { MergeStats } from '$lib/engine/referenceMerger';
 
@@ -9,7 +9,9 @@ import type { MergeStats } from '$lib/engine/referenceMerger';
 
 async function loadReference(init?: RequestInit): Promise<unknown> {
 	const url = asset('/data/reference.json');
-	const res = await fetch(url, init);
+	// no-cache: always revalidate with the server (ETag/304) so a redeployed
+	// reference.json is detected even when the browser has a cached copy.
+	const res = await fetch(url, { cache: 'no-cache', ...init });
 	if (!res.ok) throw new Error(`Failed to fetch reference.json: ${res.status}`);
 	return res.json();
 }
@@ -54,8 +56,8 @@ function flattenMetrics(json: unknown): MetricMap {
 	return map;
 }
 
-const STORAGE_KEY = 'ana_metric_store_v2';
-const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
+export const STORAGE_KEY = 'ana_metric_store_v2';
+export const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
@@ -110,13 +112,19 @@ export function hydrateMetricStore(): void {
 	metricStore.generatedAt = saved.generatedAt;
 }
 
-export async function loadMetrics(): Promise<void> {
+export async function loadMetrics(): Promise<{ frameworkUpdated: boolean }> {
 	try {
 		const json = await loadReference();
 		const incoming = (json as Record<string, any>).generatedAt as string | undefined;
 
-		// Check for stored custom rows and re-merge if present
-		const customRaw = browser ? localStorage.getItem(CUSTOM_ROWS_KEY) : null;
+		// Detect framework change: new generatedAt differs from a previously-stored non-null value.
+		// First-time loads (storedAt === null) are not "updates" — the user has no stale data.
+		const storedAt = metricStore.generatedAt;
+		const frameworkUpdated = !!(incoming && storedAt && incoming !== storedAt);
+
+		// Skip custom rows re-merge when the framework has changed — old custom MET_IDs may
+		// no longer exist in the new schema. The caller will wipe the custom rows.
+		const customRaw = (!frameworkUpdated && browser) ? localStorage.getItem(CUSTOM_ROWS_KEY) : null;
 		if (customRaw) {
 			try {
 				const { rows, stats, appliedAt } = JSON.parse(customRaw) as {
@@ -134,13 +142,13 @@ export async function loadMetrics(): Promise<void> {
 				metricStore.customMergeStats = stats;
 				metricStore.customAppliedAt = appliedAt;
 				persist($state.snapshot(metricStore) as MetricStoreState);
-				return;
+				return { frameworkUpdated };
 			} catch (e) {
 				console.warn('[metricStore] Failed to re-apply custom reference, falling back to base:', e);
 			}
 		}
 
-		if (incoming && incoming === metricStore.generatedAt && !metricStore.customReferenceActive) return;
+		if (incoming && incoming === storedAt && !metricStore.customReferenceActive) return { frameworkUpdated: false };
 		const map = flattenMetrics(json);
 		metricStore.referenceJson = json as Record<string, any>;
 		metricStore.metricMap = map;
@@ -149,9 +157,22 @@ export async function loadMetrics(): Promise<void> {
 		metricStore.customMergeStats = null;
 		metricStore.customAppliedAt = null;
 		persist($state.snapshot(metricStore) as MetricStoreState);
+		return { frameworkUpdated };
 	} catch (e) {
 		console.error('[metricStore] Failed to load reference.json:', e);
+		return { frameworkUpdated: false };
 	}
+}
+
+/**
+ * Clear only the custom-reference side-effects without resetting the base reference or
+ * reloading. Used when the framework version changes on boot.
+ */
+export function clearCustomReferenceState(): void {
+	if (browser) localStorage.removeItem(CUSTOM_ROWS_KEY);
+	metricStore.customReferenceActive = false;
+	metricStore.customMergeStats = null;
+	metricStore.customAppliedAt = null;
 }
 
 /**

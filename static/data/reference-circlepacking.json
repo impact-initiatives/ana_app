@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-19T09:09:50.772Z",
+  "generatedAt": "2026-05-22T12:16:13.053Z",
   "name": "root",
   "id": "root",
   "children": [
@@ -790,9 +790,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
                         "factor_threshold": 2,
@@ -822,9 +822,9 @@
                         "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
                         "factor_threshold": 2,
@@ -848,9 +848,9 @@
                         "remarks_limitations": "Can use PHU4IMPACT functions to compute the composite scores",
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
                         "factor_threshold": 2,
@@ -944,9 +944,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
                         "factor_threshold": 2,
@@ -1730,9 +1730,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.3,
-                          "van": null
+                          "van": 0.45
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -1756,9 +1756,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.5,
-                          "van": null
+                          "van": 0.75
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -1782,9 +1782,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.5,
-                          "van": null
+                          "van": 0.75
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -2082,9 +2082,9 @@
                         "remarks_limitations": "Low total water = signal of system stress/collapse",
                         "thresholds": {
                           "an": 7.5,
-                          "van": null
+                          "van": 3.75
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -2114,9 +2114,9 @@
                         "remarks_limitations": "Low drinking water indicates potential survival risk\r\nLow domestic water indicates hygiene breakdown, potential disease risk",
                         "thresholds": {
                           "an": 3,
-                          "van": null
+                          "van": 1.5
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -2242,9 +2242,9 @@
                         "remarks_limitations": "Reliance on surface water indicates high vulnerability, increased disease risk",
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3130,9 +3130,9 @@
                         "remarks_limitations": "Check contextualized options for inadequate shelter type",
                         "thresholds": {
                           "an": 0.4,
-                          "van": null
+                          "van": 0.6
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
                         "factor_threshold": 1,
@@ -3270,9 +3270,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.75,
-                          "van": null
+                          "van": 0.375
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3296,9 +3296,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.1,
-                          "van": null
+                          "van": 0.15
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3322,9 +3322,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.15,
-                          "van": null
+                          "van": 0.225
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3354,9 +3354,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.75,
-                          "van": null
+                          "van": 0.375
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3380,9 +3380,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.03,
-                          "van": null
+                          "van": 0.045
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3405,10 +3405,10 @@
                         "question_kobo_code": null,
                         "remarks_limitations": null,
                         "thresholds": {
-                          "an": 0.15,
-                          "van": null
+                          "an": 0.16,
+                          "van": 0.225
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3438,9 +3438,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.3,
-                          "van": null
+                          "van": 0.45
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3464,9 +3464,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.3,
-                          "van": null
+                          "van": 0.45
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3490,9 +3490,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.2,
-                          "van": null
+                          "van": 0.3
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3636,9 +3636,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.05,
-                          "van": null
+                          "van": 0.075
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3662,9 +3662,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.01,
-                          "van": null
+                          "van": 0.015
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3688,9 +3688,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.7,
-                          "van": null
+                          "van": 1.05
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3862,9 +3862,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 250000,
-                          "van": null
+                          "van": 375000
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3920,9 +3920,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.5,
-                          "van": null
+                          "van": 0.25
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -3946,9 +3946,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.4,
-                          "van": null
+                          "van": 0.2
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -4004,9 +4004,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 0.4,
-                          "van": null
+                          "van": 0.2
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -4264,12 +4264,12 @@
                   "id": "health_nutrition_services::health_services::accessibility::social_access_to_health_care",
                   "children": [
                     {
-                      "name": "Qualitative reports of exclusion of certain groups",
+                      "name": "Qualitative reports of exclusion of certain groups from health care",
                       "id": "MET185",
                       "value": 3,
                       "metric": {
                         "metric": "MET185",
-                        "label": "Qualitative reports of exclusion of certain groups",
+                        "label": "Qualitative reports of exclusion of certain groups from health care",
                         "level": "Community or system level contributing factors",
                         "preference": 1,
                         "evidence_type": "Supporting evidence",
@@ -4426,9 +4426,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 10,
-                          "van": null
+                          "van": 15
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -4484,9 +4484,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 1,
-                          "van": null
+                          "van": 1.5
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -4516,9 +4516,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 10,
-                          "van": null
+                          "van": 15
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,
@@ -4574,9 +4574,9 @@
                         "remarks_limitations": null,
                         "thresholds": {
                           "an": 1,
-                          "van": null
+                          "van": 1.5
                         },
-                        "van_is_strict": false,
+                        "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
                         "factor_threshold": 1,

@@ -168,7 +168,8 @@ function build(rows: RefRow[]): {
 
 	for (const row of rows) {
 		const id = row['MET_ID']?.trim();
-		if (!id?.startsWith('MET')) continue;
+		// Do not skip empty/invalid IDs — include them so Pass 5 catches them consistently
+		// with the browser upload path. Blank trailing CSV rows will also fail Pass 5.
 
 		const sysId = toSnakeCase(row['System'] ?? '');
 		const facId = toSnakeCase(row['Factor'] ?? '');

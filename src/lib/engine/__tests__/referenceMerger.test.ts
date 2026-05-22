@@ -218,14 +218,14 @@ describe('mergeCustomRows — stats', () => {
 
 describe('mergeCustomRows — Zod post-merge validation', () => {
 	it('returns no zodErrors for a valid merge', () => {
-		const { zodErrors } = mergeCustomRows(baseJson as Record<string, unknown>, [
+		const { errors: zodErrors } = mergeCustomRows(baseJson as Record<string, unknown>, [
 			row({ MET_ID: 'MET001', 'Acute needs threshold (4)': '0.75' })
 		]);
 		expect(zodErrors).toHaveLength(0);
 	});
 
 	it('returns no zodErrors when adding a new metric with valid data', () => {
-		const { zodErrors } = mergeCustomRows(baseJson as Record<string, unknown>, [
+		const { errors: zodErrors } = mergeCustomRows(baseJson as Record<string, unknown>, [
 			row({ MET_ID: 'MET099', Indicator: 'Crude mortality rate', Metric: 'New' })
 		]);
 		expect(zodErrors).toHaveLength(0);

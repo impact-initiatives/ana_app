@@ -4,17 +4,16 @@
 	import logoDark from '$lib/assets/LogoANA2026-dark.svg';
 	import '../app.css';
 
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page, navigating } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import Footer from '$lib/components/ui/Footer.svelte';
-	import { flagStore, clearFlagResult, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
-	import { clearValidatorState } from '$lib/stores/validatorStore.svelte';
-	import { clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
+	import { flagStore, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
+	import { clearAllStores, clearAllStoresOnFrameworkUpdate } from '$lib/utils/clearAll';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
 
@@ -30,7 +29,12 @@
 
 		// If reference.json was not in localStorage, fetch it now.
 		// Keep the app-loader visible until this resolves.
-		await loadMetrics();
+		const { frameworkUpdated } = await loadMetrics();
+		if (frameworkUpdated) {
+			clearAllStoresOnFrameworkUpdate();
+			await tick();
+			showFrameworkModal = true;
+		}
 
 		// Fade out the app-loader and reveal content simultaneously.
 		const loader = document.getElementById('app-loader');
@@ -61,12 +65,11 @@
 		{ path: '/merge' as const, label: 'Merge' }
 	];
 
+	let showFrameworkModal = $state(false);
 	let scrollY = $state(0);
 
 	function clearAll() {
-		clearFlagResult();
-		clearValidatorState();
-		clearAdminFeatures();
+		clearAllStores();
 		goto(resolve('/'));
 	}
 </script>
@@ -360,6 +363,24 @@
 	</div>
 	<Footer />
 </main>
+
+<!-- Framework update notification -->
+<dialog class={['modal', showFrameworkModal ? 'modal-open' : ''].join(' ')}>
+	<div class="modal-box max-w-md">
+		<h3 class="text-base-content text-lg font-bold">Framework updated</h3>
+		<p class="text-base-content/80 py-3 text-sm">
+			The ANA reference framework has been updated since your last visit. Your uploaded data,
+			stored results, and any custom reference rows have been cleared — please re-upload your
+			CSV to continue your analysis.
+		</p>
+		<div class="modal-action">
+			<button class="btn btn-primary btn-sm" onclick={() => (showFrameworkModal = false)}>
+				OK, understood
+			</button>
+		</div>
+	</div>
+	<div class="modal-backdrop" role="presentation" onclick={() => (showFrameworkModal = false)}></div>
+</dialog>
 
 <!-- Back to top -->
 {#if scrollY > 400}
