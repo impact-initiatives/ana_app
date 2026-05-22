@@ -100,6 +100,8 @@
 	const referenceJson = $derived(metricStore.referenceJson);
 	const metadataCols = $derived(flagStore.metadataCols ?? ([] as string[]));
 	const hasData = $derived(flagStore.flaggedResult !== null && flagged.length > 0);
+	let everHadData = $state(false);
+	$effect(() => { if (hasData) everHadData = true; });
 
 	const systems = $derived<System[]>(
 		Array.isArray(referenceJson?.systems)
@@ -542,7 +544,7 @@
 		filterStore.selectedGroupValues;
 		filterStore.indSelectedSystems;
 		filterStore.indSelectedFactors;
-		persistFilters();
+		if (everHadData) persistFilters();
 	});
 
 	// ── Observers: scroll spy ────────────────────────────────────────────────

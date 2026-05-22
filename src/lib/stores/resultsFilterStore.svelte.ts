@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 
-const STORAGE_KEY = 'ana_results_filters_v1';
+const STORAGE_KEY = 'ana_results_filters';
 
 type FilterState = {
 	selectedUoas: string[] | null;

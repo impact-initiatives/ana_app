@@ -56,8 +56,8 @@ function flattenMetrics(json: unknown): MetricMap {
 	return map;
 }
 
-export const STORAGE_KEY = 'ana_metric_store_v2';
-export const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
+export const STORAGE_KEY = 'ana_metric_store';
+export const CUSTOM_ROWS_KEY = 'ana_custom_reference';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
