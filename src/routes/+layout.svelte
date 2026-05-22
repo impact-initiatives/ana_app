@@ -13,7 +13,7 @@
 	import Footer from '$lib/components/ui/Footer.svelte';
 	import { flagStore, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
-	import { clearAllStores } from '$lib/utils/clearAll';
+	import { clearAllStores, clearAllStoresOnFrameworkUpdate } from '$lib/utils/clearAll';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
 
@@ -29,7 +29,11 @@
 
 		// If reference.json was not in localStorage, fetch it now.
 		// Keep the app-loader visible until this resolves.
-		await loadMetrics();
+		const { frameworkUpdated } = await loadMetrics();
+		if (frameworkUpdated) {
+			clearAllStoresOnFrameworkUpdate();
+			frameworkModalEl?.showModal();
+		}
 
 		// Fade out the app-loader and reveal content simultaneously.
 		const loader = document.getElementById('app-loader');
@@ -60,6 +64,7 @@
 		{ path: '/merge' as const, label: 'Merge' }
 	];
 
+	let frameworkModalEl = $state<HTMLDialogElement | null>(null);
 	let scrollY = $state(0);
 
 	function clearAll() {
@@ -357,6 +362,24 @@
 	</div>
 	<Footer />
 </main>
+
+<!-- Framework update notification -->
+<dialog bind:this={frameworkModalEl} class="modal">
+	<div class="modal-box max-w-md">
+		<h3 class="text-base-content text-lg font-bold">Framework updated</h3>
+		<p class="text-base-content/80 py-3 text-sm">
+			The ANA reference framework has been updated since your last visit. Your uploaded data,
+			stored results, and any custom reference rows have been cleared — please re-upload your
+			CSV to continue your analysis.
+		</p>
+		<div class="modal-action">
+			<form method="dialog">
+				<button class="btn btn-primary btn-sm">OK, understood</button>
+			</form>
+		</div>
+	</div>
+	<form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
 
 <!-- Back to top -->
 {#if scrollY > 400}
