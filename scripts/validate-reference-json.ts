@@ -1,20 +1,21 @@
 #!/usr/bin/env bun
 /**
- * scripts/validate-indicators-json.ts
+ * scripts/validate-reference-json.ts
  *
  * Validates the generated `static/data/reference.json`.
  *
- * All check functions (passes 2–8) are imported from the shared browser-safe
+ * All check functions (passes 1–8) are imported from the shared browser-safe
  * module src/lib/engine/referenceValidator.ts — the same code that runs in
  * the browser when an analyst uploads a custom reference CSV.
  *
- * Pass 1 (Zod schema) is handled by safeValidateReferenceRoot from
- * src/lib/types/reference-json.ts.
+ * The CLI runs each pass individually for rich formatted output (tables,
+ * grouped errors). The browser path calls validateMergedJson() which
+ * orchestrates all passes and returns flat error/warning strings.
  *
  * Usage:
- *   bun ./scripts/validate-indicators.ts
- *   bun ./scripts/validate-indicators.ts --json static/data/reference.json
- *   bun ./scripts/validate-indicators.ts --help
+ *   bun ./scripts/validate-reference-json.ts
+ *   bun ./scripts/validate-reference-json.ts --json static/data/reference.json
+ *   bun ./scripts/validate-reference-json.ts --help
  *
  * Exit codes:
  *   0 — all checks passed
@@ -103,9 +104,10 @@ Checks performed:
   Pass 4 — Threshold value sanity
     · factor_threshold / evidence_threshold must be ≥ 1 (error if ≤ 0; warning if missing)
 
-  Pass 5 — Duplicate IDs and labels
+  Pass 5 — Duplicate and invalid IDs
     · metric/system/factor/subfactor IDs must be globally unique (error)
-    · metric labels must be globally unique (warning)
+    · metric IDs must match MET followed by 3+ digits — e.g. NEW, MOVED (error)
+    · metric labels must be globally unique (error)
 
   Pass 6 — Threshold integers and plausibility
     · factor_threshold and evidence_threshold must be integers

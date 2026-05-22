@@ -21,6 +21,7 @@
 import { SystemIDEnum } from '$lib/types/structure';
 import { FactorIDs } from '$lib/types/generated/factor-enum';
 import { SubFactorIDs } from '$lib/types/generated/subfactor-enum';
+import { safeValidateReferenceRoot, formatZodErrors } from '$lib/types/reference-json';
 
 // ── Shared loose traversal types ──────────────────────────────────────────────
 
@@ -515,7 +516,7 @@ export function checkVanPresence(data: unknown): VanPresenceError[] {
 // ── Orchestrator ──────────────────────────────────────────────────────────────
 
 /**
- * Run passes 2–8 on the merged JSON.
+ * Run passes 1–8 on the merged JSON.
  *
  * errors  → block apply / CI failure
  * warnings → shown to user, non-blocking
@@ -523,6 +524,14 @@ export function checkVanPresence(data: unknown): VanPresenceError[] {
 export function validateMergedJson(data: unknown): { errors: string[]; warnings: string[] } {
 	const errors: string[] = [];
 	const warnings: string[] = [];
+
+	// Pass 1 — Zod schema
+	const zodResult = safeValidateReferenceRoot(data);
+	if (!zodResult.success) {
+		for (const msg of formatZodErrors(zodResult.error)) {
+			errors.push(`[Pass 1] ${msg}`);
+		}
+	}
 
 	// Pass 2
 	for (const e of checkLookupConsistency(data)) {
