@@ -8,6 +8,7 @@
 	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { colourForHierarchy } from '$lib/utils/colors';
@@ -282,7 +283,7 @@
 				downloadable
 				humanizeHeaders
 				overflow="scroll"
-				initialSearch={page.url.searchParams.get('q') ?? ''}
+				initialSearch={browser ? (page.url.searchParams.get('q') ?? '') : ''}
 			/>
 		{/if}
 	{/if}

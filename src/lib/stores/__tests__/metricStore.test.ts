@@ -21,13 +21,10 @@ vi.stubGlobal('localStorage', localStorage);
 const {
 	metricStore,
 	loadMetrics,
-	clearCustomReferenceState
+	clearCustomReferenceState,
+	STORAGE_KEY,
+	CUSTOM_ROWS_KEY
 } = await import('$lib/stores/metricStore.svelte');
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const STORAGE_KEY = 'ana_metric_store_v2';
-const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
 
 function mockFetch(generatedAt: string) {
 	vi.stubGlobal(

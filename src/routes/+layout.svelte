@@ -4,7 +4,7 @@
 	import logoDark from '$lib/assets/LogoANA2026-dark.svg';
 	import '../app.css';
 
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page, navigating } from '$app/state';
@@ -32,7 +32,8 @@
 		const { frameworkUpdated } = await loadMetrics();
 		if (frameworkUpdated) {
 			clearAllStoresOnFrameworkUpdate();
-			frameworkModalEl?.showModal();
+			await tick();
+			showFrameworkModal = true;
 		}
 
 		// Fade out the app-loader and reveal content simultaneously.
@@ -64,7 +65,7 @@
 		{ path: '/merge' as const, label: 'Merge' }
 	];
 
-	let frameworkModalEl = $state<HTMLDialogElement | null>(null);
+	let showFrameworkModal = $state(false);
 	let scrollY = $state(0);
 
 	function clearAll() {
@@ -364,7 +365,7 @@
 </main>
 
 <!-- Framework update notification -->
-<dialog bind:this={frameworkModalEl} class="modal">
+<dialog class={['modal', showFrameworkModal ? 'modal-open' : ''].join(' ')}>
 	<div class="modal-box max-w-md">
 		<h3 class="text-base-content text-lg font-bold">Framework updated</h3>
 		<p class="text-base-content/80 py-3 text-sm">
@@ -373,12 +374,12 @@
 			CSV to continue your analysis.
 		</p>
 		<div class="modal-action">
-			<form method="dialog">
-				<button class="btn btn-primary btn-sm">OK, understood</button>
-			</form>
+			<button class="btn btn-primary btn-sm" onclick={() => (showFrameworkModal = false)}>
+				OK, understood
+			</button>
 		</div>
 	</div>
-	<form method="dialog" class="modal-backdrop"><button>close</button></form>
+	<div class="modal-backdrop" role="presentation" onclick={() => (showFrameworkModal = false)}></div>
 </dialog>
 
 <!-- Back to top -->

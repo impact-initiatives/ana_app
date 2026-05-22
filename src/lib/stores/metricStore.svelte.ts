@@ -9,7 +9,9 @@ import type { MergeStats } from '$lib/engine/referenceMerger';
 
 async function loadReference(init?: RequestInit): Promise<unknown> {
 	const url = asset('/data/reference.json');
-	const res = await fetch(url, init);
+	// no-cache: always revalidate with the server (ETag/304) so a redeployed
+	// reference.json is detected even when the browser has a cached copy.
+	const res = await fetch(url, { cache: 'no-cache', ...init });
 	if (!res.ok) throw new Error(`Failed to fetch reference.json: ${res.status}`);
 	return res.json();
 }
@@ -54,8 +56,8 @@ function flattenMetrics(json: unknown): MetricMap {
 	return map;
 }
 
-const STORAGE_KEY = 'ana_metric_store_v2';
-const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
+export const STORAGE_KEY = 'ana_metric_store_v2';
+export const CUSTOM_ROWS_KEY = 'ana_custom_reference_v1';
 
 export interface MetricStoreState {
 	referenceJson: Record<string, any> | null;
