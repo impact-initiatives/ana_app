@@ -76,25 +76,26 @@
 	);
 
 	const refColOptions: Record<string, { wrap: boolean; extraClass?: string; bg?: string }> = {
-		risk_concept: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
-		level: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
-		system: { wrap: true, extraClass: 'max-w-20' },
-		factor: { wrap: true, extraClass: 'max-w-20' },
-		subfactor: { wrap: true, extraClass: 'max-w-24' },
-		indicator: { wrap: true, extraClass: 'max-w-40' },
-		metric: { wrap: true, extraClass: 'max-w-20' },
-		label: { wrap: true, extraClass: 'max-w-52' },
-		type: { wrap: true, extraClass: 'max-w-20' },
-		preference: { wrap: true, extraClass: 'max-w-20' },
-		evidence_type: { wrap: true, extraClass: 'max-w-36' },
-		evidence_threshold: { wrap: true, extraClass: 'max-w-20' },
-		factor_threshold: { wrap: true, extraClass: 'max-w-20' },
-		above_or_below: { wrap: true, extraClass: 'max-w-18' },
-		threshold_an: { wrap: true, extraClass: 'max-w-20' },
-		threshold_van: { wrap: true, extraClass: 'max-w-20' },
-		msna_module: { wrap: true, extraClass: 'max-w-40' },
-		question_kobo_code: { wrap: true, extraClass: 'max-w-24' },
-		remarks_limitations: { wrap: true, extraClass: 'max-w-30' }
+		risk_concept: { wrap: true, extraClass: 'min-w-24 max-w-32', bg: 'var(--color-base-100)' },
+		level: { wrap: true, extraClass: 'min-w-20 max-w-32', bg: 'var(--color-base-100)' },
+		system: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		factor: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		subfactor: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		indicator: { wrap: true, extraClass: 'min-w-44 max-w-64' },
+		metric: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		label: { wrap: true, extraClass: 'min-w-60 max-w-80' },
+		type: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		preference: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		evidence_type: { wrap: true, extraClass: 'min-w-32 max-w-44' },
+		evidence_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		factor_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		above_or_below: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		threshold_an: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		threshold_van: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		msna_module: { wrap: true, extraClass: 'min-w-40 max-w-56' },
+		msna_indicator: { wrap: true, extraClass: 'min-w-40 max-w-60' },
+		question_kobo_code: { wrap: true, extraClass: 'min-w-24 max-w-36' },
+		remarks_limitations: { wrap: true, extraClass: 'min-w-36 max-w-56' }
 	};
 
 	const refRowColor = $derived.by(
@@ -171,7 +172,7 @@
 		<!-- View tabs -->
 		<div class="mb-0 flex items-end">
 			<div class="tabs tabs-lift" role="tablist">
-				{#each ([['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const) as [id, label] (id)}
+				{#each [['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const as [id, label] (id)}
 					<button
 						role="tab"
 						class="tab {activeView === id ? 'tab-active' : ''}"
@@ -207,7 +208,8 @@
 					/>
 				</div>
 				{#if filtersActive}
-					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button>
+					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button
+					>
 				{/if}
 			</div>
 		{/if}
