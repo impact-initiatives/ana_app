@@ -108,8 +108,8 @@ interface CheckResult {
  *   num        → "a number"
  *   int        → "an integer"
  *   num[0+]    → "a positive number (≥ 0)"
- *   num[0:1]   → "a number between 0 and 1 (likely a proportion)"
- *   int[0:1]   → "an integer between 0 and 1 (likely a binary)"
+ *   num[0:1]   → "a number between 0 and 1."
+ *   int[0:1]   → "an integer between 0 and 1."
  *   int[0+]    → "a positive integer (≥ 0)"
  *   num[1:10]  → "a number between 1 and 10"
  *   int[1:10]  → "an integer between 1 and 10"
@@ -138,8 +138,8 @@ function humanReadableType(parsed: {
 		const hint =
 			parsed.lb === 0 && parsed.ub === 1
 				? parsed.base === 'int'
-					? ' (likely a binary)'
-					: ' (likely a proportion)'
+					? ' (it is a binary variable)'
+					: ' (it is likely a proportion variable)'
 				: '';
 		return `${noun} between ${parsed.lb} and ${parsed.ub}${hint}`;
 	}
