@@ -217,7 +217,7 @@
 								: `×${multiVal.length}`}</span
 						>
 					{/if}
-				{:else if isNullAll}
+				{:else if allSelected}
 					<span class="text-base-content/85"
 						>All{unitLabel ? ` ${unitLabel}` : ''} ({flatOptions.length > 1000
 							? '1000+'

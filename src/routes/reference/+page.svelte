@@ -45,7 +45,8 @@
 			const levelOk = levels.length === 0 || levels.includes(node.metric.level);
 			const conceptOk =
 				concepts.length === 0 ||
-				(node.metric.risk_concept != null && concepts.includes(String(node.metric.risk_concept)));
+				node.metric.risk_concept == null ||
+				concepts.includes(String(node.metric.risk_concept));
 			return levelOk && conceptOk ? node : null;
 		}
 		if (!node.children) return node;
@@ -195,6 +196,7 @@
 						selected={selectedLevels}
 						placeholder="All levels"
 						label="Filter by level"
+						unitLabel="levels"
 						onchange={(v) => (selectedLevels = v as string[])}
 					/>
 				</div>
@@ -204,6 +206,7 @@
 						selected={selectedConcepts}
 						placeholder="All concepts"
 						label="Filter by risk concept"
+						unitLabel="concepts"
 						onchange={(v) => (selectedConcepts = v as string[])}
 					/>
 				</div>
