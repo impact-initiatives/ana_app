@@ -259,7 +259,9 @@
 				</div>
 			{/if}
 			{#if downloadable}
-				<DownloadButton onclick={downloadCsv} label="Download as CSV" variant="outline" />
+				<div class="ml-auto">
+					<DownloadButton onclick={downloadCsv} label="Download as CSV" variant="outline" />
+				</div>
 			{/if}
 		</div>
 	{/if}
