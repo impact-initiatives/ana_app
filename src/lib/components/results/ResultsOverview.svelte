@@ -333,7 +333,7 @@
 			return { type: 'status', field: `${selectedFactor}.status`, hasInsufficient: true };
 		if (selectedSystem)
 			return { type: 'status', field: `${selectedSystem}.status`, hasInsufficient: true };
-		return { type: 'prelim' };
+		return { type: 'priority_flag' };
 	});
 
 	// ── Card subtitle ─────────────────────────────────────────────────────────────

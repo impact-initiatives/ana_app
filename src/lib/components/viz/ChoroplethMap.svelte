@@ -3,7 +3,13 @@
 	import { geoIdentity, geoBounds } from 'd3-geo';
 	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
-	import { getPriorityBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
+	import {
+		getPriorityBadge,
+		getFlagBadge,
+		FLAG_BADGE_MAP,
+		getConclusionBadge,
+		CONCLUSION_KEYS
+	} from '$lib/utils/colors';
 	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
@@ -17,7 +23,8 @@
 
 	/** Discriminated union describing which data field to visualise on the map. */
 	export type MapLayer =
-		| { type: 'prelim' }
+		| { type: 'priority_flag' }
+		| { type: 'conclusion' }
 		| { type: 'status'; field: string; hasInsufficient: boolean };
 
 	interface Props {
@@ -37,6 +44,8 @@
 		layerTitle?: string | null;
 		/** UoA codes to render with a selection ring. Managed by parent. */
 		selectedUoas?: string[];
+		/** UoA codes to render with grey fill + dot pattern (e.g. no deep dive run). */
+		patternedUoas?: string[];
 	}
 
 	let {
@@ -45,11 +54,12 @@
 		rows,
 		level,
 		country = null,
-		layer = { type: 'prelim' },
+		layer = { type: 'priority_flag' },
 		onuoaclick,
 		ondownloadready,
 		layerTitle = null,
-		selectedUoas = []
+		selectedUoas = [],
+		patternedUoas = []
 	}: Props = $props();
 
 	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(
@@ -108,6 +118,14 @@
 				label: getFlagBadge(k)!.label
 			}));
 			flaggedCount = rows.filter((r) => r[layer.field] === 'flag').length;
+		} else if (layer.type === 'conclusion') {
+			legendEntries = CONCLUSION_KEYS.map((k) => ({
+				varOrColor: getConclusionBadge(k)?.bg ?? '#999',
+				label: getConclusionBadge(k)?.label ?? k
+			}));
+			flaggedCount = rows.filter((r) =>
+				['em', 'roem', 'an'].includes(String(r.priority_flag ?? ''))
+			).length;
 		}
 
 		const svgStr = buildExportSvg(svg, {
@@ -136,6 +154,8 @@
 
 	const NO_DATA_COLOR = getPriorityBadge('no_data')?.bg ?? 'var(--color-no-data)';
 
+	const patternedSet = $derived(new Set(patternedUoas));
+
 	function enrichFeatures(
 		features: GeoFC['features'],
 		getCode: (f: GeoFC['features'][number]) => string | undefined,
@@ -151,16 +171,25 @@
 			if (!row) {
 				flagColor = transparent ? 'transparent' : NO_DATA_COLOR;
 				flagLabel = getPriorityBadge('no_data')?.label ?? 'No Data';
-			} else if (layer.type === 'prelim') {
+			} else if (layer.type === 'priority_flag') {
 				const flag = String(row.priority_flag ?? '');
 				const badge = flag ? getPriorityBadge(flag) : undefined;
 				flagColor = badge?.bg ?? NO_DATA_COLOR;
 				flagLabel = badge?.label ?? getPriorityBadge('no_data')?.label ?? 'No Data';
+			} else if (layer.type === 'conclusion') {
+				const key = String(row.priority_flag ?? '');
+				const badge = key ? getConclusionBadge(key) : null;
+				flagColor = badge?.bg ?? NO_DATA_COLOR;
+				flagLabel = badge?.label ?? 'No data';
 			} else {
 				const status = String(row[layer.field] ?? 'no_data');
 				const badge = getFlagBadge(status);
 				flagColor = badge ? `var(${badge.colorVar})` : NO_DATA_COLOR;
 				flagLabel = badge?.label ?? FLAG_BADGE_MAP.no_data.label;
+			}
+
+			if (code && patternedSet.has(code) && row) {
+				flagLabel = flagLabel + ' · no conclusion filled';
 			}
 
 			return { ...f, properties: { ...f.properties, flagColor, flagLabel, hasData: !!row, code } };
@@ -235,6 +264,33 @@
 			return code && set.has(code);
 		});
 		return [...adm1Sel, ...adm2Sel];
+	});
+
+	// Features to render with grey fill + dot pattern (e.g. no deep dive run).
+	const patternedFeatures = $derived.by(() => {
+		if (patternedSet.size === 0) return [];
+		if (level === 'ADM1') {
+			return adm1.features.filter((f) => {
+				const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+				return code && patternedSet.has(code);
+			});
+		}
+		if (level === 'ADM2') {
+			return (adm2?.features ?? []).filter((f) => {
+				const code = f.properties?.adm2_source_code as string | undefined;
+				return code && patternedSet.has(code);
+			});
+		}
+		// MIXED
+		const adm1Pat = adm1.features.filter((f) => {
+			const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+			return code && patternedSet.has(code);
+		});
+		const adm2Pat = (adm2?.features ?? []).filter((f) => {
+			const code = f.properties?.adm2_source_code as string | undefined;
+			return code && patternedSet.has(code);
+		});
+		return [...adm1Pat, ...adm2Pat];
 	});
 
 	// Tooltip derived values from the enriched hovered feature
@@ -352,6 +408,15 @@
 					style="pointer-events: none"
 				/>
 
+				<!-- Patterned dot-fill for "no deep dive run" UoAs -->
+				{#if patternedFeatures.length > 0}
+					<Geo
+						data={patternedFeatures}
+						fill={{ value: () => 'url(#sel-dots)', scale: null }}
+						style="pointer-events: none; stroke: none"
+					/>
+				{/if}
+
 				<!-- Selection dot-fill — rendered last so it sits above all other lines -->
 				{#if selectedFeatures.length > 0}
 					<Geo
@@ -375,8 +440,27 @@
 	/>
 {/if}
 
-{#if layer.type === 'prelim'}
+{#if layer.type === 'priority_flag'}
 	<LegendBadge keys={[]} tinted={false} priorityKeys={PRIORITY_FLAG_KEYS} />
+{:else if layer.type === 'conclusion'}
+	<LegendBadge keys={[]} conclusionKeys={CONCLUSION_KEYS} />
+	{#if patternedUoas.length > 0}
+		<div class="text-base-content/85 mt-1 flex items-start gap-2 text-sm">
+			<span
+				class="border-base-content/75 mt-0.5 inline-block h-4 w-6 shrink-0 rounded border"
+				style="background: radial-gradient(circle, var(--color-base-content) 1px, transparent 1px) 0 0 / 4px 4px"
+			></span>
+			<span>
+				Dotted overlay: no conclusion filled yet. Color reflects the priority flag:
+				<ul class="mt-0.5 list-inside list-disc space-y-0.5">
+					<li>Excess Mortality: EM</li>
+					<li>HO Primary / Secondary: RoEM</li>
+					<li>AN Primary / Secondary: Acute Needs</li>
+					<li>No Acute Needs, Insufficient Evidence, No Data: same</li>
+				</ul>
+			</span>
+		</div>
+	{/if}
 {:else}
 	<LegendBadge tinted={false} keys={legendStatusKeys} />
 {/if}
