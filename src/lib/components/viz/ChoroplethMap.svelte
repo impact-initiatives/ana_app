@@ -89,11 +89,11 @@
 		const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
 		pat.id = 'sel-dots';
 		pat.setAttribute('patternUnits', 'userSpaceOnUse');
-		pat.setAttribute('width', '5');
-		pat.setAttribute('height', '5');
+		pat.setAttribute('width', '10');
+		pat.setAttribute('height', '10');
 		const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-		circ.setAttribute('cx', '2.5');
-		circ.setAttribute('cy', '2.5');
+		circ.setAttribute('cx', '5');
+		circ.setAttribute('cy', '5');
 		circ.setAttribute('r', '1');
 		circ.setAttribute('style', 'fill: var(--color-base-content)');
 		pat.appendChild(circ);
