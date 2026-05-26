@@ -1,6 +1,11 @@
 import ExcelJS from '@protobi/exceljs';
 import type { Worksheet, Cell, Fill, Border, Borders, DataValidation } from '@protobi/exceljs';
-import { colCount, colWidths, tableHeaders } from '$lib/types/deepdives.js';
+import {
+	colCount, colWidths, tableHeaders, toExcelList,
+	INDICATOR_RATING_VALUES, PLAUSIBILITY_INDICATOR_VALUES,
+	HYPOTHESIS_VALUES, PLAUSIBILITY_SYNTHESIS_VALUES,
+	TRIANGULATION_VALUES, CONCLUSION_VALUES
+} from '$lib/types/deepdives.js';
 import type { HypothesesBlock, HypothesesData } from '$lib/types/hypotheses';
 import { SystemIDs } from '$lib/types/structure';
 import { PRIORITY_BADGE_MAP } from '$lib/utils/colors.js';
@@ -273,7 +278,7 @@ function addIndicatorRow(
 		const hypothesisValidation: DataValidation = {
 			type: 'list',
 			allowBlank: true,
-			formulae: ['"++,+,+/-,-,--"'],
+			formulae: [toExcelList(INDICATOR_RATING_VALUES)],
 			showErrorMessage: false
 		};
 		for (let col = 10; col <= 9 + hypothesesCount; col++) {
@@ -309,7 +314,7 @@ function addQualitativeEvidenceRows(
 			const hypValidation: DataValidation = {
 				type: 'list',
 				allowBlank: true,
-				formulae: ['"++,+,+/-,-,--"'],
+				formulae: [toExcelList(INDICATOR_RATING_VALUES)],
 				showErrorMessage: false
 			};
 			for (let col = 10; col <= 9 + hypothesesCount; col++) {
@@ -349,7 +354,7 @@ function addPlausibilityJudgementRow(
 	labelCell.font = { bold: true, size: 10 };
 	labelCell.fill = solidFill('fff2f2f2');
 	labelCell.border = allBorders();
-	labelCell.alignment = { vertical: 'middle', indent: 1 };
+	labelCell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
 
 	// Tint for hypothesis dropdown cells: 70% white mix of block color, or default light green
 	const hypFillArgb = hypArgb
@@ -360,7 +365,7 @@ function addPlausibilityJudgementRow(
 	const hypValidation: DataValidation = {
 		type: 'list',
 		allowBlank: true,
-		formulae: ['"Very likely,Likely,Plausible,Unlikely,Very unlikely"'],
+		formulae: [toExcelList(PLAUSIBILITY_INDICATOR_VALUES)],
 		showErrorMessage: false
 	} as DataValidation;
 	for (let col = 10; col <= 9 + hypothesesCount; col++) {
@@ -618,22 +623,11 @@ function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number, 
 	headerRow.height = 22;
 
 	const p = systemLabel;
-	addSynthesisRow(ws, `${p} — Primary Hypothesis`, 'H1,H2,H3,Inconclusive', numCols);
-	addSynthesisRow(ws, `${p} — Secondary Hypothesis`, 'H1,H2,H3,Inconclusive', numCols, true);
-	addSynthesisRow(
-		ws,
-		`${p} — Plausibility`,
-		'Very likely,Likely,Plausible,Unlikely,Very unlikely,Inconclusive',
-		numCols
-	);
+	addSynthesisRow(ws, `${p} — Primary Hypothesis`, HYPOTHESIS_VALUES.join(','), numCols);
+	addSynthesisRow(ws, `${p} — Secondary Hypothesis`, HYPOTHESIS_VALUES.join(','), numCols, true);
+	addSynthesisRow(ws, `${p} — Plausibility`, PLAUSIBILITY_SYNTHESIS_VALUES.join(','), numCols);
 	addSynthesisTextRow(ws, `${p} — Summary`, numCols);
-	addSynthesisRow(ws, `${p} — Triangulation Strength`, 'Strong,Moderate,Weak', numCols);
-	addSynthesisRow(
-		ws,
-		`${p} — Final conclusion`,
-		'EM,RoEM,Acute Needs,No Acute Needs,Insufficient evidence,No data',
-		numCols
-	);
+	addSynthesisRow(ws, `${p} — Triangulation Strength`, TRIANGULATION_VALUES.join(','), numCols);
 	const lastSynthRow = ws.rowCount;
 
 	// Outer medium black border around the full conclusion table (cols 1–4)
@@ -728,8 +722,8 @@ function addLandingPage(
 			sysCell.border = allBorders();
 
 			const synthFields: Array<{ col: number; key: string }> = [
-				{ col: 2, key: 'Primary H' },
-				{ col: 3, key: 'Secondary H' },
+				{ col: 2, key: 'Primary Hypothesis' },
+				{ col: 3, key: 'Secondary Hypothesis' },
 				{ col: 4, key: 'Summary' },
 				{ col: 5, key: 'Plausibility' },
 				{ col: 6, key: 'Triangulation Strength' }
@@ -798,7 +792,7 @@ function addLandingPage(
 	conclusionValueCell.dataValidation = {
 		type: 'list',
 		allowBlank: true,
-		formulae: ['"EM,RoEM,Acute Needs,No Acute Needs,Insufficient evidence,No data"'],
+		formulae: [toExcelList(CONCLUSION_VALUES)],
 		showErrorMessage: false
 	} as DataValidation;
 	conclusionRow.height = 20;

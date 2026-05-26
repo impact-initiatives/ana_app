@@ -43,6 +43,20 @@ export function colWidths(hypothesesCount: number): number[] {
 	];
 }
 
+// ── Dropdown value constants (shared by generator and merge parser) ───────────
+
+export const HYPOTHESIS_VALUES             = ['H1', 'H2', 'H3', 'Inconclusive'] as const;
+export const INDICATOR_RATING_VALUES       = ['++', '+', '+/-', '-', '--'] as const;
+export const PLAUSIBILITY_INDICATOR_VALUES = ['Very likely', 'Likely', 'Plausible', 'Unlikely', 'Very unlikely'] as const;
+export const PLAUSIBILITY_SYNTHESIS_VALUES = [...PLAUSIBILITY_INDICATOR_VALUES, 'Inconclusive'] as const;
+export const TRIANGULATION_VALUES          = ['Strong', 'Moderate', 'Weak'] as const;
+export const CONCLUSION_VALUES             = ['EM', 'RoEM', 'Acute Needs', 'No Acute Needs', 'Insufficient evidence', 'No data'] as const;
+
+/** Produce an Excel data-validation formulae string: `"H1,H2,H3,Inconclusive"` */
+export function toExcelList(values: readonly string[]): string {
+	return `"${values.join(',')}"`;
+}
+
 /**
  * Build the TABLE_HEADERS array for a given list of hypothesis ids.
  */
