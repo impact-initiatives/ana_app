@@ -95,7 +95,8 @@ export async function downloadDeepDiveZip(
 	const files: Record<string, Uint8Array> = {};
 	for (let i = 0; i < uoaRows.length; i++) {
 		const uoaId = String(uoaRows[i]['uoa'] ?? `uoa_${i}`);
-		files[`deepdive_${uoaId}.xlsx`] = buffers[i];
+		const flag = String(uoaRows[i]['priority_flag'] ?? '').replace(/\s+/g, '_') || 'no_flag';
+		files[`deepdive_${uoaId}_${flag}.xlsx`] = buffers[i];
 	}
 
 	const zipped = zipSync(files, { level: 0 });
