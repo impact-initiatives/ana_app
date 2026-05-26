@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import ClearButton from '$lib/components/ui/ClearButton.svelte';
 
 	interface Props {
 		accept?: string;
@@ -150,17 +150,17 @@
 	tabindex="0"
 	aria-label={status === 'idle' ? 'Drop a file or click to browse' : fileName}
 	class={[
-		'rounded-box border-2 border-dashed transition-colors duration-150',
+		'rounded-box border border-dashed transition-colors duration-150 hover:border',
 		lg
 			? 'flex cursor-pointer flex-col items-center justify-center gap-3 px-6 py-14 text-center'
 			: ['flex items-center', sm ? 'gap-3 px-3 py-2' : 'gap-4 px-4 py-4'].join(' '),
 		isDragging
 			? 'border-primary bg-primary/8 cursor-copy'
 			: status === 'done'
-				? 'border-success/40 bg-success/5 cursor-default'
+				? 'border-success bg-success/10 cursor-default'
 				: status === 'error'
-					? 'border-error/40 bg-error/5 cursor-pointer'
-					: 'border-base-300 bg-base-100 hover:border-primary/80 cursor-pointer'
+					? 'border-error/60 bg-error/10 cursor-pointer'
+					: 'border-base-content/60 bg-base-100 hover:border-primary cursor-pointer'
 	].join(' ')}
 	ondrop={onDrop}
 	ondragover={onDragOver}
@@ -237,13 +237,15 @@
 				<p class={['text-error truncate font-semibold', sm ? 'text-xs' : 'text-sm'].join(' ')}>
 					{fileName || 'Upload failed'}
 				</p>
-				<p class="text-base-content/75 text-xs">Click to try again</p>
+				<p class="text-base-content/85 text-xs">Click to try again</p>
 			{:else}
-				<p class={['text-base-content/75', sm ? 'text-xs' : 'text-sm'].join(' ')}>
+				<p
+					class={['text-base-content/85 hover:text-primary', sm ? 'text-xs' : 'text-sm'].join(' ')}
+				>
 					{isDragging ? 'Drop to upload' : idleText}
 				</p>
 				{#if hintText}
-					<p class="text-base-content/75 mt-0.5 text-xs">{@html hintText}</p>
+					<p class="text-base-content/85 mt-0.5 text-xs">{@html hintText}</p>
 				{/if}
 			{/if}
 		</div>
@@ -257,11 +259,13 @@
 			<p class="text-error font-semibold">{fileName || 'Upload failed'}</p>
 			<p class="text-base-content/85 text-sm">Click to try again</p>
 		{:else}
-			<p class="text-base-content/85">{isDragging ? 'Drop to upload' : idleText}</p>
+			<p class="text-base-content/85 hover:text-primary">
+				{isDragging ? 'Drop to upload' : idleText}
+			</p>
 			{#if hintText}
-				<p class="text-base-content/75 text-sm">{@html hintText}</p>
+				<p class="text-base-content/85 text-sm">{@html hintText}</p>
 			{:else}
-				<p class="text-base-content/75 text-sm">or click to browse ({accept})</p>
+				<p class="text-base-content/85 text-sm">or click to browse ({accept})</p>
 			{/if}
 		{/if}
 	{/if}
@@ -301,7 +305,7 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<ButtonClear size="sm" onclick={clearAll} />
+			<ClearButton size="sm" onclick={clearAll} />
 		</div>
 	</div>
 
