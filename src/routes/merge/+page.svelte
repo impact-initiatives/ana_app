@@ -6,7 +6,6 @@
 	} from '$lib/stores/adminFeaturesStore.svelte';
 	import {
 		parseMergeZip,
-		downloadMergeXlsx,
 		conclusionToFlag,
 		priorityFlagToConclusion
 	} from '$lib/engine/mergeDeepDives';
@@ -55,16 +54,6 @@
 	function clearAll() {
 		clearMergeResult();
 		uploaderKey++;
-	}
-
-	function exportXlsx() {
-		if (!mergeStore.parsed) return;
-		const baseName = (mergeStore.filename ?? '').replace(/\.zip$/i, '') || 'deepdives';
-		downloadMergeXlsx(
-			mergeStore.parsed,
-			adminFeaturesStore.pcodeLabelMap ?? {},
-			`${baseName}_merged.xlsx`
-		);
 	}
 
 	// One row per UoA: conclusion key first, then PF→conclusion fallback for unfilled ZIPs.
@@ -291,13 +280,6 @@
 				/>
 			{/if}
 
-			<button
-				class="btn btn-primary"
-				onclick={exportXlsx}
-				disabled={!mergeStore.parsed.synthesis.length}
-			>
-				Export XLSX
-			</button>
 		</div>
 	{/if}
 </div>
