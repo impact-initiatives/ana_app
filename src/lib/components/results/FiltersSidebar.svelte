@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import ClearButton from '$lib/components/ui/ClearButton.svelte';
 
 	type Option = { value: string; label: string };
 
@@ -122,6 +122,6 @@
 	</p>
 
 	{#if isFiltered}
-		<ButtonClear label="Clear filters" onclick={onclearfilters} widthClass="w-full" />
+		<ClearButton label="Clear filters" onclick={onclearfilters} class="w-full" />
 	{/if}
 </div>

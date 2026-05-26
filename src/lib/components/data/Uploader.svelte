@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import ClearButton from '$lib/components/ui/ClearButton.svelte';
 
 	interface Props {
 		accept?: string;
@@ -305,7 +305,7 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<ButtonClear size="sm" onclick={clearAll} />
+			<ClearButton size="sm" onclick={clearAll} />
 		</div>
 	</div>
 
