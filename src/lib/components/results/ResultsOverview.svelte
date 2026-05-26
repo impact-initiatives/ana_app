@@ -36,12 +36,13 @@
 		selectedMapUoa: string | null;
 		selectedMapAdminName: string | null;
 		selectedMapRow: Row | null;
+		multiSelectMode: boolean;
+		onmultiselecttoggle: () => void;
+		onclusterchange?: (uoas: string[]) => void;
 		onselectinheatmap: (uoa: string, systemId: string) => void;
 		onmapselect: (uoa: string, adminName: string | null) => void;
 		onmapclear: () => void;
 		ondonutsliceclick: (key: string | null) => void;
-		onmapuoaschange?: (uoas: string[]) => void;
-		onmapselectreset?: () => void;
 	}
 
 	let {
@@ -55,12 +56,13 @@
 		selectedMapUoa,
 		selectedMapAdminName,
 		selectedMapRow,
+		multiSelectMode,
+		onmultiselecttoggle,
+		onclusterchange,
 		onselectinheatmap,
 		onmapselect,
 		onmapclear,
-		ondonutsliceclick,
-		onmapuoaschange,
-		onmapselectreset
+		ondonutsliceclick
 	}: Props = $props();
 
 	// ── Map download ──────────────────────────────────────────────────────────────
@@ -68,8 +70,6 @@
 	let mapDownloadFn: (() => Promise<void>) | undefined = $state();
 
 	// ── Multi-select state ────────────────────────────────────────────────────────
-
-	let multiSelectMode = $state(false);
 	let selectedUoas = new SvelteSet<string>();
 	let nonAdjacentWarning = $state(false);
 
@@ -134,14 +134,14 @@
 			setTimeout(() => (nonAdjacentWarning = false), 2000);
 			return;
 		}
-		onmapuoaschange?.([...selectedUoas]);
+		onclusterchange?.([...selectedUoas]);
 	}
 
 	function toggleMultiSelect() {
-		multiSelectMode = !multiSelectMode;
 		selectedUoas.clear();
-		onmapselectreset?.();
-		if (!multiSelectMode) onmapclear();
+		onclusterchange?.([]);
+		if (multiSelectMode) onmapclear();
+		onmultiselecttoggle();
 	}
 
 	// ── Cascade filter state ──────────────────────────────────────────────────────
@@ -511,7 +511,7 @@
 							ondrilldown={onselectinheatmap}
 							onclear={() => {
 								selectedUoas.clear();
-								onmapselectreset?.();
+								onmultiselecttoggle();
 							}}
 						/>
 					</div>

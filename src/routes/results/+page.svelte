@@ -278,8 +278,13 @@
 		filterStore.selectedGroupValues = null;
 	}
 
+	let mapClusterActive = $state(false);
+	let clusterUoas = $state<string[]>([]);
+
 	function clearAllFilters() {
 		clearFilters();
+		mapClusterActive = false;
+		clusterUoas = [];
 	}
 
 	// ── Event handlers ────────────────────────────────────────────────────────
@@ -320,8 +325,17 @@
 		return filteredForMap.filter((r) => filterStore.selectedUoas!.includes(String(r.uoa)));
 	});
 
+	const effectiveFlagged = $derived(
+		mapClusterActive && clusterUoas.length > 0
+			? filteredFlagged.filter((r) => clusterUoas.includes(String(r.uoa)))
+			: filteredFlagged
+	);
+
 	const isFiltered = $derived(
-		filterStore.selectedUoas !== null || filterStore.selectedPrelimKeys !== null || filterStore.groupByCol !== null
+		filterStore.selectedUoas !== null ||
+		filterStore.selectedPrelimKeys !== null ||
+		filterStore.groupByCol !== null ||
+		mapClusterActive
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -607,8 +621,9 @@
 		<aside class="bg-base-100 border-base-300 hidden lg:block lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:w-64 lg:shrink-0 border-r">
 			<FiltersSidebar
 				flaggedTotal={flagged.length}
-				filteredTotal={filteredFlagged.length}
+				filteredTotal={effectiveFlagged.length}
 				{isFiltered}
+				{mapClusterActive}
 				{uoaOptions}
 				selectedUoas={filterStore.selectedUoas}
 				selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -637,8 +652,9 @@
 				<div class="border-base-300 bg-base-100 border-b lg:hidden">
 					<FiltersSidebar
 						flaggedTotal={flagged.length}
-						filteredTotal={filteredFlagged.length}
+						filteredTotal={effectiveFlagged.length}
 						{isFiltered}
+						{mapClusterActive}
 						{uoaOptions}
 						selectedUoas={filterStore.selectedUoas}
 						selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -673,8 +689,9 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							onmapuoaschange={(uoas) => (filterStore.selectedUoas = uoas.length > 0 ? uoas : null)}
-							onmapselectreset={clearAllFilters}
+							multiSelectMode={mapClusterActive}
+							onmultiselecttoggle={() => { mapClusterActive = !mapClusterActive; if (!mapClusterActive) clusterUoas = []; }}
+							onclusterchange={(uoas) => (clusterUoas = uoas)}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -701,7 +718,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							filteredFlagged={filteredFlagged}
+							filteredFlagged={effectiveFlagged}
 							{systems}
 							{systemCodes}
 							{subList}

@@ -8,6 +8,7 @@
 		flaggedTotal: number;
 		filteredTotal: number;
 		isFiltered: boolean;
+		mapClusterActive?: boolean;
 		uoaOptions: Option[];
 		selectedUoas: string[] | null;
 		selectedPrelimKeys: string[] | null;
@@ -29,6 +30,7 @@
 		flaggedTotal,
 		filteredTotal,
 		isFiltered,
+		mapClusterActive = false,
 		uoaOptions,
 		selectedUoas,
 		selectedPrelimKeys,
@@ -107,6 +109,12 @@
 				onchange={ongroupvalueschange}
 			/>
 		{/if}
+	{/if}
+
+	{#if mapClusterActive}
+		<div role="alert" class="alert alert-info alert-soft py-2 text-xs">
+			Map cluster selection is active. Showing selected UoAs only.
+		</div>
 	{/if}
 
 	<p class="text-base-content/75 text-xs">
