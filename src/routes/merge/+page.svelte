@@ -86,18 +86,18 @@
 	// (no_data = nothing to deep dive, so no pattern needed)
 	const noDeepDiveUoas = $derived(
 		mergeStore.parsed
-			? [...new Set(mergeStore.parsed.synthesis.filter((r) => !r.deepDiveRun).map((r) => r.uoa))].filter(
-					(uoa) => {
-						const rows = mergeStore.parsed!.synthesis.filter((r) => r.uoa === uoa);
-						return (
-							rows.every((r) => !r.deepDiveRun) &&
-							rows.some((r) => {
-								const k = priorityFlagToConclusion(r.priorityFlag);
-								return k !== null && k !== 'no_data';
-							})
-						);
-					}
-				)
+			? [
+					...new Set(mergeStore.parsed.synthesis.filter((r) => !r.deepDiveRun).map((r) => r.uoa))
+				].filter((uoa) => {
+					const rows = mergeStore.parsed!.synthesis.filter((r) => r.uoa === uoa);
+					return (
+						rows.every((r) => !r.deepDiveRun) &&
+						rows.some((r) => {
+							const k = priorityFlagToConclusion(r.priorityFlag);
+							return k !== null && k !== 'no_data';
+						})
+					);
+				})
 			: []
 	);
 
@@ -139,9 +139,7 @@
 	// ── Admin boundary auto-detect ─────────────────────────────────────────────
 
 	const mergeUoas = $derived(
-		mergeStore.parsed
-			? [...new Set(mergeStore.parsed.synthesis.map((r) => r.uoa))]
-			: []
+		mergeStore.parsed ? [...new Set(mergeStore.parsed.synthesis.map((r) => r.uoa))] : []
 	);
 	const mergeUoaAnalysis = $derived(mergeUoas.length > 0 ? analyzeUoas(mergeUoas) : null);
 	const mergeHasPcodes = $derived(
@@ -203,45 +201,43 @@
 		subtitle="Upload the filled-in deep-dive ZIP to consolidate analytical conclusions into a single XLSX."
 	/>
 
-	{#if mergeStore.parsed}
-		<div class="mb-4 flex flex-wrap items-center gap-2">
-			<span
-				class="border-success/30 bg-success/10 text-success inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
-			>
-				<span class="bg-success inline-block size-1.5 rounded-full"></span>
-				{mergeStore.filename ?? 'Merge results loaded'}
-			</span>
-			<button
-				class="border-error/30 bg-error/10 text-error hover:bg-error/20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-150"
-				onclick={clearAll}
-			>
-				<span class="bg-error inline-block size-1.5 rounded-full"></span>
-				Clear
-			</button>
+	<Card title="Upload ZIP">
+		{#snippet titleActions()}
+			{#if mergeStore.parsed}
+				<div class="flex items-center gap-2">
+					<span
+						class="border-success/30 bg-success/10 text-success inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
+					>
+						<span class="bg-success inline-block size-1.5 rounded-full"></span>
+						{mergeStore.filename ?? 'Results loaded'}
+					</span>
+					<button
+						class="border-error/30 bg-error/10 text-error hover:bg-error/20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-150"
+						onclick={clearAll}
+					>
+						<span class="bg-error inline-block size-1.5 rounded-full"></span>
+						Clear
+					</button>
+				</div>
+			{/if}
+		{/snippet}
+		<div class="mt-4">
+			{#key uploaderKey}
+				<Uploader
+					size="md"
+					accept=".zip"
+					dropText="Drop your filled-in deep-dives ZIP here"
+					detailsMode="collapse"
+					process={processMergeZip}
+					oncleared={onMergeCleared}
+				/>
+			{/key}
 		</div>
-	{/if}
-
-	{#key uploaderKey}
-		<Uploader
-			size="md"
-			accept=".zip"
-			dropText="Drop your filled-in deep-dives ZIP here"
-			detailsMode="collapse"
-			process={processMergeZip}
-			oncleared={onMergeCleared}
-		/>
-	{/key}
+	</Card>
 
 	<!-- Results -->
 	{#if mergeStore.parsed}
 		<div class="mt-6 space-y-4">
-			<!-- Summary badges -->
-			<div class="flex flex-wrap items-center gap-2">
-				<span class="badge badge-neutral">{mergeStore.parsed.uoaCount} UoAs</span>
-				<span class="badge badge-neutral">{mergeStore.parsed.systemCount} systems</span>
-				<span class="badge badge-neutral">{mergeStore.parsed.synthesis.length} synthesis rows</span>
-			</div>
-
 			<RadioToggle
 				bind:value={showTable}
 				labelFalse="Outcome map"
@@ -295,7 +291,6 @@
 				/>
 			{/if}
 
-			<!-- Export button -->
 			<button
 				class="btn btn-primary"
 				onclick={exportXlsx}
