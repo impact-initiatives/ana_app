@@ -55,7 +55,7 @@
 		subtitleUppercase = false,
 		subtitleSemibold = false,
 		subtitleSize = '',
-		subtitleDim = 75,
+		subtitleDim = 85,
 		subtitleActions,
 		figure,
 		figureClass = '',
