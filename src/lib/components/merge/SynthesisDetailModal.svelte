@@ -72,7 +72,7 @@
 				{:else}
 					<span class="text-base-content/85 text-xs">No conclusion</span>
 				{/if}
-				<button class="btn btn-ghost btn-sm ml-1 shrink-0" onclick={onclose}>✕</button>
+				<button class="btn btn-ghost btn-circle btn-sm ml-1 shrink-0" onclick={onclose}>✕</button>
 			</div>
 		</div>
 
