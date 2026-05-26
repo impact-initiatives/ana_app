@@ -7,7 +7,7 @@
       "Bash(base64 -d gh api \"repos/OwnKng/svelte-d3/contents/src/visualisations/helpers/Grid.svelte\" --jq '.content')",
       "Bash(base64 -d gh api \"repos/OwnKng/svelte-d3/contents/src/visualisations/primatives/Bar.svelte\" --jq '.content')",
       "Edit(/.claude/skills/svelte-d3/**)",
-      "Bash(npx @sveltejs/mcp svelte-autofixer src/lib/components/viz/PrelimFlagDonut.svelte)",
+      "Bash(npx @sveltejs/mcp svelte-autofixer src/lib/components/viz/PriorityFlagDonut.svelte)",
       "Bash(bun run:*)",
       "Bash(mv HeatMapWithDrilldown.svelte SystemMatrix.svelte)",
       "Bash(mv SystemHeatmap.svelte HeatmapGrid.svelte)",

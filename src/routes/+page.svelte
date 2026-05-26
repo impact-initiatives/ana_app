@@ -8,14 +8,11 @@
 	import Uploader, { type ProcessResult } from '$lib/components/data/Uploader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
-	import { flagStore, clearFlagResult } from '$lib/stores/flagStore.svelte';
-	import {
-		validatorStore,
-		saveValidatorState,
-		clearValidatorState
-	} from '$lib/stores/validatorStore.svelte';
-	import { adminFeaturesStore, clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
-	import { validateCsv } from '$lib/engine/validator';
+	import { flagStore } from '$lib/stores/flagStore.svelte';
+	import { validatorStore, saveValidatorState } from '$lib/stores/validatorStore.svelte';
+	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
+	import { clearAllStores } from '$lib/utils/clearAll';
+	import { validateCsv } from '$lib/engine/dataValidator';
 	import { parseFile } from '$lib/engine/parser';
 	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -100,8 +97,7 @@
 	});
 
 	async function processMetricsCsv(file: File): Promise<ProcessResult> {
-		clearFlagResult();
-		if (adminFeaturesStore.fetchState === 'error') clearAdminFeatures();
+		clearAllStores();
 		validationPassed = false;
 
 		const parsed = await parseFile(file);
@@ -191,9 +187,7 @@
 		lastRows = [];
 		filename = null;
 		validationPassed = false;
-		clearValidatorState();
-		clearFlagResult();
-		clearAdminFeatures();
+		clearAllStores();
 	}
 </script>
 
@@ -302,7 +296,7 @@
 							<!-- Mini header -->
 							<div class="flex items-center justify-between">
 								<span class="text-base-content/85 text-xs font-semibold tracking-wide uppercase"
-									>Preliminary flagging</span
+									>Priority flag</span
 								>
 								<span
 									class=" border-success/30 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold"
@@ -516,8 +510,8 @@
 			></path>
 		</svg>
 		<p>
-			The preliminary flag is a data-driven pre-screening result, not a conclusion. Each unit of
-			analysis requires a full deep-dive before drawing final conclusions.
+			The priority flag is a tool to prioritise which areas to review first — it is not a final
+			analytical conclusion. All UoAs should receive a deep dive if time allows.
 		</p>
 	</div>
 
@@ -592,7 +586,8 @@
 					</div>
 					<p class="mt-1">
 						Extra columns (e.g. <code>region</code>, <code>partner</code>) are carried through and
-						available as filters in results views.
+						available as filters in results views. If values are p-codes, filter labels are resolved
+						to their admin names automatically.
 					</p>
 				</div>
 				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">

@@ -3,8 +3,8 @@
 	import { geoIdentity, geoBounds } from 'd3-geo';
 	import { tick } from 'svelte';
 	import type { FeatureCollection, Geometry } from 'geojson';
-	import { getPrelimBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { getPriorityBadge, getFlagBadge, FLAG_BADGE_MAP } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
 	import LegendBadge from '$lib/components/ui/LegendBadge.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
@@ -35,6 +35,8 @@
 		ondownloadready?: (fn: () => Promise<void>) => void;
 		/** Title for the exported SVG. Overrides the default prelim title when set. */
 		layerTitle?: string | null;
+		/** UoA codes to render with a selection ring. Managed by parent. */
+		selectedUoas?: string[];
 	}
 
 	let {
@@ -46,10 +48,13 @@
 		layer = { type: 'prelim' },
 		onuoaclick,
 		ondownloadready,
-		layerTitle = null
+		layerTitle = null,
+		selectedUoas = []
 	}: Props = $props();
 
-	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(null);
+	let hoveredFeature = $state<{ properties: Record<string, unknown>; geometry: unknown } | null>(
+		null
+	);
 	let tooltipX = $state(0);
 	let tooltipY = $state(0);
 	let containerWidth = $state(0);
@@ -58,6 +63,31 @@
 
 	$effect(() => {
 		if (mapEl) ondownloadready?.(handleSvgDownload);
+	});
+
+	// Inject a dot pattern into the SveltePlot SVG so selectedFeatures can use fill="url(#sel-dots)".
+	// Depends on plotHeight so it re-runs whenever Plot rebuilds its SVG.
+	$effect(() => {
+		if (!mapEl || plotHeight === 0) return;
+		const svg = mapEl.querySelector('svg');
+		if (!svg || svg.querySelector('#sel-dots')) return;
+		let defs = svg.querySelector('defs');
+		if (!defs) {
+			defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+			svg.insertBefore(defs, svg.firstChild);
+		}
+		const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+		pat.id = 'sel-dots';
+		pat.setAttribute('patternUnits', 'userSpaceOnUse');
+		pat.setAttribute('width', '5');
+		pat.setAttribute('height', '5');
+		const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		circ.setAttribute('cx', '2.5');
+		circ.setAttribute('cy', '2.5');
+		circ.setAttribute('r', '1');
+		circ.setAttribute('style', 'fill: var(--color-base-content)');
+		pat.appendChild(circ);
+		defs.appendChild(pat);
 	});
 
 	async function handleSvgDownload() {
@@ -104,7 +134,7 @@
 		containerWidth > 0 ? Math.round(Math.max(150, Math.min(700, containerWidth / aspectRatio))) : 0
 	);
 
-	const NO_DATA_COLOR = getPrelimBadge('no_data')?.bg ?? 'var(--color-no-data)';
+	const NO_DATA_COLOR = getPriorityBadge('no_data')?.bg ?? 'var(--color-no-data)';
 
 	function enrichFeatures(
 		features: GeoFC['features'],
@@ -120,12 +150,12 @@
 
 			if (!row) {
 				flagColor = transparent ? 'transparent' : NO_DATA_COLOR;
-				flagLabel = getPrelimBadge('no_data')?.label ?? 'No Data';
+				flagLabel = getPriorityBadge('no_data')?.label ?? 'No Data';
 			} else if (layer.type === 'prelim') {
-				const flag = String(row.prelim_flag ?? '');
-				const badge = flag ? getPrelimBadge(flag) : undefined;
+				const flag = String(row.priority_flag ?? '');
+				const badge = flag ? getPriorityBadge(flag) : undefined;
 				flagColor = badge?.bg ?? NO_DATA_COLOR;
-				flagLabel = badge?.label ?? getPrelimBadge('no_data')?.label ?? 'No Data';
+				flagLabel = badge?.label ?? getPriorityBadge('no_data')?.label ?? 'No Data';
 			} else {
 				const status = String(row[layer.field] ?? 'no_data');
 				const badge = getFlagBadge(status);
@@ -177,6 +207,34 @@
 			(f) => f.properties?.adm2_source_code as string | undefined,
 			lookup
 		).filter((f) => f.properties.hasData);
+	});
+
+	// Features to highlight with a selection ring.
+	const selectedFeatures = $derived.by(() => {
+		if (selectedUoas.length === 0) return [];
+		const set = new Set(selectedUoas);
+		if (level === 'ADM1') {
+			return adm1.features.filter((f) => {
+				const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+				return code && set.has(code);
+			});
+		}
+		if (level === 'ADM2') {
+			return (adm2?.features ?? []).filter((f) => {
+				const code = f.properties?.adm2_source_code as string | undefined;
+				return code && set.has(code);
+			});
+		}
+		// MIXED: UoAs can be either ADM1 or ADM2
+		const adm1Sel = adm1.features.filter((f) => {
+			const code = (f.properties?.adm1_source_code ?? f.properties?.pcode) as string | undefined;
+			return code && set.has(code);
+		});
+		const adm2Sel = (adm2?.features ?? []).filter((f) => {
+			const code = f.properties?.adm2_source_code as string | undefined;
+			return code && set.has(code);
+		});
+		return [...adm1Sel, ...adm2Sel];
 	});
 
 	// Tooltip derived values from the enriched hovered feature
@@ -293,6 +351,15 @@
 					strokeWidth={2}
 					style="pointer-events: none"
 				/>
+
+				<!-- Selection dot-fill — rendered last so it sits above all other lines -->
+				{#if selectedFeatures.length > 0}
+					<Geo
+						data={selectedFeatures}
+						fill={{ value: () => 'url(#sel-dots)', scale: null }}
+						style="pointer-events: none; stroke: none"
+					/>
+				{/if}
 			</Plot>
 		</div>
 	{/if}
@@ -309,7 +376,7 @@
 {/if}
 
 {#if layer.type === 'prelim'}
-	<LegendBadge keys={[]} prelimKeys={PRELIM_FLAG_KEYS} />
+	<LegendBadge keys={[]} tinted={false} priorityKeys={PRIORITY_FLAG_KEYS} />
 {:else}
-	<LegendBadge keys={legendStatusKeys} />
+	<LegendBadge tinted={false} keys={legendStatusKeys} />
 {/if}

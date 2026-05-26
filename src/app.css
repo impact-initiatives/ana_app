@@ -74,7 +74,7 @@
 	--size-field: 0.25rem;
 	--border: 1px;
 	--depth: 1;
-	--noise: 1;
+	--noise: 0;
 
 	/* ── Flag-status colour tokens (light) ──────────────────────────────────*/
 	--color-flag: var(--color-primary);
@@ -88,11 +88,39 @@
 	--color-insufficient-tint: color-mix(in srgb, var(--color-insufficient) 35%, white);
 	--color-no-flag-hover: color-mix(in srgb, var(--color-secondary) 60%, white);
 
-	/* ── Classification colour tokens (light) ───────────────────────────────*/
-	--color-em: #ee5859;
-	--color-roem: oklch(78% 0.13 15);
-	--color-acute: oklch(87% 0.07 14);
+	/* ── Priority flag colour tokens (light) ────────────────────────────────*/
+	--color-priority-em: oklch(35% 0.2 290);
+	--color-priority-ho-primary: oklch(50% 0.22 290);
+	--color-priority-ho-secondary: oklch(65% 0.18 290);
+	--color-priority-an-secondary: oklch(80% 0.09 240);
 	--color-no-acute: oklch(84% 0.143 164.978);
+	--color-priority-em-tint: color-mix(in srgb, var(--color-priority-em) 30%, white);
+	--color-priority-ho-primary-tint: color-mix(in srgb, var(--color-priority-ho-primary) 28%, white);
+	--color-priority-ho-secondary-tint: color-mix(
+		in srgb,
+		var(--color-priority-ho-secondary) 35%,
+		white
+	);
+	--color-priority-an-secondary-tint: color-mix(
+		in srgb,
+		var(--color-priority-an-secondary) 40%,
+		white
+	);
+	--color-no-acute-tint: color-mix(in srgb, var(--color-no-acute) 35%, white);
+
+	/* ── Badge text colour tokens (light) ───────────────────────────────────*/
+	--color-badge-flag-text: white;
+	--color-badge-no-flag-text: white;
+	--color-badge-insufficient-text: var(--color-base-content);
+	--color-badge-no-data-text: var(--color-base-content);
+	--color-badge-priority-em-text: var(--color-base-100);
+	--color-badge-priority-ho-primary-text: var(--color-base-100);
+	--color-badge-priority-ho-secondary-text: var(--color-base-100);
+	--color-badge-priority-an-primary-text: var(--color-base-100);
+	--color-badge-priority-an-secondary-text: var(--color-base-content);
+	--color-badge-priority-insufficient-text: var(--color-base-content);
+	--color-badge-priority-no-data-text: var(--color-base-content);
+	--color-badge-priority-no-acute-text: var(--color-base-content);
 }
 
 /* ── Dark theme ──────────────────────────────────────────────────────────────
@@ -146,7 +174,7 @@
 	--size-field: 0.25rem;
 	--border: 1px;
 	--depth: 1;
-	--noise: 1;
+	--noise: 0;
 
 	/* ── Flag-status colour tokens (dark — tints mixed with dark base, not white) */
 	--color-flag: var(--color-primary);
@@ -164,11 +192,43 @@
 	);
 	--color-no-flag-hover: color-mix(in srgb, var(--color-secondary) 64%, var(--color-base-200));
 
-	/* ── Classification colour tokens (dark) ────────────────────────────────*/
-	--color-em: #ee5859;
-	--color-roem: oklch(72% 0.14 20);
-	--color-acute: oklch(85% 0.08 14);
-	--color-no-acute: oklch(84% 0.143 164.978);
+	/* ── Priority flag colour tokens (dark) ─────────────────────────────── */
+	--color-priority-em: oklch(48% 0.22 290);
+	--color-priority-ho-primary: oklch(60% 0.22 290);
+	--color-priority-ho-secondary: oklch(82% 0.18 290);
+	--color-priority-an-secondary: oklch(88% 0.1 240);
+	--color-no-acute: oklch(72% 0.143 164.978);
+	--color-priority-em-tint: color-mix(in srgb, var(--color-priority-em) 46%, var(--color-base-200));
+	--color-priority-ho-primary-tint: color-mix(
+		in srgb,
+		var(--color-priority-ho-primary) 46%,
+		var(--color-base-200)
+	);
+	--color-priority-ho-secondary-tint: color-mix(
+		in srgb,
+		var(--color-priority-ho-secondary) 42%,
+		var(--color-base-200)
+	);
+	--color-priority-an-secondary-tint: color-mix(
+		in srgb,
+		var(--color-priority-an-secondary) 46%,
+		var(--color-base-200)
+	);
+	--color-no-acute-tint: color-mix(in srgb, var(--color-no-acute) 40%, var(--color-base-200));
+
+	/* ── Badge text colour tokens (dark) ────────────────────────────────── */
+	--color-badge-flag-text: black;
+	--color-badge-no-flag-text: white;
+	--color-badge-insufficient-text: black;
+	--color-badge-no-data-text: white;
+	--color-badge-priority-em-text: white;
+	--color-badge-priority-ho-primary-text: white;
+	--color-badge-priority-ho-secondary-text: black;
+	--color-badge-priority-an-primary-text: black;
+	--color-badge-priority-an-secondary-text: black;
+	--color-badge-priority-insufficient-text: black;
+	--color-badge-priority-no-data-text: white;
+	--color-badge-priority-no-acute-text: black;
 }
 
 /* Global base size — 18px so text-sm ≈ 15.75px, text-base = 18px */
@@ -184,20 +244,20 @@
 	         → d4 (indicator 90%) → d5 (metric 100%)                         */
 
 	/* food_systems */
-	--color-sys-food-systems: #61d095;
-	--color-sys-food-systems-d1: color-mix(in srgb, var(--color-sys-food-systems) 15%, transparent);
-	--color-sys-food-systems-d2: color-mix(in srgb, var(--color-sys-food-systems) 40%, transparent);
-	--color-sys-food-systems-d3: color-mix(in srgb, var(--color-sys-food-systems) 70%, transparent);
-	--color-sys-food-systems-d4: color-mix(in srgb, var(--color-sys-food-systems) 90%, transparent);
-	--color-sys-food-systems-d5: var(--color-sys-food-systems);
+	--color-sys-food-system: #61d095;
+	--color-sys-food-system-d1: color-mix(in srgb, var(--color-sys-food-system) 15%, transparent);
+	--color-sys-food-system-d2: color-mix(in srgb, var(--color-sys-food-system) 40%, transparent);
+	--color-sys-food-system-d3: color-mix(in srgb, var(--color-sys-food-system) 70%, transparent);
+	--color-sys-food-system-d4: color-mix(in srgb, var(--color-sys-food-system) 90%, transparent);
+	--color-sys-food-system-d5: var(--color-sys-food-system);
 
 	/* water_systems */
-	--color-sys-water-systems: #0e79b2;
-	--color-sys-water-systems-d1: color-mix(in srgb, var(--color-sys-water-systems) 15%, transparent);
-	--color-sys-water-systems-d2: color-mix(in srgb, var(--color-sys-water-systems) 40%, transparent);
-	--color-sys-water-systems-d3: color-mix(in srgb, var(--color-sys-water-systems) 70%, transparent);
-	--color-sys-water-systems-d4: color-mix(in srgb, var(--color-sys-water-systems) 90%, transparent);
-	--color-sys-water-systems-d5: var(--color-sys-water-systems);
+	--color-sys-water-system: #0e79b2;
+	--color-sys-water-system-d1: color-mix(in srgb, var(--color-sys-water-system) 15%, transparent);
+	--color-sys-water-system-d2: color-mix(in srgb, var(--color-sys-water-system) 40%, transparent);
+	--color-sys-water-system-d3: color-mix(in srgb, var(--color-sys-water-system) 70%, transparent);
+	--color-sys-water-system-d4: color-mix(in srgb, var(--color-sys-water-system) 90%, transparent);
+	--color-sys-water-system-d5: var(--color-sys-water-system);
 
 	/* health_outcomes */
 	--color-sys-health-outcomes: #a8201a;

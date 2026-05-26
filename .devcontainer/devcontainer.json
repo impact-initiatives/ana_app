@@ -1,0 +1,10 @@
+{
+  "name": "ANA App",
+  "build": { "dockerfile": "Containerfile" },
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": { "label": "Vite dev server", "onAutoForward": "openBrowser" }
+  },
+  "postCreateCommand": "bun install",
+  "remoteEnv": { "NODE_ENV": "development" }
+}

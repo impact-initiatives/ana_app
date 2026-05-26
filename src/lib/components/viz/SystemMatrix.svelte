@@ -73,7 +73,7 @@
 			threshold_an: md.raw?.thresholds?.an ?? null,
 			threshold_van: md.raw?.thresholds?.van ?? null,
 			above_or_below: md.raw?.above_or_below ?? null,
-			preference: md.raw?.preference ?? null
+			evidence_type: md.raw?.evidence_type ?? null
 		};
 	}
 

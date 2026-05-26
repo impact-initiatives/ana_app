@@ -1,29 +1,31 @@
 /**
  * THIS FILE IS GENERATED — DO NOT EDIT BY HAND
  * Generated from: ../../../../static/data/subfactor.csv
- * Generated at: 2026-05-06T12:04:49.557Z
+ * Generated at: 2026-05-22T12:16:12.843Z
  */
 
 export enum SubFactorIDEnum {
+	Quantity = 'quantity',
+	Quality = 'quality',
+	Availability = 'availability',
+	Access = 'access',
+	Utilisation = 'utilisation',
+	Consumption = 'consumption',
+	Accessibility = 'accessibility',
 	Mortality = 'mortality',
+	Functionality = 'functionality',
+	ExposureToElements = 'exposure_to_elements',
+	ProtectionFromVectors = 'protection_from_vectors',
+	Overcrowding = 'overcrowding',
 	AcuteMalnutrition = 'acute_malnutrition',
 	CommonChildhoodIllnesses = 'common_childhood_illnesses',
 	InfectiousDiseaseOutbreaks = 'infectious_disease_outbreaks',
 	PopulationHealthNeeds = 'population_health_needs',
-	IndividualConsumption = 'individual_consumption',
-	HhConsumption = 'hh_consumption',
-	Availability = 'availability',
-	Accessibility = 'accessibility',
-	Utilisation = 'utilisation',
-	Consumption = 'consumption',
-	Quantity = 'quantity',
-	Quality = 'quality',
-	Access = 'access',
-	ExposureToElements = 'exposure_to_elements',
-	ProtectionFromVectors = 'protection_from_vectors',
-	Overcrowding = 'overcrowding',
-	Functionality = 'functionality',
 	AccessToNutrition = 'access_to_nutrition',
+	QuantityAndDiversityProxy = 'quantity_and_diversity_proxy',
+	QuantityProxy = 'quantity_proxy',
+	Diversity = 'diversity',
+	QualityAvailability = 'quality_availability',
 }
 
 // Convenience array of ids

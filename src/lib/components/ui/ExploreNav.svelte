@@ -10,6 +10,7 @@
 		{ id: 'systems', label: 'Systems' },
 		{ id: 'metrics', label: 'Metrics' },
 		{ id: 'coverage', label: 'Data Coverage' },
+		{ id: 'spotlight', label: 'Spotlight' },
 		{ id: 'export', label: 'Export' }
 	] as const;
 </script>

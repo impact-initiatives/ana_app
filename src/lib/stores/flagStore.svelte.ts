@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 
-const STORAGE_KEY = 'ana_flag_store_v2';
+const STORAGE_KEY = 'ana_flag_store';
 
 export interface FlagState {
 	flaggedResult: Record<string, any>[] | null;

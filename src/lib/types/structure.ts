@@ -30,6 +30,13 @@ export enum MetricDirectionEnum {
 	Below = 'Below'
 }
 
+export enum EvidenceTypeEnum {
+		Outcome = 'Outcome',
+			Predictor = 'Predictor',
+	ANSignal = 'AN signal',
+	SupportingEvidence = 'Supporting evidence'
+}
+
 // ── Type-string parsing ───────────────────────────────────────────────────────
 
 /**
@@ -91,6 +98,7 @@ export interface Metric {
 	label?: string | null;
 	level?: string | null;
 	preference: number;
+	evidence_type: string | null;
 	type: MetricType;
 	msna_module?: string | null;
 	msna_indicator?: string | null;
@@ -98,15 +106,12 @@ export interface Metric {
 	remarks_limitations?: string | null;
 	thresholds: Thresholds;
 	above_or_below: string;
+	van_is_strict?: boolean | null;
 	evidence_threshold?: number | null;
 	factor_threshold: number;
 	risk_concept?: string | null;
 }
 
-/**
- * An indicator — a thematic grouping of one or more metrics.
- * Corresponds to the "Indicator" column in the reference CSV.
- */
 export interface Indicator {
 	id: string;
 	label?: string | null;
@@ -134,4 +139,49 @@ export interface System {
 export interface ReferenceRoot {
 	generatedAt?: string;
 	systems: System[];
+}
+
+// ── System definitions (manually maintained — do not auto-generate) ──────────
+
+export enum SystemIDEnum {
+	Mortality               = 'mortality',
+	HealthOutcomes          = 'health_outcomes',
+	FoodSystem              = 'food_system',
+	WaterSystem             = 'water_system',
+	HealthNutritionServices = 'health_nutrition_services',
+	LivingConditions        = 'living_conditions',
+	MarketFunctionality     = 'market_functionality',
+}
+
+export type SystemID = SystemIDEnum;
+export const SystemIDs = Object.values(SystemIDEnum) as SystemIDEnum[];
+
+export const SystemLabels: Record<SystemIDEnum, string> = {
+	[SystemIDEnum.Mortality]:               'Mortality outcome',
+	[SystemIDEnum.HealthOutcomes]:          'Health Outcomes',
+	[SystemIDEnum.FoodSystem]:              'Food System',
+	[SystemIDEnum.WaterSystem]:             'Water System',
+	[SystemIDEnum.HealthNutritionServices]: 'Health / Nutrition Services',
+	[SystemIDEnum.LivingConditions]:        'Living Conditions',
+	[SystemIDEnum.MarketFunctionality]:     'Market Functionality',
+};
+
+/** Canonical UI display order. Edit this array to change order everywhere. */
+export const SYSTEM_DISPLAY_ORDER: SystemIDEnum[] = [
+	SystemIDEnum.Mortality,
+	SystemIDEnum.HealthOutcomes,
+	SystemIDEnum.FoodSystem,
+	SystemIDEnum.WaterSystem,
+	SystemIDEnum.HealthNutritionServices,
+	SystemIDEnum.LivingConditions,
+	SystemIDEnum.MarketFunctionality,
+];
+
+/** Sort any array of objects with an `id` field by SYSTEM_DISPLAY_ORDER. */
+export function sortSystemsByOrder<T extends { id: string }>(systems: T[]): T[] {
+	return [...systems].sort(
+		(a, b) =>
+			SYSTEM_DISPLAY_ORDER.indexOf(a.id as SystemIDEnum) -
+			SYSTEM_DISPLAY_ORDER.indexOf(b.id as SystemIDEnum)
+	);
 }

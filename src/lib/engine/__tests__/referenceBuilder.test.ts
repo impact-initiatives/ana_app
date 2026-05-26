@@ -27,6 +27,7 @@ function validRow(overrides: Record<string, string> = {}): RefRow {
 		'Sub-Factor': 'Mortality',
 		Indicator: 'Crude mortality rate',
 		Preference: '1',
+		'Evidence type': 'AN signal',
 		Type: 'num[0+]',
 		Metric: 'Deaths per 10,000 per day',
 		'MSNA module': '',
@@ -263,12 +264,20 @@ describe('validateRefRows — base reference cross-check', () => {
 // ── validateRefRows — full valid row ──────────────────────────────────────────
 
 describe('validateRefRows — full valid row', () => {
-	it('returns no errors for a complete valid row', () => {
-		const csv = toCsv([validRow()]);
+	it('returns no errors for a complete valid row (new MET_ID)', () => {
+		const csv = toCsv([validRow({ MET_ID: 'MET099' })]);
 		const { rows } = parseReferenceCsvText(csv);
 		const { errors, warnings } = validateRefRows(rows, baseJson as Record<string, unknown>);
 		expect(errors).toHaveLength(0);
 		expect(warnings).toHaveLength(0);
+	});
+
+	it('warns (not errors) when the MET_ID already exists in the base reference', () => {
+		const csv = toCsv([validRow({ MET_ID: 'MET001' })]);
+		const { rows } = parseReferenceCsvText(csv);
+		const { errors, warnings } = validateRefRows(rows, baseJson as Record<string, unknown>);
+		expect(errors).toHaveLength(0);
+		expect(warnings.some((w) => w.toLowerCase().includes('update'))).toBe(true);
 	});
 
 	it('returns no errors for multiple valid rows with distinct MET_IDs', () => {

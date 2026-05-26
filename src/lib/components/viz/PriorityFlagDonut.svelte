@@ -2,10 +2,9 @@
 	import { pie } from 'd3-shape';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { getPrelimBadge } from '$lib/utils/colors';
-	import { PRELIM_FLAG_KEYS } from '$lib/types/flags';
+	import { getPriorityBadge } from '$lib/utils/colors';
+	import { PRIORITY_FLAG_KEYS } from '$lib/types/flags';
 	import TooltipCard from '$lib/components/ui/TooltipCard.svelte';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
 	import Arc from './primitives/Arc.svelte';
 	import Chart, { type Dimensions } from './primitives/Chart.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -30,9 +29,7 @@
 	// Radius: explicit override or auto-fit to container (max 120px)
 	const effectiveRadius = $derived(radius ?? Math.min(Math.floor(containerWidth / 2.8), 120));
 
-	const PRELIM_KEYS = PRELIM_FLAG_KEYS;
-
-	// ── Count rows per prelim_flag ────────────────────────────────────────────
+	// ── Count rows per priority_flag ────────────────────────────────────────────
 	interface Slice {
 		key: string;
 		count: number;
@@ -42,16 +39,16 @@
 
 	const slices = $derived.by<Slice[]>(() => {
 		const counts: Record<string, number> = {};
-		for (const k of PRELIM_KEYS) counts[k] = 0;
+		for (const k of PRIORITY_FLAG_KEYS) counts[k] = 0;
 		for (const row of rows) {
-			const k = String(row.prelim_flag ?? '');
+			const k = String(row.priority_flag ?? '');
 			if (k in counts) counts[k]++;
 		}
-		return PRELIM_KEYS.map((k) => ({
+		return PRIORITY_FLAG_KEYS.map((k) => ({
 			key: k,
 			count: counts[k],
-			label: getPrelimBadge(k)?.label ?? k,
-			color: getPrelimBadge(k)?.bg ?? '#9ca3af'
+			label: getPriorityBadge(k)?.label ?? k,
+			color: getPriorityBadge(k)?.bg ?? '#9ca3af'
 		}));
 	});
 
@@ -84,7 +81,9 @@
 	// ── Tweened legend numbers (same duration as arc animation) ──────────────
 	// Always includes all keys (0 for absent slices) so the tween shape is stable.
 	const allCounts = $derived(
-		Object.fromEntries(PRELIM_KEYS.map((k) => [k, slices.find((s) => s.key === k)?.count ?? 0]))
+		Object.fromEntries(
+			PRIORITY_FLAG_KEYS.map((k) => [k, slices.find((s) => s.key === k)?.count ?? 0])
+		)
 	);
 	const tweenedCounts = Tween.of(() => allCounts, { duration: 600, easing: cubicOut });
 	const tweenedTotal = Tween.of(() => rows.length, { duration: 600, easing: cubicOut });
@@ -132,23 +131,20 @@
 {#if tooltipVisible && hoveredSlice}
 	<TooltipCard
 		title={hoveredSlice.data.label}
+		titleColor={hoveredSlice.data.color}
 		x={tooltipX}
 		y={tooltipY}
 		rows={[
 			{ key: 'Count', value: String(hoveredSlice.data.count) },
-			{
-				key: 'Share',
-				value: `${Math.round((hoveredSlice.data.count / rows.length) * 100)}%`
-			}
+			{ key: 'Share', value: `${Math.round((hoveredSlice.data.count / rows.length) * 100)}%` }
 		]}
-		swatches={[{ color: hoveredSlice.data.color, label: hoveredSlice.data.label }]}
 	/>
 {/if}
 
-<Card title="# of UOAs per preliminary flag" subtitle="Click a slice to filter.">
+<Card title="# of UOAs per priority flag" subtitle="Click a slice to filter.">
 	<div bind:offsetWidth={containerWidth}>
 		{#if rows.length === 0}
-			<p class="text-base-content/70 py-8 text-center text-sm">No data matches current filters.</p>
+			<p class="text-base-content/75 py-8 text-center text-sm">No data matches current filters.</p>
 		{:else}
 			<div class="flex flex-col items-center justify-center gap-6">
 				<!-- Donut — Chart wrapper matches Arcs.svelte template pattern -->
@@ -204,9 +200,9 @@
 							>
 								<span class="h-3 w-3 rounded-full" style:background-color={s.color}></span>
 								<span>{Math.round(tc)}</span>
-								<span> {s.label}</span>
+								<span class="tracking-wide uppercase">{s.label}</span>
 								<span class="text-base-content">
-									{absent ? '0%' : `${Math.round((tc / rows.length) * 100)}%`}
+									{absent ? '(0%)' : `(${Math.round((tc / rows.length) * 100)}%)`}
 								</span>
 							</button>
 						</div>

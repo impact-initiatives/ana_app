@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { getFlagBadge, getPrelimBadge } from '$lib/utils/colors';
+	import { getFlagBadge, getPriorityBadge } from '$lib/utils/colors';
 
 	interface Props {
 		/** FLAG_BADGE keys to display. Default: the four main statuses. */
 		keys?: readonly string[];
-		/** prelimBadge keys to display after a | separator. Default: none. */
-		prelimKeys?: readonly string[];
+		/** priorityBadge keys to display after FLAG_BADGE keys. Default: none. */
+		priorityKeys?: readonly string[];
 		/** Use solid colours for FLAG_BADGE swatches instead of tinted. Default true = tinted. */
 		tinted?: boolean;
 		/** Render FLAG_BADGE swatches as btn-circle buttons. Default false = small square. */
@@ -19,7 +19,7 @@
 
 	let {
 		keys = ['flag', 'no_flag', 'insufficient_evidence', 'no_data'],
-		prelimKeys = [],
+		priorityKeys = [],
 		tinted = true,
 		btnCircle = false,
 		size = 'text-sm',
@@ -35,7 +35,7 @@
 	<!-- Status badges row (hidden when keys is empty) -->
 	{#if keys.length > 0}
 		<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-			<span class="font-semibold">{prelimKeys.length > 0 ? 'System:' : 'Legend:'}</span>
+			<span class="font-semibold">{priorityKeys.length > 0 ? 'System:' : 'Legend:'}</span>
 			{#each keys as fk (fk)}
 				{@const fb = getFlagBadge(fk)}
 				{#if fb}
@@ -62,11 +62,11 @@
 	{/if}
 
 	<!-- Prelim badges row -->
-	{#if prelimKeys.length > 0}
+	{#if priorityKeys.length > 0}
 		<div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-			<span class="font-semibold">Preliminary flag:</span>
-			{#each prelimKeys as pk (pk)}
-				{@const pb = getPrelimBadge(pk)}
+			<span class="font-semibold">Priority flag:</span>
+			{#each priorityKeys as pk (pk)}
+				{@const pb = getPriorityBadge(pk)}
 				{#if pb}
 					<span class="flex items-center gap-1">
 						{#if btnCircle}

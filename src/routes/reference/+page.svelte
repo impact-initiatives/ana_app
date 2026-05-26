@@ -7,6 +7,8 @@
 	import { buildReferenceRows } from '$lib/engine/metricMetadata';
 	import { tidy, filter, distinct, arrange, asc } from '@tidyjs/tidy';
 	import { resolve, asset } from '$app/paths';
+	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
 	import { colourForHierarchy } from '$lib/utils/colors';
@@ -23,15 +25,6 @@
 	let selectedLevels = $state<string[]>([]);
 	let selectedConcepts = $state<string[]>([]);
 	let activeView = $state<View>('table');
-	let showAdvancedCols = $state(false);
-
-	const ADVANCED_COLS = new Set([
-		'threshold_van',
-		'msna_module',
-		'question_kobo_code',
-		'remarks_limitations'
-	]);
-
 	onMount(async () => {
 		loadMetrics();
 		try {
@@ -83,24 +76,26 @@
 	);
 
 	const refColOptions: Record<string, { wrap: boolean; extraClass?: string; bg?: string }> = {
-		risk_concept: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
-		level: { wrap: true, extraClass: 'max-w-24', bg: 'var(--color-base-100)' },
-		system: { wrap: true, extraClass: 'max-w-20' },
-		factor: { wrap: true, extraClass: 'max-w-20' },
-		subfactor: { wrap: true, extraClass: 'max-w-24' },
-		indicator: { wrap: true, extraClass: 'max-w-40' },
-		metric: { wrap: true, extraClass: 'max-w-20' },
-		label: { wrap: true, extraClass: 'max-w-52' },
-		type: { wrap: true, extraClass: 'max-w-20' },
-		preference: { wrap: true, extraClass: 'max-w-20' },
-		evidence_threshold: { wrap: true, extraClass: 'max-w-20' },
-		factor_threshold: { wrap: true, extraClass: 'max-w-20' },
-		above_or_below: { wrap: true, extraClass: 'max-w-18' },
-		threshold_an: { wrap: true, extraClass: 'max-w-20' },
-		threshold_van: { wrap: true, extraClass: 'max-w-20' },
-		msna_module: { wrap: true, extraClass: 'max-w-40' },
-		question_kobo_code: { wrap: true, extraClass: 'max-w-24' },
-		remarks_limitations: { wrap: true, extraClass: 'max-w-30' }
+		risk_concept: { wrap: true, extraClass: 'min-w-24 max-w-32', bg: 'var(--color-base-100)' },
+		level: { wrap: true, extraClass: 'min-w-20 max-w-32', bg: 'var(--color-base-100)' },
+		system: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		factor: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		subfactor: { wrap: true, extraClass: 'min-w-28 max-w-40' },
+		indicator: { wrap: true, extraClass: 'min-w-44 max-w-64' },
+		metric: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		label: { wrap: true, extraClass: 'min-w-60 max-w-80' },
+		type: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		preference: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		evidence_type: { wrap: true, extraClass: 'min-w-32 max-w-44' },
+		evidence_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		factor_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		above_or_below: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		threshold_an: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		threshold_van: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		msna_module: { wrap: true, extraClass: 'min-w-40 max-w-56' },
+		msna_indicator: { wrap: true, extraClass: 'min-w-40 max-w-60' },
+		question_kobo_code: { wrap: true, extraClass: 'min-w-24 max-w-36' },
+		remarks_limitations: { wrap: true, extraClass: 'min-w-36 max-w-56' }
 	};
 
 	const refRowColor = $derived.by(
@@ -147,12 +142,7 @@
 	);
 
 	const tableRows = $derived(
-		(showAdvancedCols
-			? referenceObjects
-			: referenceObjects.map((row) =>
-					Object.fromEntries(Object.entries(row).filter(([k]) => !ADVANCED_COLS.has(k)))
-				)
-		).map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
+		referenceObjects.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
@@ -182,7 +172,7 @@
 		<!-- View tabs -->
 		<div class="mb-0 flex items-end">
 			<div class="tabs tabs-lift" role="tablist">
-				{#each ([['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const) as [id, label] (id)}
+				{#each [['table', 'Table'], ['circle', 'Circle Packing'], ['pdf', 'Methodology']] as const as [id, label] (id)}
 					<button
 						role="tab"
 						class="tab {activeView === id ? 'tab-active' : ''}"
@@ -218,21 +208,9 @@
 					/>
 				</div>
 				{#if filtersActive}
-					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button>
+					<button class="btn btn-ghost btn-sm self-end" onclick={clearFilters}>Clear filters</button
+					>
 				{/if}
-			</div>
-		{:else if activeView === 'table'}
-			<div
-				class="border-base-200 bg-base-200/40 rounded-b-box mb-4 flex items-center border border-t-0 px-4 py-2"
-			>
-				<label class="label text-base-content/85 text-xs">
-					<input
-						type="checkbox"
-						class="toggle toggle-primary toggle-sm"
-						bind:checked={showAdvancedCols}
-					/>
-					Additional column: VAN threshold · MSNA module · KoboToolbox question code · Remarks &amp; limitations
-				</label>
 			</div>
 		{/if}
 
@@ -307,6 +285,7 @@
 				downloadable
 				humanizeHeaders
 				overflow="scroll"
+				initialSearch={browser ? (page.url.searchParams.get('q') ?? '') : ''}
 			/>
 		{/if}
 	{/if}

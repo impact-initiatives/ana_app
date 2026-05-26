@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCsv, type MetricMap } from '$lib/engine/validator';
+import { validateCsv, type MetricMap } from '$lib/engine/dataValidator';
 
 // MetricMap is Record<string, Metric> — use plain object, not Map
 const metricMap: MetricMap = {

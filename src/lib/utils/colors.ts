@@ -1,6 +1,6 @@
 import type { Metric } from '$lib/types/structure';
-import type { FlagStatus, PrelimFlag } from '$lib/types/flags';
-import { SystemIDEnum } from '$lib/types/generated/system-enum';
+import type { FlagStatus, PriorityFlag } from '$lib/types/flags';
+import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
 
@@ -39,9 +39,9 @@ export function tileStyle(flagN: number, avail: number): string {
  * DATA MAP: System ID to CSS variable name.
  * Convention: SCREAMING_SNAKE_CASE for constant data maps.
  */
-const SYSTEM_CSS_VAR_MAP: Record<SystemIDEnum | 'default', string> = {
-	[SystemIDEnum.FoodSystems]: '--color-sys-food-systems',
-	[SystemIDEnum.WaterSystems]: '--color-sys-water-systems',
+export const SYSTEM_CSS_VAR_MAP: Record<SystemIDEnum | 'default', string> = {
+	[SystemIDEnum.FoodSystem]: '--color-sys-food-system',
+	[SystemIDEnum.WaterSystem]: '--color-sys-water-system',
 	[SystemIDEnum.HealthOutcomes]: '--color-sys-health-outcomes',
 	[SystemIDEnum.Mortality]: '--color-sys-mortality',
 	[SystemIDEnum.LivingConditions]: '--color-sys-living-conditions',
@@ -136,6 +136,8 @@ export function formatMetricTooltip(met: Metric | undefined): string {
 // ── Badge Definitions ────────────────────────────────────────────────────────
 
 export interface FlagBadge {
+	/** Theme-aware text colour — use a CSS custom property (e.g. var(--color-badge-priority-X-text)). */
+	textColor?: string;
 	bg: string;
 	tintBg?: string;
 	label: string;
@@ -145,6 +147,7 @@ export interface FlagStatusBadge {
 	label: string;
 	colorVar: string;
 	tintVar: string;
+	/** Theme-aware style string — uses CSS vars so no JS isDark needed. */
 	badgeStyle: string;
 	badgeTintStyle: string;
 	badgeCls: string;
@@ -153,7 +156,24 @@ export interface FlagStatusBadge {
 }
 
 /**
+ * DATA MAP: Priority flag to Badge configuration.
+ * textColor references a theme-scoped CSS var — no JS isDark needed.
+ * Convention: SCREAMING_SNAKE_CASE.
+ */
+export const PRIORITY_BADGE_MAP: Record<PriorityFlag, FlagBadge> = {
+	em:                    { bg: 'var(--color-priority-em)',           tintBg: 'var(--color-priority-em-tint)',           label: 'Excess Mortality',      textColor: 'var(--color-badge-priority-em-text)' },
+	ho_primary:            { bg: 'var(--color-priority-ho-primary)',   tintBg: 'var(--color-priority-ho-primary-tint)',   label: 'HO – Primary',          textColor: 'var(--color-badge-priority-ho-primary-text)' },
+	ho_secondary:          { bg: 'var(--color-priority-ho-secondary)', tintBg: 'var(--color-priority-ho-secondary-tint)', label: 'HO – Secondary',        textColor: 'var(--color-badge-priority-ho-secondary-text)' },
+	an_primary:            { bg: 'var(--color-flag)',                  tintBg: 'var(--color-flag-tint)',                  label: 'AN – Primary',          textColor: 'var(--color-badge-priority-an-primary-text)' },
+	an_secondary:          { bg: 'var(--color-priority-an-secondary)', tintBg: 'var(--color-priority-an-secondary-tint)', label: 'AN – Secondary',        textColor: 'var(--color-badge-priority-an-secondary-text)' },
+	insufficient_evidence: { bg: 'var(--color-insufficient)',          tintBg: 'var(--color-insufficient-tint)',          label: 'Insufficient Evidence', textColor: 'var(--color-badge-priority-insufficient-text)' },
+	no_data:               { bg: 'var(--color-no-data)',               tintBg: 'var(--color-no-data-tint)',               label: 'No Data',               textColor: 'var(--color-badge-priority-no-data-text)' },
+	no_acute_needs:        { bg: 'var(--color-no-acute)',              tintBg: 'var(--color-no-acute-tint)',              label: 'No Acute Needs',        textColor: 'var(--color-badge-priority-no-acute-text)' }
+};
+
+/**
  * DATA MAP: Status to Badge configuration.
+ * darkTextColor for shared statuses references PRIORITY_BADGE_MAP to avoid duplication.
  * Convention: SCREAMING_SNAKE_CASE.
  */
 export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
@@ -161,7 +181,7 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
 		label: 'Flag',
 		colorVar: '--color-flag',
 		tintVar: '--color-flag-tint',
-		badgeStyle: 'background-color: var(--color-flag); color: var(--color-base-100)',
+		badgeStyle: 'background-color: var(--color-flag); color: var(--color-badge-flag-text)',
 		badgeTintStyle: 'background-color: var(--color-flag-tint); color: var(--color-base-content)',
 		badgeCls: '',
 		checkboxCls: 'checkbox-warning',
@@ -171,7 +191,7 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
 		label: 'No Flag',
 		colorVar: '--color-no-flag',
 		tintVar: '--color-no-flag-tint',
-		badgeStyle: 'background-color: var(--color-no-flag); color: var(--color-base-100)',
+		badgeStyle: 'background-color: var(--color-no-flag); color: var(--color-badge-no-flag-text)',
 		badgeTintStyle: 'background-color: var(--color-no-flag-tint); color: var(--color-base-content)',
 		badgeCls: '',
 		checkboxCls: 'checkbox-info',
@@ -181,9 +201,8 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
 		label: 'Insufficient Evidence',
 		colorVar: '--color-insufficient',
 		tintVar: '--color-insufficient-tint',
-		badgeStyle: 'background-color: var(--color-insufficient); color: var(--color-base-100)',
-		badgeTintStyle:
-			'background-color: var(--color-insufficient-tint); color: var(--color-base-content)',
+		badgeStyle: 'background-color: var(--color-insufficient); color: var(--color-badge-insufficient-text)',
+		badgeTintStyle: 'background-color: var(--color-insufficient-tint); color: var(--color-base-content)',
 		badgeCls: 'badge-warning',
 		checkboxCls: 'checkbox-warning',
 		buttonCls: 'btn-warning'
@@ -192,25 +211,12 @@ export const FLAG_BADGE_MAP: Record<FlagStatus, FlagStatusBadge> = {
 		label: 'No Data',
 		colorVar: '--color-no-data',
 		tintVar: '--color-no-data-tint',
-		badgeStyle: 'background-color: var(--color-no-data); color: var(--color-base-100)',
+		badgeStyle: 'background-color: var(--color-no-data); color: var(--color-badge-no-data-text)',
 		badgeTintStyle: 'background-color: var(--color-no-data-tint); color: var(--color-base-content)',
 		badgeCls: 'badge-ghost',
 		checkboxCls: 'checkbox-neutral',
 		buttonCls: 'btn-neutral'
 	}
-};
-
-/**
- * DATA MAP: Preliminary flag to Badge configuration.
- * Convention: SCREAMING_SNAKE_CASE (Renamed from prelimBadge).
- */
-export const PRELIM_BADGE_MAP: Record<PrelimFlag, FlagBadge> = {
-	em: { bg: 'var(--color-em)', label: 'EM' },
-	roem: { bg: 'var(--color-roem)', label: 'RoEM' },
-	acute: { bg: 'var(--color-acute)', label: 'Acute Needs' },
-	acute_needs: { bg: 'var(--color-no-acute)', label: 'No Acute Needs' },
-	insufficient_evidence: { bg: 'var(--color-insufficient)', label: 'Insufficient Evidence' },
-	no_data: { bg: 'var(--color-no-data)', tintBg: 'var(--color-no-data-tint)', label: 'No Data' }
 };
 
 /**
@@ -221,8 +227,25 @@ export const getFlagBadge = (key: string): FlagStatusBadge | undefined =>
 	FLAG_BADGE_MAP[key as FlagStatus];
 
 /**
- * ACCESSOR: Get Prelim Badge config.
+ * ACCESSOR: Get Priority Badge config.
  * Convention: camelCase with 'get' prefix.
  */
-export const getPrelimBadge = (key: string): FlagBadge | undefined =>
-	PRELIM_BADGE_MAP[key as PrelimFlag];
+export const getPriorityBadge = (key: string): FlagBadge | undefined =>
+	PRIORITY_BADGE_MAP[key as PriorityFlag];
+
+/**
+ * Returns the inline style for a FlagStatusBadge.
+ * Text color is CSS-var-driven — automatically theme-aware.
+ */
+export function flagBadgeStyle(badge: FlagStatusBadge): string {
+	return badge.badgeStyle;
+}
+
+/**
+ * Returns the text color for a FlagBadge (priority flags).
+ * textColor references a theme-scoped CSS var — no isDark needed.
+ */
+export function priorityBadgeTextColor(badge: FlagBadge): string {
+	return badge.textColor ?? 'var(--color-base-content)';
+}
+

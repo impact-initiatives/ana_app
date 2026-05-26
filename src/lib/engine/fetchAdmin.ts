@@ -69,13 +69,18 @@ export async function fetchAdminsForCountry(pcode: string, level: 'ADM1' | 'ADM2
           const line = polygonToLine(feature);
           // polygonToLine returns a Feature when input is a Polygon,
           // but a FeatureCollection when input is a MultiPolygon (e.g. ADM1 with islands).
+          const adm1Props = {
+            adm1_pcode: feature.properties?.adm1_pcode,
+            adm1_source_code: feature.properties?.adm1_source_code,
+            gis_name: feature.properties?.gis_name ?? feature.properties?.name
+          };
           if (line.type === 'FeatureCollection') {
             for (const f of line.features) {
-              f.properties = { adm1_pcode: feature.properties?.adm1_pcode };
+              f.properties = adm1Props;
               adm1Lines.push(f);
             }
           } else {
-            line.properties = { adm1_pcode: feature.properties?.adm1_pcode };
+            line.properties = adm1Props;
             adm1Lines.push(line);
           }
         }

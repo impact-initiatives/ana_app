@@ -1,12 +1,14 @@
 <script lang="ts">
-	import PrelimFlagDonut from '$lib/components/viz/PrelimFlagDonut.svelte';
+	import PriorityFlagDonut from '$lib/components/viz/PriorityFlagDonut.svelte';
 	import UoaRankingTable from '$lib/components/viz/UoaRankingTable.svelte';
 	import ChoroplethMap from '$lib/components/viz/ChoroplethMap.svelte';
 	import type { MapLayer } from '$lib/components/viz/ChoroplethMap.svelte';
 	import UoaDetailPanel from '$lib/components/viz/UoaDetailPanel.svelte';
+	import UoaClusterPanel from '$lib/components/viz/UoaClusterPanel.svelte';
 	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 	import { metricStore } from '$lib/stores/metricStore.svelte';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import booleanIntersects from '@turf/boolean-intersects';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import type { SelectGroup } from '$lib/components/ui/Select.svelte';
@@ -25,6 +27,7 @@
 
 	interface Props {
 		filteredFlagged: Row[];
+		mapRows?: Row[];
 		systems: System[];
 		systemCodes: Map<string, string[]>;
 		hasPcodes: boolean;
@@ -37,10 +40,13 @@
 		onmapselect: (uoa: string, adminName: string | null) => void;
 		onmapclear: () => void;
 		ondonutsliceclick: (key: string | null) => void;
+		onmapuoaschange?: (uoas: string[]) => void;
+		onmapselectreset?: () => void;
 	}
 
 	let {
 		filteredFlagged,
+		mapRows,
 		systems,
 		systemCodes,
 		hasPcodes,
@@ -52,12 +58,91 @@
 		onselectinheatmap,
 		onmapselect,
 		onmapclear,
-		ondonutsliceclick
+		ondonutsliceclick,
+		onmapuoaschange,
+		onmapselectreset
 	}: Props = $props();
 
 	// ── Map download ──────────────────────────────────────────────────────────────
 
 	let mapDownloadFn: (() => Promise<void>) | undefined = $state();
+
+	// ── Multi-select state ────────────────────────────────────────────────────────
+
+	let multiSelectMode = $state(false);
+	let selectedUoas = new SvelteSet<string>();
+	let nonAdjacentWarning = $state(false);
+
+	const effectiveRows = $derived(
+		selectedUoas.size > 0
+			? filteredFlagged.filter((r) => selectedUoas.has(String(r.uoa)))
+			: filteredFlagged
+	);
+
+	function getFeatureByUoa(uoa: string): any | null {
+		// $state.snapshot strips the Svelte proxy so Turf geometry ops work correctly.
+		if (pcodeLevel === 'ADM1') {
+			const f = ((adminFeaturesStore.adm1?.features as any[]) ?? []).find(
+				(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
+			);
+			return f ? $state.snapshot(f) : null;
+		}
+		if (pcodeLevel === 'ADM2') {
+			const f = ((adminFeaturesStore.adm2?.features as any[]) ?? []).find(
+				(f: any) => f.properties?.adm2_source_code === uoa
+			);
+			return f ? $state.snapshot(f) : null;
+		}
+		// MIXED: UoAs may be ADM2 or ADM1 codes — search adm2 first
+		const fromAdm2 = ((adminFeaturesStore.adm2?.features as any[]) ?? []).find(
+			(f: any) => f.properties?.adm2_source_code === uoa
+		);
+		if (fromAdm2) return $state.snapshot(fromAdm2);
+		const fromAdm1 = ((adminFeaturesStore.adm1?.features as any[]) ?? []).find(
+			(f: any) => (f.properties?.adm1_source_code ?? f.properties?.pcode) === uoa
+		);
+		return fromAdm1 ? $state.snapshot(fromAdm1) : null;
+	}
+
+	function isAdjacentToAny(uoa: string): boolean {
+		const candidate = getFeatureByUoa(uoa);
+		if (!candidate) return false;
+		for (const s of selectedUoas) {
+			const sf = getFeatureByUoa(s);
+			if (sf) {
+				try {
+					if (booleanIntersects(candidate, sf)) return true;
+				} catch {
+					// ignore geometry errors for individual pairs
+				}
+			}
+		}
+		return false;
+	}
+
+	function handleMapClick(uoa: string, adminName: string | null) {
+		if (!multiSelectMode) {
+			onmapselect(uoa, adminName);
+			return;
+		}
+		if (selectedUoas.has(uoa)) {
+			selectedUoas.delete(uoa);
+		} else if (selectedUoas.size === 0 || isAdjacentToAny(uoa)) {
+			selectedUoas.add(uoa);
+		} else {
+			nonAdjacentWarning = true;
+			setTimeout(() => (nonAdjacentWarning = false), 2000);
+			return;
+		}
+		onmapuoaschange?.([...selectedUoas]);
+	}
+
+	function toggleMultiSelect() {
+		multiSelectMode = !multiSelectMode;
+		selectedUoas.clear();
+		onmapselectreset?.();
+		if (!multiSelectMode) onmapclear();
+	}
 
 	// ── Cascade filter state ──────────────────────────────────────────────────────
 
@@ -292,7 +377,7 @@
 	const cardSubtitle = $derived(
 		activeLabel
 			? `Showing: ${activeLabel}`
-			: 'Showing: Preliminary flag. Click an area to view its report. Filter to view flags for systems, factors, subfactors or metrics.'
+			: 'Showing: Priority flag. Click an area to view its report. Filter to view flags for systems, factors, subfactors or metrics.'
 	);
 </script>
 
@@ -304,15 +389,15 @@
 	<!-- Donut + ranking table -->
 	<div class="mb-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-5">
 		<div class="lg:col-span-2">
-			<PrelimFlagDonut
-				rows={filteredFlagged}
+			<PriorityFlagDonut
+				rows={effectiveRows}
 				selectedKeys={selectedPrelimKeys}
 				onsliceclick={ondonutsliceclick}
 			/>
 		</div>
 		<div class="lg:col-span-3">
 			<UoaRankingTable
-				rows={filteredFlagged}
+				rows={effectiveRows}
 				{systems}
 				{systemCodes}
 				onprelimclick={ondonutsliceclick}
@@ -335,6 +420,35 @@
 					Fetching admin boundaries…
 				</div>
 			{:else if adminFeaturesStore.adm1}
+				<!-- Multi-select toggle + warnings -->
+				<div class="mb-3 flex flex-wrap items-center gap-2">
+					<button
+						type="button"
+						class="btn btn-sm {multiSelectMode ? 'btn-primary' : 'btn-outline'} cursor-pointer"
+						onclick={toggleMultiSelect}
+					>
+						{multiSelectMode ? 'Exit selection' : 'Select UoAs'}
+					</button>
+					<span class="text-base-content/85 text-xs">
+						{multiSelectMode
+							? 'Click adjacent UoAs to add them. Click a selected UoA to remove it.'
+							: 'Select contiguous UoAs to compare them side-by-side.'}
+					</span>
+				</div>
+				<div class="mb-4 flex items-center gap-4">
+					{#if multiSelectMode && selectedUoas.size > 0}
+						<span class="text-base-content/85 text-md">{selectedUoas.size} selected</span>
+					{/if}
+					{#if multiSelectMode && selectedUoas.size > 5}
+						<span class="badge badge-warning badge-md"
+							>{selectedUoas.size} UoAs — consider narrowing selection</span
+						>
+					{/if}
+					{#if nonAdjacentWarning}
+						<span class="badge badge-error badge-md">UoAs not adjacent to current selection</span>
+					{/if}
+				</div>
+
 				<!-- Cascade layer filters -->
 				<div class="mb-4 flex flex-wrap items-end gap-3">
 					<div class="min-w-44">
@@ -378,15 +492,30 @@
 				<ChoroplethMap
 					adm1={adminFeaturesStore.adm1}
 					adm2={adminFeaturesStore.adm2}
-					rows={filteredFlagged}
+					rows={mapRows ?? filteredFlagged}
 					level={pcodeLevel}
 					country={adminFeaturesStore.countryName}
 					layer={mapLayer}
 					layerTitle={exportLayerTitle}
-					onuoaclick={(uoa, adminName) => onmapselect(uoa, adminName)}
+					selectedUoas={[...selectedUoas]}
+					onuoaclick={handleMapClick}
 					ondownloadready={(fn) => (mapDownloadFn = fn)}
 				/>
-				{#if selectedMapUoa}
+				{#if multiSelectMode && selectedUoas.size > 0}
+					<div class="mt-4">
+						<UoaClusterPanel
+							uoas={[...selectedUoas]}
+							rows={filteredFlagged}
+							{systems}
+							{systemCodes}
+							ondrilldown={onselectinheatmap}
+							onclear={() => {
+								selectedUoas.clear();
+								onmapselectreset?.();
+							}}
+						/>
+					</div>
+				{:else if selectedMapUoa}
 					<div class="mt-4">
 						<UoaDetailPanel
 							uoa={selectedMapUoa}

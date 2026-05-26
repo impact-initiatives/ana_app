@@ -2,6 +2,7 @@
 	import Select from '$lib/components/ui/Select.svelte';
 	import RadioToggle from '$lib/components/ui/RadioToggle.svelte';
 	import CoverageDetailCards from '$lib/components/viz/CoverageDetailCards.svelte';
+	import HealthOutcomesCoverage from '$lib/components/viz/HealthOutcomesCoverage.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { fade } from 'svelte/transition';
@@ -28,8 +29,30 @@
 		oncoverageUoaChange
 	}: Props = $props();
 
+	// Tab: 'coverage' | 'health-outcomes'
+	let coverageTab = $state(false); // false = Coverage (default), true = Health outcomes coverage
+
 	// false = Overall (default), true = Per UoA
 	let isPerUoa = $state(false);
+
+	// HO metrics: non-supporting-evidence metrics in health_outcomes system
+	const hoMetricIds = $derived.by((): string[] => {
+		const j = referenceJson as any;
+		if (!j?.systems) return [];
+		const hoSystem = j.systems.find((s: any) => s.id === 'health_outcomes');
+		if (!hoSystem) return [];
+		const ids: string[] = [];
+		for (const factor of hoSystem.factors ?? []) {
+			for (const sub of factor.sub_factors ?? []) {
+				for (const ind of sub.indicators ?? []) {
+					for (const m of ind.metrics ?? []) {
+						if (m?.metric && m.evidence_type !== 'Supporting evidence') ids.push(m.metric);
+					}
+				}
+			}
+		}
+		return ids;
+	});
 
 	// Aggregated row: sum flag_n / no_flag_n / missing_n across all filtered rows,
 	// plus uoa_flagged_n (count of rows where that system/factor is flagged).
@@ -93,23 +116,33 @@
 	</h1>
 
 	<div class="space-y-4">
-		<!-- Controls -->
+		<!-- Tab + controls -->
 		<Card>
-			<div class="flex flex-wrap items-end gap-6">
+			<div class="flex flex-wrap items-center gap-6">
 				<RadioToggle
-					bind:value={isPerUoa}
+					bind:value={coverageTab}
 					label="Scope"
 					labelFalse="Overall"
-					labelTrue="Per UoA"
+					labelTrue="Health Outcomes"
 					name="coverageScope"
 				/>
+
+				<RadioToggle
+					bind:value={isPerUoa}
+					label="Level"
+					labelFalse="Overall"
+					labelTrue="Per UoA"
+					name="coverageLevel"
+				/>
 				{#if isPerUoa}
-					<div class="max-w-72 min-w-60 flex-1" transition:fade={{ duration: 150 }}>
+					<div transition:fade={{ duration: 150 }}>
 						<Select
 							label="Unit of analysis"
+							class="w-80"
 							options={coverageUoaOptions.map((uoa) => ({ value: uoa, label: uoaLabel(uoa) }))}
 							selected={coverageUoa}
 							placeholder="Select UOA…"
+							labelPosition="left"
 							onchange={(val) => oncoverageUoaChange(Array.isArray(val) ? (val[0] ?? '') : val)}
 						/>
 					</div>
@@ -117,7 +150,7 @@
 			</div>
 		</Card>
 
-		{#if activeRow !== null}
+		{#if !coverageTab && activeRow !== null}
 			<div transition:fade={{ duration: 150 }}>
 				<CoverageDetailCards
 					row={activeRow}
@@ -125,6 +158,16 @@
 					{referenceJson}
 					mode={isPerUoa ? 'per-uoa' : 'overall'}
 					totalUoas={filteredRows.length}
+				/>
+			</div>
+		{:else if coverageTab}
+			<div transition:fade={{ duration: 150 }}>
+				<HealthOutcomesCoverage
+					rows={filteredRows}
+					{hoMetricIds}
+					{referenceJson}
+					mode={isPerUoa ? 'per-uoa' : 'overall'}
+					selectedUoa={isPerUoa ? coverageUoa : null}
 				/>
 			</div>
 		{/if}

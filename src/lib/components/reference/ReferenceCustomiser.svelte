@@ -57,17 +57,17 @@
 			};
 		}
 
-		// Dry-run merge to get preview stats (not persisted yet)
+		// Dry-run merge to get preview stats and post-merge warnings (not persisted yet)
 		const base = JSON.parse(JSON.stringify(baseJson)) as Record<string, unknown>;
-		const { stats } = mergeCustomRows(base, rows);
+		const { stats, warnings: mergeWarnings } = mergeCustomRows(base, rows);
 		pendingRows = rows;
 
 		const summary = `${stats.updated.length} to update · ${stats.added.length} to add`;
-		const details: ProcessResult['details'] = warnings.length
-			? [{ label: 'Warnings', type: 'warning', items: warnings }]
-			: undefined;
+		const details: ProcessResult['details'] = [];
+		if (warnings.length) details.push({ label: 'Warnings', type: 'warning', items: warnings });
+		if (mergeWarnings.length) details.push({ label: 'Reference warnings', type: 'warning', items: mergeWarnings });
 
-		return { ok: true, summary, details };
+		return { ok: true, summary, details: details.length ? details : undefined };
 	}
 
 	function onRefAccepted() {
@@ -89,9 +89,9 @@
 		applyError = null;
 		try {
 			const base = JSON.parse(JSON.stringify(metricStore.referenceJson)) as Record<string, unknown>;
-			const { mergedJson, mergedMetricMap, stats, zodErrors } = mergeCustomRows(base, pendingRows);
-			if (zodErrors.length > 0) {
-				applyError = `Merged reference failed structural validation:\n${zodErrors.join('\n')}`;
+			const { mergedJson, mergedMetricMap, stats, errors } = mergeCustomRows(base, pendingRows);
+			if (errors.length > 0) {
+				applyError = `Validation failed (${errors.length} error${errors.length !== 1 ? 's' : ''}):\n${errors.join('\n')}`;
 				isApplying = false;
 				return;
 			}

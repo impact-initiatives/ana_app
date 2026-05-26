@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { SystemIDEnum } from './generated/system-enum';
 import { SubFactorIDEnum } from './generated/subfactor-enum';
 import { FactorIDEnum } from './generated/factor-enum';
 import {
@@ -12,14 +11,17 @@ import {
 	type ReferenceRoot,
 	MetricPreferenceEnum,
 	MetricDirectionEnum,
+	EvidenceTypeEnum,
 	METRIC_TYPE_REGEX,
 	METRIC_ID_REGEX,
-	parseMetricType
+	parseMetricType,
+	SystemIDEnum
 } from './structure';
 export type { Thresholds, Metric, Indicator, SubFactor, Factor, System, ReferenceRoot as IndicatorsRoot };
 export {
 	MetricPreferenceEnum,
 	MetricDirectionEnum,
+	EvidenceTypeEnum,
 	METRIC_TYPE_REGEX,
 	METRIC_ID_REGEX,
 	parseMetricType as parseIndicatorType
@@ -56,7 +58,7 @@ export type { MetricID, MetricType as IndicatorType } from './structure';
  *   Type-bound checks — i.e. whether a user-supplied CSV cell value satisfies
  *   the constraints implied by the `type` string (int vs num, lb, ub) — are
  *   performed at the CSV validation stage in:
- *     src/lib/engine/validator.js → checkValueAgainstType()
+ *     src/lib/engine/dataValidator.ts → checkValueAgainstType()
  *   They are intentionally NOT enforced here.
  *
  * ─── Threshold fields ────────────────────────────────────────────────────────
@@ -106,6 +108,14 @@ export const MetricSchema = z
 		label: z.string().nullable().optional(),
 		level: z.string().nullable().optional(),
 		preference: z.enum(MetricPreferenceEnum),
+		evidence_type: z
+			.enum([
+				EvidenceTypeEnum.SupportingEvidence,
+				EvidenceTypeEnum.ANSignal,
+				EvidenceTypeEnum.Outcome,
+				EvidenceTypeEnum.Predictor
+			])
+			.nullable(),
 		type: MetricTypeSchema,
 		msna_module: z.string().nullable().optional(),
 		msna_indicator: z.string().nullable().optional(),
@@ -118,6 +128,7 @@ export const MetricSchema = z
 		above_or_below: z.enum(MetricDirectionEnum, {
 			message: 'above_or_below must be "Above" or "Below"'
 		}),
+		van_is_strict: z.boolean().nullable().optional().default(false),
 		evidence_threshold: z.number().nullable().optional(),
 		risk_concept: z.string().nullable().optional()
 	})
@@ -127,7 +138,11 @@ export const MetricSchema = z
 		// ── Rule: van requires an ─────────────────────────────────────────────
 		// This is a structural constraint on the JSON itself.
 		// Type-bound checks (int/num, lb, ub) are performed at the CSV
-		// validation stage in src/lib/engine/validator.js, not here.
+		// validation stage in src/lib/engine/dataValidator.ts, not here.
+		//
+		// The semantic rule "non-supporting-evidence metrics must have van" is
+		// enforced separately in scripts/validate-reference-json.ts Pass 8,
+		// which produces a richer diagnostic table.
 		if (thresholds.van != null && thresholds.an == null) {
 			ctx.addIssue({
 				path: ['thresholds', 'van'],

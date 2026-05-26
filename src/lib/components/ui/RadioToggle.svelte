@@ -23,7 +23,7 @@
 
 <div class="flex items-center gap-3">
 	{#if label}
-		<span class="text-sm font-semibold">{label}</span>
+		<span class="text-xs font-semibold tracking-wide uppercase">{label}</span>
 	{/if}
 	<div class="join">
 		<label class="join-item btn btn-sm {!value ? 'btn-neutral' : 'btn-outline'}">

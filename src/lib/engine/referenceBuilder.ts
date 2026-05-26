@@ -29,6 +29,7 @@ export interface RefRow {
 	'Sub-Factor': string;
 	Indicator: string;
 	Preference: string;
+	'Evidence type': string;
 	Type: string;
 	Metric: string;
 	'MSNA module': string;
@@ -144,6 +145,20 @@ export function validateRefRows(
 	const sysMap = new Map<string, ReferenceRoot['systems'][0]>();
 	for (const sys of base.systems ?? []) sysMap.set(sys.id, sys);
 
+	// Flat set of all MET_IDs already in the base reference (for update-vs-add detection)
+	const baseMetricIds = new Set<string>();
+	for (const sys of base.systems ?? []) {
+		for (const fac of sys.factors ?? []) {
+			for (const sf of fac.sub_factors ?? []) {
+				for (const ind of sf.indicators ?? []) {
+					for (const m of ind.metrics ?? []) {
+						if (m.metric) baseMetricIds.add(m.metric.trim().toUpperCase());
+					}
+				}
+			}
+		}
+	}
+
 	// Track seen MET_IDs for duplicate detection
 	const seenIds = new Set<string>();
 
@@ -163,6 +178,10 @@ export function validateRefRows(
 			errors.push(`Row ${rowNum}: Duplicate MET_ID "${id}"`);
 		}
 		seenIds.add(id);
+
+		if (baseMetricIds.has(id.toUpperCase())) {
+			warnings.push(`Row ${rowNum} (${id}): MET_ID already exists in the base reference — this row will update the existing metric in place, not add a new one`);
+		}
 
 		const prefStr = row['Preference']?.trim() ?? '';
 		if (!VALID_PREFERENCES.has(prefStr)) {

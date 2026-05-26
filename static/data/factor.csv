@@ -1,14 +1,16 @@
 factor,factor_label,system
+food_consumption,Food consumption,food_system
+hh_food_security,HH Food security,food_system
+livelihoods,Livelihoods,food_system
+health_services,Health services,health_nutrition_services
+nutrition_services,Nutrition services,health_nutrition_services
 nutrition_status,Nutrition status,health_outcomes
 health_status,Health status,health_outcomes
-mortality,Mortality,mortality
-food_consumption,Food consumption,food_systems
-hh_food_security,HH Food security,food_systems
-hh_water_consumption,HH Water consumption,water_systems
-hh_water_security,HH Water security,water_systems
 living_conditions,Living conditions,living_conditions
-market_functionality,Market functionality,market_functionality
-water_systems_infrastructure,Water systems (infrastructure),water_systems
 sanitation_hygiene,Sanitation & Hygiene,living_conditions
-health_services, Health services, health_nutrition_services
-nutrition_services, Nutrition services, health_nutrition_services
+environmental_hygiene,Environmental Hygiene,living_conditions
+market_functionality,Market functionality,market_functionality
+mortality,Mortality,mortality
+water_systems_infrastructure,Water systems (infrastructure),water_system
+hh_water_consumption,HH Water consumption,water_system
+hh_water_security,HH Water security,water_system

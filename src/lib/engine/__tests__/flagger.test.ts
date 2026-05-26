@@ -26,14 +26,14 @@ describe('flagData — basic output shape', () => {
 	});
 
 	it('pads missing canonical columns with null', () => {
-		// Only provide MET001; MET002–MET005 should be null-padded
+		// Only provide MET001; MET002–MET005 etc should be null-padded
 		const out = flagData([row('A', { MET001: 0.6 })], refJson);
 		expect(out[0]!['MET002']).toBeNull();
 	});
 
-	it('adds prelim_flag to each row', () => {
+	it('adds priority_flag to each row', () => {
 		const out = flagData([row('A', { MET001: 0.6 })], refJson);
-		expect(out[0]).toHaveProperty('prelim_flag');
+		expect(out[0]).toHaveProperty('priority_flag');
 	});
 });
 
@@ -60,6 +60,13 @@ describe('flagData — metric-level flagging', () => {
 		// MET006 is preference 3 in the fixture — should have no _flag column generated
 		const out = flagData([row('A', { MET006: 0.3 })], refJson);
 		expect(out[0]).not.toHaveProperty('MET006_flag');
+	});
+
+	it('supporting evidence metrics (MET013) generate metric-level _flag column', () => {
+		// MET013 is Supporting evidence — gets a _flag column even though excluded from rollup
+		const out = flagData([row('A', { MET013: 0.5 })], refJson);
+		expect(out[0]).toHaveProperty('MET013_flag');
+		expect(out[0]!['MET013_flag']).toBe(true); // 0.5 ≥ 0.3 threshold, Above
 	});
 
 	it('includes preference-2 metrics (MET002) in flagging', () => {
@@ -151,6 +158,73 @@ describe('flagData — metric-level flagging', () => {
 	});
 });
 
+describe('flagData — VAN flag columns', () => {
+	// MET005: Above, an=0.15, van=0.3
+	it('MET005_van_flag is null when metric value is null', () => {
+		const out = flagData([row('A', { MET005: null })], refJson);
+		expect(out[0]!['MET005_van_flag']).toBeNull();
+		expect(out[0]!['MET005_van_status']).toBe('no_data');
+	});
+
+	it('MET005_van_flag is false when value is above AN but below VAN', () => {
+		// 0.2 ≥ an=0.15 → AN flag; 0.2 < van=0.3 → no VAN flag
+		const out = flagData([row('A', { MET005: 0.2 })], refJson);
+		expect(out[0]!['MET005_van_flag']).toBe(false);
+		expect(out[0]!['MET005_van_status']).toBe('no_flag');
+		expect(out[0]!['MET005_flag']).toBe(true); // AN still flags
+	});
+
+	it('MET005_van_flag is true when value is at or above VAN threshold', () => {
+		// 0.35 ≥ van=0.3 → VAN flag
+		const out = flagData([row('A', { MET005: 0.35 })], refJson);
+		expect(out[0]!['MET005_van_flag']).toBe(true);
+		expect(out[0]!['MET005_van_status']).toBe('flag');
+	});
+
+	// MET009: Below, an=0.3, van=0.1 (van more extreme = lower)
+	it('MET009_van_flag is true when value is at or below VAN threshold', () => {
+		// 0.08 ≤ van=0.1 → VAN flag (Below direction)
+		const out = flagData([row('A', { MET009: 0.08 })], refJson);
+		expect(out[0]!['MET009_van_flag']).toBe(true);
+		expect(out[0]!['MET009_van_status']).toBe('flag');
+	});
+
+	it('MET009_van_flag is false when value is below AN but above VAN', () => {
+		// 0.2 ≤ an=0.3 → AN flag; 0.2 > van=0.1 → no VAN flag
+		const out = flagData([row('A', { MET009: 0.2 })], refJson);
+		expect(out[0]!['MET009_van_flag']).toBe(false);
+		expect(out[0]!['MET009_flag']).toBe(true);
+	});
+
+	// MET001: Above, an=0.5, van=1.0
+	it('MET001_van_flag is true when value is at or above VAN threshold', () => {
+		const out = flagData([row('A', { MET001: 1.2 })], refJson);
+		expect(out[0]!['MET001_van_flag']).toBe(true);
+	});
+
+	it('MET001_van_flag is false when value is between AN and VAN', () => {
+		// 0.7 ≥ an=0.5 but 0.7 < van=1.0
+		const out = flagData([row('A', { MET001: 0.7 })], refJson);
+		expect(out[0]!['MET001_van_flag']).toBe(false);
+		expect(out[0]!['MET001_flag']).toBe(true);
+	});
+
+	// MET014: Above, an=0.3, van=0.3 (van_is_strict=false — identical thresholds)
+	it('MET014_van_flag is still computed at metric level even when van === an', () => {
+		// van_is_strict=false means the flag is excluded from ho_secondary/an_primary VAN branches
+		// but the metric-level _van_flag column is still written
+		const out = flagData([row('A', { MET014: 0.35 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(true);
+		expect(out[0]!['MET014_flag']).toBe(true); // same threshold → both fire together
+	});
+
+	it('MET014_van_flag is false when value is below the (identical) VAN threshold', () => {
+		const out = flagData([row('A', { MET014: 0.2 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(false);
+		expect(out[0]!['MET014_flag']).toBe(false);
+	});
+});
+
 describe('flagData — subfactor/factor/system rollup', () => {
 	it('subfactor status is flag when any metric in group flags', () => {
 		const out = flagData([row('A', { MET001: 0.6, MET002: null })], refJson);
@@ -175,6 +249,19 @@ describe('flagData — subfactor/factor/system rollup', () => {
 		// mortality flagged → system flag
 		const out = flagData([row('A', { MET001: 0.6 })], refJson);
 		expect(out[0]!['mortality.status']).toBe('flag');
+	});
+
+	it('supporting evidence metrics (MET013) are excluded from subfactor rollup', () => {
+		// MET013=0.5 would flag if counted, but it is Supporting evidence → excluded from rollup
+		// MET003=0.1 (no_flag), MET004=0.1 (no_flag) → food_consumption_fcs = no_flag
+		const out = flagData([row('A', { MET003: 0.1, MET004: 0.1, MET013: 0.5 })], refJson);
+		expect(out[0]!['food_security.food_consumption.food_consumption_fcs.status']).toBe('no_flag');
+	});
+
+	it('non-supporting evidence metrics still drive rollup to flag when crossing threshold', () => {
+		// MET003=0.25 flags (≥0.2) → food_consumption_fcs = flag, regardless of MET013
+		const out = flagData([row('A', { MET003: 0.25, MET013: 0.5 })], refJson);
+		expect(out[0]!['food_security.food_consumption.food_consumption_fcs.status']).toBe('flag');
 	});
 });
 
@@ -209,6 +296,13 @@ describe('flagData — count columns', () => {
 		expect(out[0]!['mortality.mortality_rate.no_flag_n']).toBe(0);
 		expect(out[0]!['mortality.mortality_rate.missing_n']).toBe(1);
 	});
+
+	it('supporting evidence metrics are not counted in subfactor counts', () => {
+		// MET013 (Supporting evidence) in food_consumption_fcs — should NOT appear in flag_n
+		const out = flagData([row('A', { MET003: 0.1, MET004: 0.1, MET013: 0.5 })], refJson);
+		// flag_n should be 0 (MET003 and MET004 no_flag; MET013 excluded)
+		expect(out[0]!['food_security.food_consumption.food_consumption_fcs.flag_n']).toBe(0);
+	});
 });
 
 describe('flagData — factor and system rollup', () => {
@@ -238,80 +332,122 @@ describe('flagData — factor and system rollup', () => {
 	});
 });
 
-describe('flagData — prelim_flag classification', () => {
-	it('returns EM when mortality system is flagged', () => {
+describe('flagData — priority_flag classification', () => {
+	it('returns em when mortality system is flagged', () => {
+		// MET001=0.6 ≥ an=0.5 → mortality flags → em
 		const out = flagData([row('A', { MET001: 0.6 })], refJson);
-		expect(out[0]!['prelim_flag']).toBe('em');
+		expect(out[0]!['priority_flag']).toBe('em');
 	});
 
-	it('returns ACUTE when a non-mortality system flags but not mortality', () => {
-		// MET003=0.25 ≥ 0.2 Above, factor_threshold=1 → food_security flags with one metric
-		const out = flagData([row('A', { MET001: 0.3, MET003: 0.25 })], refJson);
-		expect(out[0]!['prelim_flag']).toBe('acute');
+	it('returns ho_primary when HO proportion rule met (n≤5, ≥1/2 flagged)', () => {
+		// HO: MET005=0.2 (flag), MET011=0.15 (flag), MET012=0 (no_flag) → 2/3 ≥ 0.5
+		// mortality: no flag (MET001 not provided)
+		const out = flagData([row('A', { MET005: 0.2, MET011: 0.15, MET012: 0 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('ho_primary');
 	});
 
-	it('returns ACUTE when health_outcomes flags but fewer than 3 other systems flag', () => {
-		// health_outcomes: MET005=0.2 → flag; food_security + livelihoods = 2 others < 3
-		const out = flagData(
-			[row('A', { MET001: 0.3, MET005: 0.2, MET003: 0.25, MET007: 0.5 })],
-			refJson
-		);
-		expect(out[0]!['prelim_flag']).toBe('acute');
-	});
-
-	it('returns ACUTE when health_outcomes flags alone with no other systems', () => {
+	it('returns ho_primary when all available HO metrics flag (n=1, ≥1/2)', () => {
+		// Only MET005 has data (1/1 ≥ 0.5) — proportion rule triggers with single metric
 		const out = flagData([row('A', { MET005: 0.2 })], refJson);
-		expect(out[0]!['prelim_flag']).toBe('acute');
+		expect(out[0]!['priority_flag']).toBe('ho_primary');
 	});
 
-	it('returns ROEM when health_outcomes flags and ≥3 other classification systems flag', () => {
-		// health_outcomes: MET005=0.2 ≥ 0.15 Above → flag
-		// food_security: MET003=0.25 ≥ 0.2 Above, factor_threshold=1 → flag (1 other)
-		// livelihoods:   MET007=0.5 ≥ 0.4 Above → flag (2 other)
-		// wash:          MET008=0.5 ≥ 0.4 Above → flag (3 other)
-		// mortality: MET001=0.3 < 0.5 → no_flag (no EM)
-		const out = flagData(
-			[row('A', { MET001: 0.3, MET005: 0.2, MET003: 0.25, MET007: 0.5, MET008: 0.5 })],
-			refJson
-		);
-		expect(out[0]!['prelim_flag']).toBe('roem');
+	it('returns ho_secondary when any HO metric has VAN flag but proportion rule not met', () => {
+		// MET011=0.3 → flag=true (≥0.1) AND van_flag=true (≥0.25); van_is_strict=true
+		// MET005=0.1 → flag=false (0.1 < 0.15); MET012=0.1 → flag=false; MET014=null
+		// 1/3 flagged < 0.5 → ho_primary NOT triggered; HO VAN flag (strict) → ho_secondary
+		const out = flagData([row('A', { MET005: 0.1, MET011: 0.3, MET012: 0.1 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('ho_secondary');
 	});
 
-	it('returns INSUFFICIENT_EVIDENCE when some data present but below evidence threshold', () => {
-		// food_security: MET003=0.1 below threshold (no_flag), MET004 null
-		// → 1 metric with data < evidence_threshold=2 → insufficient_evidence
-		// all other classification systems: no data
+	it('does NOT return ho_secondary when only van_is_strict=false HO metrics have VAN flags', () => {
+		// MET014=0.35: van=an=0.3 → van_is_strict=false → excluded from hoVanEligibleIds
+		// MET014_van_flag=true at metric level, but the branch check skips it
+		// MET005=0.1, MET011=0, MET012=0.1 → no VAN flags among strict metrics
+		// MET014_flag=true (0.35 ≥ an=0.3) → HO system flagged → an_primary (not ho_secondary)
+		const out = flagData([row('A', { MET014: 0.35, MET005: 0.1, MET011: 0, MET012: 0.1 })], refJson);
+		expect(out[0]!['MET014_van_flag']).toBe(true); // metric-level still fires
+		expect(out[0]!['priority_flag']).not.toBe('ho_secondary');
+		expect(out[0]!['priority_flag']).toBe('an_primary'); // HO system flag triggers this
+	});
+
+	it('returns an_primary when health_outcomes system is flagged (proportion not met, no VAN)', () => {
+		// MET005=0.2 → flag=true (0.2 ≥ 0.15), van=false (0.2 < 0.3)
+		// MET011=0, MET012=0, MET014=null → no_flag / no_data
+		// gam group: flag_n=1 ≥ factor_threshold=1 → gam subfactor=flag → HO system=flag
+		// 1/4 flagged < 0.5 → ho_primary NOT triggered; no HO VAN → not ho_secondary
+		// isFlagged(healthOutcomesId)=true → an_primary
+		const out = flagData([row('A', { MET005: 0.2, MET011: 0, MET012: 0 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('an_primary');
+	});
+
+	it('returns an_primary when a non-HO classification metric has VAN flag', () => {
+		// MET007=0.8 ≥ van=0.7 (livelihoods) → anyVanFlag=true
+		// No HO metrics flagged (all 0 < thresholds)
+		const out = flagData([row('A', { MET005: 0, MET011: 0, MET012: 0, MET007: 0.8 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('an_primary');
+	});
+
+	it('returns an_primary when ≥3 classification systems are flagged', () => {
+		// food_security: MET003=0.25 → flag (flag_n=1 ≥ ft=1)
+		// livelihoods: MET007=0.5 → flag (0.5 ≥ 0.4 → flag, 0.5 < van=0.7 → no van)
+		// wash: MET008=0.5 → flag (0.5 ≥ 0.4 → flag, 0.5 < van=0.7 → no van)
+		// nSystemsFlagged=3 → an_primary; no HO flags, no VAN flags
+		const out = flagData([row('A', { MET003: 0.25, MET007: 0.5, MET008: 0.5 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('an_primary');
+	});
+
+	it('returns an_secondary when one non-HO classification system flags', () => {
+		// food_security: MET003=0.25 (flag, flag_n=1 ≥ ft=1); others no data
+		// No HO flags → not ho_primary/ho_secondary
+		// anyHoAnFlag=false, anyVanFlag=false, nSystemsFlagged=1 < 3 → not an_primary
+		// 1 system flagged → an_secondary
+		const out = flagData([row('A', { MET003: 0.25 })], refJson);
+		expect(out[0]!['priority_flag']).toBe('an_secondary');
+	});
+
+	it('returns insufficient_evidence when some data present but below evidence threshold', () => {
+		// food_security: MET003=0.1 (no_flag, 1 metric < et=2 → insufficient_evidence); others no data
+		// hasGaps=true → insufficient_evidence
 		const out = flagData([row('A', { MET003: 0.1 })], refJson);
-		expect(out[0]!['prelim_flag']).toBe('insufficient_evidence');
+		expect(out[0]!['priority_flag']).toBe('insufficient_evidence');
 	});
 
-	it('returns ACUTE_NEEDS when data is present and nothing flags', () => {
-		// food_security: both MET003 and MET004 below threshold, evidence_threshold=2 met → no_flag
-		// health_outcomes: MET005 below threshold → no_flag
-		// other systems: no data — not enough to block ACUTE_NEEDS
+	it('returns no_acute_needs when all classification systems have data and nothing flags', () => {
+		// All classification systems: no_flag with sufficient data
 		const out = flagData(
-			[row('A', { MET001: 0.3, MET002: 1, MET003: 0.1, MET004: 0.1, MET005: 0.1 })],
+			[row('A', {
+				MET003: 0.1, MET004: 0.1,          // food_security: et=2 met, both no_flag
+				MET005: 0.1, MET011: 0.05, MET012: 0.2, // health_outcomes: all no_flag
+				MET007: 0.3, MET009: 0.5, MET010: 0.3,  // livelihoods: all no_flag
+				MET008: 0.3                              // wash: no_flag
+			})],
 			refJson
 		);
-		expect(out[0]!['prelim_flag']).toBe('acute_needs');
+		expect(out[0]!['priority_flag']).toBe('no_acute_needs');
 	});
 
-	it('returns NO_DATA when all metrics are missing', () => {
+	it('returns no_data when all metrics are missing', () => {
 		const out = flagData([row('A', {})], refJson);
-		expect(out[0]!['prelim_flag']).toBe('no_data');
+		expect(out[0]!['priority_flag']).toBe('no_data');
 	});
 
 	it('handles multiple rows independently', () => {
-		// Row B: all metrics present with no-flag values (provide MET004 so food_security evidence_threshold=2 is met)
 		const out = flagData(
 			[
 				row('A', { MET001: 0.6 }),
-				row('B', { MET001: 0.3, MET002: 1, MET003: 0.1, MET004: 0.1, MET005: 0.1 })
+				// Row B: all classification systems have data, all no_flag → no_acute_needs
+				row('B', {
+					MET003: 0.1, MET004: 0.1,
+					MET005: 0.1, MET011: 0.05, MET012: 0.2,
+					MET007: 0.3, MET009: 0.5, MET010: 0.3,
+					MET008: 0.3
+				})
 			],
 			refJson
 		);
-		expect(out[0]!['prelim_flag']).toBe('em');
-		expect(out[1]!['prelim_flag']).toBe('acute_needs');
+		expect(out[0]!['priority_flag']).toBe('em');
+		expect(out[1]!['priority_flag']).toBe('no_acute_needs');
 	});
 });
 

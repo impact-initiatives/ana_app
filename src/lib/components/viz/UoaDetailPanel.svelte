@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { FLAG_BADGE_MAP, getFlagBadge, getPrelimBadge, systemBaseColor } from '$lib/utils/colors';
-	import PrelimBadge from '$lib/components/ui/PrelimBadge.svelte';
+	import {
+		FLAG_BADGE_MAP,
+		getFlagBadge,
+		getPriorityBadge,
+		systemBaseColor
+	} from '$lib/utils/colors';
+	import PriorityBadge from '$lib/components/ui/PriorityBadge.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { uoaLabel } from '$lib/stores/adminFeaturesStore.svelte';
 
@@ -78,18 +83,18 @@
 				<button class="btn btn-sm btn-circle" onclick={onclose} aria-label="Close panel">✕</button>
 			{/if}
 		{/snippet}
-		<!-- Preliminary flag -->
+		<!-- Priority flag -->
 		<div class="mt-1 mb-2 flex items-center gap-2">
-			<span>This UoA received the following preliminary flag:</span>
-			{#if row && getPrelimBadge(row.prelim_flag)}
-				<PrelimBadge value={row.prelim_flag} />
+			<span>Priority flag for this area:</span>
+			{#if row && getPriorityBadge(row.priority_flag)}
+				<PriorityBadge value={row.priority_flag} />
 			{:else}
-				<PrelimBadge value="NO_DATA" />
+				<PriorityBadge value="no_data" />
 			{/if}
 		</div>
 
-		{#if !row}
-			<p class="text-base-content/75 text-sm">No data is available for this area.</p>
+		{#if !row || row.priority_flag === 'no_data'}
+			<p class="text-base-content/85 text-sm">No data is available for this area.</p>
 		{:else}
 			<p class="">Systems have been flagged as follows:</p>
 			<div class="flex flex-wrap gap-3 text-sm">
@@ -154,7 +159,7 @@
 							</div>
 
 							<!-- Status badge -->
-							<span class="badge badge-sm shrink-0" style={fb.badgeTintStyle}>{fb.label}</span>
+							<span class="badge badge-sm shrink-0" style={fb.badgeStyle}>{fb.label}</span>
 						</button>
 					{/each}
 				</div>
