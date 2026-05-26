@@ -238,7 +238,9 @@ function build(rows: RefRow[]): {
 			above_or_below: (row['Above or below'] ?? '').trim(),
 			evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
 			factor_threshold: parseInteger(row['Factor threshold'] ?? ''),
-			risk_concept: nullIfNA(row['Risk concept'] ?? '')
+			risk_concept: nullIfNA(row['Risk concept'] ?? ''),
+			usual_data_sources: nullIfEmpty(row['Usual data sources'] ?? ''),
+			references_for_threshold: nullIfEmpty(row['References for threshold'] ?? '')
 		});
 	}
 
