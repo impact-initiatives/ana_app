@@ -1,5 +1,6 @@
 import type { Metric } from '$lib/types/structure';
-import type { FlagStatus, PriorityFlag } from '$lib/types/flags';
+import type { FlagStatus, PriorityFlag, ConclusionKey } from '$lib/types/flags';
+export { CONCLUSION_KEYS } from '$lib/types/flags';
 import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
@@ -238,20 +239,16 @@ export const getPriorityBadge = (key: string): FlagBadge | undefined =>
  * Keys are conclusion vocabulary (not priority flag keys).
  * pfKey optionally relates back to PriorityFlag for cross-reference.
  */
-export const CONCLUSION_BADGE_MAP: Record<string, { label: string; bg: string; pfKey?: string }> = {
-	roem:                  { label: 'RoEM',                  bg: '#EE5859',                    pfKey: 'roem' },
-	an_exclamation:        { label: 'Acute Needs (!)',        bg: '#F1797A',                    pfKey: 'an_primary' },
-	an:                    { label: 'Acute Needs',           bg: '#F49A9B',                    pfKey: 'an_secondary' },
-	no_acute_needs:        { label: 'No Acute Needs',        bg: 'var(--color-no-acute)',      pfKey: 'no_acute_needs' },
-	insufficient_evidence: { label: 'Insufficient Evidence', bg: 'var(--color-insufficient)',  pfKey: 'insufficient_evidence' },
-	no_data:               { label: 'No data',               bg: 'var(--color-no-data)',       pfKey: 'no_data' }
+export const CONCLUSION_BADGE_MAP: Record<ConclusionKey, { label: string; bg: string; pfKey?: string }> = {
+	roem:                  { label: 'RoEM',                  bg: 'var(--color-conclusion-roem)',            pfKey: 'roem' },
+	an_exclamation:        { label: 'Acute Needs (!)',        bg: 'var(--color-conclusion-an-exclamation)',  pfKey: 'an_primary' },
+	an:                    { label: 'Acute Needs',            bg: 'var(--color-conclusion-an)',              pfKey: 'an_secondary' },
+	no_acute_needs:        { label: 'No Acute Needs',         bg: 'var(--color-no-acute)',                   pfKey: 'no_acute_needs' },
+	insufficient_evidence: { label: 'Insufficient Evidence',  bg: 'var(--color-insufficient)',               pfKey: 'insufficient_evidence' },
+	no_data:               { label: 'No data',                bg: 'var(--color-no-data)',                    pfKey: 'no_data' }
 };
 
-export const CONCLUSION_KEYS = [
-	'roem', 'an_exclamation', 'an', 'no_acute_needs', 'insufficient_evidence', 'no_data'
-] as const;
-
-export const getConclusionBadge = (key: string) => CONCLUSION_BADGE_MAP[key] ?? null;
+export const getConclusionBadge = (key: string) => CONCLUSION_BADGE_MAP[key as ConclusionKey] ?? null;
 
 /**
  * Returns the inline style for a FlagStatusBadge.

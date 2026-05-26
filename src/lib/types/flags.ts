@@ -57,3 +57,23 @@ export const ACUTE_PRIORITY_FLAGS = new Set<PriorityFlag>([
 export const PRIORITY_ORDER = Object.fromEntries(
 	PRIORITY_FLAG_KEYS.map((k, i) => [k, i])
 ) as Record<PriorityFlag, number>;
+
+// ── Conclusion classification (deep-dive merge) ───────────────────────────────
+
+export type ConclusionKey =
+	| 'roem'
+	| 'an_exclamation'
+	| 'an'
+	| 'no_acute_needs'
+	| 'insufficient_evidence'
+	| 'no_data';
+
+/** Canonical iteration order — severity descending. */
+export const CONCLUSION_KEYS = [
+	'roem',
+	'an_exclamation',
+	'an',
+	'no_acute_needs',
+	'insufficient_evidence',
+	'no_data'
+] as const satisfies readonly ConclusionKey[];
