@@ -42,7 +42,9 @@
 
 	const sm = $derived(size === 'sm');
 	const lg = $derived(size === 'lg');
-	const defaultDropText = $derived(lg ? 'Drop a file here' : 'Drop a file here, or click to browse');
+	const defaultDropText = $derived(
+		lg ? 'Drop a file here' : 'Drop a file here, or click to browse'
+	);
 	const idleText = $derived(dropText ?? defaultDropText);
 	const iconSize = $derived(sm ? 'size-4' : lg ? 'size-8' : 'size-6');
 	const spinnerSize = $derived(sm ? 'loading-xs' : lg ? 'loading-md' : 'loading-sm');
@@ -158,7 +160,7 @@
 				? 'border-success/40 bg-success/5 cursor-default'
 				: status === 'error'
 					? 'border-error/40 bg-error/5 cursor-pointer'
-					: 'border-base-300 hover:border-primary/80 cursor-pointer'
+					: 'border-base-300 bg-base-100 hover:border-primary/80 cursor-pointer'
 	].join(' ')}
 	ondrop={onDrop}
 	ondragover={onDragOver}
@@ -275,8 +277,9 @@
 		{/if}
 		<span
 			class={[
-				'min-w-0 flex-1 text-xs',
-				result.ok ? 'text-base-content/80' : 'text-error/90'
+				'min-w-0 flex-1',
+				lg ? 'text-sm' : 'text-xs',
+				result.ok ? 'text-base-content/85' : 'text-error/90'
 			].join(' ')}
 		>
 			{result.summary}
@@ -284,7 +287,7 @@
 		{#if hasDetails && detailsMode !== 'none'}
 			<button
 				type="button"
-				class="btn btn-ghost btn-xs shrink-0 text-xs"
+				class={['btn btn-ghost btn-xs shrink-0', lg ? 'text-sm' : 'text-xs'].join(' ')}
 				onclick={detailsMode === 'modal'
 					? () => detailsModal?.showModal()
 					: () => (showDetailsCollapse = !showDetailsCollapse)}
@@ -304,7 +307,7 @@
 
 	<!-- Collapse details -->
 	{#if detailsMode === 'collapse' && showDetailsCollapse && hasDetails}
-		<div class="mt-1 space-y-2">
+		<div class="mt-1 max-h-72 space-y-2 overflow-y-auto pr-1">
 			{#each result.details ?? [] as section, i (i)}
 				{#if section.items.length > 0}
 					<div
@@ -320,7 +323,8 @@
 						{#if section.label}
 							<p
 								class={[
-									'text-xs font-semibold',
+									lg ? 'text-sm' : 'text-xs',
+									'font-semibold',
 									section.type === 'error'
 										? 'text-error'
 										: section.type === 'warning'
@@ -331,7 +335,7 @@
 								{section.label}
 							</p>
 						{/if}
-						<ul class="mt-1 space-y-0.5 list-disc pl-4 text-xs">
+						<ul class={['mt-1 list-disc space-y-0.5 pl-4', lg ? 'text-sm' : 'text-xs'].join(' ')}>
 							{#each section.items as item, j (j)}
 								<li class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}>
 									{item}
@@ -343,7 +347,10 @@
 			{/each}
 			{#if detailsHref}
 				<div class="flex justify-end">
-					<a href={(resolve as (p: string) => string)(detailsHref ?? '')} class="btn btn-ghost btn-xs gap-1 text-xs">
+					<a
+						href={(resolve as (p: string) => string)(detailsHref ?? '')}
+						class="btn btn-ghost btn-xs gap-1 text-xs"
+					>
 						{detailsHrefLabel ?? 'View more details'}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -403,11 +410,9 @@
 										{section.label}
 									</p>
 								{/if}
-								<ul class="mt-1 space-y-0.5 list-disc pl-4 text-xs">
+								<ul class="mt-1 list-disc space-y-0.5 pl-4 text-xs">
 									{#each section.items as item, j (j)}
-										<li
-											class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}
-										>
+										<li class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}>
 											{item}
 										</li>
 									{/each}
@@ -419,7 +424,10 @@
 			{/if}
 			{#if detailsHref}
 				<div class="mt-3 flex justify-end">
-					<a href={(resolve as (p: string) => string)(detailsHref ?? '')} class="btn btn-ghost btn-xs gap-1 text-xs">
+					<a
+						href={(resolve as (p: string) => string)(detailsHref ?? '')}
+						class="btn btn-ghost btn-xs gap-1 text-xs"
+					>
 						{detailsHrefLabel ?? 'View more details'}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"

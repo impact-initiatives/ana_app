@@ -10,8 +10,6 @@
 	let { label = 'Clear', size = 'sm', widthClass = 'w-30', onclick }: Props = $props();
 </script>
 
-<button
-	type="button"
-	class={['btn btn-ghost btn-outline border-base-content/30', `btn-${size}`, widthClass]}
-	{onclick}>{label}</button
+<button type="button" class={['btn btn-outline bg-base-100', `btn-${size}`, widthClass]} {onclick}
+	>{label}</button
 >

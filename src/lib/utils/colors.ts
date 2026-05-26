@@ -234,6 +234,26 @@ export const getPriorityBadge = (key: string): FlagBadge | undefined =>
 	PRIORITY_BADGE_MAP[key as PriorityFlag];
 
 /**
+ * DATA MAP: Deep-dive conclusion to badge configuration.
+ * Keys are conclusion vocabulary (not priority flag keys).
+ * pfKey optionally relates back to PriorityFlag for cross-reference.
+ */
+export const CONCLUSION_BADGE_MAP: Record<string, { label: string; bg: string; pfKey?: string }> = {
+	em:                    { label: 'EM',                    bg: '#EE5859', pfKey: 'em' },
+	roem:                  { label: 'RoEM',                  bg: '#F1797A', pfKey: 'ho_primary' },
+	an:                    { label: 'Acute Needs',           bg: '#F49A9B', pfKey: 'an_primary' },
+	no_acute_needs:        { label: 'No Acute Needs',        bg: 'var(--color-no-acute)',    pfKey: 'no_acute_needs' },
+	insufficient_evidence: { label: 'Insufficient Evidence', bg: 'var(--color-insufficient)', pfKey: 'insufficient_evidence' },
+	no_data:               { label: 'No data',               bg: 'var(--color-no-data)', pfKey: 'no_data' }
+};
+
+export const CONCLUSION_KEYS = [
+	'em', 'roem', 'an', 'no_acute_needs', 'insufficient_evidence', 'no_data'
+] as const;
+
+export const getConclusionBadge = (key: string) => CONCLUSION_BADGE_MAP[key] ?? null;
+
+/**
  * Returns the inline style for a FlagStatusBadge.
  * Text color is CSS-var-driven — automatically theme-aware.
  */

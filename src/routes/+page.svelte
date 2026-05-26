@@ -10,7 +10,6 @@
 	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
 	import { validatorStore, saveValidatorState } from '$lib/stores/validatorStore.svelte';
-	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
 	import { clearAllStores } from '$lib/utils/clearAll';
 	import { validateCsv } from '$lib/engine/dataValidator';
 	import { parseFile } from '$lib/engine/parser';
@@ -18,6 +17,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
 	import ReferenceCustomiser from '$lib/components/reference/ReferenceCustomiser.svelte';
+	import screenshot_impact_ana_page from '$lib/assets/screenshot-impact-ana-page.png';
 
 	let lastHeader: string[] = $state([]);
 	let lastRows: Record<string, unknown>[] = $state([]);
@@ -143,7 +143,9 @@
 				});
 			}
 			if (validation.warnings?.length) {
-				parts.push(`${validation.warnings.length} warning${validation.warnings.length !== 1 ? 's' : ''}`);
+				parts.push(
+					`${validation.warnings.length} warning${validation.warnings.length !== 1 ? 's' : ''}`
+				);
 				details.push({
 					label: 'Warnings',
 					type: 'warning',
@@ -515,174 +517,51 @@
 		</p>
 	</div>
 
-	<!-- ── Modals ──────────────────────────────────────────────────────────────── -->
-
-	<!-- Format guide: CSV structure only -->
-	<dialog bind:this={formatModal} class="modal">
-		<div class="modal-box max-w-lg">
-			<form method="dialog">
-				<button
-					class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
-					aria-label="Close">✕</button
-				>
-			</form>
-			<h3 class="text-lg font-bold">CSV format guide</h3>
-			<p class="text-base-content/85 text-md mt-1">How to structure your file before uploading.</p>
-
-			<div
-				class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-primary size-4 shrink-0"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-				<p class="text-sm">
-					Download the CSV
-					<a
-						href={asset('/data/input_template.csv')}
-						class="text-primary font-semibold underline underline-offset-2">template</a
-					>. And read the below for information on how to fill in.
-				</p>
+	<!-- ── How it works ───────────────────────────────────────────────────────── -->
+	<section
+		id="want-to-know-more-about-the-ana-and-2025-analyses"
+		aria-labelledby="want-to-know-more-about-the-ana-and-2025-analyses"
+		class="mt-16"
+	>
+		<h2
+			id="want-to-know-more-about-the-ana-and-2025-analyses-heading"
+			class="mb-8 text-center text-lg font-semibold tracking-widest uppercase"
+			style="opacity: 0"
+			{@attach revealOnScroll({ y: 16, duration: 400 })}
+		>
+			Want to know more
+		</h2>
+		<Card side figureClass="lg:p-4" class="mx-auto mb-6 max-w-2xl" title="Check out the ANA page on IMPACT Initiatives' website!">
+			{#snippet figure()}
+				<img src={screenshot_impact_ana_page} alt="ANA page screenshot" />
+			{/snippet}
+			<p>
+				To get more information on the Acute Needs Analysis (ANA) framework and view past global
+				analyses, please visit the dedicated page.
+			</p>
+			<div class="card-actions mt-2 justify-end">
+				<a href="https://www.impact-initiatives.org/acute-needs-analysis/" class="btn btn-primary">Visit</a>
 			</div>
+		</Card>
 
-			<div class="text-base-content/85 mt-5 space-y-3 text-sm">
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">uoa column</p>
-						<span class="badge badge-error badge-sm">required</span>
-					</div>
-					<p class="mt-1">
-						A column named exactly <code>uoa</code> which is a unique identifier for rows such as p-code,
-						district name, or any string that identifies the unit of analysis (UoA).
-					</p>
-					<p class="mt-1">
-						If <code>uoa</code> values are valid admin p-codes (e.g. <code>SOM001</code>), a
-						choropleth map is generated automatically.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Metric columns</p>
-						<span class="badge badge-error badge-sm">required</span>
-					</div>
-					<p class="mt-1">
-						Named with the metric ID (e.g. <code>MET001</code>, <code>MET002</code>). Unrecognised
-						column names are silently ignored during flagging.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Metadata columns</p>
-						<span class="badge badge-primary badge-sm">optional</span>
-					</div>
-					<p class="mt-1">
-						Extra columns (e.g. <code>region</code>, <code>partner</code>) are carried through and
-						available as filters in results views. If values are p-codes, filter labels are resolved
-						to their admin names automatically.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Values</p>
-						<span class="badge badge-primary badge-sm">info</span>
-					</div>
-					<p class="mt-1">
-						Must be generally numeric or empty. No formatted strings, units, or special characters.
-						For missing values, leave the cell empty instead of writing "N/A" or "missing". See the
-						Reference tab for type constraints — for example, proportions must be between 0 and 1.
-					</p>
-				</div>
-			</div>
+		<!-- ── Modals ──────────────────────────────────────────────────────────────── -->
 
-			<div
-				class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-primary size-4 shrink-0"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-				<p class="text-sm">
-					For the full list of metrics and their type constraints, check out the
-					<a
-						href={resolve('/reference')}
-						class="text-primary font-semibold underline underline-offset-2">Reference</a
-					> tab.
-				</p>
-			</div>
-		</div>
-		<form method="dialog" class="modal-backdrop"><button>close</button></form>
-	</dialog>
-
-	<!-- Step detail modal (shared, switches content via activeStep) -->
-	<dialog bind:this={stepsModal} class="modal">
-		<div class="modal-box max-w-lg">
-			<form method="dialog">
-				<button
-					class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
-					aria-label="Close">✕</button
-				>
-			</form>
-
-			<!-- Step nav pills -->
-			<div class="mb-5 flex flex-wrap gap-2">
-				{#each steps as step, i (i)}
+		<!-- Format guide: CSV structure only -->
+		<dialog bind:this={formatModal} class="modal">
+			<div class="modal-box max-w-lg">
+				<form method="dialog">
 					<button
-						class={[
-							'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-150',
-							activeStep === i
-								? 'bg-primary text-primary-content'
-								: 'bg-base-200 text-base-content/85 hover:text-base-content'
-						].join(' ')}
-						onclick={() => (activeStep = i)}
+						class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
+						aria-label="Close">✕</button
 					>
-						{i + 1}. {step.title}
-					</button>
-				{/each}
-			</div>
+				</form>
+				<h3 class="text-lg font-bold">CSV format guide</h3>
+				<p class="text-base-content/85 text-md mt-1">
+					How to structure your file before uploading.
+				</p>
 
-			<h3 class="font-semibold">{steps[activeStep].title}</h3>
-			<p class="text-base-content/85 mt-1 text-sm">{steps[activeStep].desc}</p>
-
-			<div class="text-base-content mt-5 space-y-3 text-sm">
-				{#each steps[activeStep].detail.sections as section (section.label)}
-					{#if section.route}
-						<a
-							href={resolve(section.route)}
-							class="border-base-300 hover:bg-base-200 bg-base-200/40 block rounded-lg border px-4 py-3.5"
-						>
-							<p class="font-semibold">{section.label}</p>
-							<p class="text-base-content/85 mt-1">{section.body}</p>
-						</a>
-					{:else}
-						<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-							<p class="font-semibold">{section.label}</p>
-							<p class="text-base-content/85 mt-1">{section.body}</p>
-						</div>
-					{/if}
-				{/each}
-			</div>
-
-			{#if steps[activeStep].detail.tip}
 				<div
-					class="border-primary/20 bg-primary/6 mt-4 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+					class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -697,20 +576,174 @@
 							clip-rule="evenodd"
 						/>
 					</svg>
-					<p class="text-xs">
-						{steps[activeStep].detail.tip}
-						{#if activeStep === 0}
-							<a
-								href={resolve('/reference')}
-								class="text-primary font-semibold underline underline-offset-2">Reference</a
-							> tab.
-						{/if}
+					<p class="text-sm">
+						Download the CSV
+						<a
+							href={asset('/data/input_template.csv')}
+							class="text-primary font-semibold underline underline-offset-2">template</a
+						>. And read the below for information on how to fill in.
 					</p>
 				</div>
-			{/if}
-		</div>
-		<form method="dialog" class="modal-backdrop"><button>close</button></form>
-	</dialog>
+
+				<div class="text-base-content/85 mt-5 space-y-3 text-sm">
+					<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+						<div class="flex items-center justify-between gap-2">
+							<p class="text-base-content font-semibold">uoa column</p>
+							<span class="badge badge-error badge-sm">required</span>
+						</div>
+						<p class="mt-1">
+							A column named exactly <code>uoa</code> which is a unique identifier for rows such as p-code,
+							district name, or any string that identifies the unit of analysis (UoA).
+						</p>
+						<p class="mt-1">
+							If <code>uoa</code> values are valid admin p-codes (e.g. <code>SOM001</code>), a
+							choropleth map is generated automatically.
+						</p>
+					</div>
+					<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+						<div class="flex items-center justify-between gap-2">
+							<p class="text-base-content font-semibold">Metric columns</p>
+							<span class="badge badge-error badge-sm">required</span>
+						</div>
+						<p class="mt-1">
+							Named with the metric ID (e.g. <code>MET001</code>, <code>MET002</code>). Unrecognised
+							column names are silently ignored during flagging.
+						</p>
+					</div>
+					<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+						<div class="flex items-center justify-between gap-2">
+							<p class="text-base-content font-semibold">Metadata columns</p>
+							<span class="badge badge-primary badge-sm">optional</span>
+						</div>
+						<p class="mt-1">
+							Extra columns (e.g. <code>region</code>, <code>partner</code>) are carried through and
+							available as filters in results views. If values are p-codes, filter labels are
+							resolved to their admin names automatically.
+						</p>
+					</div>
+					<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+						<div class="flex items-center justify-between gap-2">
+							<p class="text-base-content font-semibold">Values</p>
+							<span class="badge badge-primary badge-sm">info</span>
+						</div>
+						<p class="mt-1">
+							Must be generally numeric or empty. No formatted strings, units, or special
+							characters. For missing values, leave the cell empty instead of writing "N/A" or
+							"missing". See the Reference tab for type constraints — for example, proportions must
+							be between 0 and 1.
+						</p>
+					</div>
+				</div>
+
+				<div
+					class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary size-4 shrink-0"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<p class="text-sm">
+						For the full list of metrics and their type constraints, check out the
+						<a
+							href={resolve('/reference')}
+							class="text-primary font-semibold underline underline-offset-2">Reference</a
+						> tab.
+					</p>
+				</div>
+			</div>
+			<form method="dialog" class="modal-backdrop"><button>close</button></form>
+		</dialog>
+
+		<!-- Step detail modal (shared, switches content via activeStep) -->
+		<dialog bind:this={stepsModal} class="modal">
+			<div class="modal-box max-w-lg">
+				<form method="dialog">
+					<button
+						class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
+						aria-label="Close">✕</button
+					>
+				</form>
+
+				<!-- Step nav pills -->
+				<div class="mb-5 flex flex-wrap gap-2">
+					{#each steps as step, i (i)}
+						<button
+							class={[
+								'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-150',
+								activeStep === i
+									? 'bg-primary text-primary-content'
+									: 'bg-base-200 text-base-content/85 hover:text-base-content'
+							].join(' ')}
+							onclick={() => (activeStep = i)}
+						>
+							{i + 1}. {step.title}
+						</button>
+					{/each}
+				</div>
+
+				<h3 class="font-semibold">{steps[activeStep].title}</h3>
+				<p class="text-base-content/85 mt-1 text-sm">{steps[activeStep].desc}</p>
+
+				<div class="text-base-content mt-5 space-y-3 text-sm">
+					{#each steps[activeStep].detail.sections as section (section.label)}
+						{#if section.route}
+							<a
+								href={resolve(section.route)}
+								class="border-base-300 hover:bg-base-200 bg-base-200/40 block rounded-lg border px-4 py-3.5"
+							>
+								<p class="font-semibold">{section.label}</p>
+								<p class="text-base-content/85 mt-1">{section.body}</p>
+							</a>
+						{:else}
+							<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+								<p class="font-semibold">{section.label}</p>
+								<p class="text-base-content/85 mt-1">{section.body}</p>
+							</div>
+						{/if}
+					{/each}
+				</div>
+
+				{#if steps[activeStep].detail.tip}
+					<div
+						class="border-primary/20 bg-primary/6 mt-4 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="text-primary size-4 shrink-0"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+							aria-hidden="true"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+						<p class="text-xs">
+							{steps[activeStep].detail.tip}
+							{#if activeStep === 0}
+								<a
+									href={resolve('/reference')}
+									class="text-primary font-semibold underline underline-offset-2">Reference</a
+								> tab.
+							{/if}
+						</p>
+					</div>
+				{/if}
+			</div>
+			<form method="dialog" class="modal-backdrop"><button>close</button></form>
+		</dialog>
+	</section>
 </div>
 
 <!-- /max-w-5xl -->
