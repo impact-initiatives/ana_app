@@ -448,7 +448,7 @@
 		<div class="text-base-content/85 mt-1 flex items-start gap-2 text-sm">
 			<span
 				class="border-base-content/75 mt-0.5 inline-block h-4 w-6 shrink-0 rounded border"
-				style="background: radial-gradient(circle, var(--color-base-content) 1px, transparent 1px) 0 0 / 4px 4px"
+				style="background: radial-gradient(circle, var(--color-base-content) 1px, transparent 1px) 0 0 / 6px 6px"
 			></span>
 			<span>
 				Dotted overlay: no conclusion filled yet. Color reflects the priority flag:
