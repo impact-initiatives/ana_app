@@ -32,6 +32,7 @@
 	});
 
 	const activeRows = $derived(rows.filter((r) => r.tab === activeTab));
+	const anyDeepDiveRun = $derived(rows.some((r) => r.deepDiveRun));
 
 	// Header badges
 	const pfBadge = $derived(
@@ -75,64 +76,64 @@
 			</div>
 		</div>
 
-		<!-- ── Tab strip (only shown when multiple tabs) ── -->
-		{#if tabs.length > 1}
-			<div class="tabs tabs-border mb-4" role="tablist">
-				{#each tabs as tab (tab)}
-					<button
-						role="tab"
-						class="tab {activeTab === tab ? 'tab-active' : ''}"
-						onclick={() => (activeTab = tab)}
-					>
-						{tab}
-					</button>
+		{#if !anyDeepDiveRun}
+			<p class="text-base-content/60 py-4 text-sm italic">No deep dive run</p>
+		{:else}
+			<!-- ── Tab strip (only shown when multiple tabs) ── -->
+			{#if tabs.length > 1}
+				<div class="tabs tabs-border mb-4" role="tablist">
+					{#each tabs as tab (tab)}
+						<button
+							role="tab"
+							class="tab {activeTab === tab ? 'tab-active' : ''}"
+							onclick={() => (activeTab = tab)}
+						>
+							{tab}
+						</button>
+					{/each}
+				</div>
+			{/if}
+
+			<!-- ── System cards ── -->
+			<div class="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+				{#each activeRows as r (r.system)}
+					{@const hasContent =
+						r.primaryHypothesis ||
+						r.secondaryHypothesis ||
+						r.plausibility ||
+						r.triangulation ||
+						r.summary}
+					<div class="rounded-box border-base-300 border p-4">
+						<h4 class="mb-3 text-sm font-semibold">{r.system}</h4>
+						{#if !hasContent}
+							<p class="text-base-content/75 text-sm italic">No content</p>
+						{:else}
+							<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-sm">
+								{#if r.primaryHypothesis}
+									<dt class="text-base-content/75 font-medium whitespace-nowrap">Primary H</dt>
+									<dd>{r.primaryHypothesis}</dd>
+								{/if}
+								{#if r.secondaryHypothesis}
+									<dt class="text-base-content/75 font-medium whitespace-nowrap">Secondary H</dt>
+									<dd>{r.secondaryHypothesis}</dd>
+								{/if}
+								{#if r.plausibility}
+									<dt class="text-base-content/75 font-medium whitespace-nowrap">Plausibility</dt>
+									<dd>{r.plausibility}</dd>
+								{/if}
+								{#if r.triangulation}
+									<dt class="text-base-content/75 font-medium whitespace-nowrap">Triangulation</dt>
+									<dd>{r.triangulation}</dd>
+								{/if}
+							</dl>
+							{#if r.summary}
+								<p class="border-base-200 mt-2.5 border-t pt-2.5 text-sm">{r.summary}</p>
+							{/if}
+						{/if}
+					</div>
 				{/each}
 			</div>
 		{/if}
-
-		<!-- ── System cards ── -->
-		<div class="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-			{#each activeRows as r (r.system)}
-				{@const hasContent =
-					r.primaryHypothesis ||
-					r.secondaryHypothesis ||
-					r.plausibility ||
-					r.triangulation ||
-					r.summary}
-				<div class="rounded-box border-base-300 border p-4">
-					<h4 class="mb-3 text-sm font-semibold">{r.system}</h4>
-					{#if !hasContent}
-						<p class="text-base-content/75 text-sm italic">No deep dive run</p>
-					{:else}
-						<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-sm">
-							{#if r.primaryHypothesis}
-								<dt class="text-base-content/75 font-medium whitespace-nowrap">Primary H</dt>
-								<dd>{r.primaryHypothesis}</dd>
-							{/if}
-							{#if r.secondaryHypothesis}
-								<dt class="text-base-content/75 font-medium whitespace-nowrap">Secondary H</dt>
-								<dd>{r.secondaryHypothesis}</dd>
-							{/if}
-							{#if r.plausibility}
-								<dt class="text-base-content/75 font-medium whitespace-nowrap">Plausibility</dt>
-								<dd>{r.plausibility}</dd>
-							{/if}
-							{#if r.triangulation}
-								<dt class="text-base-content/75 font-medium whitespace-nowrap">Triangulation</dt>
-								<dd>{r.triangulation}</dd>
-							{/if}
-						</dl>
-						{#if r.summary}
-							<p class="border-base-200 mt-2.5 border-t pt-2.5 text-sm">{r.summary}</p>
-						{/if}
-					{/if}
-				</div>
-			{/each}
-
-			{#if activeRows.length === 0 && tabs.length === 0}
-				<p class="text-base-content/60 text-sm italic">No synthesis data for this UoA.</p>
-			{/if}
-		</div>
 	</div>
 	<form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
