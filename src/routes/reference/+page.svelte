@@ -145,7 +145,10 @@
 	);
 
 	const tableRows = $derived(
-		referenceObjects.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
+		referenceObjects
+			.slice()
+			.sort((a, b) => a.metric.localeCompare(b.metric))
+			.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
