@@ -19,10 +19,19 @@
 	import RadioToggle from '$lib/components/ui/RadioToggle.svelte';
 	import DownloadButton from '$lib/components/ui/DownloadButton.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import SynthesisDetailModal from '$lib/components/merge/SynthesisDetailModal.svelte';
 
 	let showTable = $state(false);
 	let mapDownloadFn = $state<(() => Promise<void>) | undefined>(undefined);
 	let uploaderKey = $state(0);
+	let selectedUoa = $state<string | null>(null);
+
+	const detailRows = $derived(
+		selectedUoa ? (mergeStore.parsed?.synthesis ?? []).filter((r) => r.uoa === selectedUoa) : []
+	);
+	const detailAdminName = $derived(
+		selectedUoa ? (adminFeaturesStore.pcodeLabelMap?.[selectedUoa] ?? '') : ''
+	);
 
 	const mapTitle = $derived(
 		`ANA Outcome Conclusions${adminFeaturesStore.countryName ? ' for ' + adminFeaturesStore.countryName : ''}`
@@ -272,6 +281,11 @@
 							layerTitle={mapTitle}
 							patternedUoas={noDeepDiveUoas}
 							ondownloadready={(fn) => (mapDownloadFn = fn)}
+							onuoaclick={(uoa) => {
+								if ((mergeStore.parsed?.synthesis ?? []).some((r) => r.uoa === uoa)) {
+									selectedUoa = uoa;
+								}
+							}}
 						/>
 					{/if}
 				</Card>
@@ -290,9 +304,22 @@
 					downloadFilename="synthesis"
 					overflow="paginate"
 					pageSize={20}
+					onrowclick={(cells) => {
+						selectedUoa = cells['uoa'];
+					}}
 				/>
 			{/if}
 
 		</div>
+
+		<SynthesisDetailModal
+			uoa={selectedUoa ?? ''}
+			adminName={detailAdminName}
+			rows={detailRows}
+			open={selectedUoa !== null}
+			onclose={() => {
+				selectedUoa = null;
+			}}
+		/>
 	{/if}
 </div>
