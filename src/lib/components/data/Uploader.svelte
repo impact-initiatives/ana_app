@@ -158,7 +158,7 @@
 				? 'border-success/40 bg-success/5 cursor-default'
 				: status === 'error'
 					? 'border-error/40 bg-error/5 cursor-pointer'
-					: 'border-base-300 hover:border-primary/80 cursor-pointer'
+					: 'border-base-300 bg-base-100 hover:border-primary/80 cursor-pointer'
 	].join(' ')}
 	ondrop={onDrop}
 	ondragover={onDragOver}
