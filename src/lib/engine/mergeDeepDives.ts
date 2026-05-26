@@ -26,6 +26,7 @@ export interface ParsedMergeResult {
 	synthesis: SynthesisRow[];
 	uoaCount: number;
 	systemCount: number;
+	errors: string[];
 	warnings: string[];
 }
 
@@ -104,7 +105,7 @@ function parseSummarySheet(ws: ExcelJS.Worksheet): {
 	});
 
 	const conclusion = conclusionValue.trim() === '—' ? '' : conclusionValue.trim();
-	const deepDiveRun = conclusion !== '';
+	const deepDiveRun = conclusion !== '' && VALID_CONCLUSION.has(conclusion);
 
 	const fullSystems: Omit<SynthesisRow, 'uoa' | 'priorityFlag'>[] =
 		systems.map((s) => ({ ...s, conclusion, deepDiveRun }));
@@ -115,8 +116,8 @@ function parseSummarySheet(ws: ExcelJS.Worksheet): {
 /* --------------------- Conclusion → conclusion key mapping --------------------- */
 
 const CONCLUSION_TO_KEY: Record<string, string> = {
-	'EM':                    'em',
 	'RoEM':                  'roem',
+	'Acute Needs (!)':       'an_exclamation',
 	'Acute Needs':           'an',
 	'No Acute Needs':        'no_acute_needs',
 	'Insufficient evidence': 'insufficient_evidence',
@@ -130,10 +131,10 @@ export function conclusionToFlag(conclusion: string): string | null {
 /* --------------------- PriorityFlag → conclusion key mapping --------------------- */
 
 const PF_TO_CONCLUSION: Record<string, string> = {
-	em:                    'em',
+	em:                    'roem',
 	ho_primary:            'roem',
 	ho_secondary:          'roem',
-	an_primary:            'an',
+	an_primary:            'an_exclamation',
 	an_secondary:          'an',
 	no_acute_needs:        'no_acute_needs',
 	insufficient_evidence: 'insufficient_evidence',
@@ -172,8 +173,6 @@ function validateSynthesisFields(
 		errs.push(`${context}: invalid Plausibility "${sys.plausibility}" — expected ${PLAUSIBILITY_SYNTHESIS_VALUES.join(', ')}`);
 	if (!VALID_TRIANGULATION.has(sys.triangulation))
 		errs.push(`${context}: invalid Triangulation Strength "${sys.triangulation}" — expected ${TRIANGULATION_VALUES.join(', ')}`);
-	if (!VALID_CONCLUSION.has(sys.conclusion))
-		errs.push(`${context}: invalid Conclusion "${sys.conclusion}" — expected ${CONCLUSION_VALUES.join(', ')}`);
 	return errs;
 }
 
@@ -191,6 +190,7 @@ export async function parseMergeZip(file: File): Promise<ParsedMergeResult> {
 	}
 
 	const synthesis: SynthesisRow[] = [];
+	const errors: string[] = [];
 	const warnings: string[] = [];
 	const uoaSet = new Set<string>();
 	const systemSet = new Set<string>();
@@ -224,6 +224,14 @@ export async function parseMergeZip(file: File): Promise<ParsedMergeResult> {
 			continue;
 		}
 
+		// Validate conclusion once per UoA (same value across all systems)
+		const conclusionStr = result.systems[0]?.conclusion ?? '';
+		if (conclusionStr !== '' && !VALID_CONCLUSION.has(conclusionStr)) {
+			errors.push(
+				`${name} / ${result.uoa}: invalid Conclusion "${conclusionStr}" — expected ${CONCLUSION_VALUES.join(', ')}`
+			);
+		}
+
 		uoaSet.add(result.uoa);
 		for (const sys of result.systems) {
 			const ctx = `${name} / ${result.uoa} — ${sys.tab} › ${sys.system}`;
@@ -237,7 +245,7 @@ export async function parseMergeZip(file: File): Promise<ParsedMergeResult> {
 		}
 	}
 
-	return { synthesis, uoaCount: uoaSet.size, systemCount: systemSet.size, warnings };
+	return { synthesis, uoaCount: uoaSet.size, systemCount: systemSet.size, errors, warnings };
 }
 
 /* --------------------- XLSX builder --------------------- */

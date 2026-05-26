@@ -31,8 +31,22 @@
 	async function processMergeZip(file: File): Promise<ProcessResult> {
 		clearMergeResult();
 		const result = await parseMergeZip(file);
-		setMergeResult(result, file.name);
 
+		if (result.errors.length) {
+			return {
+				ok: false,
+				summary: 'Invalid conclusion values — fix before merging',
+				details: [
+					{
+						label: `${result.errors.length} error${result.errors.length !== 1 ? 's' : ''}`,
+						type: 'error',
+						items: result.errors
+					}
+				]
+			};
+		}
+
+		setMergeResult(result, file.name);
 		const summary = `${result.uoaCount} UoAs · ${result.systemCount} systems · ${result.synthesis.length} synthesis rows`;
 		const details: ProcessResult['details'] = result.warnings.length
 			? [
@@ -43,7 +57,6 @@
 					}
 				]
 			: undefined;
-
 		return { ok: true, summary, details };
 	}
 
