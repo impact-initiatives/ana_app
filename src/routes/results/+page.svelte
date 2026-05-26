@@ -576,7 +576,7 @@
 			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
-		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'spotlight', 'export']) {
+		for (const id of ['overview', 'systems', 'spotlight', 'metrics', 'coverage', 'export']) {
 			const el = document.getElementById(id);
 			if (el) spyObs.observe(el);
 		}
@@ -729,8 +729,21 @@
 					</div>
 				</div>
 
+				<!-- Spotlight -->
+				<div id="spotlight" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+					<div
+						class="mx-auto max-w-5xl px-6"
+						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+					>
+						<ResultsSpotlight
+							filteredRows={effectiveFlagged}
+							{referenceJson}
+						/>
+					</div>
+				</div>
+
 				<!-- Metrics -->
-				<div id="metrics" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+				<div id="metrics" class="border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -749,7 +762,7 @@
 				</div>
 
 				<!-- Coverage -->
-				<div id="coverage" class="border-base-300 scroll-mt-28 border-b py-16">
+				<div id="coverage" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -762,19 +775,6 @@
 							{systems}
 							{referenceJson}
 							oncoverageUoaChange={(v) => (coverageUoa = v)}
-						/>
-					</div>
-				</div>
-
-				<!-- Spotlight -->
-				<div id="spotlight" class="border-base-300 scroll-mt-28 border-b py-16">
-					<div
-						class="mx-auto max-w-5xl px-6"
-						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-					>
-						<ResultsSpotlight
-							filteredRows={effectiveFlagged}
-							{referenceJson}
 						/>
 					</div>
 				</div>
