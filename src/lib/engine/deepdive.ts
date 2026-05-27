@@ -414,16 +414,19 @@ function addLegendSection(
 	evidenceHeaderRow.height = 16;
 
 	const colorEntries = [
-		{ argb: 'ffffffcc', label: 'Critical evidence' },
-		{ argb: 'ffffd6b5', label: 'Evidence relates to specific sub-group only' },
-		{ argb: 'ffe4dfec', label: 'Coping/mitigation' }
+		{ argb: 'ffffffcc', color_cell_text: '', label: 'Critical evidence', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffffd6b5', color_cell_text: '', label: 'Evidence relates to specific sub-group only', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffe4dfec', color_cell_text: '', label: 'Coping/mitigation', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffffffff', color_cell_text: 'text', label: 'Add assumptions in red font', color_cell_text_color: 'ffe12424' },
 	];
-	for (const { argb, label } of colorEntries) {
+	for (const { argb, color_cell_text, label, color_cell_text_color } of colorEntries) {
 		const row = ws.addRow(new Array(numCols).fill(''));
 		if (numCols > 1) ws.mergeCells(row.number, 2, row.number, numCols);
 		const colorCell = row.getCell(1);
 		colorCell.fill = solidFill(argb);
 		colorCell.border = allBorders();
+		colorCell.value = color_cell_text;
+		colorCell.font = { size: 10, color: { argb: color_cell_text_color } };
 		const labelCell = row.getCell(2);
 		labelCell.value = label;
 		labelCell.font = { size: 10 };
@@ -616,7 +619,7 @@ function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number, 
 	ws.mergeCells(headerRow.number, 1, headerRow.number, 5);
 	const headerCell = headerRow.getCell(1);
 	headerCell.value = 'Conclusion';
-	headerCell.font = { bold: true, size: 12, color: { argb: titleTextArgb } };
+	headerCell.font = { bold: true, size: 11, color: { argb: titleTextArgb } };
 	headerCell.fill = solidFill(tintArgb);
 	headerCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 	headerCell.border = allBorders('FF000000');
