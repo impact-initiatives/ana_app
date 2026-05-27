@@ -415,7 +415,7 @@ function addLegendSection(
 
 	const colorEntries = [
 		{ argb: 'ffffffcc', label: 'Critical evidence' },
-		{ argb: 'ffdaeef3', label: 'Evidence relates to specific sub-group only' },
+		{ argb: 'ffffd6b5', label: 'Evidence relates to specific sub-group only' },
 		{ argb: 'ffe4dfec', label: 'Coping/mitigation' }
 	];
 	for (const { argb, label } of colorEntries) {
