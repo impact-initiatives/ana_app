@@ -237,15 +237,14 @@ export const getPriorityBadge = (key: string): FlagBadge | undefined =>
 /**
  * DATA MAP: Deep-dive conclusion to badge configuration.
  * Keys are conclusion vocabulary (not priority flag keys).
- * pfKey optionally relates back to PriorityFlag for cross-reference.
  */
-export const CONCLUSION_BADGE_MAP: Record<ConclusionKey, { label: string; bg: string; pfKey?: string }> = {
-	roem:                  { label: 'RoEM',                  bg: 'var(--color-conclusion-roem)',            pfKey: 'roem' },
-	an_exclamation:        { label: 'Acute Needs (!)',        bg: 'var(--color-conclusion-an-exclamation)',  pfKey: 'an_primary' },
-	an:                    { label: 'Acute Needs',            bg: 'var(--color-conclusion-an)',              pfKey: 'an_secondary' },
-	no_acute_needs:        { label: 'No Acute Needs',         bg: 'var(--color-no-acute)',                   pfKey: 'no_acute_needs' },
-	insufficient_evidence: { label: 'Insufficient Evidence',  bg: 'var(--color-insufficient)',               pfKey: 'insufficient_evidence' },
-	no_data:               { label: 'No data',                bg: 'var(--color-no-data)',                    pfKey: 'no_data' }
+export const CONCLUSION_BADGE_MAP: Record<ConclusionKey, { label: string; bg: string }> = {
+	roem:                  { label: 'RoEM',                   bg: 'var(--color-conclusion-roem)'           },
+	an_exclamation:        { label: 'Acute Needs (!)',         bg: 'var(--color-conclusion-an-exclamation)' },
+	an:                    { label: 'Acute Needs',             bg: 'var(--color-conclusion-an)'             },
+	no_acute_needs:        { label: 'No Acute Needs',          bg: 'var(--color-no-acute)'                  },
+	insufficient_evidence: { label: 'Insufficient Evidence',   bg: 'var(--color-insufficient)'              },
+	no_data:               { label: 'No data',                 bg: 'var(--color-no-data)'                   }
 };
 
 export const getConclusionBadge = (key: string) => CONCLUSION_BADGE_MAP[key as ConclusionKey] ?? null;
