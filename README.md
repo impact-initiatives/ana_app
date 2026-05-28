@@ -31,7 +31,7 @@
 
 ## What ANA does
 
-Upload a CSV (one row per unit of analysis, columns = metric IDs `MET001`, `MET002`, …). ANA validates it, applies threshold-based flagging across 198 metrics and 8 humanitarian systems, and delivers two core outputs:
+Upload a CSV (one row per unit of analysis, columns mainly metric IDs `MET001`, `MET002`, …). the app validates it, applies threshold-based flagging across 198 metrics and 8 humanitarian systems, and delivers two core outputs:
 
 | Output                  | Description                                                                                                                                                                                                                             |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
