@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-28T11:50:43.034Z",
+  "generatedAt": "2026-05-28T12:22:03.704Z",
   "name": "root",
   "id": "root",
   "children": [
@@ -340,8 +340,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -374,8 +374,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -408,8 +408,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Below",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -832,8 +832,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -866,8 +866,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -900,8 +900,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -934,8 +934,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1440,8 +1440,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
@@ -1474,7 +1474,41 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
+                        "risk_concept": "Exposure",
+                        "usual_data_sources": null,
+                        "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Average number of meals",
+                  "id": "food_system::food_consumption::quantity_and_diversity_proxy::average_number_of_meals",
+                  "children": [
+                    {
+                      "name": "% of HHs relying on one meal per day",
+                      "id": "MET044",
+                      "value": 2,
+                      "metric": {
+                        "metric": "MET044",
+                        "label": "% of HHs relying on one meal per day",
+                        "level": "Contr. fact. individual and HH",
+                        "preference": 2,
+                        "evidence_type": "AN signal",
+                        "type": "num[0:1]",
+                        "msna_module": null,
+                        "msna_indicator": null,
+                        "question_kobo_code": null,
+                        "remarks_limitations": null,
+                        "thresholds": {
+                          "an": 0.2,
+                          "van": 0.4
+                        },
+                        "van_is_strict": true,
+                        "above_or_below": "Above",
+                        "evidence_threshold": 2,
                         "factor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
@@ -1518,46 +1552,6 @@
                   ]
                 }
               ]
-            },
-            {
-              "name": "Quantity (proxy)",
-              "id": "food_system::food_consumption::quantity_proxy",
-              "children": [
-                {
-                  "name": "Average number of meals",
-                  "id": "food_system::food_consumption::quantity_proxy::average_number_of_meals",
-                  "children": [
-                    {
-                      "name": "% of HHs relying on one meal per day",
-                      "id": "MET044",
-                      "value": 2,
-                      "metric": {
-                        "metric": "MET044",
-                        "label": "% of HHs relying on one meal per day",
-                        "level": "Contr. fact. individual and HH",
-                        "preference": 2,
-                        "evidence_type": "AN signal",
-                        "type": "num[0:1]",
-                        "msna_module": null,
-                        "msna_indicator": null,
-                        "question_kobo_code": null,
-                        "remarks_limitations": null,
-                        "thresholds": {
-                          "an": 0.2,
-                          "van": 0.4
-                        },
-                        "van_is_strict": true,
-                        "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 2,
-                        "risk_concept": "Exposure",
-                        "usual_data_sources": null,
-                        "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
-                      }
-                    }
-                  ]
-                }
-              ]
             }
           ]
         },
@@ -1594,8 +1588,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1628,8 +1622,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1662,8 +1656,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1696,8 +1690,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1730,8 +1724,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1764,8 +1758,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1798,8 +1792,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1900,8 +1894,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -1934,8 +1928,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2002,8 +1996,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2030,8 +2024,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Household Economy Approach (HEA). Survival deficit indicates households cannot meet minimum food and non-food needs without irreversible coping."
@@ -2064,8 +2058,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2099,7 +2093,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2132,8 +2126,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2167,7 +2161,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2200,8 +2194,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2241,7 +2235,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 3,
+                        "factor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO/UNICEF guidance on safe food preparation and WASH–nutrition linkages. Threshold reflects widespread use of unsafe water for food preparation.\nhttps://www.who.int/publications/i/item/9789241594639"
@@ -2274,8 +2268,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Below",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2309,7 +2303,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 3,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2342,8 +2336,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2376,8 +2370,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2422,8 +2416,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2450,8 +2444,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2478,8 +2472,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2512,8 +2506,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2546,8 +2540,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2580,8 +2574,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2614,8 +2608,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2654,8 +2648,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2688,8 +2682,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2722,8 +2716,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2842,8 +2836,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Below",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Sphere: Total water (15L) - drinking/cooking (6L) leaves 9L/person/day as the domsetic threshold."
@@ -3300,8 +3294,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3340,8 +3334,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Sphere minimum standard = ≤30 minutes round trip. ANA threshold suggests significant share of population unable to make this roundtrip within that timeframe. https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf"
@@ -3374,8 +3368,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "No global threshold exists. 3-5% is often used as affordability threshold. The UN Resolution on Human Rights in Drinking Water and Sewerage (24 March 2011) sets the threshold at 5%, elsewhere 3% is reported (e.g., https://www.un.org/en/global-issues/water#:~:text=One%20of%20the%20most%20important,should%20not%20exceed%2030%20minutes.)"
@@ -3408,8 +3402,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3436,8 +3430,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3470,8 +3464,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3504,8 +3498,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3538,8 +3532,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3578,8 +3572,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Below",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "No global threshold, often referenced in WASH programming guidance."
@@ -3612,8 +3606,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3640,8 +3634,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3668,8 +3662,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3696,8 +3690,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3730,8 +3724,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3764,8 +3758,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3804,8 +3798,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3844,8 +3838,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3924,8 +3918,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3952,8 +3946,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3980,8 +3974,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4054,8 +4048,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4082,8 +4076,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4116,8 +4110,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4144,8 +4138,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4178,8 +4172,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4270,7 +4264,7 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
+                        "evidence_threshold": 1,
                         "factor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
@@ -4304,8 +4298,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4332,8 +4326,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4366,8 +4360,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4440,8 +4434,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Below",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4474,8 +4468,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4502,8 +4496,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4536,8 +4530,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4570,8 +4564,8 @@
                         },
                         "van_is_strict": null,
                         "above_or_below": "Above",
-                        "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "evidence_threshold": 0,
+                        "factor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4718,8 +4712,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on Sphere sanitation standards regarding safe waste management and environmental health. Threshold reflects widespread exposure to unsanitary living environments.\nhttps://spherestandards.org/wp-content/uploads/Sphere-in-Practice.pdf"
@@ -5036,8 +5030,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5228,8 +5222,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5664,8 +5658,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5732,8 +5726,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Above",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -6126,8 +6120,8 @@
                         },
                         "van_is_strict": true,
                         "above_or_below": "Below",
-                        "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "evidence_threshold": 1,
+                        "factor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on WHO/UNICEF indicator for births attended by skilled health personnel (SDG 3.1.2). No universally agreed humanitarian severity thresholds exist; ANA thresholds reflect levels associated with severe constraints in maternal and newborn health service access."
