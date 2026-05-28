@@ -39,6 +39,7 @@
 		downloadXLSX,
 		downloadDeepDiveZip
 	} from '$lib/engine/download';
+	import { metricSourcesStore } from '$lib/stores/metricSourcesStore.svelte';
 
 	// ── Types ─────────────────────────────────────────────────────────────────
 
@@ -541,7 +542,7 @@
 		if (!json) return;
 		const hypothesesResp = await fetch(asset('/data/hypotheses.json'));
 		const hypothesesData = await hypothesesResp.json();
-		await downloadDeepDiveZip(effectiveFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`);
+		await downloadDeepDiveZip(effectiveFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`, metricSourcesStore.sourcesMap ?? undefined);
 	}
 
 	// ── Persist filters to localStorage ──────────────────────────────────────

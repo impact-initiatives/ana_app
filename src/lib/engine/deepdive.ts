@@ -7,6 +7,7 @@ import {
 	TRIANGULATION_VALUES, CONCLUSION_VALUES
 } from '$lib/types/deepdives.js';
 import type { HypothesesBlock, HypothesesData } from '$lib/types/hypotheses';
+import type { MetricSourceEntry, MetricSourcesMap } from '$lib/types/sources';
 import { SystemIDs } from '$lib/types/structure';
 import { PRIORITY_BADGE_MAP } from '$lib/utils/colors.js';
 import type { PriorityFlag } from '$lib/types/flags';
@@ -238,7 +239,8 @@ function addTableHeaderRow(ws: Worksheet, headers: string[], hypothesesCount = 0
 function addIndicatorRow(
 	ws: Worksheet,
 	{ factorSubfactor, evidenceType, id, metric, value, flagLabelStr, an, van }: IndicatorRowParams,
-	hypothesesCount: number
+	hypothesesCount: number,
+	sourceEntry?: MetricSourceEntry
 ): void {
 	// Col 1 = gutter (merged with col 2 = Factor-Sub-factor); all data cols shift +1
 	const rowValues = [
@@ -295,7 +297,17 @@ function addIndicatorRow(
 	const commentCell = row.getCell(commentColIdx);
 	commentCell.border = allBorders('FFDDDDDD');
 	commentCell.alignment = { vertical: 'top', wrapText: true };
-	// No fixed row.height — Excel auto-fits based on wrapped content
+
+	// Source metadata columns (always present; empty when no entry)
+	const sourceVals = sourceEntry
+		? [sourceEntry.source, sourceEntry.link, sourceEntry.startOfDataCollection, sourceEntry.endOfDataCollection]
+		: ['', '', '', ''];
+	sourceVals.forEach((v, i) => {
+		const c = row.getCell(commentColIdx + 1 + i);
+		c.value = v;
+		c.border = allBorders('FFDDDDDD');
+		c.alignment = { vertical: 'top', wrapText: true };
+	});
 }
 
 function addQualitativeEvidenceRows(
@@ -900,7 +912,8 @@ function applyHypGroupStyling(
 export async function buildDeepDiveBuffer(
 	uoaRow: Record<string, any>,
 	referenceJson: Record<string, any>,
-	hypothesesData: HypothesesData
+	hypothesesData: HypothesesData,
+	metricSources?: MetricSourcesMap
 ): Promise<Uint8Array> {
 	const uoaId = String(uoaRow['uoa'] ?? 'unknown');
 	const workbook = new ExcelJS.Workbook();
@@ -996,7 +1009,8 @@ export async function buildDeepDiveBuffer(
 										an: met.thresholds?.an ?? null,
 										van: met.thresholds?.van ?? null
 									},
-									hypIds.length
+									hypIds.length,
+									metricSources?.[`${met.metric}__${uoaId}`] ?? metricSources?.[met.metric]
 								);
 							}
 						}
@@ -1059,7 +1073,8 @@ export async function buildDeepDiveBuffer(
 										an: met.thresholds?.an ?? null,
 										van: met.thresholds?.van ?? null
 									},
-									hypIds.length
+									hypIds.length,
+									metricSources?.[`${met.metric}__${uoaId}`] ?? metricSources?.[met.metric]
 								);
 							}
 						}

@@ -3,12 +3,14 @@ import { clearValidatorState } from '$lib/stores/validatorStore.svelte';
 import { clearAdminFeatures } from '$lib/stores/adminFeaturesStore.svelte';
 import { clearFilters } from '$lib/stores/resultsFilterStore.svelte';
 import { clearCustomReferenceState } from '$lib/stores/metricStore.svelte';
+import { clearMetricSources } from '$lib/stores/metricSourcesStore.svelte';
 
 export function clearAllStores(): void {
 	clearFlagResult();
 	clearValidatorState();
 	clearAdminFeatures();
 	clearFilters();
+	clearMetricSources();
 }
 
 /** Called when reference.json generatedAt changes between deployments. Clears all data-
