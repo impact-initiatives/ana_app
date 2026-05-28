@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Select from '$lib/components/ui/Select.svelte';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import ClearButton from '$lib/components/ui/ClearButton.svelte';
 
 	type Option = { value: string; label: string };
 
@@ -8,6 +8,7 @@
 		flaggedTotal: number;
 		filteredTotal: number;
 		isFiltered: boolean;
+		mapClusterActive?: boolean;
 		uoaOptions: Option[];
 		selectedUoas: string[] | null;
 		selectedPrelimKeys: string[] | null;
@@ -29,6 +30,7 @@
 		flaggedTotal,
 		filteredTotal,
 		isFiltered,
+		mapClusterActive = false,
 		uoaOptions,
 		selectedUoas,
 		selectedPrelimKeys,
@@ -109,11 +111,17 @@
 		{/if}
 	{/if}
 
+	{#if mapClusterActive}
+		<div role="alert" class="alert alert-info alert-soft py-2 text-xs">
+			Map cluster selection is active. Showing selected UoAs only.
+		</div>
+	{/if}
+
 	<p class="text-base-content/75 text-xs">
 		<strong class="text-base-content">{filteredTotal}</strong> / {flaggedTotal} UOAs shown
 	</p>
 
 	{#if isFiltered}
-		<ButtonClear label="Clear filters" onclick={onclearfilters} widthClass="w-full" />
+		<ClearButton label="Clear filters" onclick={onclearfilters} class="w-full" />
 	{/if}
 </div>

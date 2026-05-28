@@ -65,7 +65,8 @@
 		const summary = `${stats.updated.length} to update · ${stats.added.length} to add`;
 		const details: ProcessResult['details'] = [];
 		if (warnings.length) details.push({ label: 'Warnings', type: 'warning', items: warnings });
-		if (mergeWarnings.length) details.push({ label: 'Reference warnings', type: 'warning', items: mergeWarnings });
+		if (mergeWarnings.length)
+			details.push({ label: 'Reference warnings', type: 'warning', items: mergeWarnings });
 
 		return { ok: true, summary, details: details.length ? details : undefined };
 	}
@@ -217,10 +218,13 @@
 				</div>
 			</div>
 		{/if}
-		<p class="text-base-content/65 text-xs">
+		<p class="text-base-content/85 v mt-2 mb-2 text-xs">
 			Upload a reference CSV to update thresholds, labels, or add country-specific metrics. Only
 			rows you include are changed — unmentioned metrics stay unchanged.
 		</p>
+		<div role="alert" class="alert alert-info alert-soft text-xs">
+			Please contact AU HQ team before changing the reference list. Thanks!
+		</div>
 
 		{#key uploaderKey}
 			<Uploader

@@ -32,6 +32,12 @@
 		subtitleDim?: number;
 		/** Optional snippet rendered inline beside the subtitle (e.g. an action button). */
 		subtitleActions?: Snippet;
+		/** Optional snippet rendered as a <figure> before the card body (e.g. an image). */
+		figure?: Snippet;
+		/** Extra classes on the <figure> element. */
+		figureClass?: string;
+		/** Adds lg:card-side for a horizontal layout when a figure is present. */
+		side?: boolean;
 		children: Snippet;
 	}
 
@@ -49,8 +55,11 @@
 		subtitleUppercase = false,
 		subtitleSemibold = false,
 		subtitleSize = '',
-		subtitleDim = 75,
+		subtitleDim = 85,
 		subtitleActions,
+		figure,
+		figureClass = '',
+		side = false,
 		children
 	}: Props = $props();
 
@@ -64,9 +73,19 @@
 </script>
 
 <div
-	class={['card bg-base-100 border-base-300 border', SHADOW_CLASSES[shadow], extraClass]}
+	class={[
+		'card bg-base-100 border-base-300 border',
+		side && 'lg:card-side',
+		SHADOW_CLASSES[shadow],
+		extraClass
+	]}
 	style={extraStyle}
 >
+	{#if figure}
+		<figure class={figureClass}>
+			{@render figure()}
+		</figure>
+	{/if}
 	<div class={['card-body', bodyClass]}>
 		{#if title || subtitle}
 			<div class="mb-2">

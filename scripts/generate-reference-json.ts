@@ -52,7 +52,7 @@ interface RefRow {
 	'Very acute needs threshold (5)': string;
 	'Above or below': string;
 	'Evidence threshold': string;
-	'Factor threshold': string;
+	'Subfactor threshold': string;
 	'Risk concept': string;
 	[key: string]: string;
 }
@@ -67,7 +67,7 @@ const REQUIRED_COLUMNS: (keyof RefRow)[] = [
 	'Type',
 	'Above or below',
 	'Evidence threshold',
-	'Factor threshold',
+	'Subfactor threshold',
 	'Acute needs threshold (4)',
 ];
 
@@ -120,8 +120,10 @@ function parseCsv<T>(filePath: string): T[] {
 	}
 	return result.data.map((row) => {
 		const out: Record<string, string> = {};
-		for (const [k, v] of Object.entries(row as Record<string, string>))
-			out[k.trim()] = (v ?? '').trim();
+		for (const [k, v] of Object.entries(row as Record<string, unknown>)) {
+			if (k === '__parsed_extra') continue;
+			out[k.trim()] = typeof v === 'string' ? v.trim() : String(v ?? '');
+		}
 		return out as T;
 	});
 }
@@ -235,10 +237,12 @@ function build(rows: RefRow[]): {
 				van: vanVal
 			},
 			van_is_strict: vanIsStrict,
-			above_or_below: (row['Above or below'] ?? '').trim(),
+			above_or_below: nullIfEmpty(row['Above or below'] ?? '') as 'Above' | 'Below' | null,
 			evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
-			factor_threshold: parseInteger(row['Factor threshold'] ?? ''),
-			risk_concept: nullIfNA(row['Risk concept'] ?? '')
+			factor_threshold: parseInteger(row['Subfactor threshold'] ?? ''),
+			risk_concept: nullIfNA(row['Risk concept'] ?? ''),
+			usual_data_sources: nullIfEmpty(row['Usual data sources'] ?? ''),
+			references_for_threshold: nullIfEmpty(row['References for threshold'] ?? '')
 		});
 	}
 

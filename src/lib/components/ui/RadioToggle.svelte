@@ -26,7 +26,7 @@
 		<span class="text-xs font-semibold tracking-wide uppercase">{label}</span>
 	{/if}
 	<div class="join">
-		<label class="join-item btn btn-sm {!value ? 'btn-neutral' : 'btn-outline'}">
+		<label class="join-item btn btn-sm {!value ? 'btn-neutral' : 'btn-outline bg-base-100'}">
 			<input
 				type="radio"
 				{name}
@@ -36,7 +36,7 @@
 			/>
 			{labelFalse}
 		</label>
-		<label class="join-item btn btn-sm {value ? 'btn-neutral' : 'btn-outline'}">
+		<label class="join-item btn btn-sm {value ? 'btn-neutral' : 'btn-outline bg-base-100'}">
 			<input type="radio" {name} class="sr-only" checked={value} onchange={() => (value = true)} />
 			{labelTrue}
 		</label>

@@ -9,6 +9,8 @@ type FilterState = {
 	selectedGroupValues: string[] | null;
 	indSelectedSystems: string[] | null;
 	indSelectedFactors: string[] | null;
+	clusterActive: boolean;
+	clusterUoas: string[];
 };
 
 function loadFilters(): Partial<FilterState> {
@@ -30,6 +32,8 @@ export const filterStore: FilterState = $state({
 	selectedGroupValues: saved.selectedGroupValues ?? null,
 	indSelectedSystems: saved.indSelectedSystems ?? null,
 	indSelectedFactors: saved.indSelectedFactors ?? null,
+	clusterActive: saved.clusterActive ?? false,
+	clusterUoas: saved.clusterUoas ?? [],
 });
 
 export function persistFilters(): void {
@@ -48,5 +52,7 @@ export function clearFilters(): void {
 	filterStore.selectedGroupValues = null;
 	filterStore.indSelectedSystems = null;
 	filterStore.indSelectedFactors = null;
+	filterStore.clusterActive = false;
+	filterStore.clusterUoas = [];
 	if (browser) localStorage.removeItem(STORAGE_KEY);
 }

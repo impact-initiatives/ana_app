@@ -36,7 +36,7 @@
 						<li>
 							<a
 								href={link.href}
-								class="text-base-content/75 hover:text-primary text-sm transition-colors duration-150"
+								class="text-base-content/85 hover:text-primary text-sm transition-colors duration-150"
 							>
 								{link.label}
 							</a>

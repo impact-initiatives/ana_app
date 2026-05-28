@@ -13,6 +13,7 @@
 	import Footer from '$lib/components/ui/Footer.svelte';
 	import { flagStore, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
+	import { hydrateMetricSourcesStore } from '$lib/stores/metricSourcesStore.svelte';
 	import { clearAllStores, clearAllStoresOnFrameworkUpdate } from '$lib/utils/clearAll';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
@@ -26,6 +27,7 @@
 		// spinner is already animating — heavy JSON.parse no longer freezes it.
 		hydrateFlagStore();
 		hydrateMetricStore();
+		hydrateMetricSourcesStore();
 
 		// If reference.json was not in localStorage, fetch it now.
 		// Keep the app-loader visible until this resolves.
@@ -136,16 +138,85 @@
 					<a
 						href={resolve(link.path)}
 						class={[
-							'relative flex items-center px-3.5 py-1 text-sm transition-colors duration-150',
+							'relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150',
 							isActive(link.path)
 								? 'text-primary after:bg-primary after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:rounded-full'
 								: 'text-base-content/85 hover:text-base-content'
 						].join(' ')}
 						aria-current={isActive(link.path) ? 'page' : undefined}
 					>
+						{#if link.path === '/results'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
+								class="size-4"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"
+								/>
+							</svg>
+						{/if}
 						{link.label}
 					</a>
 				{/each}
+
+				<!-- Export shortcut — anchor to #export section on /results -->
+				<a
+					href="{resolve('/results')}#export"
+					class={[
+						'relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150',
+						isResultsPage() && exploreNav.activeSection === 'export'
+							? 'text-primary after:bg-primary after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:rounded-full'
+							: 'text-base-content/85 hover:text-base-content'
+					].join(' ')}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="size-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+						/>
+					</svg>
+
+					Export
+				</a>
+
+				<!-- Reupload shortcut — only when results are loaded -->
+				{#if flagStore.flaggedResult}
+					<a
+						href="{resolve('/')}#upload"
+						class="text-base-content/85 hover:text-base-content relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-4"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+							/>
+						</svg>
+						Reupload
+					</a>
+				{/if}
 			</div>
 
 			<!-- Divider -->
@@ -180,61 +251,25 @@
 									d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"
 								/>
 							</svg>
+						{:else if link.path === '/reference'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
+								class="size-4"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+								/>
+							</svg>
 						{/if}
 						{link.label}
 					</a>
 				{/each}
-
-				<!-- Export shortcut — anchor to #export section on /results -->
-				<a
-					href="{resolve('/results')}#export"
-					class={[
-						'relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150',
-						isResultsPage() && exploreNav.activeSection === 'export'
-							? 'text-primary after:bg-primary after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:rounded-full'
-							: 'text-base-content/85 hover:text-base-content'
-					].join(' ')}
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="size-4"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-						aria-hidden="true"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					Export
-				</a>
-
-				<!-- Reupload shortcut — only when results are loaded -->
-				{#if flagStore.flaggedResult}
-					<a
-						href="{resolve('/')}#upload"
-						class="relative flex items-center gap-1.5 px-3.5 py-1 text-sm transition-colors duration-150 text-base-content/85 hover:text-base-content"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="1.5"
-							stroke="currentColor"
-							class="size-4"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
-							/>
-						</svg>
-						Reupload
-					</a>
-				{/if}
 			</div>
 
 			<!-- Divider -->
@@ -273,6 +308,22 @@
 								class={isActive(link.path) ? 'active' : ''}
 								aria-current={isActive(link.path) ? 'page' : undefined}
 							>
+								{#if link.path === '/results'}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-4"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"
+										/>
+									</svg>
+								{/if}
 								{link.label}
 							</a>
 						</li>
@@ -302,6 +353,21 @@
 											d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"
 										/>
 									</svg>
+								{:else if link.path === '/reference'}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-4"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+										/>
+									</svg>
 								{/if}
 								{link.label}
 							</a>
@@ -311,17 +377,19 @@
 						<a href="{resolve('/results')}#export">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
 								class="size-4"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-								aria-hidden="true"
 							>
 								<path
-									fill-rule="evenodd"
-									d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-									clip-rule="evenodd"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
 								/>
 							</svg>
+
 							Export
 						</a>
 					</li>
@@ -369,8 +437,8 @@
 	<div class="modal-box max-w-md">
 		<h3 class="text-base-content text-lg font-bold">Framework updated</h3>
 		<p class="text-base-content/80 py-3 text-sm">
-			The ANA reference framework has been updated. Any stored results or custom reference rows
-			have been cleared — please re-upload your CSV to run your analysis.
+			The ANA reference framework has been updated. Any stored results or custom reference rows have
+			been cleared — please re-upload your CSV to run your analysis.
 		</p>
 		<div class="modal-action">
 			<button class="btn btn-primary btn-sm" onclick={() => (showFrameworkModal = false)}>
@@ -378,7 +446,11 @@
 			</button>
 		</div>
 	</div>
-	<div class="modal-backdrop" role="presentation" onclick={() => (showFrameworkModal = false)}></div>
+	<div
+		class="modal-backdrop"
+		role="presentation"
+		onclick={() => (showFrameworkModal = false)}
+	></div>
 </dialog>
 
 <!-- Back to top -->

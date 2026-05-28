@@ -1,6 +1,7 @@
 import Papa from 'papaparse';
 import ExcelJS from '@protobi/exceljs';
 import type { HypothesesData } from '$lib/types/deepdives';
+import type { MetricSourcesMap } from '$lib/types/sources';
 import { zipSync } from 'fflate';
 import { buildDeepDiveBuffer } from '$lib/engine/deepdive';
 
@@ -86,16 +87,18 @@ export async function downloadDeepDiveZip(
 	uoaRows: Record<string, any>[],
 	referenceJson: Record<string, any>,
 	hypothesesData: HypothesesData,
-	zipFilename = 'deepdives.zip'
+	zipFilename = 'deepdives.zip',
+	metricSources?: MetricSourcesMap
 ): Promise<void> {
 	const buffers = await Promise.all(
-		uoaRows.map((row) => buildDeepDiveBuffer(row, referenceJson, hypothesesData))
+		uoaRows.map((row) => buildDeepDiveBuffer(row, referenceJson, hypothesesData, metricSources))
 	);
 
 	const files: Record<string, Uint8Array> = {};
 	for (let i = 0; i < uoaRows.length; i++) {
 		const uoaId = String(uoaRows[i]['uoa'] ?? `uoa_${i}`);
-		files[`deepdive_${uoaId}.xlsx`] = buffers[i];
+		const flag = String(uoaRows[i]['priority_flag'] ?? '').replace(/\s+/g, '_') || 'no_flag';
+		files[`deepdive_${uoaId}_${flag}.xlsx`] = buffers[i];
 	}
 
 	const zipped = zipSync(files, { level: 0 });

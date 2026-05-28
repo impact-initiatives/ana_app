@@ -39,6 +39,7 @@
 		downloadXLSX,
 		downloadDeepDiveZip
 	} from '$lib/engine/download';
+	import { metricSourcesStore } from '$lib/stores/metricSourcesStore.svelte';
 
 	// ── Types ─────────────────────────────────────────────────────────────────
 
@@ -320,8 +321,17 @@
 		return filteredForMap.filter((r) => filterStore.selectedUoas!.includes(String(r.uoa)));
 	});
 
+	const effectiveFlagged = $derived(
+		filterStore.clusterActive && filterStore.clusterUoas.length > 0
+			? filteredFlagged.filter((r) => filterStore.clusterUoas.includes(String(r.uoa)))
+			: filteredFlagged
+	);
+
 	const isFiltered = $derived(
-		filterStore.selectedUoas !== null || filterStore.selectedPrelimKeys !== null || filterStore.groupByCol !== null
+		filterStore.selectedUoas !== null ||
+		filterStore.selectedPrelimKeys !== null ||
+		filterStore.groupByCol !== null ||
+		filterStore.clusterActive
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -443,7 +453,7 @@
 	);
 
 	// Dot index: O(rows) single pass, recomputes on every filter change.
-	const dotIndex = $derived(buildDotIndex(filteredFlagged));
+	const dotIndex = $derived(buildDotIndex(effectiveFlagged));
 
 	// Merged blocks: O(metrics) Map lookups — near-instant on filter change.
 	const allBlocks = $derived(
@@ -527,12 +537,12 @@
 		downloadXLSX(flagStore.flaggedResult, `flagged_data_${timestamp}.xlsx`);
 	}
 	async function handleDeepDive() {
-		if (filteredFlagged.length === 0) return;
+		if (effectiveFlagged.length === 0) return;
 		const json = metricStore.referenceJson;
 		if (!json) return;
 		const hypothesesResp = await fetch(asset('/data/hypotheses.json'));
 		const hypothesesData = await hypothesesResp.json();
-		await downloadDeepDiveZip(filteredFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`);
+		await downloadDeepDiveZip(effectiveFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`, metricSourcesStore.sourcesMap ?? undefined);
 	}
 
 	// ── Persist filters to localStorage ──────────────────────────────────────
@@ -544,6 +554,8 @@
 		filterStore.selectedGroupValues;
 		filterStore.indSelectedSystems;
 		filterStore.indSelectedFactors;
+		filterStore.clusterActive;
+		filterStore.clusterUoas;
 		if (everHadData) persistFilters();
 	});
 
@@ -565,7 +577,7 @@
 			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
-		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'spotlight', 'export']) {
+		for (const id of ['overview', 'systems', 'spotlight', 'metrics', 'coverage', 'export']) {
 			const el = document.getElementById(id);
 			if (el) spyObs.observe(el);
 		}
@@ -607,8 +619,9 @@
 		<aside class="bg-base-100 border-base-300 hidden lg:block lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:overflow-y-auto lg:w-64 lg:shrink-0 border-r">
 			<FiltersSidebar
 				flaggedTotal={flagged.length}
-				filteredTotal={filteredFlagged.length}
+				filteredTotal={effectiveFlagged.length}
 				{isFiltered}
+				mapClusterActive={filterStore.clusterActive}
 				{uoaOptions}
 				selectedUoas={filterStore.selectedUoas}
 				selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -637,8 +650,9 @@
 				<div class="border-base-300 bg-base-100 border-b lg:hidden">
 					<FiltersSidebar
 						flaggedTotal={flagged.length}
-						filteredTotal={filteredFlagged.length}
+						filteredTotal={effectiveFlagged.length}
 						{isFiltered}
+						mapClusterActive={filterStore.clusterActive}
 						{uoaOptions}
 						selectedUoas={filterStore.selectedUoas}
 						selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -673,8 +687,12 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							onmapuoaschange={(uoas) => (filterStore.selectedUoas = uoas.length > 0 ? uoas : null)}
-							onmapselectreset={clearAllFilters}
+							multiSelectMode={filterStore.clusterActive}
+							onmultiselecttoggle={() => {
+								filterStore.clusterActive = !filterStore.clusterActive;
+								if (!filterStore.clusterActive) filterStore.clusterUoas = [];
+							}}
+							onclusterchange={(uoas) => (filterStore.clusterUoas = uoas)}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -701,7 +719,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsSystems
-							filteredFlagged={filteredFlagged}
+							filteredFlagged={effectiveFlagged}
 							{systems}
 							{systemCodes}
 							{subList}
@@ -712,8 +730,21 @@
 					</div>
 				</div>
 
+				<!-- Spotlight -->
+				<div id="spotlight" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+					<div
+						class="mx-auto max-w-5xl px-6"
+						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+					>
+						<ResultsSpotlight
+							filteredRows={effectiveFlagged}
+							{referenceJson}
+						/>
+					</div>
+				</div>
+
 				<!-- Metrics -->
-				<div id="metrics" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+				<div id="metrics" class="border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -732,7 +763,7 @@
 				</div>
 
 				<!-- Coverage -->
-				<div id="coverage" class="border-base-300 scroll-mt-28 border-b py-16">
+				<div id="coverage" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -749,19 +780,6 @@
 					</div>
 				</div>
 
-				<!-- Spotlight -->
-				<div id="spotlight" class="border-base-300 scroll-mt-28 border-b py-16">
-					<div
-						class="mx-auto max-w-5xl px-6"
-						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-					>
-						<ResultsSpotlight
-							filteredRows={filteredFlagged}
-							{referenceJson}
-						/>
-					</div>
-				</div>
-
 				<!-- Export -->
 				<div id="export" class="bg-base-200/30 scroll-mt-28 py-16">
 					<div
@@ -769,7 +787,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsExport
-							rows={filteredFlagged}
+							rows={effectiveFlagged}
 							{handleJSON}
 							{handleCSV}
 							{handleXLSX}

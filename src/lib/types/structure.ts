@@ -110,6 +110,8 @@ export interface Metric {
 	evidence_threshold?: number | null;
 	factor_threshold: number;
 	risk_concept?: string | null;
+	usual_data_sources?: string | null;
+	references_for_threshold?: string | null;
 }
 
 export interface Indicator {

@@ -100,7 +100,7 @@
 
 	<!-- Swatch rows -->
 	{#each swatches as sw (sw.label)}
-		<div class="text-base-content/70 flex items-center gap-1.5">
+		<div class="text-base-content/85 flex items-center gap-1.5">
 			<span class="inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style:background-color={sw.color}
 			></span>
 			<span>{sw.label}</span>

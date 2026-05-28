@@ -1,5 +1,6 @@
 import type { Metric } from '$lib/types/structure';
-import type { FlagStatus, PriorityFlag } from '$lib/types/flags';
+import type { FlagStatus, PriorityFlag, ConclusionKey } from '$lib/types/flags';
+export { CONCLUSION_KEYS } from '$lib/types/flags';
 import { SystemIDEnum } from '$lib/types/structure';
 
 // ── Fill ─────────────────────────────────────────────────────────────────────
@@ -232,6 +233,21 @@ export const getFlagBadge = (key: string): FlagStatusBadge | undefined =>
  */
 export const getPriorityBadge = (key: string): FlagBadge | undefined =>
 	PRIORITY_BADGE_MAP[key as PriorityFlag];
+
+/**
+ * DATA MAP: Deep-dive conclusion to badge configuration.
+ * Keys are conclusion vocabulary (not priority flag keys).
+ */
+export const CONCLUSION_BADGE_MAP: Record<ConclusionKey, { label: string; bg: string }> = {
+	roem:                  { label: 'RoEM',                   bg: 'var(--color-conclusion-roem)'           },
+	an_exclamation:        { label: 'Acute Needs (!)',         bg: 'var(--color-conclusion-an-exclamation)' },
+	an:                    { label: 'Acute Needs',             bg: 'var(--color-conclusion-an)'             },
+	no_acute_needs:        { label: 'No Acute Needs',          bg: 'var(--color-no-acute)'                  },
+	insufficient_evidence: { label: 'Insufficient Evidence',   bg: 'var(--color-insufficient)'              },
+	no_data:               { label: 'No data',                 bg: 'var(--color-no-data)'                   }
+};
+
+export const getConclusionBadge = (key: string) => CONCLUSION_BADGE_MAP[key as ConclusionKey] ?? null;
 
 /**
  * Returns the inline style for a FlagStatusBadge.

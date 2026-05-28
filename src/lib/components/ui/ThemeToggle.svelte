@@ -1,35 +1,18 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-
-	const STORAGE_KEY = 'ana-theme';
-
-	let isDark = $state(browser ? localStorage.getItem(STORAGE_KEY) !== 'ana-light' : true);
-
-	function onchange(e: Event) {
-		const checked = (e.target as HTMLInputElement).checked;
-		isDark = checked;
-		if (browser) {
-			const theme = checked ? 'ana-dark' : 'ana-light';
-			localStorage.setItem(STORAGE_KEY, theme);
-			// Drive data-theme directly — do NOT rely on DaisyUI's theme-controller
-			// CSS :has() selector, which conflicts with our manually-set attribute.
-			document.documentElement.setAttribute('data-theme', theme);
-		}
-	}
+	import { themeStore } from '$lib/stores/themeStore.svelte';
 </script>
 
 <!--
   swap-rotate drives the sun/moon animation via checkbox checked state.
-  No theme-controller class — we set data-theme explicitly in onchange.
+  No theme-controller class — we set data-theme explicitly in themeStore.toggle().
   Input is sr-only so it doesn't show browser default checkbox styling.
 -->
 <label
-	// class="swap swap-rotate inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-base-content/60 hover:bg-base-300/60 hover:text-base-content transition-colors duration-150"
 	class="swap swap-rotate btn btn-ghost btn-sm btn-circle hover:bg-base-300"
-	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-	aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+	title={themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-label={themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >
-	<input type="checkbox" checked={isDark} {onchange} class="sr-only" />
+	<input type="checkbox" checked={themeStore.isDark} onchange={() => themeStore.toggle()} class="sr-only" />
 
 	<!-- Sun — shown when light mode (swap-off = unchecked) -->
 	<svg

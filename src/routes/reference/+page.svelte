@@ -45,7 +45,8 @@
 			const levelOk = levels.length === 0 || levels.includes(node.metric.level);
 			const conceptOk =
 				concepts.length === 0 ||
-				(node.metric.risk_concept != null && concepts.includes(String(node.metric.risk_concept)));
+				node.metric.risk_concept == null ||
+				concepts.includes(String(node.metric.risk_concept));
 			return levelOk && conceptOk ? node : null;
 		}
 		if (!node.children) return node;
@@ -92,6 +93,8 @@
 		above_or_below: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		threshold_an: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		threshold_van: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		references_for_threshold: { wrap: true, extraClass: 'min-w-48 max-w-72' },
+		usual_data_sources: { wrap: true, extraClass: 'min-w-48 max-w-72' },
 		msna_module: { wrap: true, extraClass: 'min-w-40 max-w-56' },
 		msna_indicator: { wrap: true, extraClass: 'min-w-40 max-w-60' },
 		question_kobo_code: { wrap: true, extraClass: 'min-w-24 max-w-36' },
@@ -142,7 +145,10 @@
 	);
 
 	const tableRows = $derived(
-		referenceObjects.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
+		referenceObjects
+			.slice()
+			.sort((a, b) => a.metric.localeCompare(b.metric))
+			.map(({ risk_concept, level, ...rest }) => ({ risk_concept, level, ...rest }))
 	);
 </script>
 
@@ -195,6 +201,7 @@
 						selected={selectedLevels}
 						placeholder="All levels"
 						label="Filter by level"
+						unitLabel="levels"
 						onchange={(v) => (selectedLevels = v as string[])}
 					/>
 				</div>
@@ -204,6 +211,7 @@
 						selected={selectedConcepts}
 						placeholder="All concepts"
 						label="Filter by risk concept"
+						unitLabel="concepts"
 						onchange={(v) => (selectedConcepts = v as string[])}
 					/>
 				</div>

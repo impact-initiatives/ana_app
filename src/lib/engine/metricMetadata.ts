@@ -242,6 +242,8 @@ export const REFERENCE_TABLE_COLUMNS = [
 	'above_or_below',
 	'threshold_an',
 	'threshold_van',
+	'references_for_threshold',
+	'usual_data_sources',
 	'msna_module',
 	'question_kobo_code',
 	'remarks_limitations'
@@ -293,6 +295,8 @@ export function buildReferenceRows(json: unknown): Record<string, string>[] {
 							above_or_below: str(m.above_or_below),
 							threshold_an: str(t.an),
 							threshold_van: str(t.van),
+							references_for_threshold: str(m.references_for_threshold),
+							usual_data_sources: str(m.usual_data_sources),
 							msna_module: str(m.msna_module),
 							msna_indicator: str(m.msna_indicator),
 							question_kobo_code: str(m.question_kobo_code),

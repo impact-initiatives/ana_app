@@ -8,9 +8,9 @@
 	const tabs = [
 		{ id: 'overview', label: 'Overview' },
 		{ id: 'systems', label: 'Systems' },
+		{ id: 'spotlight', label: 'Spotlight' },
 		{ id: 'metrics', label: 'Metrics' },
 		{ id: 'coverage', label: 'Data Coverage' },
-		{ id: 'spotlight', label: 'Spotlight' },
 		{ id: 'export', label: 'Export' }
 	] as const;
 </script>

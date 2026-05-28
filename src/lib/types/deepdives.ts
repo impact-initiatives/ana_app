@@ -24,12 +24,23 @@ export const COMMENT_COL_WIDTH = 32;
 /** Fixed column widths for the first 9 columns (gutter + 8 data cols) */
 export const FIXED_COL_WIDTHS = [9, 28, 16, 8, 64, 10, 12, 8, 8] as const;
 
+/** Headers for the trailing source metadata columns */
+export const SOURCE_COL_HEADERS = [
+	'Source',
+	'Source link',
+	'Start of data collection',
+	'End of data collection'
+] as const;
+
+/** Widths for the trailing source metadata columns */
+export const SOURCE_COL_WIDTHS = [28, 24, 20, 20] as const;
+
 /**
  * Compute total column count for a given number of hypotheses.
- * = 9 fixed + N hypothesis columns + 1 comments column
+ * = 9 fixed + N hypothesis columns + 1 comments column + 4 source columns
  */
 export function colCount(hypothesesCount: number): number {
-	return FIXED_COLS_BEFORE_HYPOTHESES + hypothesesCount + 1;
+	return FIXED_COLS_BEFORE_HYPOTHESES + hypothesesCount + 1 + SOURCE_COL_HEADERS.length;
 }
 
 /**
@@ -39,8 +50,23 @@ export function colWidths(hypothesesCount: number): number[] {
 	return [
 		...FIXED_COL_WIDTHS,
 		...Array(hypothesesCount).fill(HYPOTHESIS_COL_WIDTH),
-		COMMENT_COL_WIDTH
+		COMMENT_COL_WIDTH,
+		...SOURCE_COL_WIDTHS
 	];
+}
+
+// ── Dropdown value constants (shared by generator and merge parser) ───────────
+
+export const HYPOTHESIS_VALUES             = ['H1', 'H2', 'H3', 'Inconclusive'] as const;
+export const INDICATOR_RATING_VALUES       = ['++', '+', '+/-', '-', '--'] as const;
+export const PLAUSIBILITY_INDICATOR_VALUES = ['Very likely', 'Likely', 'Plausible', 'Unlikely', 'Very unlikely'] as const;
+export const PLAUSIBILITY_SYNTHESIS_VALUES = [...PLAUSIBILITY_INDICATOR_VALUES, 'Inconclusive'] as const;
+export const TRIANGULATION_VALUES          = ['Strong', 'Moderate', 'Weak'] as const;
+export const CONCLUSION_VALUES             = ['RoEM', 'Acute Needs (!)', 'Acute Needs', 'No Acute Needs', 'Insufficient evidence', 'No data'] as const;
+
+/** Produce an Excel data-validation formulae string: `"H1,H2,H3,Inconclusive"` */
+export function toExcelList(values: readonly string[]): string {
+	return `"${values.join(',')}"`;
 }
 
 /**
@@ -58,6 +84,7 @@ export function tableHeaders(hypothesisIds: string[]): string[] {
 		'AN Th.',
 		'VAN Th.',
 		...hypothesisIds,
-		'Comments'
+		'Comments',
+		...SOURCE_COL_HEADERS
 	];
 }

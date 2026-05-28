@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ButtonClear from '$lib/components/ui/ButtonClear.svelte';
+	import ClearButton from '$lib/components/ui/ClearButton.svelte';
 
 	interface Props {
 		accept?: string;
@@ -42,7 +42,9 @@
 
 	const sm = $derived(size === 'sm');
 	const lg = $derived(size === 'lg');
-	const defaultDropText = $derived(lg ? 'Drop a file here' : 'Drop a file here, or click to browse');
+	const defaultDropText = $derived(
+		lg ? 'Drop a file here' : 'Drop a file here, or click to browse'
+	);
 	const idleText = $derived(dropText ?? defaultDropText);
 	const iconSize = $derived(sm ? 'size-4' : lg ? 'size-8' : 'size-6');
 	const spinnerSize = $derived(sm ? 'loading-xs' : lg ? 'loading-md' : 'loading-sm');
@@ -148,17 +150,17 @@
 	tabindex="0"
 	aria-label={status === 'idle' ? 'Drop a file or click to browse' : fileName}
 	class={[
-		'rounded-box border-2 border-dashed transition-colors duration-150',
+		'rounded-box border border-dashed transition-colors duration-150 hover:border',
 		lg
 			? 'flex cursor-pointer flex-col items-center justify-center gap-3 px-6 py-14 text-center'
 			: ['flex items-center', sm ? 'gap-3 px-3 py-2' : 'gap-4 px-4 py-4'].join(' '),
 		isDragging
 			? 'border-primary bg-primary/8 cursor-copy'
 			: status === 'done'
-				? 'border-success/40 bg-success/5 cursor-default'
+				? 'border-success bg-success/10 cursor-default'
 				: status === 'error'
-					? 'border-error/40 bg-error/5 cursor-pointer'
-					: 'border-base-300 hover:border-primary/80 cursor-pointer'
+					? 'border-error/60 bg-error/10 cursor-pointer'
+					: 'border-base-content/60 bg-base-100 hover:border-primary cursor-pointer'
 	].join(' ')}
 	ondrop={onDrop}
 	ondragover={onDragOver}
@@ -235,13 +237,15 @@
 				<p class={['text-error truncate font-semibold', sm ? 'text-xs' : 'text-sm'].join(' ')}>
 					{fileName || 'Upload failed'}
 				</p>
-				<p class="text-base-content/75 text-xs">Click to try again</p>
+				<p class="text-base-content/85 text-xs">Click to try again</p>
 			{:else}
-				<p class={['text-base-content/75', sm ? 'text-xs' : 'text-sm'].join(' ')}>
+				<p
+					class={['text-base-content/85 hover:text-primary', sm ? 'text-xs' : 'text-sm'].join(' ')}
+				>
 					{isDragging ? 'Drop to upload' : idleText}
 				</p>
 				{#if hintText}
-					<p class="text-base-content/75 mt-0.5 text-xs">{@html hintText}</p>
+					<p class="text-base-content/85 mt-0.5 text-xs">{@html hintText}</p>
 				{/if}
 			{/if}
 		</div>
@@ -255,11 +259,13 @@
 			<p class="text-error font-semibold">{fileName || 'Upload failed'}</p>
 			<p class="text-base-content/85 text-sm">Click to try again</p>
 		{:else}
-			<p class="text-base-content/85">{isDragging ? 'Drop to upload' : idleText}</p>
+			<p class="text-base-content/85 hover:text-primary">
+				{isDragging ? 'Drop to upload' : idleText}
+			</p>
 			{#if hintText}
-				<p class="text-base-content/75 text-sm">{@html hintText}</p>
+				<p class="text-base-content/85 text-sm">{@html hintText}</p>
 			{:else}
-				<p class="text-base-content/75 text-sm">or click to browse ({accept})</p>
+				<p class="text-base-content/85 text-sm">or click to browse ({accept})</p>
 			{/if}
 		{/if}
 	{/if}
@@ -275,8 +281,9 @@
 		{/if}
 		<span
 			class={[
-				'min-w-0 flex-1 text-xs',
-				result.ok ? 'text-base-content/80' : 'text-error/90'
+				'min-w-0 flex-1',
+				lg ? 'text-sm' : 'text-xs',
+				result.ok ? 'text-base-content/85' : 'text-error/90'
 			].join(' ')}
 		>
 			{result.summary}
@@ -284,7 +291,7 @@
 		{#if hasDetails && detailsMode !== 'none'}
 			<button
 				type="button"
-				class="btn btn-ghost btn-xs shrink-0 text-xs"
+				class={['btn btn-ghost btn-xs shrink-0', lg ? 'text-sm' : 'text-xs'].join(' ')}
 				onclick={detailsMode === 'modal'
 					? () => detailsModal?.showModal()
 					: () => (showDetailsCollapse = !showDetailsCollapse)}
@@ -298,13 +305,13 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<ButtonClear size="sm" onclick={clearAll} />
+			<ClearButton size="sm" onclick={clearAll} />
 		</div>
 	</div>
 
 	<!-- Collapse details -->
 	{#if detailsMode === 'collapse' && showDetailsCollapse && hasDetails}
-		<div class="mt-1 space-y-2">
+		<div class="mt-1 max-h-72 space-y-2 overflow-y-auto pr-1">
 			{#each result.details ?? [] as section, i (i)}
 				{#if section.items.length > 0}
 					<div
@@ -320,7 +327,8 @@
 						{#if section.label}
 							<p
 								class={[
-									'text-xs font-semibold',
+									lg ? 'text-sm' : 'text-xs',
+									'font-semibold',
 									section.type === 'error'
 										? 'text-error'
 										: section.type === 'warning'
@@ -331,7 +339,7 @@
 								{section.label}
 							</p>
 						{/if}
-						<ul class="mt-1 space-y-0.5 list-disc pl-4 text-xs">
+						<ul class={['mt-1 list-disc space-y-0.5 pl-4', lg ? 'text-sm' : 'text-xs'].join(' ')}>
 							{#each section.items as item, j (j)}
 								<li class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}>
 									{item}
@@ -343,7 +351,10 @@
 			{/each}
 			{#if detailsHref}
 				<div class="flex justify-end">
-					<a href={(resolve as (p: string) => string)(detailsHref ?? '')} class="btn btn-ghost btn-xs gap-1 text-xs">
+					<a
+						href={(resolve as (p: string) => string)(detailsHref ?? '')}
+						class="btn btn-ghost btn-xs gap-1 text-xs"
+					>
 						{detailsHrefLabel ?? 'View more details'}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -403,11 +414,9 @@
 										{section.label}
 									</p>
 								{/if}
-								<ul class="mt-1 space-y-0.5 list-disc pl-4 text-xs">
+								<ul class="mt-1 list-disc space-y-0.5 pl-4 text-xs">
 									{#each section.items as item, j (j)}
-										<li
-											class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}
-										>
+										<li class={section.type === 'error' ? 'text-error' : 'text-base-content/80'}>
 											{item}
 										</li>
 									{/each}
@@ -419,7 +428,10 @@
 			{/if}
 			{#if detailsHref}
 				<div class="mt-3 flex justify-end">
-					<a href={(resolve as (p: string) => string)(detailsHref ?? '')} class="btn btn-ghost btn-xs gap-1 text-xs">
+					<a
+						href={(resolve as (p: string) => string)(detailsHref ?? '')}
+						class="btn btn-ghost btn-xs gap-1 text-xs"
+					>
 						{detailsHrefLabel ?? 'View more details'}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"

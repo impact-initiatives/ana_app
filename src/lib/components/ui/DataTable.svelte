@@ -17,7 +17,17 @@
 		/** Alternate row background (zebra stripe). Default false = no stripe. */
 		stripe?: boolean;
 		/** Optional custom cell renderer. Receives col name, string value, indices, and the full row as a string map. */
-		renderCell?: Snippet<[{ col: string; value: string; colIndex: number; rowIndex: number; rowObj: Record<string, string> }]>;
+		renderCell?: Snippet<
+			[
+				{
+					col: string;
+					value: string;
+					colIndex: number;
+					rowIndex: number;
+					rowObj: Record<string, string>;
+				}
+			]
+		>;
 		/** Per-cell style callback. Return a CSS style string (e.g. 'background-color: red') or undefined. */
 		getCellStyle?: (col: string, rowObj: Record<string, string>) => string | undefined;
 		/** Stick the first column to the left edge during horizontal scroll. */
@@ -122,7 +132,7 @@
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
-		return col.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+		return col.replace(/[_-]/g, ' ').replace(/^./, (c) => c.toUpperCase());
 	}
 
 	function resolveRowColor(rowObj: Record<string, string>) {
@@ -260,7 +270,12 @@
 			{/if}
 			{#if downloadable}
 				<div class="ml-auto">
-					<DownloadButton onclick={downloadCsv} label="Download as CSV" variant="outline" />
+					<DownloadButton
+						onclick={downloadCsv}
+						label="Download as CSV"
+						class="bg-base-100"
+						variant="outline"
+					/>
 				</div>
 			{/if}
 		</div>
@@ -330,13 +345,21 @@
 					{@const cellStyle = getCellStyle?.(colName, rowObj)}
 					<svelte:element
 						this={stickyFirstColumn && j === 0 ? 'th' : 'td'}
-						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{(bg || cellStyle) ? ' group-hover:brightness-90' : ''}{stickyFirstColumn && j === 0 ? ' group-hover:bg-base-200' : ''}"
+						class="{colClass(colName)}{rowDividerClass ? ' ' + rowDividerClass : ''}{bg || cellStyle
+							? ' group-hover:brightness-90'
+							: ''}{stickyFirstColumn && j === 0 ? ' group-hover:bg-base-200' : ''}"
 						style={[bg && `background-color:${bg}`, txt && `color:${txt}`, cellStyle]
 							.filter(Boolean)
 							.join(';') || undefined}
 					>
 						{#if renderCell}
-							{@render renderCell({ col: colName, value: String(cell), colIndex: j, rowIndex: i, rowObj })}
+							{@render renderCell({
+								col: colName,
+								value: String(cell),
+								colIndex: j,
+								rowIndex: i,
+								rowObj
+							})}
 						{:else if cellBadges?.[colName]}
 							{@const badgeMap = cellBadges[colName]}
 							{@const cfg = badgeMap[String(cell)] ?? badgeMap['*']}
@@ -370,7 +393,11 @@
 		class:overflow-y-auto={overflow === 'scroll'}
 		style={overflow === 'scroll' ? `max-height: ${scrollHeight}` : undefined}
 	>
-		<table class="table {tableClass}" class:table-pin-rows={overflow === 'scroll'} class:table-pin-cols={stickyFirstColumn}>
+		<table
+			class="table {tableClass}"
+			class:table-pin-rows={overflow === 'scroll'}
+			class:table-pin-cols={stickyFirstColumn}
+		>
 			<thead>{@render theadMarkup()}</thead>
 			<tbody>{@render tbodyMarkup()}</tbody>
 		</table>

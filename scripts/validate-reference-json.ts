@@ -114,8 +114,8 @@ Checks performed:
     · neither may exceed the group size in its subfactor
 
   Pass 7 — VAN threshold ordering
-    · Above metrics: van > an
-    · Below metrics: van < an
+    · Above metrics: van >= an (equal allowed — means no distinct VAN level)
+    · Below metrics: van <= an
 
   Pass 8 — VAN threshold presence
     · every non-supporting-evidence, non-preference-3 metric must have thresholds.van
@@ -589,7 +589,7 @@ async function main(): Promise<void> {
 		console.log('  ✅ Passed');
 		pass7Ok = true;
 	} else {
-		console.error(`  ❌ Failed — ${vanErrors.length} metric(s) have van ≤ an (severity scale inverted).`);
+		console.error(`  ❌ Failed — ${vanErrors.length} metric(s) have van < an (severity scale inverted).`);
 		printTable(
 			['System', 'Factor', 'Subfactor', 'Metric', 'Dir', 'AN', 'VAN'],
 			vanErrors.map((e: VanOrderError) => {

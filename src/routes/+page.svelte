@@ -2,33 +2,27 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { resolve, asset } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { revealOnScroll } from '$lib/utils/revealOnScroll.svelte';
 	import { steps } from '$lib/types/steps';
-	import Uploader, { type ProcessResult } from '$lib/components/data/Uploader.svelte';
 	import NavButton from '$lib/components/ui/NavButton.svelte';
-	import { loadMetrics, metricStore } from '$lib/stores/metricStore.svelte';
+	import { loadMetrics } from '$lib/stores/metricStore.svelte';
 	import { flagStore } from '$lib/stores/flagStore.svelte';
-	import { validatorStore, saveValidatorState } from '$lib/stores/validatorStore.svelte';
-	import { adminFeaturesStore } from '$lib/stores/adminFeaturesStore.svelte';
+	import { validatorStore } from '$lib/stores/validatorStore.svelte';
 	import { clearAllStores } from '$lib/utils/clearAll';
-	import { validateCsv } from '$lib/engine/dataValidator';
-	import { parseFile } from '$lib/engine/parser';
-	import { runPipeline } from '$lib/engine/pipeline';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { FLAG_BADGE_MAP, getFlagBadge } from '$lib/utils/colors';
-	import ReferenceCustomiser from '$lib/components/reference/ReferenceCustomiser.svelte';
+	import InputDataUploader from '$lib/components/data/InputDataUploader.svelte';
+	import SourcesUploader from '$lib/components/data/SourcesUploader.svelte';
+	import CustomReferenceUploader from '$lib/components/data/CustomReferenceUploader.svelte';
+	import screenshot_impact_ana_page from '$lib/assets/screenshot-impact-ana-page.png';
+	import InfoModal from '$lib/components/ui/InfoModal.svelte';
 
-	let lastHeader: string[] = $state([]);
-	let lastRows: Record<string, unknown>[] = $state([]);
-	let filename: string | null = $state(null);
 	let validationPassed = $state(false);
-	let formatModal = $state<HTMLDialogElement | null>(null);
-	let stepsModal = $state<HTMLDialogElement | null>(null);
+	let showStepsModal = $state(false);
 	let activeStep = $state(0);
 	let mounted = $state(false);
 
-	const metricMap = $derived(metricStore.metricMap);
 	const flagKeys = Object.keys(FLAG_BADGE_MAP);
 
 	const gridData = [
@@ -85,107 +79,15 @@
 
 	function openStep(i: number) {
 		activeStep = i;
-		stepsModal?.showModal();
+		showStepsModal = true;
 	}
 
 	onMount(() => {
 		loadMetrics();
-		lastHeader = validatorStore.lastHeader ?? [];
-		lastRows = validatorStore.lastRows ?? [];
-		filename = validatorStore.filename ?? null;
 		mounted = true;
 	});
 
-	async function processMetricsCsv(file: File): Promise<ProcessResult> {
-		clearAllStores();
-		validationPassed = false;
-
-		const parsed = await parseFile(file);
-		lastHeader = parsed.header;
-		lastRows = parsed.rows as unknown as Record<string, unknown>[];
-		filename = file.name;
-
-		const validation = validateCsv(lastHeader, parsed.rows as unknown as unknown[][], metricMap);
-		saveValidatorState(
-			lastHeader,
-			lastRows,
-			validation as unknown as Record<string, unknown> | null,
-			null,
-			filename
-		);
-
-		const parseErrorMsgs = parsed.errors.map((e) => e.message ?? String(e)).filter(Boolean);
-		if (!validation.ok || parseErrorMsgs.length > 0) {
-			const parts: string[] = [];
-			const details: ProcessResult['details'] = [];
-
-			if (parseErrorMsgs.length) {
-				parts.push(`${parseErrorMsgs.length} parse error${parseErrorMsgs.length !== 1 ? 's' : ''}`);
-				details.push({ label: 'Parse errors', type: 'error', items: parseErrorMsgs });
-			}
-			if (validation.headerErrors?.length) {
-				parts.push(
-					`${validation.headerErrors.length} header error${validation.headerErrors.length !== 1 ? 's' : ''}`
-				);
-				details.push({
-					label: 'Header errors',
-					type: 'error',
-					items: validation.headerErrors as string[]
-				});
-			}
-			if (validation.cellErrors?.length) {
-				const n = validation.cellErrors.length;
-				parts.push(`${n} cell error${n !== 1 ? 's' : ''}`);
-				details.push({
-					label: 'Cell errors',
-					type: 'error',
-					items: [`${n} cell error${n !== 1 ? 's' : ''} — full list on the details page`]
-				});
-			}
-			if (validation.warnings?.length) {
-				parts.push(`${validation.warnings.length} warning${validation.warnings.length !== 1 ? 's' : ''}`);
-				details.push({
-					label: 'Warnings',
-					type: 'warning',
-					items: validation.warnings as string[]
-				});
-			}
-
-			return {
-				ok: false,
-				summary: parts.join(' · ') || 'Validation failed',
-				details: details.length ? details : undefined
-			};
-		}
-
-		if (validation.numericObjects?.length) {
-			try {
-				await runPipeline({
-					header: lastHeader,
-					rows: lastRows,
-					filename,
-					metricMap,
-					referenceJson: metricStore.referenceJson
-				});
-			} catch (e) {
-				const msg = e instanceof Error ? e.message : String(e);
-				return { ok: false, summary: `Pipeline error: ${msg}` };
-			}
-		}
-
-		return {
-			ok: true,
-			summary: `${validation.numericObjects?.length ?? 0} rows · ${lastHeader.length} columns`,
-			details: validation.warnings?.length
-				? [{ label: 'Warnings', type: 'warning', items: validation.warnings as string[] }]
-				: undefined
-		};
-	}
-
 	function clearAll() {
-		lastHeader = [];
-		lastRows = [];
-		filename = null;
 		validationPassed = false;
 		clearAllStores();
 	}
@@ -213,7 +115,7 @@
 							class="border-primary/20 bg-primary/8 text-primary inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
 						>
 							<span class="bg-primary inline-block size-1.5 rounded-full"></span>
-							198 metrics · 8 humanitarian systems
+							206 metrics · 7 humanitarian systems
 						</span>
 						{#if hasPreviousResults && !validationPassed}
 							<a
@@ -281,6 +183,9 @@
 							</svg>
 						</a>
 						<a href="#how-it-works" class="btn btn-outline cursor-pointer"> How it works </a>
+						<a href="#want-to-know-more" class="btn btn-outline cursor-pointer">
+							Want to know more
+						</a>
 					</div>
 				</div>
 			{/if}
@@ -338,45 +243,20 @@
 		style="opacity: 0"
 		{@attach revealOnScroll({ y: 28, duration: 500 })}
 	>
-		<Card title="Get started" subtitle="Upload a CSV file with your data.">
-			{#snippet titleActions()}
-				<button
-					class="btn btn-sm btn-primary btn-outline shrink-0 cursor-pointer gap-1"
-					onclick={() => formatModal?.showModal()}
-					title="CSV format reference"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="size-3.5"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-						aria-hidden="true"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					Format
-				</button>
-			{/snippet}
+		<InputDataUploader
+			onprocessstart={() => (validationPassed = false)}
+			onaccepted={() => (validationPassed = true)}
+			oncleared={clearAll}
+		/>
 
-			<div class="mt-4">
-				<Uploader
-					dropText="Drop a CSV here, or click to browse"
-					process={processMetricsCsv}
-					detailsMode="collapse"
-					detailsHref="/validate"
-					onaccepted={() => (validationPassed = true)}
-					oncleared={clearAll}
-				/>
-			</div>
-		</Card>
+		<!-- Optional: upload metric sources for deep-dive XLSX annotation -->
+		<div class="mt-3">
+			<SourcesUploader />
+		</div>
 
 		<!-- Optional: customise reference before uploading data -->
 		<div class="mt-3">
-			<ReferenceCustomiser />
+			<CustomReferenceUploader />
 		</div>
 
 		<!-- Post-processing CTA -->
@@ -406,10 +286,10 @@
 	</div>
 
 	<!-- ── How it works ───────────────────────────────────────────────────────── -->
-	<section id="how-it-works" aria-labelledby="how-it-works-heading" class="mt-16">
+	<section id="how-it-works" aria-labelledby="how-it-works-heading" class="mt-24">
 		<h2
 			id="how-it-works-heading"
-			class="mb-8 text-center text-lg font-semibold tracking-widest uppercase"
+			class="mb-8 text-center text-xl font-semibold tracking-widest uppercase"
 			style="opacity: 0"
 			{@attach revealOnScroll({ y: 16, duration: 400 })}
 		>
@@ -515,138 +395,45 @@
 		</p>
 	</div>
 
-	<!-- ── Modals ──────────────────────────────────────────────────────────────── -->
-
-	<!-- Format guide: CSV structure only -->
-	<dialog bind:this={formatModal} class="modal">
-		<div class="modal-box max-w-lg">
-			<form method="dialog">
-				<button
-					class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
-					aria-label="Close">✕</button
+	<!-- ── How it works ───────────────────────────────────────────────────────── -->
+	<section id="want-to-know-more" aria-labelledby="want-to-know-more" class="mt-24">
+		<h2
+			id="want-to-know-more-heading"
+			class="mb-8 text-center text-xl font-semibold tracking-widest uppercase"
+			style="opacity: 0"
+			{@attach revealOnScroll({ y: 16, duration: 400 })}
+		>
+			Want to know more
+		</h2>
+		<Card
+			side
+			figureClass="lg:p-4"
+			class="mx-auto mb-6 max-w-2xl"
+			title="Check out the ANA page on IMPACT Initiatives' website!"
+		>
+			{#snippet figure()}
+				<img src={screenshot_impact_ana_page} alt="ANA page screenshot" />
+			{/snippet}
+			<p>
+				To get more information on the Acute Needs Analysis (ANA) framework and view past global
+				analyses, please visit the dedicated page.
+			</p>
+			<div class="card-actions mt-2 justify-end">
+				<a href="https://www.impact-initiatives.org/acute-needs-analysis/" class="btn btn-primary"
+					>Visit</a
 				>
-			</form>
-			<h3 class="text-lg font-bold">CSV format guide</h3>
-			<p class="text-base-content/85 text-md mt-1">How to structure your file before uploading.</p>
-
-			<div
-				class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-primary size-4 shrink-0"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-				<p class="text-sm">
-					Download the CSV
-					<a
-						href={asset('/data/input_template.csv')}
-						class="text-primary font-semibold underline underline-offset-2">template</a
-					>. And read the below for information on how to fill in.
-				</p>
 			</div>
+		</Card>
 
-			<div class="text-base-content/85 mt-5 space-y-3 text-sm">
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">uoa column</p>
-						<span class="badge badge-error badge-sm">required</span>
-					</div>
-					<p class="mt-1">
-						A column named exactly <code>uoa</code> which is a unique identifier for rows such as p-code,
-						district name, or any string that identifies the unit of analysis (UoA).
-					</p>
-					<p class="mt-1">
-						If <code>uoa</code> values are valid admin p-codes (e.g. <code>SOM001</code>), a
-						choropleth map is generated automatically.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Metric columns</p>
-						<span class="badge badge-error badge-sm">required</span>
-					</div>
-					<p class="mt-1">
-						Named with the metric ID (e.g. <code>MET001</code>, <code>MET002</code>). Unrecognised
-						column names are silently ignored during flagging.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Metadata columns</p>
-						<span class="badge badge-primary badge-sm">optional</span>
-					</div>
-					<p class="mt-1">
-						Extra columns (e.g. <code>region</code>, <code>partner</code>) are carried through and
-						available as filters in results views. If values are p-codes, filter labels are resolved
-						to their admin names automatically.
-					</p>
-				</div>
-				<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-base-content font-semibold">Values</p>
-						<span class="badge badge-primary badge-sm">info</span>
-					</div>
-					<p class="mt-1">
-						Must be generally numeric or empty. No formatted strings, units, or special characters.
-						For missing values, leave the cell empty instead of writing "N/A" or "missing". See the
-						Reference tab for type constraints — for example, proportions must be between 0 and 1.
-					</p>
-				</div>
-			</div>
+		<!-- ── Modals ──────────────────────────────────────────────────────────────── -->
 
-			<div
-				class="border-primary/20 bg-primary/6 mt-5 flex items-center gap-2.5 rounded-lg border px-4 py-3"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-primary size-4 shrink-0"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						fill-rule="evenodd"
-						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-				<p class="text-sm">
-					For the full list of metrics and their type constraints, check out the
-					<a
-						href={resolve('/reference')}
-						class="text-primary font-semibold underline underline-offset-2">Reference</a
-					> tab.
-				</p>
-			</div>
-		</div>
-		<form method="dialog" class="modal-backdrop"><button>close</button></form>
-	</dialog>
-
-	<!-- Step detail modal (shared, switches content via activeStep) -->
-	<dialog bind:this={stepsModal} class="modal">
-		<div class="modal-box max-w-lg">
-			<form method="dialog">
-				<button
-					class="btn btn-xs btn-circle btn-ghost btn-outline absolute top-3 right-3 cursor-pointer"
-					aria-label="Close">✕</button
-				>
-			</form>
-
+		<InfoModal bind:isOpen={showStepsModal}>
 			<!-- Step nav pills -->
-			<div class="mb-5 flex flex-wrap gap-2">
+			<div class="mb-5 flex gap-2 pr-8">
 				{#each steps as step, i (i)}
 					<button
 						class={[
-							'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-150',
+							'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-colors duration-150',
 							activeStep === i
 								? 'bg-primary text-primary-content'
 								: 'bg-base-200 text-base-content/85 hover:text-base-content'
@@ -697,20 +484,21 @@
 							clip-rule="evenodd"
 						/>
 					</svg>
-					<p class="text-xs">
+					<p class="text-sm">
 						{steps[activeStep].detail.tip}
-						{#if activeStep === 0}
+						{#if steps[activeStep].detail.tipLink}
+							{@const tl = steps[activeStep].detail.tipLink!}
+							<!-- eslint-disable-next-line svelte/valid-href -->
 							<a
-								href={resolve('/reference')}
-								class="text-primary font-semibold underline underline-offset-2">Reference</a
-							> tab.
+								href={resolve(tl.href)}
+								class="text-primary font-semibold underline underline-offset-2">{tl.label}</a
+							>{tl.suffix ?? ''}
 						{/if}
 					</p>
 				</div>
 			{/if}
-		</div>
-		<form method="dialog" class="modal-backdrop"><button>close</button></form>
-	</dialog>
+		</InfoModal>
+	</section>
 </div>
 
 <!-- /max-w-5xl -->
