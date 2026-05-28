@@ -18,7 +18,7 @@
 
 ## Table of contents
 
-1. [What the ANA app does does](#what-the-ana-app-does)
+1. [What the ANA app does](#what-the-ana-app-does)
 2. [Getting started](#getting-started) — setup, dev server, all commands
 3. [App views](#app-views)
 4. [How it works](#how-it-works) — flagging pipeline, reference framework
