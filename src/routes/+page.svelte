@@ -286,10 +286,10 @@
 	</div>
 
 	<!-- ── How it works ───────────────────────────────────────────────────────── -->
-	<section id="how-it-works" aria-labelledby="how-it-works-heading" class="mt-16">
+	<section id="how-it-works" aria-labelledby="how-it-works-heading" class="mt-24">
 		<h2
 			id="how-it-works-heading"
-			class="mb-8 text-center text-lg font-semibold tracking-widest uppercase"
+			class="mb-8 text-center text-xl font-semibold tracking-widest uppercase"
 			style="opacity: 0"
 			{@attach revealOnScroll({ y: 16, duration: 400 })}
 		>
@@ -396,10 +396,10 @@
 	</div>
 
 	<!-- ── How it works ───────────────────────────────────────────────────────── -->
-	<section id="want-to-know-more" aria-labelledby="want-to-know-more" class="mt-16">
+	<section id="want-to-know-more" aria-labelledby="want-to-know-more" class="mt-24">
 		<h2
 			id="want-to-know-more-heading"
-			class="mb-8 text-center text-lg font-semibold tracking-widest uppercase"
+			class="mb-8 text-center text-xl font-semibold tracking-widest uppercase"
 			style="opacity: 0"
 			{@attach revealOnScroll({ y: 16, duration: 400 })}
 		>
