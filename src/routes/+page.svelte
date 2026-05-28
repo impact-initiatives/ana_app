@@ -115,7 +115,7 @@
 							class="border-primary/20 bg-primary/8 text-primary inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
 						>
 							<span class="bg-primary inline-block size-1.5 rounded-full"></span>
-							198 metrics · 8 humanitarian systems
+							206 metrics · 7 humanitarian systems
 						</span>
 						{#if hasPreviousResults && !validationPassed}
 							<a
