@@ -78,7 +78,7 @@
 		uploaderKey++;
 	}
 
-	// One row per UoA: conclusion key first, then PF→conclusion fallback for unfilled ZIPs.
+	// One row per UoA: conclusion key first, then PF conclusion fallback for unfilled ZIPs.
 	const mapRows = $derived.by(() => {
 		if (!mergeStore.parsed) return [];
 		const byUoa = new Map<string, { uoa: string; priority_flag: string }>();
@@ -298,7 +298,7 @@
 					rows={uoaTableRows}
 					tableClass="table-xs"
 					headerRowClass="text-base-content text-xs"
-						searchable
+					searchable
 					downloadable
 					downloadFilename="synthesis"
 					overflow="paginate"
@@ -308,7 +308,6 @@
 					}}
 				/>
 			{/if}
-
 		</div>
 
 		<SynthesisDetailModal

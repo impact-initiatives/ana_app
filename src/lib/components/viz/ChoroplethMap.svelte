@@ -453,8 +453,7 @@
 			<span>
 				Dotted overlay: no conclusion filled yet. Color reflects the priority flag:
 				<ul class="mt-0.5 list-inside list-disc space-y-0.5">
-					<li>Excess Mortality: EM</li>
-					<li>HO Primary / Secondary: RoEM</li>
+					<li>EM / HO Primary / Secondary: RoEM</li>
 					<li>AN Primary / Secondary: Acute Needs</li>
 					<li>No Acute Needs, Insufficient Evidence, No Data: same</li>
 				</ul>
