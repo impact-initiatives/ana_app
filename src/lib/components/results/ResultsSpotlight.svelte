@@ -95,7 +95,7 @@
 	}
 
 	// TODO(#ticket): Review hardcoded MET IDs once final metric IDs are confirmed.
-	const EXTRA_PRESELECTED = ['MET036', 'MET037', 'MET102'];
+	const EXTRA_PRESELECTED = ['MET037', 'MET038', 'MET088', 'MET089'];
 
 	let selectedMetricIds = $state<string[]>([...new Set([...hoMetricIds(), ...EXTRA_PRESELECTED])]);
 
