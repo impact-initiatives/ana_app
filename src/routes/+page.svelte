@@ -183,6 +183,9 @@
 							</svg>
 						</a>
 						<a href="#how-it-works" class="btn btn-outline cursor-pointer"> How it works </a>
+						<a href="#want-to-know-more" class="btn btn-outline cursor-pointer">
+							Want to know more
+						</a>
 					</div>
 				</div>
 			{/if}
@@ -393,13 +396,9 @@
 	</div>
 
 	<!-- ── How it works ───────────────────────────────────────────────────────── -->
-	<section
-		id="want-to-know-more-about-the-ana-and-2025-analyses"
-		aria-labelledby="want-to-know-more-about-the-ana-and-2025-analyses"
-		class="mt-16"
-	>
+	<section id="want-to-know-more" aria-labelledby="want-to-know-more" class="mt-16">
 		<h2
-			id="want-to-know-more-about-the-ana-and-2025-analyses-heading"
+			id="want-to-know-more-heading"
 			class="mb-8 text-center text-lg font-semibold tracking-widest uppercase"
 			style="opacity: 0"
 			{@attach revealOnScroll({ y: 16, duration: 400 })}
@@ -428,78 +427,76 @@
 
 		<!-- ── Modals ──────────────────────────────────────────────────────────────── -->
 
-<InfoModal bind:isOpen={showStepsModal}>
-			{#snippet children()}
-				<!-- Step nav pills -->
-				<div class="mb-5 flex gap-2 pr-8">
-					{#each steps as step, i (i)}
-						<button
-							class={[
-								'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-colors duration-150',
-								activeStep === i
-									? 'bg-primary text-primary-content'
-									: 'bg-base-200 text-base-content/85 hover:text-base-content'
-							].join(' ')}
-							onclick={() => (activeStep = i)}
-						>
-							{i + 1}. {step.title}
-						</button>
-					{/each}
-				</div>
-
-				<h3 class="font-semibold">{steps[activeStep].title}</h3>
-				<p class="text-base-content/85 mt-1 text-sm">{steps[activeStep].desc}</p>
-
-				<div class="text-base-content mt-5 space-y-3 text-sm">
-					{#each steps[activeStep].detail.sections as section (section.label)}
-						{#if section.route}
-							<a
-								href={resolve(section.route)}
-								class="border-base-300 hover:bg-base-200 bg-base-200/40 block rounded-lg border px-4 py-3.5"
-							>
-								<p class="font-semibold">{section.label}</p>
-								<p class="text-base-content/85 mt-1">{section.body}</p>
-							</a>
-						{:else}
-							<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
-								<p class="font-semibold">{section.label}</p>
-								<p class="text-base-content/85 mt-1">{section.body}</p>
-							</div>
-						{/if}
-					{/each}
-				</div>
-
-				{#if steps[activeStep].detail.tip}
-					<div
-						class="border-primary/20 bg-primary/6 mt-4 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+		<InfoModal bind:isOpen={showStepsModal}>
+			<!-- Step nav pills -->
+			<div class="mb-5 flex gap-2 pr-8">
+				{#each steps as step, i (i)}
+					<button
+						class={[
+							'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-colors duration-150',
+							activeStep === i
+								? 'bg-primary text-primary-content'
+								: 'bg-base-200 text-base-content/85 hover:text-base-content'
+						].join(' ')}
+						onclick={() => (activeStep = i)}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="text-primary size-4 shrink-0"
-							viewBox="0 0 20 20"
-							fill="currentColor"
-							aria-hidden="true"
+						{i + 1}. {step.title}
+					</button>
+				{/each}
+			</div>
+
+			<h3 class="font-semibold">{steps[activeStep].title}</h3>
+			<p class="text-base-content/85 mt-1 text-sm">{steps[activeStep].desc}</p>
+
+			<div class="text-base-content mt-5 space-y-3 text-sm">
+				{#each steps[activeStep].detail.sections as section (section.label)}
+					{#if section.route}
+						<a
+							href={resolve(section.route)}
+							class="border-base-300 hover:bg-base-200 bg-base-200/40 block rounded-lg border px-4 py-3.5"
 						>
-							<path
-								fill-rule="evenodd"
-								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-						<p class="text-xs">
-							{steps[activeStep].detail.tip}
-							{#if steps[activeStep].detail.tipLink}
-								{@const tl = steps[activeStep].detail.tipLink!}
-								<!-- eslint-disable-next-line svelte/valid-href -->
-								<a
-									href={resolve(tl.href)}
-									class="text-primary font-semibold underline underline-offset-2"
-								>{tl.label}</a>{tl.suffix ?? ''}
-							{/if}
-						</p>
-					</div>
-				{/if}
-			{/snippet}
+							<p class="font-semibold">{section.label}</p>
+							<p class="text-base-content/85 mt-1">{section.body}</p>
+						</a>
+					{:else}
+						<div class="border-base-300 bg-base-200/40 rounded-lg border px-4 py-3.5">
+							<p class="font-semibold">{section.label}</p>
+							<p class="text-base-content/85 mt-1">{section.body}</p>
+						</div>
+					{/if}
+				{/each}
+			</div>
+
+			{#if steps[activeStep].detail.tip}
+				<div
+					class="border-primary/20 bg-primary/6 mt-4 flex items-center gap-2.5 rounded-lg border px-4 py-3"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary size-4 shrink-0"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<p class="text-sm">
+						{steps[activeStep].detail.tip}
+						{#if steps[activeStep].detail.tipLink}
+							{@const tl = steps[activeStep].detail.tipLink!}
+							<!-- eslint-disable-next-line svelte/valid-href -->
+							<a
+								href={resolve(tl.href)}
+								class="text-primary font-semibold underline underline-offset-2">{tl.label}</a
+							>{tl.suffix ?? ''}
+						{/if}
+					</p>
+				</div>
+			{/if}
 		</InfoModal>
 	</section>
 </div>
