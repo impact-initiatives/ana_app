@@ -125,9 +125,10 @@ export const MetricSchema = z
 		factor_threshold: z
 			.number({ message: 'factor_threshold must be a number' })
 			.refine((v) => Number.isFinite(v), { message: 'factor_threshold must be finite' }),
-		above_or_below: z.enum(MetricDirectionEnum, {
-			message: 'above_or_below must be "Above" or "Below"'
-		}),
+		above_or_below: z
+			.enum(MetricDirectionEnum, { message: 'above_or_below must be "Above" or "Below"' })
+			.nullable()
+			.optional(),
 		van_is_strict: z.boolean().nullable().optional().default(false),
 		evidence_threshold: z.number().nullable().optional(),
 		risk_concept: z.string().nullable().optional(),
@@ -150,6 +151,13 @@ export const MetricSchema = z
 				path: ['thresholds', 'van'],
 				code: z.ZodIssueCode.custom,
 				message: 'thresholds.van cannot be set without thresholds.an'
+			});
+		}
+		if (m.evidence_type !== 'Supporting evidence' && m.above_or_below == null) {
+			ctx.addIssue({
+				path: ['above_or_below'],
+				code: z.ZodIssueCode.custom,
+				message: 'above_or_below is required for non-supporting-evidence metrics'
 			});
 		}
 	})

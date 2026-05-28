@@ -33,12 +33,16 @@
 
 Upload a CSV (one row per unit of analysis, columns = metric IDs `MET001`, `MET002`, …). ANA validates it, applies threshold-based flagging across 198 metrics and 8 humanitarian systems, and delivers two core outputs:
 
-| Output                  | Description                                                                                                                                                             |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Priority flag**       | Each unit is screened and assigned one of 8 severity levels — from _Excess Mortality_ down to _No Acute Needs_                                                          |
-| **Deep-dive workbooks** | A ZIP of per-unit XLSX files, pre-filled with metric values, flags, and AN/VAN thresholds. H1–H5 hypothesis and comment columns are left blank for analysts to complete |
+| Output                  | Description                                                                                                                                                                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Priority flag**       | Each unit is screened and assigned one of 8 severity levels — from _Excess Mortality_ down to _No Acute Needs_                                                                                                                          |
+| **Deep-dive workbooks** | A ZIP of per-unit XLSX files, pre-filled with metric values, flags, and AN/VAN thresholds. H1–H5 hypothesis and comment columns are left blank for analysts to complete. Optionally enriched with columns of metric sources (see below) |
 
 Everything else in the app — heatmaps, choropleth map, coverage charts, spotlight cross-tab — is designed to help analysts interpret flagging results and decide which units warrant a deep dive.
+
+### Optional: metric sources upload
+
+Before running the pipeline, analysts can upload a second CSV that maps data sources to specific metrics and units of analysis. This annotates every metric row in the deep-dive workbooks with four extra columns: **Source**, **Source link**, **Start of data collection**, and **End of data collection**. The sources CSV is stored in `localStorage` and reapplied on subsequent visits until explicitly cleared.
 
 **Priority flag severity order:**
 
@@ -89,7 +93,8 @@ bun run test          # run the test suite (Vitest)
 # Data pipeline
 bun run generate:enums              # regenerate TS enums from reference CSV
 bun run generate:reference-json     # regenerate reference.json + reference-circlepacking.json
-bun run generate:input-data         # generate sample input data
+bun run generate:input-data         # generate sample input data CSV
+bun run generate:input-sources      # generate sample metric sources CSV
 bun run validate:reference-json     # validate reference.json
 bun run validate:hypotheses-json    # validate hypotheses JSON
 bun run validate:circlepacking-json # validate reference-circlepacking.json
@@ -106,9 +111,10 @@ Set `BASE_PATH=/repo-name` when building for GitHub Pages sub-path deploys.
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | **Overview**  | Priority-flag donut chart, ranked UoA table, choropleth map with ADM1/ADM2/mixed boundary modes |
 | **Systems**   | Flag-count heatmap across all systems; click any cell to open the metric drilldown              |
+| **Spotlight** | Custom metric × UoA cross-tab with AN/VAN threshold badges and sticky column                    |
 | **Metrics**   | Factor → subfactor → metric card grid per system; filterable by evidence type                   |
 | **Coverage**  | Data availability bars per system; Health Outcomes tab with metric-level AN/VAN breakdown       |
-| **Spotlight** | Custom metric × UoA cross-tab with AN/VAN threshold badges and sticky column                    |
+| **Export**    | Download results as CSV, JSON, or XLSX; generate per-UoA deep-dive workbooks (ZIP)              |
 
 ---
 
@@ -155,6 +161,8 @@ Each row is one metric. The columns that drive the app's behaviour:
 | Above or below                           | Whether a value above or below the threshold signals acute needs                                                                                                                 |
 | Evidence threshold                       | Minimum metrics with data needed to reach a conclusion in a sub-factor group                                                                                                     |
 | Factor threshold                         | Minimum flagged metrics needed to flag a sub-factor group                                                                                                                        |
+| Usual data sources                       | Free-text field listing typical data sources for this metric — informational only, not used in the pipeline                                                                      |
+| References for threshold                 | Citation or rationale for the AN/VAN threshold values — informational only                                                                                                       |
 
 ### How flagging works
 
@@ -256,20 +264,21 @@ priority_flag
 
 ### Engine — `src/lib/engine/`
 
-| File                  | Role                                                                                                     |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| `pipeline.ts`         | Orchestrates validate → flag → admin fetch (admin fetch fire-and-forget)                                 |
-| `validator.ts`        | Validates CSV structure, metric presence, UoA uniqueness, type constraints                               |
-| `flagger.ts`          | Threshold flagging with `@tidyjs/tidy`; sub-factor → factor → system → priority_flag rollup              |
-| `metricMetadata.ts`   | Traverses `reference.json`; provides `getAllMetricIds()`, `buildSubfactorList()`, `buildReferenceRows()` |
-| `fetchAdmin.ts`       | Detects p-codes in UoA column, fetches ADM1/ADM2 GeoJSON                                                 |
-| `download.ts`         | Exports results as CSV / JSON / XLSX                                                                     |
-| `deepdive.ts`         | Generates ZIP of per-UoA XLSX workbooks; reads system colours via `getComputedStyle`                     |
-| `mergeDeepDives.ts`   | Merges analyst-completed deep-dive workbooks back into the app                                           |
-| `exportMap.ts`        | Builds self-contained composite SVG (title, map, legend, logos) for map export                           |
-| `parser.ts`           | PapaParse wrapper; returns `{ headers, rows }`                                                           |
-| `referenceBuilder.ts` | Constructs `reference.json` hierarchy at runtime from flat metric list                                   |
-| `referenceMerger.ts`  | Merges custom reference rows into the base reference                                                     |
+| File                        | Role                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `pipeline.ts`               | Orchestrates validate → flag → admin fetch (admin fetch fire-and-forget)                                 |
+| `validator.ts`              | Validates CSV structure, metric presence, UoA uniqueness, type constraints                               |
+| `flagger.ts`                | Threshold flagging with `@tidyjs/tidy`; sub-factor → factor → system → priority_flag rollup              |
+| `metricMetadata.ts`         | Traverses `reference.json`; provides `getAllMetricIds()`, `buildSubfactorList()`, `buildReferenceRows()` |
+| `fetchAdmin.ts`             | Detects p-codes in UoA column, fetches ADM1/ADM2 GeoJSON                                                 |
+| `download.ts`               | Exports results as CSV / JSON / XLSX                                                                     |
+| `deepdive.ts`               | Generates ZIP of per-UoA XLSX workbooks; reads system colours via `getComputedStyle`                     |
+| `mergeDeepDives.ts`         | Merges analyst-completed deep-dive workbooks back into the app                                           |
+| `exportMap.ts`              | Builds self-contained composite SVG (title, map, legend, logos) for map export                           |
+| `parser.ts`                 | PapaParse wrapper; returns `{ headers, rows }`                                                           |
+| `metricSourcesValidator.ts` | Parses, validates, and builds the metric→UoA sources map from the optional sources CSV                   |
+| `referenceBuilder.ts`       | Constructs `reference.json` hierarchy at runtime from flat metric list                                   |
+| `referenceMerger.ts`        | Merges custom reference rows into the base reference                                                     |
 
 ### Stores — `src/lib/stores/`
 
@@ -281,18 +290,19 @@ All stores use Svelte 5 `$state` runes and persist to `localStorage`.
 | `flagStore`          | `ana_flag_store_v2`        | Stores `flaggedResult[]` rows from the pipeline                                                       |
 | `adminFeaturesStore` | `ana_admin_features_store` | Cached GeoJSON admin boundaries; fetch state: `idle \| loading \| done \| error`                      |
 | `resultsFilterStore` | `ana_results_filters_v1`   | Active filter selections (UoA, system, flag status)                                                   |
+| `metricSourcesStore` | `ana_metric_sources_v1`    | Optional sources map (metric, UoA, source); hydrated from localStorage; cleared with all stores       |
 | `validatorStore`     | —                          | Transient validation state; cleared after flagging completes                                          |
 | `circlePackingStore` | —                          | Tree data for the circle-packing reference visualisation                                              |
 
 ### Routes
 
-| Route        | Purpose                                                        |
-| ------------ | -------------------------------------------------------------- |
-| `/`          | Home — CSV upload, step-by-step guidance, pipeline trigger     |
-| `/results`   | Main results — heatmap, drilldown, coverage, spotlight, export |
-| `/reference` | Full metric framework (table + circle-packing visualisation)   |
-| `/validate`  | Standalone CSV validator                                       |
-| `/merge`     | Merge analyst-completed deep-dive workbooks                    |
+| Route        | Purpose                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------ |
+| `/`          | Home — CSV upload, step-by-step guidance, pipeline trigger                                             |
+| `/results`   | Main results — heatmap, drilldown, coverage, spotlight, export                                         |
+| `/reference` | Full metric framework (table + circle-packing visualisation)                                           |
+| `/validate`  | Standalone CSV validator                                                                               |
+| `/merge`     | Merge analyst-completed deep-dive workbooks; UoA detail modal on map/table click; outcome map download |
 
 ### Components
 
@@ -351,7 +361,8 @@ Each system colour is defined as a single base hex in `:root`; five depth varian
 | `reference-json.ts` | Zod v4 schema + inferred TypeScript types for `reference.json`              |
 | `generated/`        | Auto-generated enums from lookup CSVs — do not edit directly                |
 | `steps.ts`          | Upload wizard step definitions                                              |
-| `deepdives.ts`      | Deep-dive XLSX column definitions (`tableHeaders`, `colWidths`, `colCount`) |
+| `deepdives.ts`      | Deep-dive XLSX column definitions (`tableHeaders`, `colWidths`, `colCount`)                |
+| `sources.ts`        | `MetricSourceRow`, `MetricSourceEntry`, `MetricSourcesMap` — optional metric sources types |
 
 ---
 
@@ -446,13 +457,17 @@ Entry point: `flagData(rows, referenceJson)`. Five stages:
 
 Generates a ZIP archive — one pre-populated `.xlsx` per Unit of Analysis. Each workbook has one worksheet per system. Each metric row carries:
 
-- **Pre-populated:** Indicator label, Metric label, Metric ID, uploaded value, flag result, AN threshold, direction
+- **Pre-populated:** Indicator label, Metric label, Metric ID, uploaded value, flag result, AN threshold, VAN threshold, direction
+- **Source annotation (always present):** Source, Source link, Start of data collection, End of data collection — populated from the optional sources CSV if uploaded; otherwise left blank
 - **Editable:** H1–H5 hypothesis columns, Comment field
 
-Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tableHeaders`, `colWidths`, `colCount`).
+XLSX filenames include the unit's priority flag: `deepdive_{uoa}_{priority_flag}.xlsx`.
+
+Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tableHeaders`, `colWidths`, `colCount`). Source column headers and widths are in `SOURCE_COL_HEADERS` / `SOURCE_COL_WIDTHS`.
 
 **Touch `deepdive.ts` when:** export layout, cell styling, column order, or pre-population logic changes.
 **Touch `deepdives.ts` when:** adding or removing columns from the exported table.
+**Touch `metricSourcesValidator.ts` + `sources.ts` when:** the sources CSV format changes.
 
 ### Maintenance quick-reference
 
@@ -465,6 +480,6 @@ Column definitions and table headers live in `src/lib/types/deepdives.ts` (`tabl
 | Add a new sub-factor                        | `subfactor.csv` → `reference.csv` → `bun run data:refresh`                                                                |
 | Rename / remove a system, factor, subfactor | Update lookup CSV + `reference.csv` → `data:refresh` → `generate:enums` → search codebase for old ID                      |
 | Change rollup or decision-tree logic        | `src/lib/engine/flagger.ts`                                                                                               |
-| Change deep-dive XLSX layout or columns     | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts`                                                               |
+| Change deep-dive XLSX layout or columns     | `src/lib/engine/deepdive.ts` + `src/lib/types/deepdives.ts` (+ `sources.ts` if touching source annotation columns)       |
 | Add / edit hypotheses or non-system blocks  | `static/data/hypotheses.json` (schema in `src/lib/types/hypotheses.ts`) → `bun run validate:hypotheses-json`              |
 | Add a new required CSV field                | `reference.csv` + `scripts/generate-reference-json.ts` + `src/lib/types/structure.ts` + `src/lib/types/reference-json.ts` |

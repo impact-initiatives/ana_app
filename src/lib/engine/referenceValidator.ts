@@ -145,6 +145,7 @@ export function checkThresholdValues(data: unknown): ThresholdValueResult {
 					for (let mi = 0; mi < (inds[ii].metrics?.length ?? 0); mi++) {
 						const m = inds[ii].metrics![mi];
 						if (m.preference === 3) continue;
+						if (m.evidence_type === 'Supporting evidence') continue;
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 
 						for (const field of ['factor_threshold', 'evidence_threshold'] as const) {
@@ -365,6 +366,7 @@ export function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 					for (let mi = 0; mi < (inds[ii].metrics?.length ?? 0); mi++) {
 						const m = inds[ii].metrics![mi];
 						if (m.preference === 3) continue;
+						if (m.evidence_type === 'Supporting evidence') continue;
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 
 						for (const field of ['factor_threshold', 'evidence_threshold'] as const) {
@@ -400,6 +402,7 @@ export function checkThresholdPlausibility(data: unknown): ThresholdPlausibility
 				for (const ind of sf.indicators ?? []) {
 					for (const m of ind.metrics ?? []) {
 						if (m.preference === 3) continue;
+						if (m.evidence_type === 'Supporting evidence') continue;
 						const ft = m.factor_threshold;
 						const et = m.evidence_threshold;
 						if (typeof ft === 'number' && typeof et === 'number') {
@@ -436,7 +439,7 @@ export interface VanOrderError {
 	van: number;
 }
 
-/** Pass 7: VAN must be strictly more extreme than AN. */
+/** Pass 7: VAN must not be less extreme than AN (equal is allowed — means no distinct VAN level). */
 export function checkVanOrdering(data: unknown): VanOrderError[] {
 	const root = asRoot(data);
 	const errors: VanOrderError[] = [];
@@ -452,7 +455,7 @@ export function checkVanOrdering(data: unknown): VanOrderError[] {
 						const van = m.thresholds?.van;
 						const dir = m.above_or_below;
 						if (typeof an === 'number' && typeof van === 'number' && dir) {
-							const valid = dir === 'Above' ? van > an : van < an;
+							const valid = dir === 'Above' ? van >= an : van <= an;
 							if (!valid) {
 								const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 								errors.push({ location: loc, metric: m.metric ?? '?', above_or_below: dir, an, van });
