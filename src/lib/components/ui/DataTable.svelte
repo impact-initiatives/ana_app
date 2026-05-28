@@ -132,7 +132,7 @@
 	}: Props = $props();
 
 	function humanizeCol(col: string): string {
-		return col.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+		return col.replace(/[_-]/g, ' ').replace(/^./, (c) => c.toUpperCase());
 	}
 
 	function resolveRowColor(rowObj: Record<string, string>) {

@@ -1,0 +1,6 @@
+source,metric_ids,link,uoa,start_of_data_collection,end_of_data_collection
+Multi-Sector Needs Assessment 2024,"MET001,MET002,MET065,MET066,MET067,MET080",,,2024-01-15,2024-03-30
+National Admin Registry,"MET116,MET118,MET119,MET160,MET161,MET162",,,2023-07-01,2023-12-31
+Health Facility Survey – North Zone,"MET028,MET029,MET018,MET019,MET020",,"SS0101,SS0102,SS0103,SS0104,SS0105",2024-02-01,2024-04-15
+IPC Acute Food Insecurity Analysis,"MET065,MET066,MET067,MET080",,"SS0205,SS0206,SS0207,SS0208,SS0301,SS0302,SS0303,SS0304",2024-03-01,2024-05-31
+Emergency Rapid Assessment Q1,"MET021,MET022,MET023,MET024",https://example.org/reports/era-q1-2024,,2024-01-05,2024-01-20

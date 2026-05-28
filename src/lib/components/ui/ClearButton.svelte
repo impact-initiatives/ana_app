@@ -29,6 +29,12 @@
 	const sizeCls = $derived(size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : 'btn-md');
 </script>
 
-<button type="button" class="btn {variantCls} {sizeCls} {additionalClasses}" {disabled} {onclick}>
+<button
+	type="button"
+	class="btn {variantCls} {sizeCls} {additionalClasses}"
+	{disabled}
+	{onclick}
+	aria-label={label}
+>
 	{label}
 </button>

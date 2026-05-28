@@ -7,6 +7,7 @@ import {
 	TRIANGULATION_VALUES, CONCLUSION_VALUES
 } from '$lib/types/deepdives.js';
 import type { HypothesesBlock, HypothesesData } from '$lib/types/hypotheses';
+import type { MetricSourceEntry, MetricSourcesMap } from '$lib/types/sources';
 import { SystemIDs } from '$lib/types/structure';
 import { PRIORITY_BADGE_MAP } from '$lib/utils/colors.js';
 import type { PriorityFlag } from '$lib/types/flags';
@@ -238,7 +239,8 @@ function addTableHeaderRow(ws: Worksheet, headers: string[], hypothesesCount = 0
 function addIndicatorRow(
 	ws: Worksheet,
 	{ factorSubfactor, evidenceType, id, metric, value, flagLabelStr, an, van }: IndicatorRowParams,
-	hypothesesCount: number
+	hypothesesCount: number,
+	sourceEntry?: MetricSourceEntry
 ): void {
 	// Col 1 = gutter (merged with col 2 = Factor-Sub-factor); all data cols shift +1
 	const rowValues = [
@@ -295,7 +297,17 @@ function addIndicatorRow(
 	const commentCell = row.getCell(commentColIdx);
 	commentCell.border = allBorders('FFDDDDDD');
 	commentCell.alignment = { vertical: 'top', wrapText: true };
-	// No fixed row.height — Excel auto-fits based on wrapped content
+
+	// Source metadata columns (always present; empty when no entry)
+	const sourceVals = sourceEntry
+		? [sourceEntry.source, sourceEntry.link, sourceEntry.startOfDataCollection, sourceEntry.endOfDataCollection]
+		: ['', '', '', ''];
+	sourceVals.forEach((v, i) => {
+		const c = row.getCell(commentColIdx + 1 + i);
+		c.value = v;
+		c.border = allBorders('FFDDDDDD');
+		c.alignment = { vertical: 'top', wrapText: true };
+	});
 }
 
 function addQualitativeEvidenceRows(
@@ -414,16 +426,19 @@ function addLegendSection(
 	evidenceHeaderRow.height = 16;
 
 	const colorEntries = [
-		{ argb: 'ffffffcc', label: 'Critical evidence' },
-		{ argb: 'ffdaeef3', label: 'Evidence relates to specific sub-group only' },
-		{ argb: 'ffe4dfec', label: 'Coping/mitigation' }
+		{ argb: 'ffffffcc', color_cell_text: '', label: 'Critical evidence', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffffd6b5', color_cell_text: '', label: 'Evidence relates to specific sub-group only', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffe4dfec', color_cell_text: '', label: 'Coping/mitigation', color_cell_text_color: 'ff000000' },
+		{ argb: 'ffffffff', color_cell_text: 'text', label: 'Add assumptions in red font', color_cell_text_color: 'ffe12424' },
 	];
-	for (const { argb, label } of colorEntries) {
+	for (const { argb, color_cell_text, label, color_cell_text_color } of colorEntries) {
 		const row = ws.addRow(new Array(numCols).fill(''));
 		if (numCols > 1) ws.mergeCells(row.number, 2, row.number, numCols);
 		const colorCell = row.getCell(1);
 		colorCell.fill = solidFill(argb);
 		colorCell.border = allBorders();
+		colorCell.value = color_cell_text;
+		colorCell.font = { size: 10, color: { argb: color_cell_text_color } };
 		const labelCell = row.getCell(2);
 		labelCell.value = label;
 		labelCell.font = { size: 10 };
@@ -616,7 +631,7 @@ function addSummarySection(ws: Worksheet, systemLabel: string, numCols: number, 
 	ws.mergeCells(headerRow.number, 1, headerRow.number, 5);
 	const headerCell = headerRow.getCell(1);
 	headerCell.value = 'Conclusion';
-	headerCell.font = { bold: true, size: 12, color: { argb: titleTextArgb } };
+	headerCell.font = { bold: true, size: 11, color: { argb: titleTextArgb } };
 	headerCell.fill = solidFill(tintArgb);
 	headerCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
 	headerCell.border = allBorders('FF000000');
@@ -897,7 +912,8 @@ function applyHypGroupStyling(
 export async function buildDeepDiveBuffer(
 	uoaRow: Record<string, any>,
 	referenceJson: Record<string, any>,
-	hypothesesData: HypothesesData
+	hypothesesData: HypothesesData,
+	metricSources?: MetricSourcesMap
 ): Promise<Uint8Array> {
 	const uoaId = String(uoaRow['uoa'] ?? 'unknown');
 	const workbook = new ExcelJS.Workbook();
@@ -993,7 +1009,8 @@ export async function buildDeepDiveBuffer(
 										an: met.thresholds?.an ?? null,
 										van: met.thresholds?.van ?? null
 									},
-									hypIds.length
+									hypIds.length,
+									metricSources?.[`${met.metric}__${uoaId}`] ?? metricSources?.[met.metric]
 								);
 							}
 						}
@@ -1056,7 +1073,8 @@ export async function buildDeepDiveBuffer(
 										an: met.thresholds?.an ?? null,
 										van: met.thresholds?.van ?? null
 									},
-									hypIds.length
+									hypIds.length,
+									metricSources?.[`${met.metric}__${uoaId}`] ?? metricSources?.[met.metric]
 								);
 							}
 						}

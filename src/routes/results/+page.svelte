@@ -39,6 +39,7 @@
 		downloadXLSX,
 		downloadDeepDiveZip
 	} from '$lib/engine/download';
+	import { metricSourcesStore } from '$lib/stores/metricSourcesStore.svelte';
 
 	// ── Types ─────────────────────────────────────────────────────────────────
 
@@ -278,13 +279,8 @@
 		filterStore.selectedGroupValues = null;
 	}
 
-	let mapClusterActive = $state(false);
-	let clusterUoas = $state<string[]>([]);
-
 	function clearAllFilters() {
 		clearFilters();
-		mapClusterActive = false;
-		clusterUoas = [];
 	}
 
 	// ── Event handlers ────────────────────────────────────────────────────────
@@ -326,8 +322,8 @@
 	});
 
 	const effectiveFlagged = $derived(
-		mapClusterActive && clusterUoas.length > 0
-			? filteredFlagged.filter((r) => clusterUoas.includes(String(r.uoa)))
+		filterStore.clusterActive && filterStore.clusterUoas.length > 0
+			? filteredFlagged.filter((r) => filterStore.clusterUoas.includes(String(r.uoa)))
 			: filteredFlagged
 	);
 
@@ -335,7 +331,7 @@
 		filterStore.selectedUoas !== null ||
 		filterStore.selectedPrelimKeys !== null ||
 		filterStore.groupByCol !== null ||
-		mapClusterActive
+		filterStore.clusterActive
 	);
 
 	// ── Section 2: Systems — map click + heatmap selection ────────────────────
@@ -457,7 +453,7 @@
 	);
 
 	// Dot index: O(rows) single pass, recomputes on every filter change.
-	const dotIndex = $derived(buildDotIndex(filteredFlagged));
+	const dotIndex = $derived(buildDotIndex(effectiveFlagged));
 
 	// Merged blocks: O(metrics) Map lookups — near-instant on filter change.
 	const allBlocks = $derived(
@@ -541,12 +537,12 @@
 		downloadXLSX(flagStore.flaggedResult, `flagged_data_${timestamp}.xlsx`);
 	}
 	async function handleDeepDive() {
-		if (filteredFlagged.length === 0) return;
+		if (effectiveFlagged.length === 0) return;
 		const json = metricStore.referenceJson;
 		if (!json) return;
 		const hypothesesResp = await fetch(asset('/data/hypotheses.json'));
 		const hypothesesData = await hypothesesResp.json();
-		await downloadDeepDiveZip(filteredFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`);
+		await downloadDeepDiveZip(effectiveFlagged, json, hypothesesData, `deepdives_${timestamp}.zip`, metricSourcesStore.sourcesMap ?? undefined);
 	}
 
 	// ── Persist filters to localStorage ──────────────────────────────────────
@@ -558,6 +554,8 @@
 		filterStore.selectedGroupValues;
 		filterStore.indSelectedSystems;
 		filterStore.indSelectedFactors;
+		filterStore.clusterActive;
+		filterStore.clusterUoas;
 		if (everHadData) persistFilters();
 	});
 
@@ -579,7 +577,7 @@
 			{ rootMargin: '-120px 0px -50% 0px' }
 		);
 
-		for (const id of ['overview', 'systems', 'metrics', 'coverage', 'spotlight', 'export']) {
+		for (const id of ['overview', 'systems', 'spotlight', 'metrics', 'coverage', 'export']) {
 			const el = document.getElementById(id);
 			if (el) spyObs.observe(el);
 		}
@@ -623,7 +621,7 @@
 				flaggedTotal={flagged.length}
 				filteredTotal={effectiveFlagged.length}
 				{isFiltered}
-				{mapClusterActive}
+				mapClusterActive={filterStore.clusterActive}
 				{uoaOptions}
 				selectedUoas={filterStore.selectedUoas}
 				selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -654,7 +652,7 @@
 						flaggedTotal={flagged.length}
 						filteredTotal={effectiveFlagged.length}
 						{isFiltered}
-						{mapClusterActive}
+						mapClusterActive={filterStore.clusterActive}
 						{uoaOptions}
 						selectedUoas={filterStore.selectedUoas}
 						selectedPrelimKeys={filterStore.selectedPrelimKeys}
@@ -689,9 +687,12 @@
 							{selectedMapUoa}
 							{selectedMapAdminName}
 							{selectedMapRow}
-							multiSelectMode={mapClusterActive}
-							onmultiselecttoggle={() => { mapClusterActive = !mapClusterActive; if (!mapClusterActive) clusterUoas = []; }}
-							onclusterchange={(uoas) => (clusterUoas = uoas)}
+							multiSelectMode={filterStore.clusterActive}
+							onmultiselecttoggle={() => {
+								filterStore.clusterActive = !filterStore.clusterActive;
+								if (!filterStore.clusterActive) filterStore.clusterUoas = [];
+							}}
+							onclusterchange={(uoas) => (filterStore.clusterUoas = uoas)}
 							onselectinheatmap={selectInHeatmap}
 							onmapselect={(uoa, adminName) => {
 								if (selectedMapUoa === uoa) {
@@ -729,8 +730,21 @@
 					</div>
 				</div>
 
+				<!-- Spotlight -->
+				<div id="spotlight" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+					<div
+						class="mx-auto max-w-5xl px-6"
+						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
+					>
+						<ResultsSpotlight
+							filteredRows={effectiveFlagged}
+							{referenceJson}
+						/>
+					</div>
+				</div>
+
 				<!-- Metrics -->
-				<div id="metrics" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
+				<div id="metrics" class="border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -749,7 +763,7 @@
 				</div>
 
 				<!-- Coverage -->
-				<div id="coverage" class="border-base-300 scroll-mt-28 border-b py-16">
+				<div id="coverage" class="bg-base-200/30 border-base-300 scroll-mt-28 border-b py-16">
 					<div
 						class="mx-auto max-w-5xl px-6"
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
@@ -766,19 +780,6 @@
 					</div>
 				</div>
 
-				<!-- Spotlight -->
-				<div id="spotlight" class="border-base-300 scroll-mt-28 border-b py-16">
-					<div
-						class="mx-auto max-w-5xl px-6"
-						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
-					>
-						<ResultsSpotlight
-							filteredRows={filteredFlagged}
-							{referenceJson}
-						/>
-					</div>
-				</div>
-
 				<!-- Export -->
 				<div id="export" class="bg-base-200/30 scroll-mt-28 py-16">
 					<div
@@ -786,7 +787,7 @@
 						{@attach revealOnScroll({ y: 36, duration: 650, rootMargin: '0px 0px -25% 0px' })}
 					>
 						<ResultsExport
-							rows={filteredFlagged}
+							rows={effectiveFlagged}
 							{handleJSON}
 							{handleCSV}
 							{handleXLSX}

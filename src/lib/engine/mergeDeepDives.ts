@@ -134,7 +134,7 @@ const PF_TO_CONCLUSION: Record<string, string> = {
 	em:                    'roem',
 	ho_primary:            'roem',
 	ho_secondary:          'roem',
-	an_primary:            'an_exclamation',
+	an_primary:            'an',
 	an_secondary:          'an',
 	no_acute_needs:        'no_acute_needs',
 	insufficient_evidence: 'insufficient_evidence',

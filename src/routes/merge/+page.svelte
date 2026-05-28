@@ -78,7 +78,7 @@
 		uploaderKey++;
 	}
 
-	// One row per UoA: conclusion key first, then PF→conclusion fallback for unfilled ZIPs.
+	// One row per UoA: conclusion key first, then PF conclusion fallback for unfilled ZIPs.
 	const mapRows = $derived.by(() => {
 		if (!mergeStore.parsed) return [];
 		const byUoa = new Map<string, { uoa: string; priority_flag: string }>();
@@ -118,8 +118,8 @@
 	function toKey(s: string): string {
 		return s
 			.toLowerCase()
-			.replace(/\s+/g, '_')
-			.replace(/[^a-z0-9_]/g, '');
+			.replace(/\s+/g, '-')
+			.replace(/[^a-z0-9-]/g, '');
 	}
 
 	// One row per UoA, per-system fields as pivot columns
@@ -130,16 +130,16 @@
 			if (!seen.has(r.uoa)) {
 				seen.set(r.uoa, {
 					uoa: r.uoa,
-					admin_name: adminFeaturesStore.pcodeLabelMap?.[r.uoa] ?? '',
-					priority_flag: r.priorityFlag,
+					'admin-name': adminFeaturesStore.pcodeLabelMap?.[r.uoa] ?? '',
+					'priority-flag': r.priorityFlag,
 					conclusion: r.conclusion,
-					deep_dive_run: r.deepDiveRun
+					'deep-dive-run': r.deepDiveRun
 				});
 			}
 			const prefix = toKey(r.tab) + '_' + toKey(r.system);
 			const row = seen.get(r.uoa)!;
-			row[prefix + '_primary_hypothesis'] = r.primaryHypothesis;
-			row[prefix + '_secondary_hypothesis'] = r.secondaryHypothesis;
+			row[prefix + '_primary-hypothesis'] = r.primaryHypothesis;
+			row[prefix + '_secondary-hypothesis'] = r.secondaryHypothesis;
 			row[prefix + '_plausibility'] = r.plausibility;
 			row[prefix + '_summary'] = r.summary;
 			row[prefix + '_triangulation'] = r.triangulation;
@@ -298,7 +298,6 @@
 					rows={uoaTableRows}
 					tableClass="table-xs"
 					headerRowClass="text-base-content text-xs"
-					humanizeHeaders
 					searchable
 					downloadable
 					downloadFilename="synthesis"
@@ -309,7 +308,6 @@
 					}}
 				/>
 			{/if}
-
 		</div>
 
 		<SynthesisDetailModal

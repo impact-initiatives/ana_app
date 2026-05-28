@@ -218,7 +218,7 @@
 				</div>
 			</div>
 		{/if}
-		<p class="text-base-content/85 text-xs">
+		<p class="text-base-content/85 v mt-2 mb-2 text-xs">
 			Upload a reference CSV to update thresholds, labels, or add country-specific metrics. Only
 			rows you include are changed — unmentioned metrics stay unchanged.
 		</p>

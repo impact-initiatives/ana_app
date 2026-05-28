@@ -130,7 +130,9 @@ export const MetricSchema = z
 		}),
 		van_is_strict: z.boolean().nullable().optional().default(false),
 		evidence_threshold: z.number().nullable().optional(),
-		risk_concept: z.string().nullable().optional()
+		risk_concept: z.string().nullable().optional(),
+		usual_data_sources: z.string().nullable().optional(),
+		references_for_threshold: z.string().nullable().optional()
 	})
 	.superRefine((m, ctx) => {
 		const { thresholds } = m;

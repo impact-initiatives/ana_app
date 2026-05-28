@@ -13,6 +13,7 @@
 	import Footer from '$lib/components/ui/Footer.svelte';
 	import { flagStore, hydrateFlagStore } from '$lib/stores/flagStore.svelte';
 	import { hydrateMetricStore, loadMetrics } from '$lib/stores/metricStore.svelte';
+	import { hydrateMetricSourcesStore } from '$lib/stores/metricSourcesStore.svelte';
 	import { clearAllStores, clearAllStoresOnFrameworkUpdate } from '$lib/utils/clearAll';
 	import exploreNav from '$lib/stores/exploreNav.svelte';
 	import { setAppReady } from '$lib/stores/appReady.svelte';
@@ -26,6 +27,7 @@
 		// spinner is already animating — heavy JSON.parse no longer freezes it.
 		hydrateFlagStore();
 		hydrateMetricStore();
+		hydrateMetricSourcesStore();
 
 		// If reference.json was not in localStorage, fetch it now.
 		// Keep the app-loader visible until this resolves.

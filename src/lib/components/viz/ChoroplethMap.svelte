@@ -89,11 +89,11 @@
 		const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
 		pat.id = 'sel-dots';
 		pat.setAttribute('patternUnits', 'userSpaceOnUse');
-		pat.setAttribute('width', '5');
-		pat.setAttribute('height', '5');
+		pat.setAttribute('width', '10');
+		pat.setAttribute('height', '10');
 		const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-		circ.setAttribute('cx', '2.5');
-		circ.setAttribute('cy', '2.5');
+		circ.setAttribute('cx', '5');
+		circ.setAttribute('cy', '5');
 		circ.setAttribute('r', '1');
 		circ.setAttribute('style', 'fill: var(--color-base-content)');
 		pat.appendChild(circ);
@@ -448,13 +448,12 @@
 		<div class="text-base-content/85 mt-1 flex items-start gap-2 text-sm">
 			<span
 				class="border-base-content/75 mt-0.5 inline-block h-4 w-6 shrink-0 rounded border"
-				style="background: radial-gradient(circle, var(--color-base-content) 1px, transparent 1px) 0 0 / 4px 4px"
+				style="background: radial-gradient(circle, var(--color-base-content) 1px, transparent 1px) 0 0 / 6px 6px"
 			></span>
 			<span>
 				Dotted overlay: no conclusion filled yet. Color reflects the priority flag:
 				<ul class="mt-0.5 list-inside list-disc space-y-0.5">
-					<li>Excess Mortality: EM</li>
-					<li>HO Primary / Secondary: RoEM</li>
+					<li>EM / HO Primary / Secondary: RoEM</li>
 					<li>AN Primary / Secondary: Acute Needs</li>
 					<li>No Acute Needs, Insufficient Evidence, No Data: same</li>
 				</ul>
