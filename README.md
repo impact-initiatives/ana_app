@@ -18,7 +18,7 @@
 
 ## Table of contents
 
-1. [What ANA does](#what-ana-does)
+1. [What the ANA app does does](#what-the-ana-app-does)
 2. [Getting started](#getting-started) — setup, dev server, all commands
 3. [App views](#app-views)
 4. [How it works](#how-it-works) — flagging pipeline, reference framework
@@ -29,7 +29,7 @@
 
 ---
 
-## What ANA does
+## What the ANA app does
 
 Upload a CSV (one row per unit of analysis, columns mainly metric IDs `MET001`, `MET002`, …). the app validates it, applies threshold-based flagging across 198 metrics and 8 humanitarian systems, and delivers two core outputs:
 
