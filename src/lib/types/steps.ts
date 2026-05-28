@@ -8,12 +8,19 @@ export type StepDetailSection = {
 	route?: AppRoute;
 };
 
+export type StepTipLink = {
+	href: AppRoute;
+	label: string;
+	suffix?: string;
+};
+
 export type Step = {
 	title: string;
 	desc: string;
 	detail: {
 		sections: StepDetailSection[];
 		tip: string | null;
+		tipLink?: StepTipLink;
 	};
 };
 
@@ -40,7 +47,8 @@ export const steps: Step[] = [
 					body: 'Must be numeric or empty. No formatted strings, units, or special characters. For missing values, leave the cell empty instead of writing "N/A" or "missing".'
 				}
 			],
-			tip: 'For the full list of metric IDs and type constraints, see the'
+			tip: 'For the full list of metric IDs and type constraints, see the',
+			tipLink: { href: '/reference', label: 'Reference', suffix: ' tab.' }
 		}
 	},
 	{
