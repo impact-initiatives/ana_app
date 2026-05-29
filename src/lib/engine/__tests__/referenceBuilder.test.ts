@@ -190,6 +190,18 @@ describe('validateRefRows — Above or below', () => {
 		const { errors } = validateRefRows(rows, baseJson as Record<string, unknown>);
 		expect(errors.filter((e) => e.includes('Above or below'))).toHaveLength(0);
 	});
+
+	it('skips check for Supporting evidence rows with empty Above or below', () => {
+		const rows = [validRow({ MET_ID: 'MET099', 'Evidence type': 'Supporting evidence', 'Above or below': '' })];
+		const { errors } = validateRefRows(rows, baseJson as Record<string, unknown>);
+		expect(errors.filter((e) => e.includes('Above or below'))).toHaveLength(0);
+	});
+
+	it('skips check for preference-3 rows with empty Above or below', () => {
+		const rows = [validRow({ MET_ID: 'MET099', Preference: '3', 'Above or below': '' })];
+		const { errors } = validateRefRows(rows, baseJson as Record<string, unknown>);
+		expect(errors.filter((e) => e.includes('Above or below'))).toHaveLength(0);
+	});
 });
 
 // ── validateRefRows — thresholds ──────────────────────────────────────────────

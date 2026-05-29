@@ -198,7 +198,9 @@ export function validateRefRows(
 		}
 
 		const aob = row['Above or below']?.trim() ?? '';
-		if (aob !== MetricDirectionEnum.Above && aob !== MetricDirectionEnum.Below) {
+		const evType = row['Evidence type']?.trim() ?? '';
+		const skipDirectional = prefStr === '3' || evType === 'Supporting evidence';
+		if (!skipDirectional && aob !== MetricDirectionEnum.Above && aob !== MetricDirectionEnum.Below) {
 			errors.push(
 				`Row ${rowNum} (${id}): "Above or below" must be "Above" or "Below", got "${aob}"`
 			);
