@@ -89,7 +89,7 @@
 		preference: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		evidence_type: { wrap: true, extraClass: 'min-w-32 max-w-44' },
 		evidence_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
-		factor_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
+		subfactor_threshold: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		above_or_below: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		threshold_an: { wrap: true, extraClass: 'min-w-20 max-w-28' },
 		threshold_van: { wrap: true, extraClass: 'min-w-20 max-w-28' },

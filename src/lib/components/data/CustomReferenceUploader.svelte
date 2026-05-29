@@ -136,7 +136,7 @@
 			'Very acute needs threshold (5)',
 			'Above or below',
 			'Evidence threshold',
-			'Factor threshold',
+			'Subfactor threshold',
 			'Risk concept'
 		];
 		const esc = (v: string) => `"${(v ?? '').replace(/"/g, '""')}"`;
@@ -161,7 +161,7 @@
 					r.threshold_van,
 					r.above_or_below,
 					r.evidence_threshold,
-					r.factor_threshold,
+					r.subfactor_threshold,
 					r.risk_concept
 				]
 					.map(esc)

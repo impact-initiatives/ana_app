@@ -31,7 +31,7 @@
                       "thresholds": { "an": 1, "van": 2 },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1,
+                      "subfactor_threshold": 1,
                       "risk_concept": null
                     }
                   ]
@@ -54,7 +54,7 @@
                       "thresholds": { "an": 2, "van": 4 },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1,
+                      "subfactor_threshold": 1,
                       "risk_concept": null
                     }
                   ]
@@ -95,7 +95,7 @@
                       "thresholds": { "an": 0.15, "van": 0.3 },
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1,
+                      "subfactor_threshold": 1,
                       "risk_concept": null
                     }
                   ]

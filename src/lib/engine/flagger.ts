@@ -48,7 +48,7 @@ import type { FlagStatus } from '$lib/types/flags';
 
 type Row = Record<string, any>;
 type Status = FlagStatus;
-type ThresholdGroup = { factor_threshold: number; evidence_threshold: number; codes: string[] };
+type ThresholdGroup = { subfactor_threshold: number; evidence_threshold: number; codes: string[] };
 type MutateSpec = Record<string, (d: Row) => unknown>;
 
 /* --------------------- Helpers --------------------- */
@@ -121,7 +121,7 @@ function makeMetricSpec(id: string, md: any): MutateSpec {
 /**
  * Evaluate a single threshold group against a row.
  *
- * Counts flagged vs. no-flag metrics, compares against factor_threshold and
+ * Counts flagged vs. no-flag metrics, compares against subfactor_threshold and
  * evidence_threshold. Metrics with null flags (no data) are ignored in both counts.
  */
 function evaluateGroup(group: ThresholdGroup, d: Row): Status {
@@ -135,7 +135,7 @@ function evaluateGroup(group: ThresholdGroup, d: Row): Status {
 	}
 
 	const data_n = flag_n + no_flag_n;
-	if (flag_n >= group.factor_threshold) return 'flag';
+	if (flag_n >= group.subfactor_threshold) return 'flag';
 	if (data_n >= group.evidence_threshold) return 'no_flag';
 	if (data_n === 0) return 'no_data';
 	return 'insufficient_evidence';

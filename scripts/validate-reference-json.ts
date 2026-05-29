@@ -102,7 +102,7 @@ Checks performed:
     · mortality and health_outcomes must be present
 
   Pass 4 — Threshold value sanity
-    · factor_threshold / evidence_threshold must be ≥ 1 (error if ≤ 0; warning if missing)
+    · subfactor_threshold / evidence_threshold must be ≥ 1 (error if ≤ 0; warning if missing)
 
   Pass 5 — Duplicate and invalid IDs
     · metric/system/factor/subfactor IDs must be globally unique (error)
@@ -110,7 +110,7 @@ Checks performed:
     · metric labels must be globally unique (error)
 
   Pass 6 — Threshold integers and plausibility
-    · factor_threshold and evidence_threshold must be integers
+    · subfactor_threshold and evidence_threshold must be integers
     · neither may exceed the group size in its subfactor
 
   Pass 7 — VAN threshold ordering

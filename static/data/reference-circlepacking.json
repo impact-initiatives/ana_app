@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-28T12:22:03.704Z",
+  "generatedAt": "2026-05-29T12:32:15.691Z",
   "name": "root",
   "id": "root",
   "children": [
@@ -41,7 +41,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": null,
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Well-established emergency threshold (WHO, Shpere, UNHCR Emergency Handbook) https://emergency.unhcr.org/emergency-assistance/health-and-nutrition/mortality-surveillance-threshold"
@@ -75,7 +75,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": null,
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Well-established emergency threshold (WHO, Shpere, UNHCR Emergency Handbook) https://emergency.unhcr.org/emergency-assistance/health-and-nutrition/mortality-surveillance-threshold"
@@ -127,7 +127,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "Recommended threshold according to IPC Acute Malnutrition (2018). GAM 15-29.9% refers to IPC AMN Critical phase (4)."
@@ -155,7 +155,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "IPC Guidance suggests usign MUAC only when WHZ is not available. 10-15% GAM by MUAC corresponds roughly to IPC AMN Phase 3 and 4. Acute Needs threshold is therefore slightly conservative."
@@ -183,7 +183,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -217,7 +217,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "IPC AMN Classification (Phase 4 = Critical, Phase 5 = Extremely Critical)"
@@ -251,7 +251,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -279,7 +279,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -307,7 +307,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -341,7 +341,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -375,7 +375,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -409,7 +409,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -455,7 +455,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -483,7 +483,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -511,7 +511,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -545,7 +545,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold, to be interpreted against seasonality, baseline incidence, surveillance quality, and triangulated evidence of service strain or outbreak escalation."
@@ -573,7 +573,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold, to be interpreted against seasonality, baseline incidence, surveillance quality, and triangulated evidence of service strain or outbreak escalation."
@@ -601,7 +601,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold, to be interpreted against seasonality, baseline incidence, surveillance quality, and triangulated evidence of service strain or outbreak escalation."
@@ -641,7 +641,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "WHO defines suspected measles outbreak as five or more epidemiologically linked cases, and confirmed outbreak as two or more lab-confirmed linked cases. This threshold is adapted for the ANA to flag concern.  https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes/measles-outbreak-toolbox"
@@ -669,7 +669,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "ANA analytical threshold in the absence of an overall global standard threshold. Based on the Sphere Handbook, WHO outbreak response guidelines, MSF field thresholds \nhttps://medicalguidelines.msf.org/sites/default/files/pdf/guideline-498-en.pdf"
@@ -703,7 +703,7 @@
                         "van_is_strict": false,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "ANA analytical threshold, binary threshold is analytical rather than global severity cut-off. See WHO disease-specific toolboxes https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes"
@@ -737,7 +737,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "WHO/GTFCC define a suspected cholera outbreak when two or more suspected cholera cases or one suspected case with positive RDT result are reported within one surveillance unit within 7 days. This threshold is adapted for the ANA to flag outbreak severity. https://www.gtfcc.org/wp-content/uploads/2020/05/gtfcc-cholera-outbreak-response-field-manual-2024.pdf"
@@ -765,7 +765,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": "ANA analytical threshold in the absence of an overall global standard threshold. Based on the Sphere Handbook, WHO outbreak response guidelines, MSF field thresholds"
@@ -799,7 +799,7 @@
                         "van_is_strict": false,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -833,7 +833,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -867,7 +867,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -901,7 +901,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -935,7 +935,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -975,7 +975,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1009,7 +1009,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -1043,7 +1043,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Vulnerability",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -1095,7 +1095,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO/UNICEF IYCF minimum standards; no global prevalence threshold exists. ANA threshold reflects a high prevalence of inadequate feeding practices."
@@ -1135,7 +1135,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO/UNICEF IYCF minimum standards; no global prevalence threshold exists. ANA threshold reflects a high prevalence of inadequate feeding practices."
@@ -1169,7 +1169,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Aligned with FAO-MDD-W guidelines (standard is ≥5 of 10 food groups)\nhttps://www.fao.org/nutrition/assessment/tools/minimum-dietary-diversity-women/en/"
@@ -1209,7 +1209,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "IPC AFI Classification (Phase 4 = Emergency, Phase 5 = Castarophe/Famine)"
@@ -1243,7 +1243,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WFP CARI classification; threshold adapted to reflect a substantial share of the population in severe food insecurity (Phase 4), aligned with 20% rule from the IPC Guidelines."
@@ -1277,7 +1277,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold for area-level flagging, based on IPC AFI Reference table: HHS 4 corresponds with IPC AFI Phase 4 (Emergency), HHS 5-6 corresponds with IPC AFI Phase 5 (Catastrophe/Famine)"
@@ -1305,7 +1305,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold for area-level flagging, based on IPC AFI Reference table: HHS 4 corresponds with IPC AFI Phase 4 (Emergency), HHS 5-6 corresponds with IPC AFI Phase 5 (Catastrophe/Famine)"
@@ -1339,7 +1339,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold for area-level flagging. WFP typical benchmark / IPC reference table lists an rCSI over 19 as crisis/emergency conditions. Value here is reflecting high proportion of population engaging in high coping."
@@ -1373,7 +1373,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA analytical threshold for area-level flagging. WFP Standard threshold for poor FCS is ≤21. Value of 20% aligned with \"20% rule\" from the IPC guidelines."
@@ -1407,7 +1407,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
@@ -1441,7 +1441,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
@@ -1475,7 +1475,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
@@ -1509,7 +1509,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No global threshold exists. ANA analytical hreshold based on alignment with IPC severity logic."
@@ -1543,7 +1543,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "HDDS of 0-2 food groups aligns with IPC AFI Phase 4 or 5. No universally agreed global threshold for % of HHs, this ANA analytical threshold is based on alignment with IPC severity logic, 40% indicating a widespread issue."
@@ -1589,7 +1589,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1623,7 +1623,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1657,7 +1657,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1691,7 +1691,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1725,7 +1725,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1759,7 +1759,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1793,7 +1793,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1833,7 +1833,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "subfactor_threshold": 3,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on WFP food source indicators and IPC analytical frameworks. No global threshold exists; ANA threshold reflects a substantial share of households dependent on external food assistance."
@@ -1861,7 +1861,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "subfactor_threshold": 3,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on IPC and WFP coping strategy frameworks. “Atypical” food sources are context-specific and include socially or economically unsustainable sources (e.g. borrowing, begging). Threshold reflects widespread reliance on crisis coping."
@@ -1895,7 +1895,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -1929,7 +1929,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -1963,7 +1963,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 3,
+                        "subfactor_threshold": 3,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No standard global threshold. Indicator used to capture severe food access constraints; threshold reflects a substantial share of affected localities."
@@ -1997,7 +1997,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2025,7 +2025,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Household Economy Approach (HEA). Survival deficit indicates households cannot meet minimum food and non-food needs without irreversible coping."
@@ -2059,7 +2059,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2093,7 +2093,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2127,7 +2127,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2161,7 +2161,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 3,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2195,7 +2195,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2235,7 +2235,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO/UNICEF guidance on safe food preparation and WASH–nutrition linkages. Threshold reflects widespread use of unsafe water for food preparation.\nhttps://www.who.int/publications/i/item/9789241594639"
@@ -2269,7 +2269,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2303,7 +2303,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2337,7 +2337,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2371,7 +2371,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2417,7 +2417,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2445,7 +2445,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2473,7 +2473,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -2507,7 +2507,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2541,7 +2541,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2575,7 +2575,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2609,7 +2609,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2649,7 +2649,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2683,7 +2683,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2717,7 +2717,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -2769,7 +2769,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Shpere minimum standard is 15L/person/day for all uses. ANA threshold reflects severe shorfall (<50% of minimum standard), consistent with emergency conditions"
@@ -2803,7 +2803,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Sphere minimum standard is 6L/person/day for drinking + cooking. ANA threshold reflects severe shortfall consistent with emergency conditions."
@@ -2837,7 +2837,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Sphere: Total water (15L) - drinking/cooking (6L) leaves 9L/person/day as the domsetic threshold."
@@ -2871,7 +2871,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on emergency water supply practice (often 5–10 L/person/day in acute response phases); threshold reflects minimal survival-level provision."
@@ -2911,7 +2911,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "WHO Drinking water quality guidelines. Risk categories: 0 CFU = safe, 1-10 CFU = low risk, 10-100 is intermediate risk, >100 is high risk of contamination. ANA analytical threshold of 40% suggests significant exposure. \nhttps://www.who.int/teams/environment-climate-change-and-health/water-sanitation-and-health/water-safety-and-quality/drinking-water-quality-guidelines"
@@ -2945,7 +2945,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on JMP service ladder (WHO/UNICEF). ANA analytical threshold indicates widespread use (>80% of HHs, systemic issue). \nhttps://washdata.org/topics/drinking-water"
@@ -2973,7 +2973,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on JMP service ladder (WHO/UNICEF). ANA analytical threshold indicates widespread use (>20% of HHs, significant share of HHs). \nhttps://washdata.org/topics/drinking-water"
@@ -3007,7 +3007,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3053,7 +3053,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on HWISE scale; no globally agreed severity cut-offs exist. ANA threshold reflects widespread household water insecurity (>50%). \nhttps://www.rural-water-supply.net/en/resources/991-"
@@ -3081,7 +3081,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on HWISE scale; no globally agreed severity cut-offs exist. ANA threshold reflects widespread household water insecurity (>50%). \nhttps://www.rural-water-supply.net/en/resources/991-"
@@ -3109,7 +3109,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on HWISE scale; no globally agreed severity cut-offs exist. ANA threshold reflects widespread household water insecurity (>50%). \nhttps://www.rural-water-supply.net/en/resources/991-"
@@ -3143,7 +3143,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Sphere minimum standard reflects reliable daily access to water. ANA threshold here to indicate acutely severe availability gap. \nhttps://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf"
@@ -3171,7 +3171,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Sphere minimum standard reflects reliable daily access to water. ANA threshold here to indicate significant proportion of the population affected by service gap. \nhttps://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf"
@@ -3205,7 +3205,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA threshold, reflecting significant proportion of population using severe coping mechanism."
@@ -3233,7 +3233,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA threshold, reflecting majority of population using severe coping mechanism."
@@ -3261,7 +3261,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "ANA threshold, reflecting majority of population using severe coping mechanism."
@@ -3295,7 +3295,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3335,7 +3335,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Sphere minimum standard = ≤30 minutes round trip. ANA threshold suggests significant share of population unable to make this roundtrip within that timeframe. https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf"
@@ -3369,7 +3369,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "No global threshold exists. 3-5% is often used as affordability threshold. The UN Resolution on Human Rights in Drinking Water and Sewerage (24 March 2011) sets the threshold at 5%, elsewhere 3% is reported (e.g., https://www.un.org/en/global-issues/water#:~:text=One%20of%20the%20most%20important,should%20not%20exceed%2030%20minutes.)"
@@ -3403,7 +3403,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3431,7 +3431,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3465,7 +3465,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3499,7 +3499,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3533,7 +3533,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3573,7 +3573,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "No global threshold, often referenced in WASH programming guidance."
@@ -3607,7 +3607,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3635,7 +3635,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3663,7 +3663,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3691,7 +3691,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3725,7 +3725,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3759,7 +3759,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3799,7 +3799,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3839,7 +3839,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3873,7 +3873,7 @@
                         "van_is_strict": null,
                         "above_or_below": null,
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -3919,7 +3919,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3947,7 +3947,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -3975,7 +3975,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4009,7 +4009,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4049,7 +4049,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4077,7 +4077,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4111,7 +4111,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4139,7 +4139,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4173,7 +4173,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4213,7 +4213,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4265,7 +4265,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on Sphere shelter standards (shelter must provide protection from climate, safety, and privacy). Threshold reflects a substantial share of households lacking adequate protection from environmental conditions; definition of inadequacy is context-specific."
@@ -4299,7 +4299,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4327,7 +4327,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4361,7 +4361,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4395,7 +4395,7 @@
                         "van_is_strict": null,
                         "above_or_below": null,
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -4435,7 +4435,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4469,7 +4469,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4497,7 +4497,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4531,7 +4531,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4565,7 +4565,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4605,7 +4605,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Sphere minimum standards: Minimum 3.5 m2 of living space per person, excluding cooking space, bathing area and sanitation facility. https://spherestandards.org/wp-content/uploads/Sphere-in-Practice.pdf"
@@ -4633,7 +4633,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on Sphere minimum standards: Minimum 3.5 m2 of living space per person, ANA threshold suggests significant population facing gap."
@@ -4667,7 +4667,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": null,
                         "references_for_threshold": "No standard humanitarian threshold; proxy indicator derived from population density estimates to identify high-risk overcrowding."
@@ -4713,7 +4713,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on Sphere sanitation standards regarding safe waste management and environmental health. Threshold reflects widespread exposure to unsanitary living environments.\nhttps://spherestandards.org/wp-content/uploads/Sphere-in-Practice.pdf"
@@ -4759,7 +4759,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Sphere minimum standard (emergency target) = ≤20 people per latrine. Threshold reflects severe shortage consistent with emergency conditions.\nhttps://spherestandards.org/wp-content/uploads/Sphere-in-Practice.pdf"
@@ -4799,7 +4799,7 @@
                         "van_is_strict": null,
                         "above_or_below": null,
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -4833,7 +4833,7 @@
                         "van_is_strict": null,
                         "above_or_below": null,
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -4861,7 +4861,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4895,7 +4895,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "No globally standardised threshold exists. Indicator used as proxy to identify high-risk conditions; threshold defined operationally for ANA."
@@ -4929,7 +4929,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -4963,7 +4963,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5003,7 +5003,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5031,7 +5031,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5059,7 +5059,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5087,7 +5087,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5121,7 +5121,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5155,7 +5155,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5189,7 +5189,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5223,7 +5223,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Exposure",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5263,7 +5263,7 @@
                         "van_is_strict": null,
                         "above_or_below": null,
                         "evidence_threshold": 0,
-                        "factor_threshold": 0,
+                        "subfactor_threshold": 0,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5315,7 +5315,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "WHO and national planning norms often benchmark primary care facility catchment as 10,000 - 20,000 per PHC. UNHCR Emergency Handbook describes 10,000 people per basic health unit in the emergency phase. \nhttps://www.who.int/publications/i/item/9789240044210 \nhttps://emergency.unhcr.org/emergency-assistance/health-and-nutrition/primary-health-care/primary-health-care-coverage-standard"
@@ -5343,7 +5343,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5371,7 +5371,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Sphere handbook specifies a minimum of 18 beds / 10,0000 persons (excluding maternity beds) to ensure adequate coverage during emergencies. ANA threshold indicates severe gap. \nhttp://www.humanitarianstandardspartnership.org/ViewContent?DocID=1000011&VersionID=2000017&ChapterNumber=8&OrderInChapter=6&Lang=en"
@@ -5405,7 +5405,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "No gblobal thresholds exist, \"functionality* states can be based on WHO HeRAMS or other health facility monitoring. ANA threshold reflects functionality levels consistent with major health system disruption."
@@ -5433,7 +5433,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "No gblobal thresholds exist, \"functionality* states can be based on WHO HeRAMS or other health facility monitoring. ANA threshold reflects functionality levels consistent with major health system disruption."
@@ -5467,7 +5467,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5495,7 +5495,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5529,7 +5529,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5563,7 +5563,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO and UNICEF frameworks for skilled birth attendance and maternal health workforce capacity. No global density thresholds exist; ANA thresholds reflect severe constraints in availability of skilled maternal health personnel.\n https://data.unicef.org/indicator-profiles/MNCH_SAB/"
@@ -5591,7 +5591,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO health workforce density benchmarks (44.5 per 10,000 for universal health coverage). ANA threshold reflects severe shortages relative to global standards.\nhttps://www.who.int/data/gho/indicator-metadata-registry/imr-details/health-workers-density-(per-10-000-population)--by-occupation#:~:text=The%20SDG%20agenda%20gives%20recognition,Resolution%20(WHA69."
@@ -5625,7 +5625,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5659,7 +5659,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5699,7 +5699,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5727,7 +5727,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5755,7 +5755,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5789,7 +5789,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": null
@@ -5817,7 +5817,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5851,7 +5851,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5879,7 +5879,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -5919,7 +5919,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Current estimates used by WHO for CFRs in endemic countries range between 0.05-6%. ANA threshold is set at 5% as a signal of concern. \nhttps://pubmed.ncbi.nlm.nih.gov/19188207/"
@@ -5947,7 +5947,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "WHO handles an emergency threshold of >1% CFR for Cholera in treatment centres. According to the Global Taskforce on Cholera Control, a CFR >1% is usually due to one or a combination of different factors, such as poor access to health facilities, lack of healthcare-seeking behaviour, and/or inadequate case management. https://www.gtfcc.org/wp-content/uploads/2020/05/gtfcc-cholera-outbreak-response-field-manual-2024.pdf"
@@ -5975,7 +5975,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Ebola has a high baseline CFR, estimations of the Ebola CFR from the years 1976-2022 approach around 60% globally. ANA threshold set at the higher end of baseline estimates. \nhttps://www.sciencedirect.com/science/article/pii/S1876034123003581"
@@ -6009,7 +6009,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO essential health service frameworks. Threshold reflects reduced availability of core health services.\nhttps://www.who.int/data/gho/indicator-metadata-registry/imr-details/7793#:~:text=IV.&text=Associated%20terms:,and%20the%20most%20disadvantaged%20population.&text=Method%20of%20estimation:,to%20100%20(optimal%20value).&text=Step%203:%20Calculate%20the%20geometric,values%20calculated%20in%20Step%202."
@@ -6037,7 +6037,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO essential health service frameworks. Threshold reflects reduced availability of core health services.\nhttps://www.who.int/data/gho/indicator-metadata-registry/imr-details/7793#:~:text=IV.&text=Associated%20terms:,and%20the%20most%20disadvantaged%20population.&text=Method%20of%20estimation:,to%20100%20(optimal%20value).&text=Step%203:%20Calculate%20the%20geometric,values%20calculated%20in%20Step%202."
@@ -6065,7 +6065,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO essential health service frameworks. Threshold reflects reduced availability of core health services.\nhttps://www.who.int/data/gho/indicator-metadata-registry/imr-details/7793#:~:text=IV.&text=Associated%20terms:,and%20the%20most%20disadvantaged%20population.&text=Method%20of%20estimation:,to%20100%20(optimal%20value).&text=Step%203:%20Calculate%20the%20geometric,values%20calculated%20in%20Step%202."
@@ -6093,7 +6093,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on WHO essential health service frameworks. Threshold reflects reduced availability of core health services.\nhttps://www.who.int/data/gho/indicator-metadata-registry/imr-details/7793#:~:text=IV.&text=Associated%20terms:,and%20the%20most%20disadvantaged%20population.&text=Method%20of%20estimation:,to%20100%20(optimal%20value).&text=Step%203:%20Calculate%20the%20geometric,values%20calculated%20in%20Step%202."
@@ -6121,7 +6121,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": "MSNA",
                         "references_for_threshold": "Based on WHO/UNICEF indicator for births attended by skilled health personnel (SDG 3.1.2). No universally agreed humanitarian severity thresholds exist; ANA thresholds reflect levels associated with severe constraints in maternal and newborn health service access."
@@ -6167,7 +6167,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on SQUEAC/SLEAC (Action Against Hunger / Valid International) coverage standards, and Nutrition Working group: Technical Issue Paper #1 CMAM - specific programme indicators: >75% Cure rate. ANA thresholds reflect insufficient coverage to meet population needs. https://ec.europa.eu/echo/files/policies/sectoral/TIP%20CMAM.pdf"
@@ -6195,7 +6195,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Based on SQUEAC/SLEAC (Action Against Hunger / Valid International) coverage standards, and Nutrition Working group: Technical Issue Paper #1 CMAM - specific programme indicator: >10% death rate. ANA thresholds reflect insufficient coverage to meet population needs.  https://ec.europa.eu/echo/files/policies/sectoral/TIP%20CMAM.pdf"
@@ -6223,7 +6223,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "ased on SQUEAC/SLEAC (Action Against Hunger / Valid International) coverage standards, and Nutrition Working group: Technical Issue Paper #1 CMAM - specific programme indicators: >15% defaulters. ANA thresholds reflect insufficient coverage to meet population needs. https://ec.europa.eu/echo/files/policies/sectoral/TIP%20CMAM.pdf"
@@ -6257,7 +6257,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Less standardised for MAM compared to SAM, threshold reflects similar expectations (see above)"
@@ -6285,7 +6285,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Less standardised for MAM compared to SAM, threshold reflects lower likelihood of death  among MAM cases compared to SAM cases (see above)"
@@ -6313,7 +6313,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Less standardised for MAM compared to SAM, threshold reflects similar expectations (see above)"
@@ -6347,7 +6347,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Sphere minimum standards for perforamnce indicators of coverage: in camp settings suggests >90% coverage as acceptable access. ANA threshold reflects severe access gap. \nhttps://www.indikit.net/document/17-standardised-indicators-and-categories-for-better-cmam-reporting#:~:text=This%20paper%20outlines%20standardised%20reporting,systems%20to%20fit%20best%20practice."
@@ -6375,7 +6375,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Sphere minimum standards for perforamnce indicators of coverage: in camp settings suggests >70% coverage as acceptable access in urban settings. ANA threshold reflects severe access gap. https://www.indikit.net/document/17-standardised-indicators-and-categories-for-better-cmam-reporting#:~:text=This%20paper%20outlines%20standardised%20reporting,systems%20to%20fit%20best%20practice."
@@ -6403,7 +6403,7 @@
                         "van_is_strict": true,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": "Sphere minimum standards for perforamnce indicators of coverage: in camp settings suggests >50% coverage as acceptable access in rural settings. ANA threshold reflects severe access gap. https://www.indikit.net/document/17-standardised-indicators-and-categories-for-better-cmam-reporting#:~:text=This%20paper%20outlines%20standardised%20reporting,systems%20to%20fit%20best%20practice."
@@ -6443,7 +6443,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6477,7 +6477,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6511,7 +6511,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 3,
-                        "factor_threshold": 2,
+                        "subfactor_threshold": 2,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6563,7 +6563,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6597,7 +6597,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6631,7 +6631,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6665,7 +6665,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6693,7 +6693,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6727,7 +6727,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6761,7 +6761,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 2,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6801,7 +6801,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6835,7 +6835,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6863,7 +6863,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6903,7 +6903,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6931,7 +6931,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6959,7 +6959,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Above",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null
@@ -6993,7 +6993,7 @@
                         "van_is_strict": null,
                         "above_or_below": "Below",
                         "evidence_threshold": 1,
-                        "factor_threshold": 1,
+                        "subfactor_threshold": 1,
                         "risk_concept": "Coping",
                         "usual_data_sources": null,
                         "references_for_threshold": null

@@ -24,7 +24,7 @@ function row(overrides: Partial<Record<keyof RefRow, string>>): RefRow {
 		'Very acute needs threshold (5)': '2',
 		'Above or below': 'Above',
 		'Evidence threshold': '1',
-		'Factor threshold': '1',
+		'Subfactor threshold': '1',
 		'Risk concept': '',
 		...overrides
 	} as RefRow;

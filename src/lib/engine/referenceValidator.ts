@@ -29,7 +29,7 @@ type MetricLike = {
 	metric?: string;
 	label?: string | null;
 	preference?: number;
-	factor_threshold?: number | null;
+	subfactor_threshold?: number | null;
 	evidence_threshold?: number | null;
 	above_or_below?: string;
 	evidence_type?: string | null;
@@ -112,14 +112,14 @@ export function checkRequiredSystems(data: unknown): RequiredSystemError[] {
 export interface ThresholdValueError {
 	location: string;
 	metric: string;
-	field: 'factor_threshold' | 'evidence_threshold';
+	field: 'subfactor_threshold' | 'evidence_threshold';
 	value: number;
 }
 
 export interface ThresholdValueWarning {
 	location: string;
 	metric: string;
-	field: 'factor_threshold' | 'evidence_threshold';
+	field: 'subfactor_threshold' | 'evidence_threshold';
 }
 
 export interface ThresholdValueResult {
@@ -148,7 +148,7 @@ export function checkThresholdValues(data: unknown): ThresholdValueResult {
 						if (m.evidence_type === 'Supporting evidence') continue;
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 
-						for (const field of ['factor_threshold', 'evidence_threshold'] as const) {
+						for (const field of ['subfactor_threshold', 'evidence_threshold'] as const) {
 							const val = m[field];
 							if (val == null) {
 								warnings.push({ location: loc, metric: m.metric ?? '?', field });
@@ -341,19 +341,19 @@ export function checkDuplicateIDs(data: unknown): DuplicateIDResult {
 export interface ThresholdIntegerError {
 	location: string;
 	metric: string;
-	field: 'factor_threshold' | 'evidence_threshold';
+	field: 'subfactor_threshold' | 'evidence_threshold';
 	value: number;
 }
 
 export interface ThresholdPlausibilityError {
 	location: string;
-	kind: 'factor_threshold' | 'evidence_threshold';
+	kind: 'subfactor_threshold' | 'evidence_threshold';
 	value: number;
 	groupSize: number;
 	groupKey: string;
 }
 
-/** Pass 6a: factor_threshold and evidence_threshold must be integers. */
+/** Pass 6a: subfactor_threshold and evidence_threshold must be integers. */
 export function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 	const root = asRoot(data);
 	const errors: ThresholdIntegerError[] = [];
@@ -369,7 +369,7 @@ export function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 						if (m.evidence_type === 'Supporting evidence') continue;
 						const loc = `systems[${si}].factors[${fi}].sub_factors[${sfi}].indicators[${ii}].metrics[${mi}]`;
 
-						for (const field of ['factor_threshold', 'evidence_threshold'] as const) {
+						for (const field of ['subfactor_threshold', 'evidence_threshold'] as const) {
 							const val = m[field];
 							if (typeof val === 'number' && !Number.isInteger(val)) {
 								errors.push({ location: loc, metric: m.metric ?? '?', field, value: val });
@@ -385,7 +385,7 @@ export function checkThresholdIntegers(data: unknown): ThresholdIntegerError[] {
 }
 
 /**
- * Pass 6b: within each (factor_threshold, evidence_threshold) group in a subfactor,
+ * Pass 6b: within each (subfactor_threshold, evidence_threshold) group in a subfactor,
  * neither threshold may exceed the group size.
  */
 export function checkThresholdPlausibility(data: unknown): ThresholdPlausibilityError[] {
@@ -403,7 +403,7 @@ export function checkThresholdPlausibility(data: unknown): ThresholdPlausibility
 					for (const m of ind.metrics ?? []) {
 						if (m.preference === 3) continue;
 						if (m.evidence_type === 'Supporting evidence') continue;
-						const ft = m.factor_threshold;
+						const ft = m.subfactor_threshold;
 						const et = m.evidence_threshold;
 						if (typeof ft === 'number' && typeof et === 'number') {
 							const key = `ft=${ft},et=${et}`;
@@ -416,7 +416,7 @@ export function checkThresholdPlausibility(data: unknown): ThresholdPlausibility
 
 				for (const [key, { ft, et, count }] of groups) {
 					if (ft > count) {
-						errors.push({ location: sfLoc, kind: 'factor_threshold', value: ft, groupSize: count, groupKey: key });
+						errors.push({ location: sfLoc, kind: 'subfactor_threshold', value: ft, groupSize: count, groupKey: key });
 					}
 					if (et > count) {
 						errors.push({ location: sfLoc, kind: 'evidence_threshold', value: et, groupSize: count, groupKey: key });

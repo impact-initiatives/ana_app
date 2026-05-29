@@ -14,7 +14,7 @@ const REQUIRED_HEADERS = [
 	'Type',
 	'Above or below',
 	'Evidence threshold',
-	'Factor threshold',
+	'Subfactor threshold',
 	'Acute needs threshold (4)'
 ].join(',');
 
@@ -38,7 +38,7 @@ function validRow(overrides: Record<string, string> = {}): RefRow {
 		'Very acute needs threshold (5)': '2',
 		'Above or below': 'Above',
 		'Evidence threshold': '1',
-		'Factor threshold': '1',
+		'Subfactor threshold': '1',
 		'Risk concept': '',
 		Level: '',
 		...overrides
@@ -219,10 +219,10 @@ describe('validateRefRows — thresholds', () => {
 		expect(errors.some((e) => e.includes('Evidence threshold'))).toBe(true);
 	});
 
-	it('errors when Factor threshold is non-integer', () => {
-		const rows = [validRow({ MET_ID: 'MET001', 'Factor threshold': '1.5' })];
+	it('errors when Subfactor threshold is non-integer', () => {
+		const rows = [validRow({ MET_ID: 'MET001', 'Subfactor threshold': '1.5' })];
 		const { errors } = validateRefRows(rows, baseJson as Record<string, unknown>);
-		expect(errors.some((e) => e.includes('Factor threshold'))).toBe(true);
+		expect(errors.some((e) => e.includes('Subfactor threshold'))).toBe(true);
 	});
 });
 

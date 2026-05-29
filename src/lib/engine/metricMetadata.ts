@@ -36,7 +36,7 @@
 
 /** A set of metrics within a subfactor sharing the same threshold pair. */
 export type ThresholdGroup = {
-	factor_threshold: number;
+	subfactor_threshold: number;
 	evidence_threshold: number;
 	codes: string[];
 };
@@ -67,7 +67,7 @@ function extractMetricCodes(indicators: any[]): string[] {
 
 /**
  * Build threshold groups from a flat array of metric objects.
- * Metrics sharing the same (factor_threshold, evidence_threshold) pair are grouped.
+ * Metrics sharing the same (subfactor_threshold, evidence_threshold) pair are grouped.
  * Accepts the flat metrics array directly (callers flatten indicator concepts first).
  */
 function buildThresholdGroups(metrics: any[]): ThresholdGroup[] {
@@ -75,10 +75,10 @@ function buildThresholdGroups(metrics: any[]): ThresholdGroup[] {
 	const groups = new Map<string, ThresholdGroup>();
 	for (const m of metrics) {
 		if (!m || typeof m.metric !== 'string') continue;
-		const ft: number = m.factor_threshold ?? 1;
+		const ft: number = m.subfactor_threshold ?? 1;
 		const et: number = m.evidence_threshold ?? 1;
 		const key = `${ft}:${et}`;
-		if (!groups.has(key)) groups.set(key, { factor_threshold: ft, evidence_threshold: et, codes: [] });
+		if (!groups.has(key)) groups.set(key, { subfactor_threshold: ft, evidence_threshold: et, codes: [] });
 		groups.get(key)!.codes.push(m.metric);
 	}
 	return Array.from(groups.values());
@@ -238,7 +238,7 @@ export const REFERENCE_TABLE_COLUMNS = [
 	'type',
 	'preference',
 	'evidence_threshold',
-	'factor_threshold',
+	'subfactor_threshold',
 	'above_or_below',
 	'threshold_an',
 	'threshold_van',
@@ -291,7 +291,7 @@ export function buildReferenceRows(json: unknown): Record<string, string>[] {
 							type: str(m.type),
 							preference: str(m.preference),
 							evidence_threshold: str(m.evidence_threshold),
-							factor_threshold: str(m.factor_threshold),
+							subfactor_threshold: str(m.subfactor_threshold),
 							above_or_below: str(m.above_or_below),
 							threshold_an: str(t.an),
 							threshold_van: str(t.van),

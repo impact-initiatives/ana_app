@@ -26,7 +26,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET002",
@@ -38,7 +38,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -74,7 +74,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET004",
@@ -86,7 +86,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 2,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET013",
@@ -98,7 +98,7 @@
                       "van_is_strict": null,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -134,7 +134,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET011",
@@ -146,7 +146,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET012",
@@ -158,7 +158,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET014",
@@ -170,7 +170,7 @@
                       "van_is_strict": false,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -206,7 +206,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     },
                     {
                       "metric": "MET009",
@@ -218,7 +218,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -242,7 +242,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -278,7 +278,7 @@
                       "van_is_strict": true,
                       "above_or_below": "Above",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }
@@ -314,7 +314,7 @@
                       "van_is_strict": null,
                       "above_or_below": "Below",
                       "evidence_threshold": 1,
-                      "factor_threshold": 1
+                      "subfactor_threshold": 1
                     }
                   ]
                 }

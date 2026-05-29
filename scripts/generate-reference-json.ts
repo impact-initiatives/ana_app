@@ -239,7 +239,7 @@ function build(rows: RefRow[]): {
 			van_is_strict: vanIsStrict,
 			above_or_below: nullIfEmpty(row['Above or below'] ?? '') as 'Above' | 'Below' | null,
 			evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
-			factor_threshold: parseInteger(row['Subfactor threshold'] ?? ''),
+			subfactor_threshold: parseInteger(row['Subfactor threshold'] ?? ''),
 			risk_concept: nullIfNA(row['Risk concept'] ?? ''),
 			usual_data_sources: nullIfEmpty(row['Usual data sources'] ?? ''),
 			references_for_threshold: nullIfEmpty(row['References for threshold'] ?? '')

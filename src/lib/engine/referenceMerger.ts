@@ -111,7 +111,7 @@ function rowToMetric(row: RefRow): Metric {
 		},
 		above_or_below: (row['Above or below'] ?? '').trim(),
 		evidence_threshold: parseInteger(row['Evidence threshold'] ?? ''),
-		factor_threshold: parseInteger(row['Factor threshold'] ?? ''),
+		subfactor_threshold: parseInteger(row['Subfactor threshold'] ?? ''),
 		risk_concept: nullIfNA(row['Risk concept'] ?? '')
 	};
 }
@@ -177,8 +177,8 @@ export function mergeCustomRows(
 			const newEv = row['Evidence threshold'].trim() !== '' ? parseInteger(row['Evidence threshold'] ?? '') : null;
 			if (newEv !== null && newEv !== existing.evidence_threshold) { existing.evidence_threshold = newEv; changed = true; }
 
-			const newFt = row['Factor threshold'].trim() !== '' ? parseInteger(row['Factor threshold'] ?? '') : null;
-			if (newFt !== null && newFt !== existing.factor_threshold) { existing.factor_threshold = newFt; changed = true; }
+			const newFt = row['Subfactor threshold'].trim() !== '' ? parseInteger(row['Subfactor threshold'] ?? '') : null;
+			if (newFt !== null && newFt !== existing.subfactor_threshold) { existing.subfactor_threshold = newFt; changed = true; }
 
 			const newRc = nullIfNA(row['Risk concept'] ?? '');
 			if (row['Risk concept']?.trim() !== '' && newRc !== (existing.risk_concept ?? null)) { existing.risk_concept = newRc; changed = true; }

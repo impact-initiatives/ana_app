@@ -108,7 +108,7 @@ export interface Metric {
 	above_or_below: string;
 	van_is_strict?: boolean | null;
 	evidence_threshold?: number | null;
-	factor_threshold: number;
+	subfactor_threshold: number;
 	risk_concept?: string | null;
 	usual_data_sources?: string | null;
 	references_for_threshold?: string | null;

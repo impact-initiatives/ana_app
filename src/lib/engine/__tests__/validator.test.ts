@@ -11,7 +11,7 @@ const metricMap: MetricMap = {
 		thresholds: { an: 0.5, van: 1.0 },
 		above_or_below: 'Above',
 		evidence_threshold: 1,
-		factor_threshold: 1
+		subfactor_threshold: 1
 	} as any,
 	MET002: {
 		metric: 'MET002',
@@ -21,7 +21,7 @@ const metricMap: MetricMap = {
 		thresholds: { an: 2, van: 4 },
 		above_or_below: 'Above',
 		evidence_threshold: 1,
-		factor_threshold: 1
+		subfactor_threshold: 1
 	} as any,
 	MET003: {
 		metric: 'MET003',
@@ -31,7 +31,7 @@ const metricMap: MetricMap = {
 		thresholds: { an: 0.2, van: 0.35 },
 		above_or_below: 'Above',
 		evidence_threshold: 2,
-		factor_threshold: 1
+		subfactor_threshold: 1
 	} as any
 };
 

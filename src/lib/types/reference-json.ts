@@ -73,7 +73,7 @@ export type { MetricID, MetricType as IndicatorType } from './structure';
  *
  *   - metric          : MET001, MET002, … (MET + 3+ digits)
  *   - preference      : 1 | 2 | 3
- *   - factor_threshold: number
+ *   - subfactor_threshold: number
  *   - above_or_below  : "Above" | "Below"
  *   - type            : type-syntax string or null
  */
@@ -122,9 +122,9 @@ export const MetricSchema = z
 		question_kobo_code: z.string().nullable().optional(),
 		remarks_limitations: z.string().nullable().optional(),
 		thresholds: ThresholdsSchema,
-		factor_threshold: z
-			.number({ message: 'factor_threshold must be a number' })
-			.refine((v) => Number.isFinite(v), { message: 'factor_threshold must be finite' }),
+		subfactor_threshold: z
+			.number({ message: 'subfactor_threshold must be a number' })
+			.refine((v) => Number.isFinite(v), { message: 'subfactor_threshold must be finite' }),
 		above_or_below: z
 			.enum(MetricDirectionEnum, { message: 'above_or_below must be "Above" or "Below"' })
 			.nullable()

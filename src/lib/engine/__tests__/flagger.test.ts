@@ -374,7 +374,7 @@ describe('flagData — priority_flag classification', () => {
 	it('returns an_primary when health_outcomes system is flagged (proportion not met, no VAN)', () => {
 		// MET005=0.2 → flag=true (0.2 ≥ 0.15), van=false (0.2 < 0.3)
 		// MET011=0, MET012=0, MET014=null → no_flag / no_data
-		// gam group: flag_n=1 ≥ factor_threshold=1 → gam subfactor=flag → HO system=flag
+		// gam group: flag_n=1 ≥ subfactor_threshold=1 → gam subfactor=flag → HO system=flag
 		// 1/4 flagged < 0.5 → ho_primary NOT triggered; no HO VAN → not ho_secondary
 		// isFlagged(healthOutcomesId)=true → an_primary
 		const out = flagData([row('A', { MET005: 0.2, MET011: 0, MET012: 0 })], refJson);

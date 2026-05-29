@@ -104,30 +104,30 @@ describe('checkThresholdValues', () => {
 		// warnings may exist if fixture has unset thresholds — no assertion
 	});
 
-	it('warns when factor_threshold is null', () => {
+	it('warns when subfactor_threshold is null', () => {
 		const json = deepClone(baseJson) as Record<string, unknown>;
-		patchMetric(json, 'MET001', { factor_threshold: null });
+		patchMetric(json, 'MET001', { subfactor_threshold: null });
 		const { warnings } = checkThresholdValues(json);
-		expect(warnings.some((w) => w.metric === 'MET001' && w.field === 'factor_threshold')).toBe(true);
+		expect(warnings.some((w) => w.metric === 'MET001' && w.field === 'subfactor_threshold')).toBe(true);
 	});
 
-	it('errors when factor_threshold is 0', () => {
+	it('errors when subfactor_threshold is 0', () => {
 		const json = deepClone(baseJson) as Record<string, unknown>;
-		patchMetric(json, 'MET001', { factor_threshold: 0 });
+		patchMetric(json, 'MET001', { subfactor_threshold: 0 });
 		const { errors } = checkThresholdValues(json);
-		expect(errors.some((e) => e.metric === 'MET001' && e.field === 'factor_threshold')).toBe(true);
+		expect(errors.some((e) => e.metric === 'MET001' && e.field === 'subfactor_threshold')).toBe(true);
 	});
 
-	it('errors when factor_threshold is negative', () => {
+	it('errors when subfactor_threshold is negative', () => {
 		const json = deepClone(baseJson) as Record<string, unknown>;
-		patchMetric(json, 'MET001', { factor_threshold: -1 });
+		patchMetric(json, 'MET001', { subfactor_threshold: -1 });
 		const { errors } = checkThresholdValues(json);
-		expect(errors.some((e) => e.metric === 'MET001' && e.field === 'factor_threshold')).toBe(true);
+		expect(errors.some((e) => e.metric === 'MET001' && e.field === 'subfactor_threshold')).toBe(true);
 	});
 
 	it('skips preference-3 metrics', () => {
 		const json = deepClone(baseJson) as Record<string, unknown>;
-		patchMetric(json, 'MET001', { preference: 3, factor_threshold: null });
+		patchMetric(json, 'MET001', { preference: 3, subfactor_threshold: null });
 		const { warnings } = checkThresholdValues(json);
 		expect(warnings.some((w) => w.metric === 'MET001')).toBe(false);
 	});

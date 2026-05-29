@@ -40,7 +40,7 @@ export interface RefRow {
 	'Very acute needs threshold (5)': string;
 	'Above or below': string;
 	'Evidence threshold': string;
-	'Factor threshold': string;
+	'Subfactor threshold': string;
 	'Risk concept': string;
 	[key: string]: string;
 }
@@ -55,7 +55,7 @@ const REQUIRED_COLUMNS: (keyof RefRow)[] = [
 	'Type',
 	'Above or below',
 	'Evidence threshold',
-	'Factor threshold',
+	'Subfactor threshold',
 	'Acute needs threshold (4)'
 ];
 
@@ -222,9 +222,9 @@ export function validateRefRows(
 			);
 		}
 
-		if (!isNonNegativeInteger(row['Factor threshold'] ?? '')) {
+		if (!isNonNegativeInteger(row['Subfactor threshold'] ?? '')) {
 			errors.push(
-				`Row ${rowNum} (${id}): "Factor threshold" must be a non-negative integer, got "${row['Factor threshold'] ?? ''}"`
+				`Row ${rowNum} (${id}): "Subfactor threshold" must be a non-negative integer, got "${row['Subfactor threshold'] ?? ''}"`
 			);
 		}
 

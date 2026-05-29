@@ -86,7 +86,7 @@ describe('buildSubfactorList', () => {
 		expect(cdr.groups.length).toBeGreaterThanOrEqual(1);
 	});
 
-	it('groups metrics by (factor_threshold, evidence_threshold)', () => {
+	it('groups metrics by (subfactor_threshold, evidence_threshold)', () => {
 		const list = buildSubfactorList(refJson);
 		const fcs = list.find((e) => e.path === 'food_security.food_consumption.food_consumption_fcs')!;
 		// MET003 and MET004 share (ft=1, et=2) → 1 group; MET013 has (ft=1, et=1) → separate group
