@@ -150,7 +150,7 @@
 						in:fly={{ y: 20, duration: 500, delay: 80, easing: cubicOut, opacity: 0 }}
 					>
 						Screen humanitarian data for
-						<span class="text-primary"> Risk of Excess Mortality</span>
+						<span class="text-primary"> Risk of Excess Mortality.</span>
 					</h1>
 					<p
 						class="text-base-content/85 mx-auto mt-4 max-w-lg text-lg leading-relaxed lg:mx-0"
