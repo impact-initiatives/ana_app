@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T06:52:41.324Z",
+  "generatedAt": "2026-09-28T07:45:50.908Z",
   "name": "root",
   "id": "root",
   "children": [
@@ -1018,8 +1018,8 @@
                   ]
                 },
                 {
-                  "name": "Any unmet health needs for life-saving services in past three months",
-                  "id": "health_outcomes::health_status::population_health_needs::any_unmet_health_needs_for_life_saving_services_in_past_three_months",
+                  "name": "Any unmet health needs for essential, potentially life-saving services in past three months",
+                  "id": "health_outcomes::health_status::population_health_needs::any_unmet_health_needs_for_essential_potentially_life_saving_services_in_past_three_months",
                   "children": [
                     {
                       "name": "% of inviduals who reported needing consultation or drugs for acute illness, consultation or drugs for chronic illness, trauma care, emergency surgery, ante-natal or post-natal services, and/or safe-delivery services and were not able to access it",
@@ -1853,7 +1853,7 @@
                         "msna_module": "Household Food Access",
                         "msna_indicator": "% of households by main sources of food in the 30 days prior to data collection",
                         "question_kobo_code": "fsl_source_food",
-                        "remarks_limitations": "Atypical should be defined per context. Default options include: Borrowed\nGift from family and/or friends\nBegging",
+                        "remarks_limitations": "Atypical should be defined per context. Default options include: Borrowed\nGift from family and/or friends\nBegging \nHunting\nGathering\nExchange",
                         "thresholds": {
                           "an": 0.2,
                           "van": 0.4
@@ -3348,12 +3348,12 @@
                   "id": "water_system::hh_water_security::access::household_barriers_to_sufficient_water",
                   "children": [
                     {
-                      "name": "% of HHs reporting physical barriers to accessing water points",
+                      "name": "% of HHs reporting physical or infrastructure-related barriers to accessing water points",
                       "id": "MET099",
                       "value": 2,
                       "metric": {
                         "metric": "MET099",
-                        "label": "% of HHs reporting physical barriers to accessing water points",
+                        "label": "% of HHs reporting physical or infrastructure-related barriers to accessing water points",
                         "level": "Contr. fact. individual and HH",
                         "preference": 2,
                         "evidence_type": "Supporting evidence",
@@ -3361,7 +3361,7 @@
                         "msna_module": "Drinking water - accessibility",
                         "msna_indicator": "% of households having had problems related to access to water, by type of problem",
                         "question_kobo_code": "wash_water_access_issue",
-                        "remarks_limitations": null,
+                        "remarks_limitations": "Default options include: too far, difficult to use, disability-realted, safety at water point, safety travelling there, excessive waiting time, not separated by gender, some groups lack access, source not functional, intermittent/infrequent service, water points not functioning/closed, no containers",
                         "thresholds": {
                           "an": 0.5,
                           "van": null
@@ -3376,12 +3376,12 @@
                       }
                     },
                     {
-                      "name": "% of HHs reporting financial access barriers to accessing water points",
+                      "name": "% of HHs reporting financial or market-related access barriers to accessing water points",
                       "id": "MET100",
                       "value": 2,
                       "metric": {
                         "metric": "MET100",
-                        "label": "% of HHs reporting financial access barriers to accessing water points",
+                        "label": "% of HHs reporting financial or market-related access barriers to accessing water points",
                         "level": "Contr. fact. individual and HH",
                         "preference": 2,
                         "evidence_type": "Supporting evidence",
@@ -3389,7 +3389,7 @@
                         "msna_module": "Drinking water - accessibility",
                         "msna_indicator": "% of households having had problems related to access to water, by type of problem",
                         "question_kobo_code": "wash_water_access_issue",
-                        "remarks_limitations": null,
+                        "remarks_limitations": "Default options include: too expensive\nNot available at the market",
                         "thresholds": {
                           "an": 0.5,
                           "van": null
@@ -4744,12 +4744,12 @@
                   "id": "living_conditions::sanitation_hygiene::accessibility::physical_access_to_latrines",
                   "children": [
                     {
-                      "name": "% of HHs reporting physical challenges to accessing sanitation facility",
+                      "name": "% of HHs reporting physical or safety-related challenges to accessing sanitation facility",
                       "id": "MET139",
                       "value": 2,
                       "metric": {
                         "metric": "MET139",
-                        "label": "% of HHs reporting physical challenges to accessing sanitation facility",
+                        "label": "% of HHs reporting physical or safety-related challenges to accessing sanitation facility",
                         "level": "Community or system level contributing factors",
                         "preference": 2,
                         "evidence_type": "Supporting evidence",
@@ -4757,7 +4757,7 @@
                         "msna_module": "Barriers to sanitation facilities",
                         "msna_indicator": "% of households having had problems related to sanitation facility access, by type of barrier",
                         "question_kobo_code": "wash_sanitation_access_issue",
-                        "remarks_limitations": null,
+                        "remarks_limitations": "Default options include: not private, too far, difficult to reach, dangerous, disability related, not separated by gender, some groups excluded",
                         "thresholds": {
                           "an": null,
                           "van": null
@@ -4778,12 +4778,12 @@
                   "id": "living_conditions::sanitation_hygiene::accessibility::social_access_to_latrines",
                   "children": [
                     {
-                      "name": "% of HHs reporting social challenges to accessing sanitation facility",
+                      "name": "% of HHs reporting hygiene or infrastructure-related challenges to accessing sanitation facility",
                       "id": "MET140",
                       "value": 2,
                       "metric": {
                         "metric": "MET140",
-                        "label": "% of HHs reporting social challenges to accessing sanitation facility",
+                        "label": "% of HHs reporting hygiene or infrastructure-related challenges to accessing sanitation facility",
                         "level": "Community or system level contributing factors",
                         "preference": 2,
                         "evidence_type": "Supporting evidence",
@@ -4791,7 +4791,7 @@
                         "msna_module": "Barriers to sanitation facilities",
                         "msna_indicator": "% of households having had problems related to sanitation facility access, by type of barrier",
                         "question_kobo_code": "wash_sanitation_access_issue",
-                        "remarks_limitations": null,
+                        "remarks_limitations": "Default options include: too crowded, not functioning/full, unclean/unhygienic",
                         "thresholds": {
                           "an": null,
                           "van": null
